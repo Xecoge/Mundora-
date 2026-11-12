@@ -1277,7 +1277,7 @@ V.flow=()=>{
       <div class="taste" style="margin-top:12px">${g.length?g.map(([k,v])=>`<div class="hb"><div class="lab"><span>${esc(gRu(k))}</span><span class="muted">${fmt(v)}</span></div><div class="tr2"><i style="width:${v/mx*100}%"></i></div></div>`).join(''):'<div class="muted" style="font-size:13px">Пока пусто. Поставь пару лайков — и здесь появятся твои жанры.</div>'}</div>
       ${a.length?`<div class="k" style="margin:16px 0 8px">Любимые артисты</div><div class="row">${a.map(([id])=>`<span class="chip dark">${ico('user')}${esc(S.taste.artistName[id]||'Артист')}</span>`).join('')}</div>`:''}
       ${S.imported.length?`<div class="k" style="margin:16px 0 8px">Перенесено из других сервисов</div><div class="row">${S.imported.slice(0,10).map(x=>`<span class="chip dark">${esc(x)}</span>`).join('')}</div>`:''}
-      <div class="k" style="margin-top:16px;display:flex;align-items:center;gap:8px">${ico('spark','s')}${AI.on?'ИИ подбирает похожее · '+esc(AI.model||'модель выбирается…'):'ИИ выключен — открой Профиль и вставь ключ'}</div>
+      <div class="k" style="margin-top:16px;display:flex;align-items:center;gap:8px">${ico('spark','s')}${AI.on?'ИИ подбирает похожее':'ИИ выключен — открой Профиль и вставь ключ'}</div>
       <div class="row" style="margin-top:14px"><a class="btn ghost sm" href="#library">${ico('import')}Перенести вкус из Яндекс/Spotify</a><button class="btn danger sm" data-act="taste-reset">${ico('refresh')}Сбросить</button></div>
     </div>
   </div>`;
@@ -1397,7 +1397,7 @@ function isNetErr(e){return e&&(e.name==='TypeError'||/failed to fetch|networker
 function humanErr(e){
   const m=String(e&&e.message||e||'');
   if(e&&e.name==='AbortError')return 'ИИ не ответил вовремя — попробуй ещё раз';
-  if(isNetErr(e))return AI.viaProxy?'Сервер TEMPO не смог связаться с провайдером ИИ. Проверь интернет/VPN и Base URL.':'Браузер не смог связаться с провайдером ИИ (Failed to fetch). Обычно провайдер запрещает запросы прямо со страницы (CORS). Запусти сайт через server.js («node server.js» в папке сайта → http://localhost:8080) или выложи папку на Vercel — там прокси включится сам.';
+  if(isNetErr(e)&&!e.provider)return AI.viaProxy?'Связь с ИИ оборвалась. Нажми «Ещё раз»; если повторяется — проверь в Vercel переменную AI_API_KEY и сделай Redeploy.':'Браузер не смог связаться с провайдером ИИ (Failed to fetch). Обычно провайдер запрещает запросы прямо со страницы (CORS). Запусти сайт через server.js («node server.js» в папке сайта → http://localhost:8080) или выложи папку на Vercel — там прокси включится сам.';
   if(/HTTP 401|HTTP 403/.test(m))return 'Провайдер отклонил ключ ('+m.slice(0,140)+'). Проверь API-ключ в Профиле.';
   if(/HTTP 404/.test(m))return 'Адрес не найден ('+m.slice(0,140)+'). Проверь Base URL — обычно он заканчивается на /v1.';
   if(/HTTP 400|HTTP 422/.test(m)&&/model/i.test(m))return 'Провайдер не знает эту модель ('+m.slice(0,160)+'). Выбери другую в Профиле → «Модели провайдера».';
@@ -1512,7 +1512,7 @@ function finContext(){
 function chatSystem(){
   return `Ты — ИИ-помощник в разделе «Финансы» сайта TEMPO. Отвечай на языке пользователя (по умолчанию по-русски), понятно и по делу.
 Ты умеешь: считать и проверять расчёты, разбирать бюджет, доходы и расходы, проценты, вклады и кредиты, спред; читать документы, таблицы, код и любые присланные файлы; понимать изображения (скриншоты, фото чеков, графики, документы).
-ВСЕГДА сначала рассуждай: пошагово продумай задачу внутри <think>…</think> (проверь расчёты, рассмотри варианты), а затем вне тегов дай итоговый ответ. Никогда не пропускай рассуждение.
+Всегда сначала КОРОТКО рассуждай внутри <think>…</think>: 2–5 коротких пунктов (что спрошено, ключевой расчёт или проверка), без воды. Затем сразу вне тегов дай итоговый ответ. Рассуждение не пропускай, но держи его кратким — пользователю важна скорость.
 Оформляй ответ в Markdown: короткие абзацы, списки, таблицы для сравнения, **жирный** для главного. Числа пиши с пробелами между разрядами, валюту — ₽, если не указано иное. Не придумывай данные: если чего-то не хватает — скажи, что нужно уточнить.
 Сегодня ${new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}.`+(CH.useFin?`\n\nДанные пользователя из TEMPO (используй, если вопрос про его финансы):\n${finContext()}`:'');
 }
@@ -1545,7 +1545,9 @@ async function aiStream(messages,{onDelta,signal,effort}){
     while((i=buf.indexOf('\n'))>=0){
       const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
       if(!line.startsWith('data:'))continue;const d=line.slice(5).trim();if(d==='[DONE]')return;
-      try{const j=JSON.parse(d);const c=j.choices&&j.choices[0]||{};const dl=c.delta||c.message||{};onDelta(typeof dl.content==='string'?dl.content:rz(dl.content),rz(dl.reasoning_content||dl.reasoning||dl.reasoning_details))}catch(e){}
+      let j;try{j=JSON.parse(d)}catch(e){continue}
+      if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'').slice(0,300)}`.trim());er.provider=true;throw er}
+      try{const c=j.choices&&j.choices[0]||{};const dl=c.delta||c.message||{};onDelta(typeof dl.content==='string'?dl.content:rz(dl.content),rz(dl.reasoning_content||dl.reasoning||dl.reasoning_details))}catch(e){}
     }
   }
 }
@@ -1575,7 +1577,7 @@ async function chatSend(){
   CH.files=[];CH.draft='';if(inp){inp.value='';inp.style.height=''}drawAtt();
   CH.msgs.push(um);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);
   chatDraw();toBottom();
-  const effort=(um.files.length||text.length>400)?'high':text.length<40?'low':'medium';
+  const effort=(um.files.length||text.length>600)?'medium':'low';
   await chatRun(am,effort);
 }
 async function chatRun(am,effort='medium'){
@@ -1584,8 +1586,8 @@ async function chatRun(am,effort='medium'){
   const msgs=[{role:'system',content:chatSystem()},...hist.map((m,i)=>({role:m.role,content:apiContent(m,i>=hist.length-5)}))];
   let raw='',nat='';const t0=Date.now();
   const upd=()=>{const {th,ans}=splitThink(raw);am.text=ans;am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);if(!paintRaf)paintRaf=requestAnimationFrame(()=>{paintRaf=0;chatPaint(am)})};
-  try{await aiStream(msgs,{signal:CH.ctl.signal,effort,onDelta:(c,r)=>{if(c)raw+=c;if(r)nat+=r;upd()}})}
-  catch(e){if(e.name==='AbortError')am.stopped=true;else am.error=humanErr(e)}
+  try{for(let a=0;;a++){try{await aiStream(msgs,{signal:CH.ctl.signal,effort,onDelta:(c,r)=>{if(c)raw+=c;if(r)nat+=r;upd()}});break}catch(e){if(e.name!=='AbortError'&&isNetErr(e)&&!e.provider&&!raw&&!nat&&a<1){await new Promise(r=>setTimeout(r,700));continue}throw e}}}
+  catch(e){if(e.name==='AbortError')am.stopped=true;else am.error=raw?'Связь оборвалась — ответ может быть неполным. Нажми «Ещё раз».':humanErr(e)}
   const {th,ans}=splitThink(raw);am.text=ans.trim();am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);
   if(!am.text&&!am.error&&!am.stopped)am.error='Модель вернула пустой ответ';
   delete am.pending;CH.busy=false;CH.ctl=null;setBusy(false);chatSave();cancelAnimationFrame(paintRaf);paintRaf=0;chatPaint(am);
@@ -1601,7 +1603,7 @@ V.ai=()=>`<div class="chat" id="chatBox">
       <textarea id="chatIn" rows="1" placeholder="Сообщение или файл…">${esc(CH.draft)}</textarea>
       <button class="send" id="chatSend" type="submit" title="Отправить">${ico('send')}</button>
     </div>
-    <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои финансы</button><span class="k">${AI.on?esc(AI.model||''):'ИИ выключен — ключ в Профиле'}</span></div>
+    <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои финансы</button>${AI.on?'':'<span class="k">ИИ выключен — ключ в Профиле</span>'}</div>
   </form></div>`;
 V.after.ai=()=>{
   const f=$('#chatF'),inp=$('#chatIn'),box=$('#chatBox');
@@ -1871,7 +1873,7 @@ const ACT={
   'chat-new'(){if(CH.busy)CH.ctl&&CH.ctl.abort();CH.msgs=[];chatSave();render()},
   'chat-fin'(el){CH.useFin=!CH.useFin;LS.set('chatFin',CH.useFin);el.classList.toggle('on',CH.useFin);toast(CH.useFin?'ИИ видит сводку твоих операций':'ИИ не видит твои операции','wallet')},
   'chat-copy'(el){const m=CH.msgs[+el.dataset.i];if(m)copyText(m.text||'')},
-  'chat-retry'(el){if(CH.busy)return;const i=+el.dataset.i;CH.msgs=CH.msgs.slice(0,i);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);chatDraw();toBottom();chatRun(am,'medium')},
+  'chat-retry'(el){if(CH.busy)return;const i=+el.dataset.i;CH.msgs=CH.msgs.slice(0,i);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);chatDraw();toBottom();chatRun(am,'low')},
   'att-rm'(el){CH.files=CH.files.filter(f=>f.id!==el.dataset.id);drawAtt()},
   async 'ai-test'(){const box=$('#aiList');box.innerHTML=`<div class="k">${ico('loader','ldg s')} Проверяю связь…</div>`;const d=await aiDiagnose();if(!d.ok){box.innerHTML=`<div class="notice">${ico('x')}<div>${esc(d.text)}</div></div>`;return}try{AI.warned=true;const m=await AI.pickModel();await AI.chat([{role:'user',content:'Ответь JSON {"ok":true}'}]);box.innerHTML=`<div class="notice">${ico('check')}<div>ИИ отвечает. Модель: <b>${esc(m)}</b>. ${esc(d.text)}</div></div>`}catch(e){box.innerHTML=`<div class="notice">${ico('x')}<div>${esc(humanErr(e))}</div></div>`}finally{AI.warned=false}},
   'ai-search'(){clearTimeout(sT);aiSearch()},
