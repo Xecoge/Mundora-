@@ -22,7 +22,7 @@ export default async function handler(req) {
       const key = env.YT_API_KEY;
       if (!key) return out({ error: 'YT_API_KEY не задан' }, 501);
       const q = u.searchParams.get('q') || '';
-      const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '5', videoEmbeddable: 'true', videoCategoryId: '10', q, key }));
+      const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '8', videoEmbeddable: 'true', videoCategoryId: '10', q, key }));
       const j = await r.json();
       if (!r.ok) return out({ error: (j.error && j.error.message) || 'YouTube ' + r.status }, r.status);
       const items = (j.items || []).map(x => ({ id: x.id && x.id.videoId, title: x.snippet && x.snippet.title, channel: x.snippet && x.snippet.channelTitle })).filter(x => x.id);

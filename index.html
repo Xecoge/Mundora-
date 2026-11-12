@@ -816,10 +816,23 @@ async function srcFor(t){
   return API.stream(t.id);
 }
 const YTM=LS.get('ytmap',{});
+const YTQ=new Map();
+function ytPick(t,items){
+  const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
+  const A=nz(t.artist),T=nz(cleanTitle(t.title)||t.title),bad=/(live|концерт|cover|кавер|karaoke|караоке|reaction|реакция|sped ?up|speed ?up|slowed|nightcore|8d|instrumental|минус|lyrics video|tutorial|разбор)/i;
+  let best=null,bs=-99;
+  for(const it of items){const ti=String(it.title||''),ch=String(it.channel||''),n=nz(ti);let sc=0;
+    if(/- topic$/i.test(ch))sc+=4;if(A&&nz(ch).includes(A))sc+=3;if(A&&n.includes(A))sc+=2;if(T&&n.includes(T))sc+=3;
+    if(/official (audio|video|music video)|официальн/i.test(ti))sc+=1.5;if(/audio|аудио/i.test(ti))sc+=.5;
+    if(bad.test(ti)&&!bad.test(t.title))sc-=4;if(/remix|ремикс/i.test(ti)&&!/remix|ремикс/i.test(t.title))sc-=2;
+    if(sc>bs){bs=sc;best=it}}
+  return best;
+}
 async function ytFind(t){
   if(YTM[t.id])return YTM[t.id];
-  const d=await MUS.get('yt','search',{q:`${t.artist} - ${t.title}`});const it=(d.items||[])[0];if(!it)return '';
-  YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>600)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id;
+  if(YTQ.has(t.id))return YTQ.get(t.id);
+  const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
+  YTQ.set(t.id,p);return p;
 }
 const LITE=['id','title','artist','artistId','handle','genre','mood','tags','duration','plays','favs','art','artS','artL','ava','mir','lang','bpm','key','permalink','src','dz','dzArtist','preview','album','explicit'];
 const lite=t=>{const o={};LITE.forEach(k=>{if(t[k]!==undefined)o[k]=t[k]});if(!o.lang)o.lang=langOf(t);return o};
@@ -1123,7 +1136,7 @@ const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:nul
     if(this.idx>=this.queue.length-3)this.top();
     if(isPreview(t)&&fullOn()){
       const vid=await ytFind(t).catch(()=>'');if(seq!==this.seq)return;
-      if(vid){try{await ME.playYT(vid);if(seq===this.seq){t._yt=vid;UI.why(t)}return}catch(e){ME.toAudio();toast('YouTube недоступен — играет отрывок','x')}}
+      if(vid){try{await ME.playYT(vid);if(seq===this.seq){t._yt=vid;UI.why(t)}const nx=this.queue[this.idx+1];if(nx&&isPreview(nx))ytFind(nx).catch(()=>{});return}catch(e){ME.toAudio();toast('YouTube недоступен — играет отрывок','x')}}
     }
     const u=await srcFor(t);if(seq!==this.seq)return;
     if(!u){toast('Нет аудио у трека — включаю следующий','next');setTimeout(()=>{if(seq===this.seq)this.next()},500);return}
@@ -1261,7 +1274,7 @@ const UI={
     if('mediaSession'in navigator&&window.MediaMetadata){try{navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:'TEMPO',artwork:(t.artL||t.art||t.ava)?[{src:t.artL||t.art||t.ava,sizes:'1000x1000',type:'image/jpeg'}]:[]})}catch(e){}}
     document.title=`${t.title} — ${t.artist} · TEMPO`;
   },
-  why(t){const r=reasons(t).map(([i,x])=>`<span>${ico(i)}${esc(x)}</span>`);if(isPreview(t))r.unshift(t._yt&&ME.mode==='yt'?`<span>${ico('play','f')}Полная версия · YouTube</span>`:`<span>${ico('note')}Отрывок 30 с${AI.yt?'':' — полностью: кнопки ниже'}</span>`);$('#fWhy').innerHTML=r.join('')},
+  why(t){const r=reasons(t).map(([i,x])=>`<span>${ico(i)}${esc(x)}</span>`);if(isPreview(t))r.unshift(t._yt&&ME.mode==='yt'?`<span>${ico('play','f')}Полная версия · YouTube</span>`:`<span>${ico('note')}Отрывок 30 с</span>`);$('#fWhy').innerHTML=r.join('')},
   likeState(){const on=!!(P.cur&&S.likes[P.cur.id]);$('#pLike').classList.toggle('on',on);$('#fLike').classList.toggle('on',on)},
   playState(){
     const pl=!audio.paused;$('#player').classList.toggle('paused',!pl);document.body.classList.toggle('paused',!pl);
@@ -1447,7 +1460,7 @@ V.home=()=>{
   </section>
   <div class="h3">${ico('spark')}Для тебя<button class="more" data-act="remix-home">${ico('refresh','s')}</button></div>
   <div id="hRec">${skelRows(6)}</div>
-  <div class="h3">${ico('trend')}Чарт · Топ России<button class="more" data-act="play-list" data-list="home-chart">${ico('play','f')} Слушать</button></div>
+  <div class="h3">${ico('trend')}Чарт · Топ России${fullOn()?'<span class="pv" style="margin-left:4px">целиком · YouTube</span>':''}<button class="more" data-act="play-list" data-list="home-chart">${ico('play','f')} Слушать</button></div>
   <div id="hChart">${skelCards(6)}</div>
   <div class="h3">${ico('disc')}Независимые артисты · в тренде<a class="more" href="#search">Все жанры</a></div>
   <div id="hTrend">${skelCards(6)}</div>`;
@@ -1519,7 +1532,7 @@ async function doSearch(){
   const A=arts.filter(a=>a.picture_medium&&a.nb_fan>500).slice(0,8);
   if(!r.length&&!A.length){box.innerHTML=`<div class="empty">Ничего не нашлось. Попробуй другое написание</div>`;return}
   box.innerHTML=(A.length?`<div class="h3" style="margin-top:0">${ico('user')}Артисты</div><div class="arts">${A.map(a=>`<a href="#artist-${a.id}"><img loading="lazy" src="${esc(a.picture_medium)}" alt="">${esc(a.name)}</a>`).join('')}</div>`:'')+
-    `<div class="h3" style="margin-top:${A.length?14:0}px">${ico('note')}Треки<span class="more">${hits.length?'хиты — отрывки'+(fullOn()?' и полные версии с YouTube':' 30 с')+' · ':''}${full.length?'Audius — полные':''}</span></div>`+trackList(r,'search',{empty:'Ничего не нашлось'});
+    `<div class="h3" style="margin-top:${A.length?14:0}px">${ico('note')}Треки<span class="more">${hits.length&&fullOn()?'хиты — целиком через YouTube':''}</span></div>`+trackList(r,'search',{empty:'Ничего не нашлось'});
 }
 async function aiSearch(){
   const q=sQ.trim();if(!q){toast('Опиши, что хочешь послушать, и нажми «ИИ»','spark');return}

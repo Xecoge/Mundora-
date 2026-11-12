@@ -38,9 +38,9 @@ http.createServer(async (req, res) => {
     try {
       if (src === 'yt') {
         if (!env.YT_API_KEY) return send(501, { error: 'YT_API_KEY не задан' });
-        const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '5', videoEmbeddable: 'true', videoCategoryId: '10', q: u.searchParams.get('q') || '', key: env.YT_API_KEY }));
+        const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '8', videoEmbeddable: 'true', videoCategoryId: '10', q: u.searchParams.get('q') || '', key: env.YT_API_KEY }));
         const j = await r.json(); if (!r.ok) return send(r.status, { error: (j.error && j.error.message) || 'YouTube ' + r.status });
-        return send(200, { items: (j.items || []).map(x => ({ id: x.id && x.id.videoId, title: x.snippet && x.snippet.title })).filter(x => x.id) });
+        return send(200, { items: (j.items || []).map(x => ({ id: x.id && x.id.videoId, title: x.snippet && x.snippet.title, channel: x.snippet && x.snippet.channelTitle })).filter(x => x.id) });
       }
       if (!SRC[src] || !/^[\w\-./]*$/.test(p) || p.includes('..')) return send(400, { error: 'bad request' });
       const r = await fetch(SRC[src] + p + u.search); return send(r.status, await r.text());
