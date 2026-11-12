@@ -1,6 +1,16 @@
 {
   "rewrites": [
-    { "source": "/tempo-ping", "destination": "/api/ping" },
-    { "source": "/ai-proxy/:path*", "destination": "/api/proxy?path=:path*" }
+    {
+      "source": "/tempo-ping",
+      "destination": "/api/ping"
+    },
+    {
+      "source": "/ai-proxy/:path*",
+      "destination": "/api/proxy?path=:path*"
+    },
+    {
+      "source": "/music/:src/:path*",
+      "destination": "/api/music?src=:src&path=:path*"
+    }
   ]
 }

@@ -2,5 +2,5 @@
 export const config = { runtime: 'edge' };
 export default function handler() {
   const env = (typeof process !== 'undefined' && process.env) || {};
-  return new Response(env.AI_API_KEY ? 'tempo key' : 'tempo', { headers: { 'content-type': 'text/plain', 'cache-control': 'no-store' } });
+  return new Response('tempo' + (env.AI_API_KEY ? ' key' : '') + (env.YT_API_KEY ? ' yt' : ''), { headers: { 'content-type': 'text/plain', 'cache-control': 'no-store' } });
 }

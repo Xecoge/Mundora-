@@ -257,7 +257,18 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .full .pbtns .ib{width:48px;height:48px}.full .pbtns .ib .i{width:24px;height:24px}
 .facts{display:flex;justify-content:space-between;margin-top:20px;gap:8px}
 .facts .ib{width:46px;height:46px;background:var(--panel2)}
-.ext{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.ext{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.ytbox{width:100%;aspect-ratio:16/9;border-radius:20px;overflow:hidden;margin:18px 0 22px;background:#000;box-shadow:0 30px 60px rgba(0,0,0,.55)}
+.ytbox iframe,.ytbox>div{width:100%;height:100%;border:0;display:block}
+body.ytmode #fArt{display:none}
+.pv{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.1);color:#cfc8e8;margin-left:4px;vertical-align:1px}
+.arts{display:grid;grid-auto-flow:column;grid-auto-columns:120px;gap:14px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px}
+.arts a{text-align:center;font-size:13px;font-weight:600}
+.arts img{width:120px;height:120px;border-radius:50%;object-fit:cover;display:block;margin-bottom:8px;background:var(--panel2)}
+.ahead{display:flex;gap:22px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap}
+.ahead img{width:170px;height:170px;border-radius:50%;object-fit:cover;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.ahead h1{font-size:40px;font-weight:800;letter-spacing:-1px}
+@media(max-width:760px){.ahead img{width:120px;height:120px}.ahead h1{font-size:28px}.arts{grid-auto-columns:96px}.arts img{width:96px;height:96px}}
 .ext a{height:44px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:#e6e1f7}
 .ext a .i{width:16px;height:16px}
 /* tabs (mobile) */
@@ -603,6 +614,7 @@ body.noplay .composer{bottom:16px}
   <div class="full-in">
     <div class="full-top"><button class="ib" data-act="close-full"><svg class="i"><use href="#i-chev"/></svg></button><span id="fCtx">Сейчас играет</span><button class="ib" data-act="queue"><svg class="i"><use href="#i-queue"/></svg></button></div>
     <div class="art xl" id="fArt"><svg class="i"><use href="#i-note"/></svg></div>
+    <div class="ytbox" id="ytBox" hidden><div id="ytPlayer"></div></div>
     <h2 id="fTitle">—</h2>
     <div class="fa" id="fArtist">—</div>
     <div class="why" id="fWhy"></div>
@@ -694,7 +706,8 @@ const MOOD_GROUPS={
 };
 const CHARS={any:'Обычное',fav:'Любимое',new:'Незнакомое',pop:'Популярное'};
 const LANGS={any:'Любой',ru:'Русский',foreign:'Иностранный',instr:'Без слов'};
-const W8=()=>{S.prefs=S.prefs||{};return S.prefs.wave||(S.prefs.wave={char:'any',mood:'',lang:'any'})};
+const W8=()=>{S.prefs=S.prefs||{};const w=S.prefs.wave||(S.prefs.wave={char:'any',mood:'',lang:'any',cat:'all'});if(!w.cat)w.cat='all';return w};
+const CATS_W={all:'Всё',hits:'Хиты',full:'Полные треки'};
 const moodGroupOf=m=>{for(const [k,g] of Object.entries(MOOD_GROUPS))if(g.moods.includes(m))return k;return ''};
 const isInstr=t=>/instrumental|инструментал|no vocals|без слов|\bbeats?\b|piano|ambient/i.test((t.tags||[]).join(' ')+' '+(t.title||''))||['Ambient','Classical','Soundtrack'].includes(t.genre);
 function settleWithin(ps,ms){return new Promise(res=>{const out=new Array(ps.length).fill(null);let left=ps.length;let fin=false;const done=()=>{if(fin)return;fin=true;res(out.filter(x=>x!=null))};const tm=setTimeout(done,ms);if(!left){clearTimeout(tm);done();return}ps.forEach((p,i)=>Promise.resolve(p).then(v=>{out[i]=v},()=>{}).finally(()=>{if(--left===0){clearTimeout(tm);done()}}))})}
@@ -750,8 +763,65 @@ function norm(t){
     bpm:+t.bpm||0,key:t.musical_key||'',lang:scriptOf(title+' '+artist),permalink:t.permalink||''};
 }
 const norms=arr=>(Array.isArray(arr)?arr:[]).map(norm).filter(Boolean);
-const srcOf=t=>API.stream(t.id);
-const LITE=['id','title','artist','artistId','handle','genre','mood','tags','duration','plays','favs','art','artS','artL','ava','mir','lang','bpm','key','permalink'];
+/* ---- большие каталоги: Deezer, iTunes / Apple Music, YouTube (через сервер или JSONP) ---- */
+let jpN=0;
+function jsonp(url){return new Promise((res,rej)=>{const cb='__jp'+(++jpN)+'_'+Date.now();const sc=document.createElement('script');const cl=()=>{clearTimeout(tm);delete window[cb];sc.remove()};const tm=setTimeout(()=>{cl();rej(new Error('timeout'))},9000);window[cb]=d=>{cl();res(d)};sc.onerror=()=>{cl();rej(new Error('каталог недоступен'))};sc.src=url+(url.includes('?')?'&':'?')+'callback='+cb;document.head.appendChild(sc)})}
+const MUS={cache:new Map(),
+  async get(src,path,params={}){
+    const qs=new URLSearchParams(params).toString(),key=src+'/'+path+'?'+qs,c=this.cache.get(key);
+    if(c&&Date.now()-c.t<10*60e3)return c.d;
+    await AI.ready();let d;
+    if(AI.viaProxy){const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),10000);try{const r=await fetch(`/music/${src}/${path}${qs?'?'+qs:''}`,{signal:ctl.signal});d=await r.json();if(!r.ok)throw new Error((d&&d.error)||src+' '+r.status)}finally{clearTimeout(tm)}}
+    else if(src==='deezer')d=await jsonp('https://api.deezer.com/'+path+'?'+new URLSearchParams({...params,output:'jsonp'}));
+    else if(src==='itunes')d=await jsonp('https://itunes.apple.com/'+path+'?'+qs);
+    else throw new Error('нужен сервер TEMPO');
+    if(d&&d.error&&src==='deezer')throw new Error('Deezer: '+(d.error.message||d.error.type||'ошибка'));
+    this.cache.set(key,{t:Date.now(),d});return d;
+  }
+};
+function normDz(t){if(!t||!t.id||(t.type&&t.type!=='track')||t.readable===false)return null;const al=t.album||{},ar=t.artist||{},title=t.title_short||t.title||'';
+  return{id:'dz'+t.id,dz:t.id,src:'dz',title,artist:ar.name||'',artistId:'dza'+ar.id,dzArtist:ar.id,genre:'',mood:'',tags:[],duration:t.duration||30,plays:t.rank||0,favs:0,art:al.cover_big||al.cover_medium||'',artS:al.cover_medium||al.cover_small||'',artL:al.cover_xl||al.cover_big||'',ava:ar.picture_big||ar.picture_medium||'',mir:[],lang:scriptOf(title+' '+(ar.name||'')),preview:t.preview||'',album:al.title||'',explicit:!!t.explicit_lyrics}}
+const IT_G={'Hip-Hop/Rap':'Hip-Hop/Rap','Хип-хоп/рэп':'Hip-Hop/Rap','Русский рэп':'Hip-Hop/Rap','Pop':'Pop','Поп':'Pop','Русский поп':'Pop','Русская музыка':'Pop','Rock':'Rock','Рок':'Rock','Dance':'Electronic','Танцевальная музыка':'Electronic','Electronic':'Electronic','Электроника':'Electronic','R&B/Soul':'R&B/Soul','Alternative':'Alternative','Альтернатива':'Alternative','Jazz':'Jazz','Джаз':'Jazz','Classical':'Classical','Классическая музыка':'Classical','Latin':'Latin','Латиноамериканская музыка':'Latin','Reggae':'Reggae','Metal':'Metal','Метал':'Metal','Soundtrack':'Soundtrack','Саундтрек':'Soundtrack','Singer/Songwriter':'Acoustic','K-Pop':'Pop'};
+function normIt(t){if(!t||t.kind!=='song'||!t.previewUrl)return null;const a=String(t.artworkUrl100||'');
+  return{id:'it'+t.trackId,src:'it',title:t.trackName||'',artist:t.artistName||'',artistId:'ita'+t.artistId,genre:IT_G[t.primaryGenreName]||'',mood:'',tags:[String(t.primaryGenreName||'').toLowerCase()].filter(Boolean),duration:Math.round((t.trackTimeMillis||30000)/1000),plays:0,favs:0,art:a.replace('100x100bb','600x600bb'),artS:a.replace('100x100bb','200x200bb'),artL:a.replace('100x100bb','1000x1000bb'),mir:[],lang:scriptOf((t.trackName||'')+' '+(t.artistName||'')),preview:t.previewUrl,album:t.collectionName||'',explicit:t.trackExplicitness==='explicit'}}
+const DZ={
+  async search(q,limit=40){const d=await MUS.get('deezer','search',{q,limit});return (d.data||[]).map(normDz).filter(Boolean)},
+  async searchArtist(q,limit=6){const d=await MUS.get('deezer','search/artist',{q,limit});return d.data||[]},
+  async artistTop(id,limit=25){const d=await MUS.get('deezer',`artist/${id}/top`,{limit});return (d.data||[]).map(normDz).filter(Boolean)},
+  async radio(id){const d=await MUS.get('deezer',`artist/${id}/radio`,{limit:40});return (d.data||[]).map(normDz).filter(Boolean)},
+  async related(id){const d=await MUS.get('deezer',`artist/${id}/related`,{limit:12});return d.data||[]},
+  async chart(g=0,limit=50){const d=await MUS.get('deezer',`chart/${g}/tracks`,{limit});return (d.data||[]).map(normDz).filter(Boolean)},
+  async artist(id){return MUS.get('deezer',`artist/${id}`)}
+};
+const IT={
+  async search(q,limit=30){const d=await MUS.get('itunes','search',{term:q,entity:'song',limit,country:'ru'});return (d.results||[]).map(normIt).filter(Boolean)},
+  async topRU(n=50){const d=await MUS.get('applerss',`ru/music/most-played/${n}/songs.json`);const ids=((d.feed&&d.feed.results)||[]).map(x=>x.id);if(!ids.length)return[];const l=await MUS.get('itunes','lookup',{id:ids.join(','),country:'ru',entity:'song'});const by={};(l.results||[]).forEach(x=>{if(x.kind==='song')by[x.trackId]=x});return ids.map(i=>normIt(by[i])).filter(Boolean)}
+};
+const DZG={'Pop':132,'Hip-Hop/Rap':116,'Rock':152,'Electronic':106,'House':113,'Deep House':113,'Techno':106,'Alternative':85,'R&B/Soul':165,'Jazz':129,'Classical':98,'Reggae':144,'Latin':197,'Metal':464,'Soundtrack':173,'Trap':116,'Dubstep':106,'Drum & Bass':106,'Disco':113,'Funk':169};
+const MOOD_DZ={energy:[113,106,116],happy:[132,113,197],calm:[129,98,85],sad:[165,85,116]};
+async function hitsSearch(q,limit=40){try{const r=await DZ.search(q,limit);if(r.length)return r}catch(e){}try{return await IT.search(q,Math.min(limit,50))}catch(e){return[]}}
+const DZA=new Map();
+async function dzArtistId(t){
+  if(t.dzArtist)return t.dzArtist;const name=String(t.artist||'').trim();if(!name)return 0;
+  const k=name.toLowerCase();if(DZA.has(k))return DZA.get(k);
+  const p=DZ.searchArtist(name,5).then(l=>{const n=x=>String(x||'').toLowerCase().replace(/[^a-zа-яё0-9]/gi,'');const hit=l.find(a=>n(a.name)===n(name))||(t.src==='it'?l[0]:null);return hit?hit.id:0}).catch(()=>0);
+  DZA.set(k,p);return p;
+}
+const isPreview=t=>t.src==='dz'||t.src==='it';
+const fullOn=()=>AI.yt&&S.prefs.full!==false;
+const PV=new Map();
+async function srcFor(t){
+  if(t.src==='dz'){const c=PV.get(t.dz);if(c&&Date.now()-c.t<4*60e3)return c.u;try{const d=await MUS.get('deezer','track/'+t.dz,{_:(Date.now()/240000)|0});if(d&&d.preview){PV.set(t.dz,{t:Date.now(),u:d.preview});return d.preview}}catch(e){}return t.preview||''}
+  if(t.src==='it')return t.preview||'';
+  return API.stream(t.id);
+}
+const YTM=LS.get('ytmap',{});
+async function ytFind(t){
+  if(YTM[t.id])return YTM[t.id];
+  const d=await MUS.get('yt','search',{q:`${t.artist} - ${t.title}`});const it=(d.items||[])[0];if(!it)return '';
+  YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>600)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id;
+}
+const LITE=['id','title','artist','artistId','handle','genre','mood','tags','duration','plays','favs','art','artS','artL','ava','mir','lang','bpm','key','permalink','src','dz','dzArtist','preview','album','explicit'];
 const lite=t=>{const o={};LITE.forEach(k=>{if(t[k]!==undefined)o[k]=t[k]});if(!o.lang)o.lang=langOf(t);return o};
 
 /* ===================== taste engine ===================== */
@@ -842,6 +912,22 @@ function seedCands(seed){
   const p=(async()=>{
     const src=new Map(),cf=new Map(),tasks=[];let aiRes=null;
     const add=(pr,b)=>tasks.push(pr.then(l=>{(l||[]).forEach(t=>{if((src.get(t.id)||0)<b)src.set(t.id,b)});return l||[]}).catch(()=>[]));
+    const cat=W8().cat,main=isPreview(seed);
+    // 0) хиты: «радио артиста» и похожие артисты Deezer — их собственные рекомендации
+    if(cat!=='full'){
+      add(dzArtistId(seed).then(id=>id?DZ.radio(id):[]),main?2.6:1.8);
+      add(dzArtistId(seed).then(async id=>{if(!id)return[];const rel=await DZ.related(id);return (await Promise.all(shuffle(rel).slice(0,4).map(a=>DZ.artistTop(a.id,8).catch(()=>[])))).flat()}),main?2.2:1.6);
+      add(dzArtistId(seed).then(id=>id?DZ.artistTop(id,12):[]),1);
+      if(!main)add(DZ.search(cleanTitle(seed.title)+' '+seed.artist,10).catch(()=>[]),.8);
+    }
+    if(main||cat==='hits'){
+      tasks.push(AI.similar(seed).then(ai=>{aiRes=ai;if(!ai)return[];return Promise.all(ai.queries.map(q=>hitsSearch(q,15).then(l=>{l.forEach(t=>{if((src.get(t.id)||0)<2.3)src.set(t.id,2.3)});return l}))).then(x=>x.flat())}).catch(()=>[]));
+      if(cat!=='hits')add(API.search(seed.artist).catch(()=>[]),.7);
+      const res=await settleWithin(tasks,9000);
+      const list=dedupe(res.flat()).filter(t=>t.id!==seed.id);
+      if(!list.length)throw new Error('empty');
+      return{list,src,cf,get ai(){return aiRes}};
+    }
     // 1) коллаборативная фильтрация: кто слушает этот трек → что они лайкают
     tasks.push((async()=>{
       const us=shuffle(await API.topListeners(seed.id)).slice(0,6);if(!us.length)return[];
@@ -860,7 +946,7 @@ function seedCands(seed){
     const base=cleanTitle(seed.title);if(base.length>2)add(API.search(base),1.1);
     if(langOf(seed)==='cyr')add(API.search(/rap|hip/i.test(seed.genre)?pick(['рэп','русский рэп']):pick(['русский','песня',gRu(seed.genre||'Pop').toLowerCase()])),1);
     // 6) ИИ: язык, похожие артисты и запросы
-    tasks.push(AI.similar(seed).then(ai=>{aiRes=ai;if(!ai)return[];return Promise.all(ai.queries.map(q=>API.search(q).then(l=>{l.forEach(t=>{if((src.get(t.id)||0)<2.2)src.set(t.id,2.2)});return l}).catch(()=>[]))).then(x=>x.flat())}).catch(()=>[]));
+    tasks.push(AI.similar(seed).then(ai=>{aiRes=ai;if(!ai)return[];return Promise.all(ai.queries.map(q=>Promise.all([API.search(q).catch(()=>[]),cat!=='full'?hitsSearch(q,10):Promise.resolve([])]).then(x=>x.flat()).then(l=>{l.forEach(t=>{if((src.get(t.id)||0)<2.2)src.set(t.id,2.2)});return l}))).then(x=>x.flat())}).catch(()=>[]));
     const res=await settleWithin(tasks,9000);
     const list=dedupe(res.flat()).filter(t=>t.id!==seed.id);
     if(!list.length)throw new Error('empty');
@@ -870,6 +956,16 @@ function seedCands(seed){
 }
 async function poolCands(w){
   const T=S.taste,reqs=[],g=topOf(T.genre,3).map(x=>x[0]),mg=w.mood&&MOOD_GROUPS[w.mood];
+  if(w.cat!=='full'){
+    if(mg)reqs.push(DZ.chart(pick(MOOD_DZ[w.mood]),50));
+    else if(g.length&&w.char!=='new')g.filter(x=>DZG[x]).slice(0,2).forEach(x=>reqs.push(DZ.chart(DZG[x],40)));
+    if(w.lang==='ru'||(topOf(T.lang||{},1)[0]||[])[0]==='cyr'){reqs.push(IT.topRU(50));reqs.push(hitsSearch(pick(['русский рэп','русский поп','хиты','рэп','поп','любовь','танцы']),40))}
+    else if(w.lang==='foreign')reqs.push(DZ.chart(0,50));
+    else if(w.lang==='instr')reqs.push(hitsSearch(pick(['instrumental','lofi beats','piano','ambient']),40));
+    if(w.char==='pop'||!g.length)reqs.push(DZ.chart(0,50),IT.topRU(50));
+    const la=Object.values(S.likes).filter(t=>t.dzArtist);if(la.length&&w.char!=='new')reqs.push(DZ.radio(pick(la).dzArtist));
+    if(w.cat==='hits')return (await settleWithin(reqs.map(p=>p.catch(()=>[])),8000)).flat();
+  }
   let genres=mg?shuffle(mg.genres).slice(0,3):(g.length?g:shuffle(GENRES).slice(0,4));
   if(w.char==='new'&&g.length)genres=shuffle(GENRES.filter(x=>!g.includes(x))).slice(0,3);
   if(w.lang==='instr')genres=shuffle(['Ambient','Lo-Fi','Classical','Soundtrack','Downtempo','Electronic']).slice(0,3);
@@ -892,9 +988,10 @@ async function waveBatch(n=20,opts={}){
   const recent=new Set(S.recent.slice(0,60)),exclude=opts.exclude||new Set(),known=id=>(T.artist[id]||0)>0;
   const topG=new Set(topOf(T.genre,3).map(x=>x[0])),mg=w.mood&&MOOD_GROUPS[w.mood];
   const sk=SES.skips.slice(0,8),skA=new Set(sk.map(x=>x.artistId).filter(Boolean)),skG={};sk.forEach(x=>{if(x.genre)skG[x.genre]=(skG[x.genre]||0)+1});const skInstr=sk.filter(isInstr).length;
-  const out=[];
+  const out=[],cat=w.cat;
   for(const e of M.values()){
     const t=e.t;if(exclude.has(t.id)||S.banned[t.id])continue;
+    if(cat==='hits'&&!isPreview(t)||cat==='full'&&isPreview(t))continue;
     let s=e.sim*.9+1.6*Math.log2(1+e.cf)+e.src+score(t,T,0)*.45;
     if(w.char==='fav')s+=(known(t.artistId)?2.5:0)+(topG.has(t.genre)?1:0)+(S.likes[t.id]?1.5:0);
     else if(w.char==='new')s+=(known(t.artistId)?-3:.6)+(topG.has(t.genre)?-.4:.8)-(S.likes[t.id]?4:0);
@@ -919,11 +1016,12 @@ const AI={
   get on(){return (this.viaProxy&&this.serverKey)||!!(AIC.apiKey&&AIC.baseURL)},
   mem:LS.get('ai',{}),
   viaProxy:false,
-  proxyCheck:(/^https?:$/.test(location.protocol)?fetch('/tempo-ping',{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>({proxy:/^tempo/.test(t.trim()),key:/^tempo key/.test(t.trim())})).catch(()=>({proxy:false,key:false})):Promise.resolve({proxy:false,key:false})),
+  proxyCheck:(/^https?:$/.test(location.protocol)?fetch('/tempo-ping',{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>({proxy:/^tempo/.test(t.trim()),key:/\bkey\b/.test(t),yt:/\byt\b/.test(t)})).catch(()=>({proxy:false,key:false,yt:false})):Promise.resolve({proxy:false,key:false,yt:false})),
+  yt:false,
   serverKey:false,
   url(p){return this.viaProxy?location.origin+'/ai-proxy'+p:AIC.baseURL.replace(/\/+$/,'')+p},
   hdr(){const h={'Content-Type':'application/json',...(AIC.apiKey?{'Authorization':'Bearer '+AIC.apiKey}:{}),...(AIC.headers||{})};return h},
-  async ready(){const r=await this.proxyCheck;this.viaProxy=r.proxy;this.serverKey=r.key&&r.proxy},
+  async ready(){const r=await this.proxyCheck;this.viaProxy=r.proxy;this.serverKey=r.key&&r.proxy;this.yt=!!(r.yt&&r.proxy)},
   async listModels(){
     await this.ready();if(this.models)return this.models;
     const r=await fetch(this.url('/models'),{headers:this.hdr()});if(!r.ok)throw new Error('models HTTP '+r.status);
@@ -983,20 +1081,54 @@ const AI={
 };
 
 /* ===================== player ===================== */
-const audio=new Audio();audio.preload='auto';audio.setAttribute('playsinline','');
+const AUD=new Audio();AUD.preload='auto';AUD.setAttribute('playsinline','');
+const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
+  load(){if(this.ready)return this.ready;this.ready=new Promise((res,rej)=>{if(window.YT&&YT.Player)return res();const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{prev&&prev();res()};const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';sc.onerror=()=>{this.ready=null;rej(new Error('YouTube недоступен'))};document.head.appendChild(sc);setTimeout(()=>{if(!(window.YT&&YT.Player)){this.ready=null;rej(new Error('YouTube не загрузился'))}},12000)});return this.ready},
+  async play(id){
+    await this.load();$('#ytBox').hidden=false;this.cur=id;
+    if(!this.p){await new Promise((res,rej)=>{this.p=new YT.Player('ytPlayer',{videoId:id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{try{this.p.setVolume(AUD.volume*100);if(AUD.muted)this.p.mute();this.p.playVideo()}catch(e){}res()},onStateChange:e=>this.onState(e.data),onError:()=>{const t=P.cur;ME.toAudio();if(t&&isPreview(t)){delete YTM[t.id];LS.set('ytmap',YTM);toast('Это видео нельзя встроить — играет отрывок','note');srcFor(t).then(u=>{if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)})}else ME.emit('error',true)}}});setTimeout(res,8000)})}
+    else this.p.loadVideoById(id);
+  },
+  onState(s){this.state=s;if(s===1){ME.emit('playing');ME.emit('loadedmetadata');this.tick(true)}else if(s===2){this.tick(false);ME.emit('pause')}else if(s===0){this.tick(false);ME.emit('ended')}},
+  tick(on){clearInterval(this.timer);if(on)this.timer=setInterval(()=>ME.emit('timeupdate'),400)},
+  stop(){try{this.p&&this.p.stopVideo()}catch(e){}this.cur='';this.state=-1;this.tick(false);const b=$('#ytBox');if(b)b.hidden=true}
+};
+const ME={mode:'a',ls:{},
+  addEventListener(ev,fn){(this.ls[ev]=this.ls[ev]||[]).push(fn);AUD.addEventListener(ev,()=>{if(this.mode==='a')fn()})},
+  emit(ev,force){if(this.mode==='yt'||force)(this.ls[ev]||[]).forEach(f=>f())},
+  play(){if(this.mode==='yt'){$('#full').classList.add('open');try{YTP.p&&YTP.p.playVideo()}catch(e){}return Promise.resolve()}return AUD.play()},
+  pause(){if(this.mode==='yt'){try{YTP.p&&YTP.p.pauseVideo()}catch(e){}}else AUD.pause()},
+  get paused(){return this.mode==='yt'?!(YTP.state===1||YTP.state===3):AUD.paused},
+  get currentTime(){if(this.mode==='yt'){try{return YTP.p.getCurrentTime()||0}catch(e){return 0}}return AUD.currentTime},
+  set currentTime(v){if(this.mode==='yt'){try{YTP.p.seekTo(v,true)}catch(e){}}else AUD.currentTime=v},
+  get duration(){if(this.mode==='yt'){try{return YTP.p.getDuration()||0}catch(e){return 0}}return AUD.duration},
+  get volume(){return AUD.volume},set volume(v){AUD.volume=v;try{YTP.p&&YTP.p.setVolume(v*100)}catch(e){}},
+  get muted(){return AUD.muted},set muted(v){AUD.muted=v;try{YTP.p&&(v?YTP.p.mute():YTP.p.unMute())}catch(e){}},
+  get src(){return AUD.src},set src(v){this.toAudio();AUD.src=v},
+  toAudio(){if(this.mode==='yt'){YTP.stop();this.mode='a';document.body.classList.remove('ytmode')}},
+  async playYT(id){AUD.pause();this.mode='yt';document.body.classList.add('ytmode');$('#full').classList.add('open');await YTP.play(id)},
+  removeAttribute(a){this.toAudio();AUD.removeAttribute(a)},load(){AUD.load()},setAttribute(a,b){AUD.setAttribute(a,b)}
+};
+const audio=ME;
 const SILENT=(()=>{try{const n=800,b=new ArrayBuffer(44+n*2),v=new DataView(b),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,16000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}catch(e){return''}})();
 let unlocked=false;const isSilent=()=>SILENT&&audio.src===SILENT;
 function unlock(){if(unlocked||!SILENT||P.cur)return;unlocked=true;audio.src=SILENT;audio.play().catch(()=>{})}
 const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:null,loading:false,
   get cur(){return this.queue[this.idx]},
   playList(list,i=0,ctx='',name='',refill=null){if(!list||!list.length){toast('Нечего играть — каталог не ответил','x');return}this.anchor=null;this.queue=list.map(t=>({...t}));this.idx=i;this.ctx=ctx;this.ctxName=name;this.refill=refill;this.load(true)},
-  load(autoplay=true){
-    const t=this.cur;if(!t)return;
+  async load(autoplay=true){
+    const t=this.cur;if(!t)return;const seq=this.seq=(this.seq||0)+1;
     t._full=false;t._start=Date.now();
-    audio.src=srcOf(t);
-    if(autoplay)audio.play().catch(()=>{});
     UI.nowPlaying();
     if(this.idx>=this.queue.length-3)this.top();
+    if(isPreview(t)&&fullOn()){
+      const vid=await ytFind(t).catch(()=>'');if(seq!==this.seq)return;
+      if(vid){try{await ME.playYT(vid);if(seq===this.seq){t._yt=vid;UI.why(t)}return}catch(e){ME.toAudio();toast('YouTube недоступен — играет отрывок','x')}}
+    }
+    const u=await srcFor(t);if(seq!==this.seq)return;
+    if(!u){toast('Нет аудио у трека — включаю следующий','next');setTimeout(()=>{if(seq===this.seq)this.next()},500);return}
+    audio.src=u;
+    if(autoplay)audio.play().catch(()=>{});
   },
   async top(){if(!this.refill||this.loading)return;this.loading=true;try{const more=await this.refill();const have=new Set(this.queue.map(t=>t.id));this.queue.push(...more.filter(t=>!have.has(t.id)).map(t=>({...t})))}catch(e){}this.loading=false},
   toggle(){if(!this.cur){startFlow();return}audio.paused?audio.play().catch(()=>{}):audio.pause()},
@@ -1091,7 +1223,7 @@ function trackRow(t,i,key,opt={}){
   const tag=opt.why?reasons(t)[0][1]:(t.genre?gRu(t.genre):'');
   return `<div class="tr${P.cur?.id===t.id?' playing':''}" data-act="play-row" data-list="${key}" data-i="${i}" data-id="${esc(t.id)}">
     <span class="tn">${i+1}</span>${art(t)}
-    <div class="tm"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div>
+    <div class="tm"><b>${esc(t.title)}</b><small>${esc(t.artist)}${isPreview(t)&&!fullOn()?'<span class="pv">30 с</span>':''}</small></div>
     <span class="tg">${esc(tag)}</span><span class="td">${t.duration?dur(t.duration):''}</span>
     <button class="ib${liked?' on':''}" data-act="like" data-list="${key}" data-i="${i}" title="Нравится">${ico('heart')}</button>
     <button class="ib" data-act="${opt.remove?'pl-remove':'add'}" data-list="${key}" data-i="${i}" title="${opt.remove?'Убрать из плейлиста':'В плейлист'}">${ico(opt.remove?'x':'plus')}</button>
@@ -1110,6 +1242,7 @@ function mosaic(tracks,cls=''){
 }
 const yaUrl=t=>`https://music.yandex.ru/search?text=${encodeURIComponent(t.artist+' '+t.title)}`;
 const spUrl=t=>`https://open.spotify.com/search/${encodeURIComponent(t.artist+' '+t.title)}`;
+const ytUrl=t=>`https://www.youtube.com/results?search_query=${encodeURIComponent(t.artist+' '+t.title)}`;
 const auUrl=t=>t.permalink?`https://audius.co${t.permalink}`:'';
 function setRange(el,v){el.value=v;el.style.setProperty('--p',(v/el.max*100)+'%')}
 
@@ -1121,13 +1254,14 @@ const UI={
     $('#fArt').outerHTML=art(t,'xl','','fArt');$('#player').classList.remove('empty');document.body.classList.remove('noplay');
     $('#fTitle').textContent=t.title;$('#fArtist').textContent=t.artist+(t.genre?' · '+gRu(t.genre):'');
     $('#fCtx').textContent=P.ctxName||'Сейчас играет';
-    $('#fWhy').innerHTML=reasons(t).map(([i,s])=>`<span>${ico(i)}${esc(s)}</span>`).join('');
-    $('#fExt').innerHTML=`<a href="${yaUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Яндекс Музыка</a><a href="${spUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Spotify</a>`;
+    this.why(t);
+    $('#fExt').innerHTML=`<a href="${yaUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Яндекс</a><a href="${ytUrl(t)}" target="_blank" rel="noopener">${ico('ext')}YouTube</a><a href="${spUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Spotify</a>`;
     this.likeState();this.markRows();
     const fq=$('#fQueue');if(fq&&route()==='flow')fq.innerHTML=trackList(P.queue.slice(P.idx,P.idx+25),'queue',{why:true});
     if('mediaSession'in navigator&&window.MediaMetadata){try{navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:'TEMPO',artwork:(t.artL||t.art||t.ava)?[{src:t.artL||t.art||t.ava,sizes:'1000x1000',type:'image/jpeg'}]:[]})}catch(e){}}
     document.title=`${t.title} — ${t.artist} · TEMPO`;
   },
+  why(t){const r=reasons(t).map(([i,x])=>`<span>${ico(i)}${esc(x)}</span>`);if(isPreview(t))r.unshift(t._yt&&ME.mode==='yt'?`<span>${ico('play','f')}Полная версия · YouTube</span>`:`<span>${ico('note')}Отрывок 30 с${AI.yt?'':' — полностью: кнопки ниже'}</span>`);$('#fWhy').innerHTML=r.join('')},
   likeState(){const on=!!(P.cur&&S.likes[P.cur.id]);$('#pLike').classList.toggle('on',on);$('#fLike').classList.toggle('on',on)},
   playState(){
     const pl=!audio.paused;$('#player').classList.toggle('paused',!pl);document.body.classList.toggle('paused',!pl);
@@ -1178,6 +1312,8 @@ function moreSheet(t){
   <button class="opt" data-act="m-dislike">${ico('dislike')}Не нравится — больше не предлагать</button>
   <a class="opt" href="${yaUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Найти в Яндекс Музыке</a>
   <a class="opt" href="${spUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Найти в Spotify</a>
+  <a class="opt" href="${ytUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Найти на YouTube</a>
+  ${t.dzArtist?`<a class="opt" href="#artist-${t.dzArtist}" data-act="close-sheet">${ico('user')}Открыть артиста</a>`:''}
   ${auUrl(t)?`<a class="opt" href="${auUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Открыть на Audius</a>`:''}`);
   moreSheet.t=t;
 }
@@ -1244,14 +1380,14 @@ function route(){return (location.hash||'#home').slice(1)||'home'}
 let renderId=0;
 function render(){
   const r=route(),id=++renderId;
-  const base=r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r;
+  const base=r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));
   $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
   cryptoLeave(r);
   const v=$('#view');
-  const fn=r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
+  const fn=r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
   v.innerHTML=fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
-  V.after[r.startsWith('pl-')?'playlist':r.startsWith('coin-')?'coin':r.startsWith('note-')?'notes':r]?.(id,r);
+  V.after[r.startsWith('artist-')?'artist':r.startsWith('pl-')?'playlist':r.startsWith('coin-')?'coin':r.startsWith('note-')?'notes':r]?.(id,r);
   window.scrollTo({top:0,behavior:'instant'});
 }
 addEventListener('hashchange',render);
@@ -1311,7 +1447,9 @@ V.home=()=>{
   </section>
   <div class="h3">${ico('spark')}Для тебя<button class="more" data-act="remix-home">${ico('refresh','s')}</button></div>
   <div id="hRec">${skelRows(6)}</div>
-  <div class="h3">${ico('trend')}В тренде на этой неделе<a class="more" href="#search">Все жанры</a></div>
+  <div class="h3">${ico('trend')}Чарт · Топ России<button class="more" data-act="play-list" data-list="home-chart">${ico('play','f')} Слушать</button></div>
+  <div id="hChart">${skelCards(6)}</div>
+  <div class="h3">${ico('disc')}Независимые артисты · в тренде<a class="more" href="#search">Все жанры</a></div>
   <div id="hTrend">${skelCards(6)}</div>`;
 };
 let homeMix=null;
@@ -1322,6 +1460,7 @@ V.after.home=async(id)=>{
   if(id!==renderId)return;
   if(!homeMix.length){homeMix=null;rec.innerHTML=`<div class="notice">${ico('x')}<div style="flex:1">Музыкальный каталог не отвечает. Проверь интернет.</div><button class="btn sm" data-act="remix-home">${ico('refresh')}Ещё раз</button></div>`}
   else rec.innerHTML=trackList(homeMix.slice(0,8),'home-rec',{why:true});
+  (async()=>{let c=[];try{c=await IT.topRU(50)}catch(e){}if(!c.length)try{c=await DZ.chart(0,50)}catch(e){}if(id!==renderId)return;const hc=$('#hChart');if(hc)hc.innerHTML=c.length?trackCards(c,'home-chart'):'<div class="empty">Чарт недоступен</div>'})();
   try{const t=await API.trending('','week');if(id!==renderId)return;tr.innerHTML=trackCards(t.slice(0,16),'home-trend')}catch(e){if(id===renderId)tr.innerHTML='<div class="empty">Нет связи с каталогом</div>'}
 };
 function bindHomeMini(){
@@ -1340,7 +1479,9 @@ V.flow=()=>{
   `<div class="glass" style="margin-bottom:16px"><div class="card-h">${ico('flow')}Настроить волну</div>
     <div class="wave-set"><div><div class="k">По характеру</div>${seg('char',CHARS)}</div>
     <div><div class="k">Под настроение</div>${seg('mood',{'':'Любое',...Object.fromEntries(Object.entries(MOOD_GROUPS).map(([k,g])=>[k,g.name]))})}</div>
-    <div><div class="k">По языку</div>${seg('lang',LANGS)}</div></div></div>`+
+    <div><div class="k">По языку</div>${seg('lang',LANGS)}</div>
+    <div><div class="k">Каталог</div>${seg('cat',CATS_W)}</div>
+    ${AI.yt?`<div><div class="k">Хиты</div><div class="seg"><button class="${S.prefs.full!==false?'on':''}" data-act="full-set" data-v="1">Полностью (YouTube)</button><button class="${S.prefs.full===false?'on':''}" data-act="full-set" data-v="0">Отрывки</button></div></div>`:''}</div></div>`+
   `<div class="layout2">
     <div><div class="h3" style="margin-top:4px">${ico('queue')}${playing?'Дальше в волне':'Очередь'}</div><div id="fQueue">${P.queue.length?trackList(P.queue.slice(P.idx,P.idx+25),'queue',{why:true}):'<div class="empty">Включи волну — здесь появится очередь с объяснением, почему выбран каждый трек</div>'}</div></div>
     <div class="glass">
@@ -1356,7 +1497,7 @@ V.flow=()=>{
 };
 
 let sQ='',sMode='all',sT;
-V.search=()=>`<div class="sbox">${ico('search')}<input id="sIn" placeholder="Трек, артист, ремикс…" value="${esc(sQ)}" autocomplete="off" enterkeyhint="search"><div class="seg" style="border:0;background:none;padding:0"><button class="${sMode==='all'?'on':''}" data-act="s-mode" data-v="all">Всё</button><button class="${sMode==='remix'?'on':''}" data-act="s-mode" data-v="remix">Ремиксы</button></div>${AI.on?`<button class="btn sm" data-act="ai-search" title="Опиши словами, что хочешь послушать">${ico('spark')}ИИ</button>`:''}</div>
+V.search=()=>`<div class="sbox">${ico('search')}<input id="sIn" placeholder="Трек, артист, ремикс…" value="${esc(sQ)}" autocomplete="off" enterkeyhint="search"><div class="seg" style="border:0;background:none;padding:0">${[['all','Всё'],['hits','Хиты'],['full','Полные'],['remix','Ремиксы']].map(([k,n])=>`<button class="${sMode===k?'on':''}" data-act="s-mode" data-v="${k}">${n}</button>`).join('')}</div>${AI.on?`<button class="btn sm" data-act="ai-search" title="Опиши словами, что хочешь послушать">${ico('spark')}ИИ</button>`:''}</div>
   <div id="sRes"></div>`;
 const genreTiles=()=>`<div class="h3" style="margin-top:6px">${ico('grid')}Жанры</div><div class="genres">${GENRES.map((g,i)=>`<button data-act="genre" data-g="${esc(g)}" style="--h:${(i*37+250)%360}">${esc(gRu(g))}${ico(['note','wave','disc','headph','flow','spark'][i%6])}</button>`).join('')}</div>`;
 V.after.search=()=>{
@@ -1369,17 +1510,23 @@ async function doSearch(){
   const box=$('#sRes');if(!box)return;const q=sQ.trim();
   if(!q){box.innerHTML=genreTiles();return}
   box.innerHTML=skelRows(8);const id=renderId;
-  try{let r=await API.search(sMode==='remix'?q+' remix':q);if(sMode==='remix')r=r.filter(t=>/remix|edit|flip|bootleg|vip|mix/i.test(t.title)).concat(r.filter(t=>!/remix|edit|flip|bootleg|vip|mix/i.test(t.title)));
-    if(id!==renderId||q!==sQ.trim())return;
-    box.innerHTML=`<div class="k" style="margin:0 0 10px 4px">Найдено: ${r.length}</div>`+trackList(r,'search',{empty:'Ничего не нашлось. Попробуй другое написание или английское название'});
-  }catch(e){box.innerHTML=`<div class="notice">${ico('x')}<div>Каталог сейчас недоступен. Проверь интернет и попробуй ещё раз.</div></div>`}
+  const qq=sMode==='remix'?q+' remix':q;
+  const [hits,full,arts]=await Promise.all([sMode==='full'?[]:hitsSearch(qq,40),sMode==='hits'?[]:API.search(qq).catch(()=>[]),sMode==='all'||sMode==='hits'?DZ.searchArtist(q,8).catch(()=>[]):[]]);
+  if(id!==renderId||q!==sQ.trim())return;
+  let r=[...hits,...full];
+  if(sMode==='remix')r=r.filter(t=>/remix|edit|flip|bootleg|vip|mix|ремикс/i.test(t.title)).concat(r.filter(t=>!/remix|edit|flip|bootleg|vip|mix|ремикс/i.test(t.title)));
+  r=dedupe(r);
+  const A=arts.filter(a=>a.picture_medium&&a.nb_fan>500).slice(0,8);
+  if(!r.length&&!A.length){box.innerHTML=`<div class="empty">Ничего не нашлось. Попробуй другое написание</div>`;return}
+  box.innerHTML=(A.length?`<div class="h3" style="margin-top:0">${ico('user')}Артисты</div><div class="arts">${A.map(a=>`<a href="#artist-${a.id}"><img loading="lazy" src="${esc(a.picture_medium)}" alt="">${esc(a.name)}</a>`).join('')}</div>`:'')+
+    `<div class="h3" style="margin-top:${A.length?14:0}px">${ico('note')}Треки<span class="more">${hits.length?'хиты — отрывки'+(fullOn()?' и полные версии с YouTube':' 30 с')+' · ':''}${full.length?'Audius — полные':''}</span></div>`+trackList(r,'search',{empty:'Ничего не нашлось'});
 }
 async function aiSearch(){
   const q=sQ.trim();if(!q){toast('Опиши, что хочешь послушать, и нажми «ИИ»','spark');return}
   const box=$('#sRes');box.innerHTML=`<div class="h3" style="margin-top:4px">${ico('loader','ldg')}ИИ подбирает…</div>`+skelRows(6);
   try{
     const ai=await AI.fromText(q);
-    const res=await Promise.allSettled(ai.queries.map(x=>API.search(x)));
+    const res=await Promise.allSettled(ai.queries.flatMap(x=>[hitsSearch(x,15),API.search(x)]));
     const r=dedupe(res.flatMap(x=>x.status==='fulfilled'?x.value:[]));
     const ts=LANG_SCRIPT[ai.language]||'';
     r.forEach(t=>{t._s=(ai.genres.includes(t.genre)?2:0)+(ai.moods.includes(t.mood)?1:0)+(ts?(langOf(t)===ts?2.5:-1):0)+Math.log10(t.plays+10)*.3+Math.random()*.5;t._why=ai.why});
@@ -1390,7 +1537,7 @@ async function aiSearch(){
 async function openGenre(g){
   sQ='';location.hash='#search';
   setTimeout(async()=>{const box=$('#sRes');if(!box)return;box.innerHTML=`<div class="h3" style="margin-top:4px">${ico('trend')}${esc(gRu(g))} · в тренде</div>`+skelRows(8);
-    try{const r=await API.trending(g,'month');box.innerHTML=`<div class="h3" style="margin-top:4px">${ico('trend')}${esc(gRu(g))} · в тренде<button class="btn sm" style="margin-left:auto" data-act="play-list" data-list="genre">${ico('play','f')}Слушать</button></div>`+trackList(r,'genre')}catch(e){box.innerHTML='<div class="empty">Каталог недоступен</div>'}},150);
+    try{const [h,a]=await Promise.all([DZG[g]?DZ.chart(DZG[g],30).catch(()=>[]):[],API.trending(g,'month').catch(()=>[])]);const r=dedupe([...h,...a]);box.innerHTML=`<div class="h3" style="margin-top:4px">${ico('trend')}${esc(gRu(g))} · в тренде<button class="btn sm" style="margin-left:auto" data-act="play-list" data-list="genre">${ico('play','f')}Слушать</button></div>`+trackList(r,'genre')}catch(e){box.innerHTML='<div class="empty">Каталог недоступен</div>'}},150);
 }
 
 V.playlists=()=>{
@@ -1425,7 +1572,7 @@ V.after.playlist=async(id,r)=>{
 V.remixes=()=>pageHead('Ремиксы','Свежие ремиксы, эдиты и бутлеги — каждый день новые. Лайкни понравившиеся, и в потоке их станет больше.','vinyl',`<button class="btn" data-act="play-list" data-list="remix">${ico('play','f')}Слушать ремиксы</button>${['House','Techno','Trap','Drum & Bass','Pop'].map(g=>`<button class="chip dark" data-act="remix-g" data-g="${g}">${esc(gRu(g))}</button>`).join('')}`)+`<div id="rxList">${skelRows(10)}</div>`;
 V.after.remixes=async(id,r,g)=>{
   try{const q=g?g+' remix':pick(['remix','remix 2026','edit','bootleg','vip mix']);
-    let list=await gather([API.search(q),API.search('remix'),API.trending(g||'Electronic','week').then(l=>l.filter(t=>/remix|edit|flip|bootleg|vip/i.test(t.title)))]);
+    let list=await gather([hitsSearch(q,30),API.search(q),API.search('remix'),API.trending(g||'Electronic','week').then(l=>l.filter(t=>/remix|edit|flip|bootleg|vip/i.test(t.title)))]);
     list=list.filter(t=>/remix|edit|flip|bootleg|vip|mix/i.test(t.title));list.forEach(t=>t._s=score(t));list.sort((a,b)=>b._s-a._s);
     if(id!==renderId)return;$('#rxList').innerHTML=trackList(list.slice(0,40),'remix');
   }catch(e){if(id===renderId)$('#rxList').innerHTML='<div class="empty">Каталог недоступен — попробуй позже</div>'}
@@ -1440,7 +1587,7 @@ V.library=()=>{
   else if(libTab==='hist')body=S.plays.length?trackList(S.plays.map(p=>p.t),'played'):'<div class="empty">Ты ещё ничего не слушал</div>';
   else body=`<div class="layout2"><div class="glass">
       <div class="card-h">${ico('import')}Перенести вкус</div>
-      <p class="k" style="margin:8px 0 14px;line-height:1.55">Скопируй список треков или артистов из своего плейлиста в Яндекс Музыке или Spotify и вставь сюда: по одному в строке, например «Artist — Track». Я найду их в каталоге или похожие версии и ремиксы, а поток начнёт подбирать в этом стиле.</p>
+      <p class="k" style="margin:8px 0 14px;line-height:1.55">Скопируй список треков из своего плейлиста в Яндекс Музыке или Spotify и вставь сюда — по одному в строке, например «Исполнитель — Трек». Найду эти песни (каталог Deezer / Apple Music) и сохраню их плейлистом, а волна начнёт подбирать в этом стиле.</p>
       <textarea class="in" id="impText" placeholder="Исполнитель — Название трека&#10;Исполнитель"></textarea>
       <div class="row" style="margin-top:12px"><button class="btn" data-act="import">${ico('spark')}Найти и обучить подбор</button></div>
     </div>
@@ -1455,12 +1602,13 @@ async function doImport(){
   const found=[];
   for(const ln of lines){
     const q=ln.replace(/\s+[—–-]\s+/,' ');
-    try{const r=await API.search(q);if(r[0]){found.push(...r.slice(0,2));r.slice(0,2).forEach(t=>learn(t,'import',.6))}}catch(e){}
+    let r=await hitsSearch(q,5);if(!r.length)try{r=await API.search(q)}catch(e){}
+    if(r[0]){found.push(r[0]);learn(r[0],'import',.8)}
     const artist=ln.split(/\s+[—–-]\s+/)[0].trim();if(artist&&!S.imported.includes(artist))S.imported.unshift(artist);
   }
   S.imported=S.imported.slice(0,40);save();homeMix=null;
   const list=dedupe(found);
-  box.innerHTML=`<div class="h3">${ico('check')}Найдено ${list.length} треков<button class="btn sm" style="margin-left:auto" data-act="imp-save">${ico('plus')}Сохранить как плейлист</button></div>`+trackList(list,'imported',{empty:'Ничего не нашлось — попробуй латиницей или только имена артистов'});
+  box.innerHTML=`<div class="h3">${ico('check')}Найдено ${list.length} из ${lines.length}<button class="btn sm" style="margin-left:auto" data-act="imp-save">${ico('plus')}Сохранить как плейлист</button></div>`+trackList(list,'imported',{empty:'Ничего не нашлось — попробуй латиницей или только имена артистов'});
   doImport.list=list;toast('Вкус перенесён — поток обновлён','spark',IMG.crown);
 }
 
@@ -1492,6 +1640,20 @@ async function aiDiagnose(){
     return{ok:false,text:out.join(' ')};
   }
 }
+
+/* ---------- ARTIST (Deezer) ---------- */
+V.artist=()=>`<div id="artWrap"><div class="skel" style="height:170px;margin-bottom:16px;border-radius:24px"></div>${skelRows(8)}</div>`;
+V.after.artist=async(id,r)=>{
+  const aid=r.slice(7);
+  try{
+    const [a,top,rel]=await Promise.all([DZ.artist(aid),DZ.artistTop(aid,30),DZ.related(aid).catch(()=>[])]);
+    if(id!==renderId)return;
+    $('#artWrap').innerHTML=`<div class="ahead"><img src="${esc(a.picture_xl||a.picture_big||'')}" alt=""><div style="min-width:0"><div class="k">Артист</div><h1>${esc(a.name||'')}</h1><p class="k" style="margin-top:4px">${a.nb_fan?CMP.format(a.nb_fan)+' слушателей · ':''}${a.nb_album||0} альбомов</p>
+      <div class="row" style="margin-top:14px"><button class="btn" data-act="play-list" data-list="artist">${ico('play','f')}Слушать</button><button class="btn ghost" data-act="artist-wave" data-id="${aid}" data-name="${esc(a.name||'')}">${ico('flow')}Волна по артисту</button></div></div></div>
+      <div class="h3" style="margin-top:6px">${ico('trend')}Популярные треки</div>${trackList(top,'artist')}
+      ${rel.length?`<div class="h3">${ico('user')}Похожие артисты</div><div class="arts">${rel.slice(0,12).map(x=>`<a href="#artist-${x.id}"><img loading="lazy" src="${esc(x.picture_medium)}" alt="">${esc(x.name)}</a>`).join('')}</div>`:''}`;
+  }catch(e){if(id===renderId)$('#artWrap').innerHTML=`<div class="notice">${ico('x')}<div>Не удалось загрузить артиста: ${esc(e.message)}</div></div>`}
+};
 
 /* ---------- AI chat ---------- */
 const CH={msgs:LS.get('chat',[]),busy:false,ctl:null,files:[],draft:'',useFin:LS.get('chatFin',true)};
@@ -2141,7 +2303,7 @@ const ACT={
   repeat(){P.repeat=!P.repeat;UI.modes();toast(P.repeat?'Повтор трека включён':'Повтор выключен','repeat')},
   mute(){audio.muted=!audio.muted;toast(audio.muted?'Звук выключен':'Звук включён','vol')},
   'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur)$('#full').classList.add('open')},
-  'close-full'(){$('#full').classList.remove('open')},
+  'close-full'(){$('#full').classList.remove('open');if(ME.mode==='yt')ME.pause()},
   like(el){const t=T_(el);if(t)toggleLike(t)},
   'like-cur'(){if(P.cur)toggleLike(P.cur)},
   'dislike-cur'(){if(P.cur)dislike(P.cur)},
@@ -2202,6 +2364,8 @@ const ACT={
   'hist-clear'(){S.hist=[];save();render();toast('История расчётов очищена','trash')},
   copy(el){copyText(el.dataset.v)},
   'close-player'(){P.close()},
+  async 'artist-wave'(el){unlock();toast('Волна по артисту '+el.dataset.name+'…','flow');const id=el.dataset.id;let l=[];try{l=await DZ.radio(id)}catch(e){}if(!l.length){toast('Не получилось собрать волну','x');return}P.playList(shuffle(l),0,'flow','Волна · '+el.dataset.name,async()=>{const have=new Set(P.queue.map(x=>x.id));const rel=await DZ.related(id).catch(()=>[]);const more=(await Promise.all(shuffle(rel).slice(0,3).map(a=>DZ.artistTop(a.id,6).catch(()=>[])))).flat();return shuffle(more.filter(x=>!have.has(x.id)))})},
+  'full-set'(el){S.prefs.full=el.dataset.v==='1';save();$$('[data-act=full-set]').forEach(b=>b.classList.toggle('on',b===el));toast(S.prefs.full?'Хиты — полные версии с YouTube':'Хиты — отрывки 30 с','note')},
   'coin-open'(el,e){if(e.target.closest('[data-act=coin-fav]'))return;location.hash='#coin-'+el.dataset.id},
   'coin-fav'(el){const id=el.dataset.id;CR.fav=CR.fav.includes(id)?CR.fav.filter(x=>x!==id):[...CR.fav,id];LS.set('cryptoFav',CR.fav);$$(`.fav[data-id="${id}"]`).forEach(b=>b.classList.toggle('on',CR.fav.includes(id)));if(CR.tab==='fav'&&$('#cBody'))$('#cBody').innerHTML=cryptoRows()},
   'c-tab'(el){CR.tab=el.dataset.v;$$('[data-act=c-tab]').forEach(b=>b.classList.toggle('on',b===el));$('#cBody').innerHTML=cryptoRows()},

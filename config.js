@@ -6,6 +6,7 @@
         AI_API_KEY   — ключ провайдера
         AI_BASE_URL  — адрес, например https://api.drakezakuru.com/v1
         AI_MODEL     — модель, например gpt-6-astra (необязательно)
+        YT_API_KEY   — ключ YouTube Data API v3: полные версии хитов (необязательно)
       после изменения — Deployments → ⋯ → Redeploy.
     • Локально: те же переменные перед запуском  node server.js
 */

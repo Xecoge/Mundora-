@@ -1,6 +1,7 @@
 /*
   TEMPO — локальный сервер (то же, что делает Vercel).
   Запуск (настройки ИИ — переменными окружения):
+    Полные версии треков (необязательно): YT_API_KEY — ключ YouTube Data API v3.
     Windows PowerShell:  $env:AI_API_KEY="sk-..."; $env:AI_BASE_URL="https://api.drakezakuru.com/v1"; $env:AI_MODEL="gpt-6-astra"; node server.js
     macOS / Linux:       AI_API_KEY=sk-... AI_BASE_URL=https://api.drakezakuru.com/v1 AI_MODEL=gpt-6-astra node server.js
   Откроется http://localhost:8080. Нужен Node.js 18+.
@@ -29,7 +30,22 @@ async function resolveModel(auth, requested) {
 }
 
 http.createServer(async (req, res) => {
-  if (req.url === '/tempo-ping') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(env.AI_API_KEY ? 'tempo key' : 'tempo'); }
+  if (req.url === '/tempo-ping') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end('tempo' + (env.AI_API_KEY ? ' key' : '') + (env.YT_API_KEY ? ' yt' : '')); }
+  if (req.url.startsWith('/music/')) {
+    const u = new URL(req.url, 'http://x'); const [, , src, ...rest] = u.pathname.split('/'); const p = rest.join('/');
+    const SRC = { deezer: 'https://api.deezer.com/', itunes: 'https://itunes.apple.com/', applerss: 'https://rss.applemarketingtools.com/api/v2/' };
+    const send = (code, obj) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(typeof obj === 'string' ? obj : JSON.stringify(obj)); };
+    try {
+      if (src === 'yt') {
+        if (!env.YT_API_KEY) return send(501, { error: 'YT_API_KEY не задан' });
+        const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '5', videoEmbeddable: 'true', videoCategoryId: '10', q: u.searchParams.get('q') || '', key: env.YT_API_KEY }));
+        const j = await r.json(); if (!r.ok) return send(r.status, { error: (j.error && j.error.message) || 'YouTube ' + r.status });
+        return send(200, { items: (j.items || []).map(x => ({ id: x.id && x.id.videoId, title: x.snippet && x.snippet.title })).filter(x => x.id) });
+      }
+      if (!SRC[src] || !/^[\w\-./]*$/.test(p) || p.includes('..')) return send(400, { error: 'bad request' });
+      const r = await fetch(SRC[src] + p + u.search); return send(r.status, await r.text());
+    } catch (e) { return send(502, { error: e.message }); }
+  }
   if (req.url.startsWith('/ai-proxy/')) {
     const p = req.url.slice('/ai-proxy/'.length).replace(/^\/+/, '');
     const chunks = []; for await (const c of req) chunks.push(c);
