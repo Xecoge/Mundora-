@@ -871,13 +871,14 @@ const AI={
     }catch(e){}
     this.model='gpt-6.1';return this.model;
   },
-  setModel(m){this.model=m;LS.set('aiModel',m);LS.set('noReasonParam',false);const f=$('#aiF [name=model]');if(f)f.value=m},
+  setModel(m){this.model=m;LS.set('aiModel',m);LS.set('noReasonParam',false);LS.set('fastEffort','');const f=$('#aiF [name=model]');if(f)f.value=m},
   remember(k,d){this.mem[k]={t:Date.now(),d};const ks=Object.keys(this.mem);if(ks.length>200)ks.sort((a,b)=>this.mem[a].t-this.mem[b].t).slice(0,ks.length-200).forEach(x=>delete this.mem[x]);LS.set('ai',this.mem)},
   async chat(messages){
     const model=await this.pickModel();
     const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),AIC.timeout);
     try{
-      const r=await fetch(this.url('/chat/completions'),{method:'POST',signal:ctl.signal,headers:this.hdr(),body:JSON.stringify({model,temperature:AIC.temperature,messages})});
+      const fe=LS.get('fastEffort','');const b={model,messages};if(fe&&!LS.get('noReasonParam',false))b.reasoning_effort=fe;else b.temperature=AIC.temperature;
+      const r=await fetch(this.url('/chat/completions'),{method:'POST',signal:ctl.signal,headers:this.hdr(),body:JSON.stringify(b)});
       if(!r.ok)throw new Error('HTTP '+r.status);
       const j=await r.json();const txt=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
       const m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('no json');
@@ -1509,12 +1510,14 @@ function finContext(){
   const last=[...S.ops].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30).map(o=>`${o.date} ${o.type==='in'?'+':'−'}${fmt(o.amount)} ₽ · ${o.cat}${o.note?' · '+o.note:''}`).join('\n');
   return `Сводка по месяцам:\n${sm}\nРасходы текущего месяца по категориям: ${cs}\nПоследние операции:\n${last}`;
 }
+const FIN_RX=/расход|доход|бюджет|деньг|трат|зарплат|баланс|категор|операц|финанс|₽|руб|сэконом|копи|накоп|кредит|вклад|долг|потрат|сколько я|мои /i;
+function finRelevant(){return CH.msgs.filter(m=>m.role==='user').slice(-3).some(m=>FIN_RX.test(m.text||''))}
 function chatSystem(){
   return `Ты — ИИ-помощник в разделе «Финансы» сайта TEMPO. Отвечай на языке пользователя (по умолчанию по-русски), понятно и по делу.
 Ты умеешь: считать и проверять расчёты, разбирать бюджет, доходы и расходы, проценты, вклады и кредиты, спред; читать документы, таблицы, код и любые присланные файлы; понимать изображения (скриншоты, фото чеков, графики, документы).
-Всегда сначала КОРОТКО рассуждай внутри <think>…</think>: 2–5 коротких пунктов (что спрошено, ключевой расчёт или проверка), без воды. Затем сразу вне тегов дай итоговый ответ. Рассуждение не пропускай, но держи его кратким — пользователю важна скорость.
-Оформляй ответ в Markdown: короткие абзацы, списки, таблицы для сравнения, **жирный** для главного. Числа пиши с пробелами между разрядами, валюту — ₽, если не указано иное. Не придумывай данные: если чего-то не хватает — скажи, что нужно уточнить.
-Сегодня ${new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}.`+(CH.useFin?`\n\nДанные пользователя из TEMPO (используй, если вопрос про его финансы):\n${finContext()}`:'');
+Это живой чат: отвечай сразу и по делу, как собеседник. На простые сообщения — 1–3 предложения. Подробно, со списками и таблицами — только когда задача этого требует или просят. Расчёты проверяй, но не расписывай лишнего.
+Оформление — Markdown, когда оно помогает: списки, таблицы, **жирный** для главного. Числа пиши с пробелами между разрядами, валюту — ₽, если не указано иное. Не придумывай данные: если чего-то не хватает — скажи, что нужно уточнить.
+Сегодня ${new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}.`+(CH.useFin&&finRelevant()?`\n\nДанные пользователя из TEMPO (используй, если вопрос про его финансы):\n${finContext()}`:'');
 }
 function apiContent(m,withImages){
   if(m.role==='assistant')return m.text||'(ответ пуст)';
@@ -1529,15 +1532,31 @@ function apiContent(m,withImages){
 }
 async function aiStream(messages,{onDelta,signal,effort}){
   const model=await AI.pickModel();
-  const body={model,messages,stream:true,temperature:AIC.chatTemperature??.6};
-  if(!LS.get('noReasonParam',false))body.reasoning_effort=effort||'medium';
-  const go=()=>fetch(AI.url('/chat/completions'),{method:'POST',headers:AI.hdr(),body:JSON.stringify(body),signal});
-  let r=await go();
-  if(!r.ok&&body.reasoning_effort&&[400,404,422].includes(r.status)){LS.set('noReasonParam',true);delete body.reasoning_effort;r=await go()}
-  if(!r.ok){let t='';try{t=(await r.text()).slice(0,300)}catch(e){}throw new Error(`HTTP ${r.status}${t?' — '+t:''}`)}
+  const noParam=LS.get('noReasonParam',false);
+  const ladder=noParam?[null]:effort==='fast'?(LS.get('fastEffort','')?[LS.get('fastEffort','')]:['none','minimal','low']):[effort||'low'];
+  let lastErr;
+  for(let k=0;k<ladder.length;k++){
+    const eff=ladder[k];let got=false;
+    try{
+      await aiStreamOnce(messages,{model,eff,signal,onDelta:(c,r)=>{if(!got&&(c||r)){got=true;if(effort==='fast'&&eff)LS.set('fastEffort',eff)}onDelta(c,r)}});
+      return;
+    }catch(e){
+      lastErr=e;
+      const bad=!got&&/HTTP (400|422)/.test(e.message)&&/reason|effort|unsupported|invalid|not supported|unknown/i.test(e.message);
+      if(!bad)throw e;
+      if(k===ladder.length-1&&eff){LS.set('noReasonParam',true);await aiStreamOnce(messages,{model,eff:null,signal,onDelta});return}
+    }
+  }
+  throw lastErr;
+}
+async function aiStreamOnce(messages,{model,eff,signal,onDelta}){
+  const body={model,messages,stream:true};
+  if(eff)body.reasoning_effort=eff;else body.temperature=AIC.chatTemperature??.6;
+  const r=await fetch(AI.url('/chat/completions'),{method:'POST',headers:AI.hdr(),body:JSON.stringify(body),signal});
+  if(!r.ok){let t='';try{t=(await r.text()).slice(0,400)}catch(e){}const er=new Error(`HTTP ${r.status}${t?' — '+t:''}`);er.provider=true;throw er}
   const rz=d=>typeof d==='string'?d:Array.isArray(d)?d.map(x=>x&&(x.text||x.summary||x.content)||'').join(''):(d&&(d.text||d.content))||'';
   const ct=r.headers.get('content-type')||'';
-  if(!r.body||!/event-stream/.test(ct)){const j=await r.json();const m=(j.choices&&j.choices[0]&&j.choices[0].message)||{};onDelta(m.content||'',rz(m.reasoning_content||m.reasoning||m.reasoning_details));return}
+  if(!r.body||!/event-stream/.test(ct)){const j=await r.json();if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'')}`);er.provider=true;throw er}const m=(j.choices&&j.choices[0]&&j.choices[0].message)||{};onDelta(m.content||'',rz(m.reasoning_content||m.reasoning||m.reasoning_details));return}
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
   for(;;){
     const {value,done}=await rd.read();if(done)break;
@@ -1547,14 +1566,15 @@ async function aiStream(messages,{onDelta,signal,effort}){
       if(!line.startsWith('data:'))continue;const d=line.slice(5).trim();if(d==='[DONE]')return;
       let j;try{j=JSON.parse(d)}catch(e){continue}
       if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'').slice(0,300)}`.trim());er.provider=true;throw er}
-      try{const c=j.choices&&j.choices[0]||{};const dl=c.delta||c.message||{};onDelta(typeof dl.content==='string'?dl.content:rz(dl.content),rz(dl.reasoning_content||dl.reasoning||dl.reasoning_details))}catch(e){}
+      const c=j.choices&&j.choices[0]||{};const dl=c.delta||c.message||{};
+      onDelta(typeof dl.content==='string'?dl.content:rz(dl.content),rz(dl.reasoning_content||dl.reasoning||dl.reasoning_details));
     }
   }
 }
 function msgHTML(m,i){
   if(m.role==='user')return `<div class="msg u" data-i="${i}"><div class="bub">${filesHTML(m.files)}${m.text?`<div class="md">${esc(m.text).replace(/\n/g,'<br>')}</div>`:''}</div></div>`;
   const live=!!m.pending,hasAns=!!(m.text&&m.text.trim());
-  const think=(live||m.reasoning)?`<details class="think"${live&&!hasAns?' open':''}><summary>${ico(live&&!hasAns?'loader':'spark',live&&!hasAns?'ldg s':'s')}<span>${live&&!hasAns?'Рассуждает…':'Рассуждение'+(m.secs?` · ${m.secs} с`:'')}</span>${ico('chev','s chev')}</summary><div class="th md">${md(m.reasoning||'')||'<span class="muted">Думаю над задачей…</span>'}</div></details>`:'';
+  const think=m.reasoning?`<details class="think"${live&&!hasAns?' open':''}><summary>${ico(live&&!hasAns?'loader':'spark',live&&!hasAns?'ldg s':'s')}<span>${live&&!hasAns?'Рассуждает…':'Рассуждение'+(m.secs?` · ${m.secs} с`:'')}</span>${ico('chev','s chev')}</summary><div class="th md">${md(m.reasoning||'')||'<span class="muted">Думаю над задачей…</span>'}</div></details>`:'';
   return `<div class="msg a" data-i="${i}"><div class="av"><img src="${IMG.thumbs}" alt=""></div><div class="bub">${think}
     <div class="ans md">${hasAns?md(m.text):live?'<span class="dots"><i></i><i></i><i></i></span>':''}</div>
     ${m.error?`<div class="notice" style="margin-top:8px">${ico('x')}<div style="flex:1;word-break:break-word">Ошибка: ${esc(m.error)}</div><button class="btn sm" data-act="chat-retry" data-i="${i}">${ico('refresh')}Ещё раз</button></div>`:''}
@@ -1577,12 +1597,12 @@ async function chatSend(){
   CH.files=[];CH.draft='';if(inp){inp.value='';inp.style.height=''}drawAtt();
   CH.msgs.push(um);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);
   chatDraw();toBottom();
-  const effort=(um.files.length||text.length>600)?'medium':'low';
+  const effort=(um.files.length||text.length>800)?'medium':text.length>160?'low':'fast';
   await chatRun(am,effort);
 }
 async function chatRun(am,effort='medium'){
   CH.busy=true;CH.ctl=new AbortController();setBusy(true);
-  const idx=CH.msgs.indexOf(am);const hist=CH.msgs.slice(0,idx).filter(m=>!m.error&&(m.role==='user'||m.text)).slice(-20);
+  const idx=CH.msgs.indexOf(am);const hist=CH.msgs.slice(0,idx).filter(m=>!m.error&&(m.role==='user'||m.text)).slice(-12);
   const msgs=[{role:'system',content:chatSystem()},...hist.map((m,i)=>({role:m.role,content:apiContent(m,i>=hist.length-5)}))];
   let raw='',nat='';const t0=Date.now();
   const upd=()=>{const {th,ans}=splitThink(raw);am.text=ans;am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);if(!paintRaf)paintRaf=requestAnimationFrame(()=>{paintRaf=0;chatPaint(am)})};
@@ -1873,7 +1893,7 @@ const ACT={
   'chat-new'(){if(CH.busy)CH.ctl&&CH.ctl.abort();CH.msgs=[];chatSave();render()},
   'chat-fin'(el){CH.useFin=!CH.useFin;LS.set('chatFin',CH.useFin);el.classList.toggle('on',CH.useFin);toast(CH.useFin?'ИИ видит сводку твоих операций':'ИИ не видит твои операции','wallet')},
   'chat-copy'(el){const m=CH.msgs[+el.dataset.i];if(m)copyText(m.text||'')},
-  'chat-retry'(el){if(CH.busy)return;const i=+el.dataset.i;CH.msgs=CH.msgs.slice(0,i);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);chatDraw();toBottom();chatRun(am,'low')},
+  'chat-retry'(el){if(CH.busy)return;const i=+el.dataset.i;CH.msgs=CH.msgs.slice(0,i);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);chatDraw();toBottom();chatRun(am,'fast')},
   'att-rm'(el){CH.files=CH.files.filter(f=>f.id!==el.dataset.id);drawAtt()},
   async 'ai-test'(){const box=$('#aiList');box.innerHTML=`<div class="k">${ico('loader','ldg s')} Проверяю связь…</div>`;const d=await aiDiagnose();if(!d.ok){box.innerHTML=`<div class="notice">${ico('x')}<div>${esc(d.text)}</div></div>`;return}try{AI.warned=true;const m=await AI.pickModel();await AI.chat([{role:'user',content:'Ответь JSON {"ok":true}'}]);box.innerHTML=`<div class="notice">${ico('check')}<div>ИИ отвечает. Модель: <b>${esc(m)}</b>. ${esc(d.text)}</div></div>`}catch(e){box.innerHTML=`<div class="notice">${ico('x')}<div>${esc(humanErr(e))}</div></div>`}finally{AI.warned=false}},
   'ai-search'(){clearTimeout(sT);aiSearch()},
