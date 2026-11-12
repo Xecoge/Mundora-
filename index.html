@@ -819,7 +819,7 @@ const YTM=LS.get('ytmap',{});
 const YTQ=new Map();
 function ytPick(t,items){
   const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
-  const A=nz(t.artist),T=nz(cleanTitle(t.title)||t.title),bad=/(live|концерт|cover|кавер|karaoke|караоке|reaction|реакция|sped ?up|speed ?up|slowed|nightcore|8d|instrumental|минус|lyrics video|tutorial|разбор)/i;
+  const A=nz(t.artist),T=nz(cleanTitle(t.title)||t.title),bad=/(live|концерт|cover|кавер|karaoke|караоке|reaction|реакция|sped ?up|speed ?up|slowed|nightcore|8d|instrumental|минус|lyrics|текст песни|tutorial|разбор|acoustic|акустич|премия|выпускной|фестивал|шок|с дочкой)/i;
   let best=null,bs=-99;
   for(const it of items){const ti=String(it.title||''),ch=String(it.channel||''),n=nz(ti);let sc=0;
     if(/- topic$/i.test(ch))sc+=4;if(A&&nz(ch).includes(A))sc+=3;if(A&&n.includes(A))sc+=2;if(T&&n.includes(T))sc+=3;
