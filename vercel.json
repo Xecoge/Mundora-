@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/tempo-ping", "destination": "/api/ping" },
+    { "source": "/ai-proxy/:path*", "destination": "/api/proxy?path=:path*" }
+  ]
+}
