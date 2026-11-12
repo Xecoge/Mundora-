@@ -1,8 +1,8 @@
 /*
   TEMPO — локальный сервер (то же, что делает Vercel).
   Запуск (настройки ИИ — переменными окружения):
-    Windows PowerShell:  $env:AI_API_KEY="sk-..."; $env:AI_BASE_URL="https://api.drakezakuru.com/v1"; $env:AI_MODEL="gpt-6.1-sol"; node server.js
-    macOS / Linux:       AI_API_KEY=sk-... AI_BASE_URL=https://api.drakezakuru.com/v1 AI_MODEL=gpt-6.1-sol node server.js
+    Windows PowerShell:  $env:AI_API_KEY="sk-..."; $env:AI_BASE_URL="https://api.drakezakuru.com/v1"; $env:AI_MODEL="gpt-6-astra"; node server.js
+    macOS / Linux:       AI_API_KEY=sk-... AI_BASE_URL=https://api.drakezakuru.com/v1 AI_MODEL=gpt-6-astra node server.js
   Откроется http://localhost:8080. Нужен Node.js 18+.
 */
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -24,7 +24,7 @@ async function resolveModel(auth, requested) {
   const want = String(env.AI_MODEL || '').trim(), list = await listModels(auth);
   if (want) { if (!list.length || list.includes(want)) return want; const w = want.toLowerCase(); return list.find(m => m.toLowerCase().endsWith('/' + w)) || list.find(m => m.toLowerCase().includes(w)) || want; }
   if (requested && requested !== 'auto' && (!list.length || list.includes(requested))) return requested;
-  const hint = env.AI_MODEL_HINT || 'gpt-6.1';
+  const hint = env.AI_MODEL_HINT || 'gpt-6-astra';
   return list.length ? [...list].sort((a, b) => rank(b, hint) - rank(a, hint))[0] : hint;
 }
 

@@ -913,7 +913,7 @@ async function waveBatch(n=20,opts={}){
 }
 
 /* ===================== AI (OpenAI-compatible, settings in config.js) ===================== */
-const AIC=Object.assign({apiKey:'',baseURL:'',model:'auto',modelHint:'gpt-6.1',temperature:.5,headers:{},timeout:25000},CFG.ai||{});
+const AIC=Object.assign({apiKey:'',baseURL:'',model:'auto',modelHint:'gpt-6-astra',temperature:.5,headers:{},timeout:25000},CFG.ai||{});
 const AI={
   warned:false,models:null,model:AIC.model&&AIC.model!=='auto'?AIC.model:'',
   get on(){return (this.viaProxy&&this.serverKey)||!!(AIC.apiKey&&AIC.baseURL)},
@@ -939,7 +939,7 @@ const AI={
       const best=[...ms].sort((a,b)=>rank(b)-rank(a))[0];
       if(best){this.model=best;return best}
     }catch(e){}
-    this.model='gpt-6.1';return this.model;
+    this.model='gpt-6-astra';return this.model;
   },
   setModel(m){this.model=m;LS.set('aiModel',m);LS.set('noReasonParam',false);LS.set('fastEffort','');},
   remember(k,d){this.mem[k]={t:Date.now(),d};const ks=Object.keys(this.mem);if(ks.length>200)ks.sort((a,b)=>this.mem[a].t-this.mem[b].t).slice(0,ks.length-200).forEach(x=>delete this.mem[x]);LS.set('ai',this.mem)},
@@ -1472,7 +1472,7 @@ function humanErr(e){
   if(isNetErr(e)&&!e.provider)return AI.viaProxy?'Связь с ИИ оборвалась. Нажми «Ещё раз»; если повторяется — проверь в Vercel переменные AI_API_KEY и AI_BASE_URL и сделай Redeploy.':'Браузер не смог связаться с провайдером ИИ (Failed to fetch). Обычно провайдер запрещает запросы прямо со страницы (CORS). Открой сайт через Vercel или локальный server.js — ключ хранится только на сервере.';
   if(/HTTP 401|HTTP 403/.test(m))return 'Провайдер отклонил ключ ('+m.slice(0,140)+'). Проверь переменную AI_API_KEY в Vercel и сделай Redeploy.';
   if(/HTTP 404/.test(m))return 'Адрес не найден ('+m.slice(0,140)+'). Проверь переменную AI_BASE_URL в Vercel — обычно она заканчивается на /v1.';
-  if(/HTTP 400|HTTP 422/.test(m)&&/model/i.test(m))return 'Провайдер не знает эту модель ('+m.slice(0,160)+'). Проверь переменную AI_MODEL в Vercel (например gpt-6.1-sol) или удали её — сервер выберет модель сам.';
+  if(/HTTP 400|HTTP 422/.test(m)&&/model/i.test(m))return 'Провайдер не знает эту модель ('+m.slice(0,160)+'). Проверь переменную AI_MODEL в Vercel (например gpt-6-astra) или удали её — сервер выберет модель сам.';
   if(/HTTP 429/.test(m))return 'Слишком много запросов или закончился лимит у провайдера ('+m.slice(0,120)+').';
   return m||'Неизвестная ошибка';
 }

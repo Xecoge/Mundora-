@@ -3,8 +3,8 @@
 // (Vercel → Settings → Environment Variables), после изменения — Redeploy:
 //   AI_API_KEY  — ключ провайдера (обязательно)
 //   AI_BASE_URL — адрес провайдера, например https://api.drakezakuru.com/v1
-//   AI_MODEL    — модель, например gpt-6.1-sol (можно без приставки: сервер найдёт
-//                 «quince10/gpt-6.1-sol» сам). Не задана — выберется по AI_MODEL_HINT (gpt-6.1).
+//   AI_MODEL    — модель, например gpt-6-astra (можно без приставки: сервер найдёт
+//                 «…/gpt-6-astra» сам). Не задана — выберется по AI_MODEL_HINT (gpt-6-astra).
 export const config = { runtime: 'edge' };
 
 const DEFAULT_BASE = 'https://api.drakezakuru.com/v1';
@@ -41,7 +41,7 @@ async function resolveModel(env, base, auth, requested) {
     return list.find(m => m.toLowerCase().endsWith('/' + w)) || list.find(m => m.toLowerCase().endsWith(w)) || list.find(m => m.toLowerCase().includes(w)) || want;
   }
   if (requested && requested !== 'auto' && (!list.length || list.includes(requested))) return requested;
-  const hint = env.AI_MODEL_HINT || 'gpt-6.1';
+  const hint = env.AI_MODEL_HINT || 'gpt-6-astra';
   if (!list.length) return hint;
   return [...list].sort((a, b) => rank(b, hint) - rank(a, hint))[0];
 }
