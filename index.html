@@ -258,9 +258,17 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .facts{display:flex;justify-content:space-between;margin-top:20px;gap:8px}
 .facts .ib{width:46px;height:46px;background:var(--panel2)}
 .ext{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-.ytbox{width:100%;aspect-ratio:16/9;border-radius:20px;overflow:hidden;margin:18px 0 22px;background:#000;box-shadow:0 30px 60px rgba(0,0,0,.55)}
-.ytbox iframe,.ytbox>div{width:100%;height:100%;border:0;display:block}
-body.ytmode #fArt{display:none}
+.ytspace{display:none;width:100%;aspect-ratio:16/9;margin:18px 0 22px;border-radius:20px;background:#000}
+body.ytmode .ytspace{display:block}body.ytmode #fArt{display:none}
+.ytfloat{position:fixed;right:16px;bottom:calc(var(--pl) + 18px);width:356px;aspect-ratio:16/9;z-index:55}
+.ytfloat[hidden]{display:none}
+.ytin{width:100%;height:100%;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 20px 50px rgba(0,0,0,.6);border:1px solid rgba(167,139,250,.35)}
+.ytin iframe,.ytin>div{width:100%;height:100%;border:0;display:block}
+.ytbar{position:absolute;top:-38px;right:0;display:flex;gap:6px}
+.ytbar .ib{width:32px;height:32px;background:rgba(20,13,36,.92);border:1px solid rgba(167,139,250,.35);color:#fff}
+.ytbar [data-act=yt-expand] .i{transform:rotate(180deg)}
+body.fullyt .ytfloat{z-index:65}body.fullyt .ytin{border:0;border-radius:20px}body.fullyt .ytbar{display:none}
+@media(max-width:760px){.ytfloat{left:auto;right:8px;width:min(356px,calc(100vw - 16px));bottom:calc(68px + var(--safe) + var(--pl) + 14px)}}
 .pv{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.1);color:#cfc8e8;margin-left:4px;vertical-align:1px}
 .arts{display:grid;grid-auto-flow:column;grid-auto-columns:120px;gap:14px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px}
 .arts a{text-align:center;font-size:13px;font-weight:600}
@@ -430,6 +438,11 @@ body.noplay .composer{bottom:16px}
 @media(min-width:1101px){.side .sep{display:none}}
 @media(max-width:900px){.grid2,.layout2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.grid3>:last-child{grid-column:1/-1}}
 @media(max-width:760px){
+  html{overflow-x:hidden}
+  .sbox{flex-wrap:wrap;height:auto;min-height:52px;border-radius:24px;padding:6px 12px;row-gap:4px}
+  .sbox input{min-width:0;flex:1 1 50%;height:40px}
+  .sbox>.seg{order:3;flex:1 1 100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .sbox>.seg button{white-space:nowrap}
   .ctbl table{min-width:0}.ctbl .hm{display:none}.ctbl th,.ctbl td{padding:12px 8px}.ctbl .cname small{display:none}.ctbl .cname img{width:24px;height:24px}
   .coin-price .big{font-size:32px}.chartbox{height:320px}
   .notes{grid-template-columns:minmax(0,1fr)}.notes.has-cur .nlist{display:none}.notes:not(.has-cur) .ned{display:none}
@@ -614,7 +627,7 @@ body.noplay .composer{bottom:16px}
   <div class="full-in">
     <div class="full-top"><button class="ib" data-act="close-full"><svg class="i"><use href="#i-chev"/></svg></button><span id="fCtx">Сейчас играет</span><button class="ib" data-act="queue"><svg class="i"><use href="#i-queue"/></svg></button></div>
     <div class="art xl" id="fArt"><svg class="i"><use href="#i-note"/></svg></div>
-    <div class="ytbox" id="ytBox" hidden><div id="ytPlayer"></div></div>
+    <div class="ytspace" id="ytSpace"></div>
     <h2 id="fTitle">—</h2>
     <div class="fa" id="fArtist">—</div>
     <div class="why" id="fWhy"></div>
@@ -637,6 +650,7 @@ body.noplay .composer{bottom:16px}
   </div>
 </div>
 
+<div class="ytfloat" id="ytBox" hidden><div class="ytbar"><button class="ib" data-act="yt-expand" title="Развернуть"><svg class="i s"><use href="#i-chev"/></svg></button><button class="ib" data-act="close-player" title="Закрыть"><svg class="i s"><use href="#i-x"/></svg></button></div><div class="ytin"><div id="ytPlayer"></div></div></div>
 <div class="sheet-wrap" id="sheet"><div class="sheet" id="sheetIn"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -1109,7 +1123,7 @@ const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
 const ME={mode:'a',ls:{},
   addEventListener(ev,fn){(this.ls[ev]=this.ls[ev]||[]).push(fn);AUD.addEventListener(ev,()=>{if(this.mode==='a')fn()})},
   emit(ev,force){if(this.mode==='yt'||force)(this.ls[ev]||[]).forEach(f=>f())},
-  play(){if(this.mode==='yt'){$('#full').classList.add('open');try{YTP.p&&YTP.p.playVideo()}catch(e){}return Promise.resolve()}return AUD.play()},
+  play(){if(this.mode==='yt'){try{YTP.p&&YTP.p.playVideo()}catch(e){}return Promise.resolve()}return AUD.play()},
   pause(){if(this.mode==='yt'){try{YTP.p&&YTP.p.pauseVideo()}catch(e){}}else AUD.pause()},
   get paused(){return this.mode==='yt'?!(YTP.state===1||YTP.state===3):AUD.paused},
   get currentTime(){if(this.mode==='yt'){try{return YTP.p.getCurrentTime()||0}catch(e){return 0}}return AUD.currentTime},
@@ -1118,11 +1132,22 @@ const ME={mode:'a',ls:{},
   get volume(){return AUD.volume},set volume(v){AUD.volume=v;try{YTP.p&&YTP.p.setVolume(v*100)}catch(e){}},
   get muted(){return AUD.muted},set muted(v){AUD.muted=v;try{YTP.p&&(v?YTP.p.mute():YTP.p.unMute())}catch(e){}},
   get src(){return AUD.src},set src(v){this.toAudio();AUD.src=v},
-  toAudio(){if(this.mode==='yt'){YTP.stop();this.mode='a';document.body.classList.remove('ytmode')}},
-  async playYT(id){AUD.pause();this.mode='yt';document.body.classList.add('ytmode');$('#full').classList.add('open');await YTP.play(id)},
+  toAudio(){if(this.mode==='yt'){YTP.stop();this.mode='a';document.body.classList.remove('ytmode');ytDock()}},
+  async playYT(id){AUD.pause();this.mode='yt';document.body.classList.add('ytmode');ytDock();await YTP.play(id);ytDock()},
   removeAttribute(a){this.toAudio();AUD.removeAttribute(a)},load(){AUD.load()},setAttribute(a,b){AUD.setAttribute(a,b)}
 };
 const audio=ME;
+function ytDock(){
+  const f=$('#ytBox');if(!f)return;
+  const open=$('#full').classList.contains('open')&&ME.mode==='yt';
+  document.body.classList.toggle('fullyt',open);
+  if(open){const r=$('#ytSpace').getBoundingClientRect();Object.assign(f.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',right:'auto',bottom:'auto'})}
+  else['left','top','width','right','bottom'].forEach(k=>f.style[k]='');
+}
+addEventListener('resize',()=>ytDock());
+$('#full').addEventListener('scroll',()=>ytDock(),{passive:true});
+$('#full').addEventListener('transitionend',()=>ytDock());
+new MutationObserver(()=>{ytDock();setTimeout(ytDock,380)}).observe($('#full'),{attributes:true,attributeFilter:['class']});
 const SILENT=(()=>{try{const n=800,b=new ArrayBuffer(44+n*2),v=new DataView(b),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,16000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}catch(e){return''}})();
 let unlocked=false;const isSilent=()=>SILENT&&audio.src===SILENT;
 function unlock(){if(unlocked||!SILENT||P.cur)return;unlocked=true;audio.src=SILENT;audio.play().catch(()=>{})}
@@ -2315,8 +2340,9 @@ const ACT={
   shuffle(){P.shuffle=!P.shuffle;UI.modes();toast(P.shuffle?'Перемешивание включено':'Перемешивание выключено','shuffle')},
   repeat(){P.repeat=!P.repeat;UI.modes();toast(P.repeat?'Повтор трека включён':'Повтор выключен','repeat')},
   mute(){audio.muted=!audio.muted;toast(audio.muted?'Звук выключен':'Звук включён','vol')},
-  'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur)$('#full').classList.add('open')},
-  'close-full'(){$('#full').classList.remove('open');if(ME.mode==='yt')ME.pause()},
+  'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380)}},
+  'close-full'(){$('#full').classList.remove('open');ytDock()},
+  'yt-expand'(){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380)},
   like(el){const t=T_(el);if(t)toggleLike(t)},
   'like-cur'(){if(P.cur)toggleLike(P.cur)},
   'dislike-cur'(){if(P.cur)dislike(P.cur)},
