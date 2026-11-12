@@ -1,4 +1,4 @@
-// Vercel: сайт проверяет, что рядом есть прокси для ИИ.
+// Vercel: сайт проверяет, что рядом есть сервер TEMPO и настроен ли на нём ИИ.
 export const config = { runtime: 'edge' };
 export default function handler() {
   const env = (typeof process !== 'undefined' && process.env) || {};

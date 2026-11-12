@@ -343,9 +343,70 @@ body.noplay .composer{bottom:16px}
 .att .fchip img,.att .fchip .fi{width:36px;height:36px;object-fit:cover;border-radius:8px;flex:none;display:grid;place-items:center;background:rgba(139,92,246,.18);color:var(--v1)}
 .att .fchip .x{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:26px;height:26px}
 .chat.drag .composer{outline:2px dashed rgba(167,139,250,.7);outline-offset:4px}
+/* crypto */
+.cstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.cstats .glass{padding:13px 16px}.cstats b{display:block;font-size:18px;margin-top:4px;font-weight:700;letter-spacing:-.3px}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.live i{width:8px;height:8px;border-radius:50%;background:#6b6880}
+.live.on i{background:#16c784;box-shadow:0 0 8px #16c784;animation:pls 1.6s infinite}
+@keyframes pls{50%{opacity:.35}}
+.cbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cbar .sbox{flex:1;min-width:180px;height:42px;margin:0}
+.ctbl table{min-width:980px;font-size:13.5px}
+.ctbl th{cursor:default}.ctbl th,.ctbl td{padding:13px 12px}
+.ctbl tbody tr{cursor:pointer}
+.cname{display:flex;align-items:center;gap:10px;min-width:0}.cname img{width:28px;height:28px;border-radius:50%;flex:none;background:#fff1}
+.cname b{font-weight:650;white-space:nowrap}.cname small{color:var(--muted);font-weight:500}
+.up2{color:#16c784}.dn2{color:#ea3943}
+.pcell{border-radius:8px;padding:2px 6px;margin:-2px -6px;transition:background .6s}
+.fl-up{background:rgba(22,199,132,.28);transition:none}.fl-dn{background:rgba(234,57,67,.28);transition:none}
+.fav{width:30px;height:30px;color:#5c5775}.fav.on{color:#f5c542}.fav.on .i{fill:currentColor}
+.spark{display:block}
+.coin-top{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.coin-top img{width:44px;height:44px;border-radius:50%}
+.coin-top h1{font-size:28px;font-weight:800;letter-spacing:-.6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.coin-top h1 small{font-size:15px;color:var(--muted);font-weight:600}
+.coin-price{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 16px}
+.coin-price .big{font-size:40px;margin:0}
+.pill{font-size:14px;font-weight:700;padding:5px 10px;border-radius:10px}
+.pill.up2{background:rgba(22,199,132,.14)}.pill.dn2{background:rgba(234,57,67,.14)}
+.cctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chartbox{height:440px;border-radius:20px;background:rgba(0,0,0,.22);border:1px solid var(--line);position:relative;overflow:hidden}
+.chartbox .msg0{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px}
+.cgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.cgrid .glass{padding:14px 16px}.cgrid b{display:block;font-size:16px;margin-top:4px}
+.conv{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.conv .in{flex:1;min-width:120px}
+.svgtip{position:absolute;pointer-events:none;background:#1d1433;border:1px solid rgba(167,139,250,.35);border-radius:10px;padding:6px 9px;font-size:12px;white-space:nowrap;transform:translate(-50%,-115%);display:none}
+/* notes */
+.notes{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.nlist{min-width:0;display:flex;flex-direction:column;gap:8px;position:sticky;top:12px;max-height:calc(100vh - 140px);overflow:auto;padding-right:2px}
+.nlist .sbox{height:42px;margin:0}
+.nitem{display:block;padding:12px 14px;border-radius:16px;background:var(--panel);border:1px solid var(--line);transition:.15s}
+.nitem:hover{background:var(--panel2)}.nitem.on{border-color:rgba(167,139,250,.5);background:rgba(139,92,246,.14)}
+.nitem b{display:flex;align-items:center;gap:6px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nitem b .i{color:var(--v2);flex:none}
+.nitem small{display:block;color:var(--muted);font-size:12px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ned{min-width:0;border-radius:22px;background:var(--panel);border:1px solid var(--line);padding:16px 18px;min-height:60vh;display:flex;flex-direction:column}
+.ned-top{display:flex;align-items:center;gap:4px}
+.ntitle{flex:1;background:none;border:0;outline:none;font-size:24px;font-weight:750;letter-spacing:-.5px;min-width:0}
+.ib.act2{color:var(--v2)}
+.nai{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:10px 0 6px;padding:10px;border-radius:16px;background:rgba(139,92,246,.08);border:1px solid rgba(167,139,250,.2)}
+.nai .chip{padding:6px 11px;font-size:12px}
+.nai form{display:flex;gap:6px;flex:1 1 100%;margin-top:4px}
+.nai input{flex:1;height:38px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid var(--line);padding:0 12px;outline:none}
+.nai-out{margin:6px 0 8px;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.25);border:1px solid rgba(167,139,250,.3)}
+.nai-out .row{margin-top:10px}
+.nbody{flex:1;min-height:340px;background:none;border:0;outline:none;resize:none;font-size:15px;line-height:1.65;margin-top:6px}
+.nprev{flex:1;margin-top:8px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:4px 0}.chk input{width:18px;height:18px;margin-top:3px;accent-color:#8b5cf6;flex:none;cursor:pointer}
+.chk.done span{text-decoration:line-through;color:var(--muted)}
+.nmeta{margin-top:8px;font-size:11.5px}
+.mback{display:none}
 /* responsive */
 @media(max-width:1180px){.grid2{grid-template-columns:1fr 1fr}.hero>img{height:240px}}
 @media(max-width:1100px){
+  .cstats,.cgrid{grid-template-columns:1fr 1fr}
   :root{--side:80px}
   .side{padding:22px 12px calc(var(--pl) + 14px)}
   .side .lt,.sec{display:none}
@@ -358,6 +419,10 @@ body.noplay .composer{bottom:16px}
 @media(min-width:1101px){.side .sep{display:none}}
 @media(max-width:900px){.grid2,.layout2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.grid3>:last-child{grid-column:1/-1}}
 @media(max-width:760px){
+  .ctbl table{min-width:0}.ctbl .hm{display:none}.ctbl th,.ctbl td{padding:12px 8px}.ctbl .cname small{display:none}.ctbl .cname img{width:24px;height:24px}
+  .coin-price .big{font-size:32px}.chartbox{height:320px}
+  .notes{grid-template-columns:minmax(0,1fr)}.notes.has-cur .nlist{display:none}.notes:not(.has-cur) .ned{display:none}
+  .nlist{position:static;max-height:none}.nph{display:none!important}.mback{display:grid}.ned{padding:14px;min-height:70vh}.ntitle{font-size:20px}
   :root{--pl:64px;--r:20px}
   .composer{bottom:calc(68px + var(--safe) + var(--pl) + 12px)}
   body.noplay .composer{bottom:calc(68px + var(--safe) + 8px)}
@@ -473,6 +538,12 @@ body.noplay .composer{bottom:16px}
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2.2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></symbol>
 <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5M9 13h6M9 16.5h4"/></symbol>
 <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></symbol>
+<symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.6 9.3a2.8 2.8 0 0 0-2.4-1.3h-.6a2.3 2.3 0 0 0 0 4.6h.8a2.3 2.3 0 0 1 0 4.6h-.7a2.8 2.8 0 0 1-2.4-1.3M12 6.2V8M12 16.2V18"/></symbol>
+<symbol id="i-notes" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3.5 3.5h-11L10 9zM12 12.5V20"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-checks" viewBox="0 0 24 24"><rect x="3.5" y="4" width="6" height="6" rx="1.5"/><path d="m5 7 1.2 1.2L8.3 6M13 7h7.5"/><rect x="3.5" y="14" width="6" height="6" rx="1.5"/><path d="M13 17h7.5"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
 <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9.5 4 12 9l2.5-5M12 9v11"/></symbol>
 </defs>
 </svg>
@@ -485,6 +556,9 @@ body.noplay .composer{bottom:16px}
     <div class="sep"></div>
     <div class="sec">Финансы</div>
     <nav id="navF"></nav>
+    <div class="sep"></div>
+    <div class="sec">Личное</div>
+    <nav id="navP"></nav>
   </aside>
   <main class="main">
     <header class="top">
@@ -556,10 +630,6 @@ body.noplay .composer{bottom:16px}
 
 <script src="config.js"></script>
 <script>
-/* Встроенные настройки: работают, даже если config.js не загрузился. config.js (если есть рядом) — главнее. */
-window.TEMPO_DEFAULTS={ai:{apiKey:'',baseURL:'https://api.drakezakuru.com/v1',model:'auto',modelHint:'gpt-6.1',temperature:0.5,timeout:25000}};
-</script>
-<script>
 'use strict';
 /* ===================== assets ===================== */
 const IMG_DATA={
@@ -579,7 +649,8 @@ thumbs:'UklGRrBWAABXRUJQVlA4WAoAAAAQAAAAZQEAhgEAQUxQSDImAAAB56a4bSRlmfovmu7+EZGA
 const IMG={};for(const [n,b] of Object.entries(IMG_DATA)){try{const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);IMG[n]=URL.createObjectURL(new Blob([u],{type:'image/webp'}))}catch(e){IMG[n]='data:image/webp;base64,'+b}}
 document.querySelector('#avaImg').src=IMG.crown;
 const CFG_FILE=!!(window.TEMPO_CONFIG&&window.TEMPO_CONFIG.ai&&window.TEMPO_CONFIG.ai.apiKey);
-const CFG=Object.assign({},window.TEMPO_DEFAULTS||{},window.TEMPO_CONFIG||{});
+const CFG=Object.assign({},window.TEMPO_CONFIG||{});
+try{['aiCfg','aiModel','noReasonParam','fastEffort'].forEach(k=>localStorage.removeItem('tempo:'+k))}catch(e){}
 const ico=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -842,17 +913,16 @@ async function waveBatch(n=20,opts={}){
 }
 
 /* ===================== AI (OpenAI-compatible, settings in config.js) ===================== */
-const AIC=Object.assign({apiKey:'',baseURL:'',model:'auto',modelHint:'gpt-6.1',temperature:.5,headers:{},timeout:25000},(window.TEMPO_DEFAULTS||{}).ai||{},CFG.ai||{},LS.get('aiCfg',{}));
-const AI_SRC=Object.keys(LS.get('aiCfg',{})).length?'профиль':CFG_FILE?'config.js':'встроенные настройки';
+const AIC=Object.assign({apiKey:'',baseURL:'',model:'auto',modelHint:'gpt-6.1',temperature:.5,headers:{},timeout:25000},CFG.ai||{});
 const AI={
-  warned:false,models:null,model:LS.get('aiModel','')||(AIC.model&&AIC.model!=='auto'?AIC.model:''),
-  get on(){return !!((AIC.apiKey||this.serverKey)&&AIC.baseURL)&&AIC.enabled!==false},
+  warned:false,models:null,model:AIC.model&&AIC.model!=='auto'?AIC.model:'',
+  get on(){return (this.viaProxy&&this.serverKey)||!!(AIC.apiKey&&AIC.baseURL)},
   mem:LS.get('ai',{}),
   viaProxy:false,
   proxyCheck:(/^https?:$/.test(location.protocol)?fetch('/tempo-ping',{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>({proxy:/^tempo/.test(t.trim()),key:/^tempo key/.test(t.trim())})).catch(()=>({proxy:false,key:false})):Promise.resolve({proxy:false,key:false})),
   serverKey:false,
   url(p){return this.viaProxy?location.origin+'/ai-proxy'+p:AIC.baseURL.replace(/\/+$/,'')+p},
-  hdr(){const h={'Content-Type':'application/json',...(AIC.apiKey?{'Authorization':'Bearer '+AIC.apiKey}:{}),...(AIC.headers||{})};if(this.viaProxy)h['x-tempo-base']=AIC.baseURL;return h},
+  hdr(){const h={'Content-Type':'application/json',...(AIC.apiKey?{'Authorization':'Bearer '+AIC.apiKey}:{}),...(AIC.headers||{})};return h},
   async ready(){const r=await this.proxyCheck;this.viaProxy=r.proxy;this.serverKey=r.key&&r.proxy},
   async listModels(){
     await this.ready();if(this.models)return this.models;
@@ -860,18 +930,18 @@ const AI={
     const j=await r.json();this.models=(j.data||j.models||[]).map(m=>typeof m==='string'?m:m.id).filter(Boolean);return this.models;
   },
   async pickModel(){
-    await this.ready();if(this.model)return this.model;
+    await this.ready();if(this.viaProxy)return 'auto';if(this.model)return this.model;
     try{
       const ms=await this.listModels();
       const hint=String(AIC.modelHint||'').toLowerCase().replace(/[^a-z0-9.]/g,'');
       const norm=m=>m.toLowerCase().replace(/[^a-z0-9.]/g,'');
       const rank=m=>{const n=norm(m);let r=0;if(hint&&n.includes(hint))r+=10;if(/6[.\-_]?1/.test(m))r+=5;if(/gpt/i.test(m))r+=3;if(/chat/i.test(m))r+=1;if(/mini|nano|audio|realtime|image|tts|whisper|embed|search/i.test(m))r-=4;return r};
       const best=[...ms].sort((a,b)=>rank(b)-rank(a))[0];
-      if(best){this.model=best;LS.set('aiModel',best);return best}
+      if(best){this.model=best;return best}
     }catch(e){}
     this.model='gpt-6.1';return this.model;
   },
-  setModel(m){this.model=m;LS.set('aiModel',m);LS.set('noReasonParam',false);LS.set('fastEffort','');const f=$('#aiF [name=model]');if(f)f.value=m},
+  setModel(m){this.model=m;LS.set('aiModel',m);LS.set('noReasonParam',false);LS.set('fastEffort','');},
   remember(k,d){this.mem[k]={t:Date.now(),d};const ks=Object.keys(this.mem);if(ks.length>200)ks.sort((a,b)=>this.mem[a].t-this.mem[b].t).slice(0,ks.length-200).forEach(x=>delete this.mem[x]);LS.set('ai',this.mem)},
   async chat(messages){
     const model=await this.pickModel();
@@ -1100,7 +1170,6 @@ function addToPl(pid,t){
   p.tracks.push(lite(t));p.updated=Date.now();learn(t,'playlist');save();toast('Добавлено в «'+p.name+'»','lists',IMG.playlist);
 }
 function createPl(name){const p={id:uid(),name:name||'Мой плейлист',tracks:[],created:Date.now()};S.playlists.unshift(p);save();return p}
-function bindAiForm(){const f=$('#aiF');if(!f)return;f.addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));const c={apiKey:d.apiKey.trim(),baseURL:d.baseURL.trim(),model:d.model.trim()||'auto'};LS.set('aiCfg',c);Object.assign(AIC,c);AI.models=null;AI.model=c.model!=='auto'?c.model:'';LS.set('aiModel',AI.model);AI.warned=false;closeSheet();toast(AI.on?'ИИ подключён':'Ключ пустой — ИИ выключен','spark');render();if(AI.on)AI.pickModel()})}
 function moreSheet(t){
   openSheet(`<h3>${art(t)}<span style="min-width:0;font-size:15px">${esc(t.title)}<br><small class="muted" style="font-weight:400">${esc(t.artist)}</small></span><button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
   <button class="opt" data-act="m-flow">${ico('spark')}Поток по этому треку</button>
@@ -1164,23 +1233,25 @@ const pcMini=()=>{const v=pnum(PS.b)*pnum(PS.a)/100;return isFinite(v)?money(v):
 
 /* ===================== navigation ===================== */
 const NAV_M=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Плейлисты'],['remixes','disc','Ремиксы'],['library','lib','Медиатека']];
-const NAV_F=[['ai','chat','ИИ-помощник'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
+const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n])=>`<a class="it" href="#${v}" data-v="${v}" title="${n}">${ico(i)}<span class="lt">${n}</span></a>`;
-$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');
+$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки']].map(navItem).join('');
 $('#tabs').innerHTML=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Моё'],['finance','wallet','Финансы']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
-const FIN=['finance','ai','calc','budget','tables','spread','percent','history'];
+const FIN=['finance','ai','crypto','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
 
 function route(){return (location.hash||'#home').slice(1)||'home'}
 let renderId=0;
 function render(){
   const r=route(),id=++renderId;
-  $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===r||(r.startsWith('pl-')&&a.dataset.v==='playlists')));
-  $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===r||(a.dataset.v==='finance'&&FIN.includes(r))||(a.dataset.v==='playlists'&&(MUSICLIB.includes(r)||r.startsWith('pl-')))));
+  const base=r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r;
+  $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));
+  $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
+  cryptoLeave(r);
   const v=$('#view');
-  const fn=r.startsWith('pl-')?()=>V.playlist(r.slice(3)):(V[r]||V.home);
+  const fn=r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
   v.innerHTML=fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
-  V.after[r.startsWith('pl-')?'playlist':r]?.(id,r);
+  V.after[r.startsWith('pl-')?'playlist':r.startsWith('coin-')?'coin':r.startsWith('note-')?'notes':r]?.(id,r);
   window.scrollTo({top:0,behavior:'instant'});
 }
 addEventListener('hashchange',render);
@@ -1278,7 +1349,7 @@ V.flow=()=>{
       <div class="taste" style="margin-top:12px">${g.length?g.map(([k,v])=>`<div class="hb"><div class="lab"><span>${esc(gRu(k))}</span><span class="muted">${fmt(v)}</span></div><div class="tr2"><i style="width:${v/mx*100}%"></i></div></div>`).join(''):'<div class="muted" style="font-size:13px">Пока пусто. Поставь пару лайков — и здесь появятся твои жанры.</div>'}</div>
       ${a.length?`<div class="k" style="margin:16px 0 8px">Любимые артисты</div><div class="row">${a.map(([id])=>`<span class="chip dark">${ico('user')}${esc(S.taste.artistName[id]||'Артист')}</span>`).join('')}</div>`:''}
       ${S.imported.length?`<div class="k" style="margin:16px 0 8px">Перенесено из других сервисов</div><div class="row">${S.imported.slice(0,10).map(x=>`<span class="chip dark">${esc(x)}</span>`).join('')}</div>`:''}
-      <div class="k" style="margin-top:16px;display:flex;align-items:center;gap:8px">${ico('spark','s')}${AI.on?'ИИ подбирает похожее':'ИИ выключен — открой Профиль и вставь ключ'}</div>
+      <div class="k" style="margin-top:16px;display:flex;align-items:center;gap:8px">${ico('spark','s')}${AI.on?'ИИ подбирает похожее':'ИИ не настроен на сервере (AI_API_KEY в Vercel)'}</div>
       <div class="row" style="margin-top:14px"><a class="btn ghost sm" href="#library">${ico('import')}Перенести вкус из Яндекс/Spotify</a><button class="btn danger sm" data-act="taste-reset">${ico('refresh')}Сбросить</button></div>
     </div>
   </div>`;
@@ -1398,10 +1469,10 @@ function isNetErr(e){return e&&(e.name==='TypeError'||/failed to fetch|networker
 function humanErr(e){
   const m=String(e&&e.message||e||'');
   if(e&&e.name==='AbortError')return 'ИИ не ответил вовремя — попробуй ещё раз';
-  if(isNetErr(e)&&!e.provider)return AI.viaProxy?'Связь с ИИ оборвалась. Нажми «Ещё раз»; если повторяется — проверь в Vercel переменную AI_API_KEY и сделай Redeploy.':'Браузер не смог связаться с провайдером ИИ (Failed to fetch). Обычно провайдер запрещает запросы прямо со страницы (CORS). Запусти сайт через server.js («node server.js» в папке сайта → http://localhost:8080) или выложи папку на Vercel — там прокси включится сам.';
-  if(/HTTP 401|HTTP 403/.test(m))return 'Провайдер отклонил ключ ('+m.slice(0,140)+'). Проверь API-ключ в Профиле.';
-  if(/HTTP 404/.test(m))return 'Адрес не найден ('+m.slice(0,140)+'). Проверь Base URL — обычно он заканчивается на /v1.';
-  if(/HTTP 400|HTTP 422/.test(m)&&/model/i.test(m))return 'Провайдер не знает эту модель ('+m.slice(0,160)+'). Выбери другую в Профиле → «Модели провайдера».';
+  if(isNetErr(e)&&!e.provider)return AI.viaProxy?'Связь с ИИ оборвалась. Нажми «Ещё раз»; если повторяется — проверь в Vercel переменные AI_API_KEY и AI_BASE_URL и сделай Redeploy.':'Браузер не смог связаться с провайдером ИИ (Failed to fetch). Обычно провайдер запрещает запросы прямо со страницы (CORS). Открой сайт через Vercel или локальный server.js — ключ хранится только на сервере.';
+  if(/HTTP 401|HTTP 403/.test(m))return 'Провайдер отклонил ключ ('+m.slice(0,140)+'). Проверь переменную AI_API_KEY в Vercel и сделай Redeploy.';
+  if(/HTTP 404/.test(m))return 'Адрес не найден ('+m.slice(0,140)+'). Проверь переменную AI_BASE_URL в Vercel — обычно она заканчивается на /v1.';
+  if(/HTTP 400|HTTP 422/.test(m)&&/model/i.test(m))return 'Провайдер не знает эту модель ('+m.slice(0,160)+'). Проверь переменную AI_MODEL в Vercel (например gpt-6.1-sol) или удали её — сервер выберет модель сам.';
   if(/HTTP 429/.test(m))return 'Слишком много запросов или закончился лимит у провайдера ('+m.slice(0,120)+').';
   return m||'Неизвестная ошибка';
 }
@@ -1591,7 +1662,7 @@ async function chatSend(){
   const inp=$('#chatIn');const text=(inp?inp.value:CH.draft).trim();
   if(CH.busy){CH.ctl&&CH.ctl.abort();return}
   if(!text&&!CH.files.length)return;
-  if(!AI.on){toast('ИИ выключен — открой Профиль и вставь ключ','x');return}
+  if(!AI.on){toast('ИИ не настроен: добавь AI_API_KEY в Vercel и сделай Redeploy','x');return}
   if(CH.files.some(f=>f.loading)){toast('Подожди, файлы ещё читаются','loader');return}
   const um={role:'user',text,files:CH.files.map(({id,loading,...f})=>f),ts:Date.now()};
   CH.files=[];CH.draft='';if(inp){inp.value='';inp.style.height=''}drawAtt();
@@ -1623,7 +1694,7 @@ V.ai=()=>`<div class="chat" id="chatBox">
       <textarea id="chatIn" rows="1" placeholder="Сообщение или файл…">${esc(CH.draft)}</textarea>
       <button class="send" id="chatSend" type="submit" title="Отправить">${ico('send')}</button>
     </div>
-    <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои финансы</button>${AI.on?'':'<span class="k">ИИ выключен — ключ в Профиле</span>'}</div>
+    <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои финансы</button>${AI.on?'':'<span class="k">ИИ не настроен на сервере</span>'}</div>
   </form></div>`;
 V.after.ai=()=>{
   const f=$('#chatF'),inp=$('#chatIn'),box=$('#chatBox');
@@ -1641,9 +1712,258 @@ V.after.ai=()=>{
   if(matchMedia('(min-width:761px)').matches)inp.focus();
 };
 
+/* ---------- CRYPTO ---------- */
+const CG='https://api.coingecko.com/api/v3';
+const BNR=['https://data-api.binance.vision','https://api.binance.com'];
+const BNW=['wss://data-stream.binance.vision','wss://stream.binance.com:9443'];
+const LWC=['https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js','https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js'];
+const CR={coins:[],byId:{},byPair:{},loaded:0,err:'',cur:LS.get('cryptoCur','usd'),rub:0,fav:LS.get('cryptoFav',[]),q:'',tab:'all',ws:null,wsOk:false,wsTry:0,active:false,poll:0,flash:new Map(),range:LS.get('cryptoRange','1D'),type:LS.get('cryptoType','area'),chart:null,series:null,vol:null,kws:null,first:null,coinId:''};
+const RANGES={'1D':{bn:'5m',lim:288,cg:'1'},'7D':{bn:'1h',lim:168,cg:'7'},'1M':{bn:'4h',lim:180,cg:'30'},'3M':{bn:'12h',lim:180,cg:'90'},'1Y':{bn:'1d',lim:365,cg:'365'},'ALL':{bn:'1w',lim:1000,cg:'max'}};
+const RANGE_RU={'1D':'1Д','7D':'7Д','1M':'1М','3M':'3М','1Y':'1Г','ALL':'Всё'};
+const STABLE=new Set(['USDT','USDC','DAI','FDUSD','TUSD','USDE','USDS','PYUSD','USDD','BUSD']);
+const cK=()=>CR.cur==='rub'&&CR.rub?CR.rub:1;
+const cSym=()=>CR.cur==='rub'&&CR.rub?'₽':'$';
+function fp(v){v=+v*cK();if(!isFinite(v))return '—';const a=Math.abs(v);const d=a>=1000?2:a>=1?2:a>=.01?4:a>=.0001?6:8;const s=v.toLocaleString('ru-RU',{minimumFractionDigits:a>=1?2:Math.min(d,4),maximumFractionDigits:d});return CR.cur==='rub'&&CR.rub?s+' ₽':'$'+s}
+const CMP=new Intl.NumberFormat('ru-RU',{notation:'compact',maximumFractionDigits:2});
+const fb=v=>{v=+v*cK();return isFinite(v)&&v?(cSym()==='$'?'$':'')+CMP.format(v)+(cSym()==='₽'?' ₽':''):'—'};
+const fpc=v=>v==null||!isFinite(v)?'<span class="muted">—</span>':`<span class="${v>=0?'up2':'dn2'}">${v>=0?'▲':'▼'} ${Math.abs(v).toFixed(2).replace('.',',')}%</span>`;
+async function cgGet(path,params={}){const r=await fetch(CG+path+'?'+new URLSearchParams(params));if(!r.ok)throw new Error(r.status===429?'CoinGecko: слишком много запросов, подожди минуту':'CoinGecko '+r.status);return r.json()}
+async function bnGet(path,params){let last;for(const b of BNR){try{const r=await fetch(b+path+'?'+new URLSearchParams(params));if(r.ok)return r.json();last=new Error('Binance '+r.status)}catch(e){last=e}}throw last}
+async function loadCoins(force){
+  if(!force&&CR.coins.length&&Date.now()-CR.loaded<55e3)return;
+  const d=await cgGet('/coins/markets',{vs_currency:'usd',order:'market_cap_desc',per_page:100,page:1,sparkline:'true',price_change_percentage:'1h,24h,7d'});
+  const old=CR.byId;CR.coins=d.map(c=>{const o=old[c.id];const x={id:c.id,sym:String(c.symbol||'').toUpperCase(),name:c.name,img:c.image,rank:c.market_cap_rank,price:c.current_price,ch1h:c.price_change_percentage_1h_in_currency,ch24:c.price_change_percentage_24h_in_currency??c.price_change_percentage_24h,ch7d:c.price_change_percentage_7d_in_currency,mcap:c.market_cap,vol:c.total_volume,supply:c.circulating_supply,max:c.max_supply,ath:c.ath,athCh:c.ath_change_percentage,high:c.high_24h,low:c.low_24h,spark:(c.sparkline_in_7d&&c.sparkline_in_7d.price)||[]};if(o&&o.live&&CR.wsOk){x.price=o.price;x.ch24=o.ch24;x.live=true}return x});
+  CR.byId={};CR.byPair={};const seen={};CR.coins.forEach(c=>{CR.byId[c.id]=c;if(!STABLE.has(c.sym)&&!seen[c.sym]){seen[c.sym]=1;c.pair=c.sym+'USDT';CR.byPair[c.pair]=c}});
+  CR.loaded=Date.now();CR.err='';
+}
+async function loadRub(){if(CR.rub)return;try{const d=await cgGet('/simple/price',{ids:'tether',vs_currencies:'rub'});CR.rub=d.tether.rub}catch(e){}}
+function cryptoStart(){
+  CR.active=true;
+  if(!CR.ws||CR.ws.readyState>1)cryptoWS();
+  clearInterval(CR.poll);CR.poll=setInterval(async()=>{if(!CR.active)return;try{await loadCoins(true);if(!CR.wsOk)cryptoPaint(true)}catch(e){}},CR.wsOk?60e3:30e3);
+}
+function cryptoLeave(r){
+  const keep=r==='crypto'||r.startsWith('coin-');
+  if(!r.startsWith('coin-'))coinChartClose();
+  if(keep)return;
+  CR.active=false;clearInterval(CR.poll);
+  if(CR.ws){const w=CR.ws;CR.ws=null;try{w.onclose=null;w.close()}catch(e){}}CR.wsOk=false;
+}
+function cryptoWS(){
+  let ws;try{ws=new WebSocket(BNW[CR.wsTry%BNW.length]+'/ws/!miniTicker@arr')}catch(e){return}
+  CR.ws=ws;
+  ws.onopen=()=>{CR.wsOk=true;liveBadge()};
+  ws.onmessage=e=>{let a;try{a=JSON.parse(e.data)}catch(x){return}if(!Array.isArray(a))return;
+    for(const t of a){const c=CR.byPair[t.s];if(!c)continue;const p=+t.c,o=+t.o;if(!p)continue;if(p!==c.price)CR.flash.set(c.id,p>c.price?1:-1);c.price=p;if(o)c.ch24=(p-o)/o*100;c.live=true}
+    cryptoPaint()};
+  ws.onclose=()=>{CR.wsOk=false;liveBadge();if(CR.active&&CR.ws===ws){CR.wsTry++;setTimeout(()=>{if(CR.active)cryptoWS()},CR.wsTry<4?2500:15000)}};
+  ws.onerror=()=>{try{ws.close()}catch(x){}};
+}
+function liveBadge(){$$('.live').forEach(el=>{el.classList.toggle('on',CR.wsOk);const t=el.querySelector('span');if(t)t.textContent=CR.wsOk?'В реальном времени':'Обновление раз в 30 с'})}
+let crRaf=0,crLast=0;
+function cryptoPaint(full){
+  if(crRaf)return;
+  crRaf=requestAnimationFrame(()=>{crRaf=0;const now=performance.now();if(!full&&now-crLast<250){setTimeout(()=>cryptoPaint(),260-(now-crLast));return}crLast=now;
+    if(full&&route()==='crypto'){const tb=$('#cBody');if(tb)tb.innerHTML=cryptoRows();cryptoStats();return}
+    for(const [id,dir] of CR.flash){const c=CR.byId[id];if(!c)continue;
+      $$(`[data-cp="${id}"]`).forEach(el=>{el.textContent=fp(c.price);el.classList.remove('fl-up','fl-dn');void el.offsetWidth;el.classList.add(dir>0?'fl-up':'fl-dn');setTimeout(()=>el.classList.remove('fl-up','fl-dn'),350)});
+      $$(`[data-c24="${id}"]`).forEach(el=>el.innerHTML=el.classList.contains('pill')?fpc(c.ch24).replace(/<\/?span[^>]*>/g,''):fpc(c.ch24));
+      $$(`.pill[data-c24="${id}"]`).forEach(el=>{el.className='pill '+(c.ch24>=0?'up2':'dn2')});
+    }
+    CR.flash.clear();cryptoStats();
+  });
+}
+function sparkSVG(arr,up,w=124,h=40){
+  if(!arr||arr.length<2)return '';
+  const step=Math.max(1,Math.floor(arr.length/60)),a=arr.filter((_,i)=>i%step===0);const mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;
+  const pts=a.map((v,i)=>`${(i/(a.length-1)*w).toFixed(1)},${(h-2-(v-mn)/r*(h-4)).toFixed(1)}`).join(' ');
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${up?'#16c784':'#ea3943'}" stroke-width="1.6" stroke-linejoin="round" points="${pts}"/></svg>`;
+}
+function cryptoList(){const q=CR.q.trim().toLowerCase();return CR.coins.filter(c=>(CR.tab!=='fav'||CR.fav.includes(c.id))&&(!q||c.name.toLowerCase().includes(q)||c.sym.toLowerCase().includes(q)))}
+function cryptoRows(){
+  const l=cryptoList();
+  if(!l.length)return `<tr><td colspan="10" class="muted" style="text-align:center;padding:28px">${CR.tab==='fav'?'Отмечай монеты звёздочкой — они появятся здесь':'Ничего не найдено'}</td></tr>`;
+  return l.map(c=>`<tr data-act="coin-open" data-id="${c.id}">
+    <td style="width:34px"><button class="ib fav${CR.fav.includes(c.id)?' on':''}" data-act="coin-fav" data-id="${c.id}" title="В избранное">${ico('star','s')}</button></td>
+    <td class="hm muted" style="width:34px">${c.rank||''}</td>
+    <td><div class="cname"><img loading="lazy" src="${esc(c.img)}" alt=""><b>${esc(c.name)}</b><small>${esc(c.sym)}</small></div></td>
+    <td class="n num"><span class="pcell" data-cp="${c.id}">${fp(c.price)}</span></td>
+    <td class="n num hm">${fpc(c.ch1h)}</td>
+    <td class="n num" data-c24="${c.id}">${fpc(c.ch24)}</td>
+    <td class="n num hm">${fpc(c.ch7d)}</td>
+    <td class="n num hm">${fb(c.mcap)}</td>
+    <td class="n num hm">${fb(c.vol)}</td>
+    <td class="hm" style="width:132px">${sparkSVG(c.spark,(c.ch7d??0)>=0)}</td></tr>`).join('');
+}
+function cryptoStats(){
+  const el=$('#cStats');if(!el||!CR.coins.length)return;
+  const tot=CR.coins.reduce((a,c)=>a+(c.mcap||0),0),vol=CR.coins.reduce((a,c)=>a+(c.vol||0),0),btc=CR.byId.bitcoin,eth=CR.byId.ethereum;
+  el.innerHTML=`<div class="glass"><div class="k">Капитализация (топ-100)</div><b class="num">${fb(tot)}</b></div><div class="glass"><div class="k">Объём за 24 ч</div><b class="num">${fb(vol)}</b></div><div class="glass"><div class="k">Доминирование BTC</div><b class="num">${btc&&tot?(btc.mcap/tot*100).toFixed(1).replace('.',',')+'%':'—'}</b></div><div class="glass"><div class="k">Bitcoin / Ethereum</div><b class="num" style="font-size:15px">${btc?`<span data-cp="bitcoin">${fp(btc.price)}</span>`:'—'} · ${eth?`<span data-cp="ethereum">${fp(eth.price)}</span>`:'—'}</b></div>`;
+}
+const curSeg=()=>`<div class="seg"><button class="${CR.cur!=='rub'?'on':''}" data-act="c-cur" data-v="usd">$ USD</button><button class="${CR.cur==='rub'?'on':''}" data-act="c-cur" data-v="rub">₽ RUB</button></div>`;
+V.crypto=()=>pageHead('Крипта','Курсы топ-100 монет в реальном времени, изменения за час, сутки и неделю. Нажми на монету — откроется график.','bidask',`<span class="live${CR.wsOk?' on':''}"><i></i><span>${CR.wsOk?'В реальном времени':'Подключаюсь…'}</span></span>`)+
+  `<div class="cstats" id="cStats"></div>
+  <div class="cbar"><div class="seg"><button class="${CR.tab==='all'?'on':''}" data-act="c-tab" data-v="all">Все</button><button class="${CR.tab==='fav'?'on':''}" data-act="c-tab" data-v="fav">${ico('star','s')} Избранное</button></div>
+    <div class="sbox">${ico('search','s')}<input id="cQ" placeholder="Bitcoin, ETH, Solana…" value="${esc(CR.q)}" autocomplete="off"></div>${curSeg()}</div>
+  <div class="tbl-wrap ctbl"><table><thead><tr><th></th><th class="hm">#</th><th>Монета</th><th class="n">Цена</th><th class="n hm">1 ч</th><th class="n">24 ч</th><th class="n hm">7 д</th><th class="n hm">Капитализация</th><th class="n hm">Объём 24 ч</th><th class="hm">7 дней</th></tr></thead>
+  <tbody id="cBody">${CR.coins.length?cryptoRows():Array.from({length:10},()=>`<tr><td colspan="10"><div class="skel" style="height:28px"></div></td></tr>`).join('')}</tbody></table></div>
+  <div id="cErr"></div>`;
+V.after.crypto=async(id)=>{
+  const q=$('#cQ');q.addEventListener('input',()=>{CR.q=q.value;$('#cBody').innerHTML=cryptoRows()});
+  cryptoStats();cryptoStart();loadRub();
+  try{await loadCoins();if(id!==renderId)return;$('#cBody').innerHTML=cryptoRows();cryptoStats()}
+  catch(e){if(id===renderId)$('#cErr').innerHTML=`<div class="notice" style="margin-top:12px">${ico('x')}<div style="flex:1">Не удалось загрузить курсы: ${esc(e.message)}</div><button class="btn sm" data-act="c-retry">${ico('refresh')}Ещё раз</button></div>`}
+};
+/* ----- coin page ----- */
+function coinChartClose(){if(CR.kws){try{CR.kws.onclose=null;CR.kws.close()}catch(e){}CR.kws=null}if(CR.chart){try{CR.chart.remove()}catch(e){}CR.chart=null;CR.series=null;CR.vol=null}}
+const TZ=-new Date().getTimezoneOffset()*60;
+V.coin=cid=>{
+  const c=CR.byId[cid];CR.coinId=cid;
+  if(!c)return `<div id="coinWrap"><div class="skel" style="height:60px;margin-bottom:12px"></div><div class="skel" style="height:440px"></div></div>`;
+  return `<div id="coinWrap">${coinHTML(c)}</div>`;
+};
+function coinHTML(c){
+  return `<a class="btn ghost sm" href="#crypto" style="margin-bottom:14px">${ico('left')}Все монеты</a>
+  <div class="coin-top"><img src="${esc(c.img)}" alt=""><h1>${esc(c.name)} <small>${esc(c.sym)}</small><span class="chip dark" style="font-size:12px;padding:4px 10px">#${c.rank||'—'}</span></h1>
+    <button class="ib fav${CR.fav.includes(c.id)?' on':''}" data-act="coin-fav" data-id="${c.id}" style="margin-left:auto">${ico('star')}</button></div>
+  <div class="coin-price"><span class="big num pcell" data-cp="${c.id}">${fp(c.price)}</span><span class="pill num ${c.ch24>=0?'up2':'dn2'}" data-c24="${c.id}">${fpc(c.ch24).replace(/<\/?span[^>]*>/g,'')}</span><span class="k">за 24 ч</span><span class="live${CR.wsOk?' on':''}"><i></i><span>${CR.wsOk?'В реальном времени':'Подключаюсь…'}</span></span></div>
+  <div class="cctl"><div class="seg">${Object.keys(RANGES).map(k=>`<button class="${CR.range===k?'on':''}" data-act="c-range" data-v="${k}">${RANGE_RU[k]}</button>`).join('')}</div>
+    <div class="seg"><button class="${CR.type==='area'?'on':''}" data-act="c-type" data-v="area">Линия</button><button class="${CR.type==='candle'?'on':''}" data-act="c-type" data-v="candle">Свечи</button></div>${curSeg()}
+    <span class="k" id="cPer"></span></div>
+  <div class="chartbox" id="chartBox"><div class="msg0">${ico('loader','ldg')}&nbsp;Загружаю график…</div></div>
+  <div class="cgrid">
+    <div class="glass"><div class="k">Капитализация</div><b class="num">${fb(c.mcap)}</b></div>
+    <div class="glass"><div class="k">Объём за 24 ч</div><b class="num">${fb(c.vol)}</b></div>
+    <div class="glass"><div class="k">Макс. / мин. за 24 ч</div><b class="num" style="font-size:14px">${fp(c.high)} / ${fp(c.low)}</b></div>
+    <div class="glass"><div class="k">Исторический максимум</div><b class="num" style="font-size:14px">${fp(c.ath)} <span class="${(c.athCh||0)>=0?'up2':'dn2'}" style="font-size:12px">${c.athCh!=null?c.athCh.toFixed(1).replace('.',',')+'%':''}</span></b></div>
+    <div class="glass"><div class="k">В обращении</div><b class="num" style="font-size:14px">${c.supply?CMP.format(c.supply)+' '+esc(c.sym):'—'}</b></div>
+    <div class="glass"><div class="k">Макс. предложение</div><b class="num" style="font-size:14px">${c.max?CMP.format(c.max)+' '+esc(c.sym):'∞'}</b></div>
+    <div class="glass" style="grid-column:span 2"><div class="k" style="margin-bottom:8px">Конвертер</div><div class="conv"><input class="in num" id="cvA" value="1" inputmode="decimal"><span>${esc(c.sym)} =</span><input class="in num" id="cvB" inputmode="decimal"><span>${cSym()==='₽'?'₽':'$'}</span></div></div>
+  </div>`;
+}
+V.after.coin=async(id,r)=>{
+  const cid=r.slice(5);loadRub();cryptoStart();
+  if(!CR.byId[cid]){try{await loadCoins()}catch(e){}if(id!==renderId)return;const c=CR.byId[cid];$('#coinWrap').innerHTML=c?coinHTML(c):`<div class="empty">Монета не найдена. <a href="#crypto" style="color:var(--v2)">К списку</a></div>`;if(!c)return}
+  bindConv();coinChart(id);
+};
+function bindConv(){const a=$('#cvA'),b=$('#cvB');if(!a)return;const c=CR.byId[CR.coinId];const k=()=>c.price*cK();
+  const fa=()=>{const v=pnum(a.value);b.value=isFinite(v)?String(+(v*k()).toFixed(k()>=1?2:8)).replace('.',','):''};
+  a.addEventListener('input',fa);b.addEventListener('input',()=>{const v=pnum(b.value);a.value=isFinite(v)?String(+(v/k()).toFixed(8)).replace('.',','):''});fa()}
+async function coinChart(rid){
+  coinChartClose();
+  const c=CR.byId[CR.coinId],box=$('#chartBox');if(!c||!box)return;
+  const rg=RANGES[CR.range],k=cK();let bars=null,line=null,vol=null,src='';
+  if(c.pair){try{const d=await bnGet('/api/v3/klines',{symbol:c.pair,interval:rg.bn,limit:rg.lim});if(Array.isArray(d)&&d.length){bars=d.map(x=>({time:Math.floor(x[0]/1000)+TZ,open:+x[1]*k,high:+x[2]*k,low:+x[3]*k,close:+x[4]*k}));vol=d.map(x=>({time:Math.floor(x[0]/1000)+TZ,value:+x[7]*k,color:+x[4]>=+x[1]?'rgba(22,199,132,.35)':'rgba(234,57,67,.35)'}));src='bn'}}catch(e){}}
+  if(!bars){try{const d=await cgGet(`/coins/${encodeURIComponent(c.id)}/market_chart`,{vs_currency:'usd',days:rg.cg});const seen=new Set();line=(d.prices||[]).map(p=>({time:Math.floor(p[0]/1000)+TZ,value:p[1]*k})).filter(p=>!seen.has(p.time)&&seen.add(p.time));const sv=new Set();vol=(d.total_volumes||[]).map(p=>({time:Math.floor(p[0]/1000)+TZ,value:p[1]*k,color:'rgba(139,92,246,.35)'})).filter(p=>!sv.has(p.time)&&sv.add(p.time));src='cg'}catch(e){if(rid===renderId&&$('#chartBox'))$('#chartBox').innerHTML=`<div class="msg0">Не удалось загрузить график: ${esc(e.message)}</div>`;return}}
+  if(rid!==renderId||!$('#chartBox'))return;
+  const pts=bars?bars.map(b=>({time:b.time,value:b.close})):line;
+  const first=pts[0]?.value,last=pts[pts.length-1]?.value,up=last>=first;CR.first=first;
+  const per=$('#cPer');if(per&&first)per.innerHTML=`За период: ${fpc((last-first)/first*100)}`;
+  const col=up?'#16c784':'#ea3943';
+  let LW=null;for(const u of LWC){try{LW=await loadLib(u,'LightweightCharts');break}catch(e){}}
+  if(rid!==renderId||!$('#chartBox'))return;
+  box.innerHTML='';
+  if(!LW){svgChart(box,pts,col);return}
+  const ch=LW.createChart(box,{autoSize:true,layout:{background:{type:'solid',color:'transparent'},textColor:'#a79fc6',fontFamily:'Inter,system-ui,sans-serif',fontSize:12},grid:{vertLines:{color:'rgba(255,255,255,.035)'},horzLines:{color:'rgba(255,255,255,.055)'}},rightPriceScale:{borderVisible:false,scaleMargins:{top:.1,bottom:.22}},timeScale:{borderVisible:false,timeVisible:CR.range==='1D'||CR.range==='7D',secondsVisible:false,rightOffset:3},crosshair:{mode:1,vertLine:{color:'rgba(167,139,250,.5)',labelBackgroundColor:'#6d28d9'},horzLine:{color:'rgba(167,139,250,.5)',labelBackgroundColor:'#6d28d9'}},localization:{locale:'ru-RU',priceFormatter:v=>fp(v/k)},handleScale:true,handleScroll:true});
+  CR.chart=ch;
+  const pf={type:'custom',minMove:1e-8,formatter:v=>fp(v/k)};
+  if(CR.type==='candle'&&bars){CR.series=ch.addCandlestickSeries({upColor:'#16c784',downColor:'#ea3943',borderVisible:false,wickUpColor:'#16c784',wickDownColor:'#ea3943',priceFormat:pf});CR.series.setData(bars);CR.sType='candle'}
+  else{CR.series=ch.addAreaSeries({lineColor:col,topColor:up?'rgba(22,199,132,.32)':'rgba(234,57,67,.32)',bottomColor:'rgba(0,0,0,0)',lineWidth:2,priceFormat:pf,crosshairMarkerRadius:5});CR.series.setData(pts);CR.sType='area'}
+  if(vol&&vol.length){CR.vol=ch.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'v',lastValueVisible:false,priceLineVisible:false});ch.priceScale('v').applyOptions({scaleMargins:{top:.82,bottom:0}});CR.vol.setData(vol)}
+  ch.timeScale().fitContent();
+  if(src==='bn'){let ws;try{ws=new WebSocket(BNW[CR.wsTry%BNW.length]+`/ws/${c.pair.toLowerCase()}@kline_${rg.bn}`)}catch(e){return}CR.kws=ws;
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}const K=m.k;if(!K||!CR.series)return;const t=Math.floor(K.t/1000)+TZ;
+      try{if(CR.sType==='candle')CR.series.update({time:t,open:+K.o*k,high:+K.h*k,low:+K.l*k,close:+K.c*k});else CR.series.update({time:t,value:+K.c*k});if(CR.vol)CR.vol.update({time:t,value:+K.q*k,color:+K.c>=+K.o?'rgba(22,199,132,.35)':'rgba(234,57,67,.35)'})}catch(x){}
+      const p=+K.c;if(p&&CR.byId[c.id]){const cc=CR.byId[c.id];if(p!==cc.price){CR.flash.set(cc.id,p>cc.price?1:-1);cc.price=p;cryptoPaint()}}
+      if(CR.first){const per=$('#cPer');if(per)per.innerHTML=`За период: ${fpc((p*k-CR.first)/CR.first*100)}`}};
+  }
+}
+function svgChart(box,pts,col){
+  const W=box.clientWidth||800,H=box.clientHeight||400,P=10;if(pts.length<2){box.innerHTML='<div class="msg0">Мало данных</div>';return}
+  const vs=pts.map(p=>p.value),mn=Math.min(...vs),mx=Math.max(...vs),r=mx-mn||1,X=i=>P+i/(pts.length-1)*(W-2*P),Y=v=>P+(1-(v-mn)/r)*(H-2*P);
+  const d=pts.map((p,i)=>`${i?'L':'M'}${X(i).toFixed(1)},${Y(p.value).toFixed(1)}`).join('');
+  box.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".32"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs><path d="${d}L${X(pts.length-1)},${H}L${X(0)},${H}Z" fill="url(#cg1)"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2"/></svg><div class="svgtip" id="svT"></div>`;
+  const tip=$('#svT');box.onmousemove=e=>{const b=box.getBoundingClientRect(),i=Math.max(0,Math.min(pts.length-1,Math.round((e.clientX-b.left-P)/(b.width-2*P)*(pts.length-1))));const p=pts[i];tip.style.display='block';tip.style.left=(e.clientX-b.left)+'px';tip.style.top=(Y(p.value)/H*b.height)+'px';tip.textContent=fp(p.value/cK())+' · '+new Date((p.time-TZ)*1000).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};box.onmouseleave=()=>tip.style.display='none';
+}
+
+/* ---------- NOTES ---------- */
+const NT={list:LS.get('notes',[]),q:'',prev:false,ai:null};
+let ntT;const ntSave=()=>{clearTimeout(ntT);ntT=setTimeout(()=>LS.set('notes',NT.list),250)};
+function noteNew(title='',body=''){const n={id:uid(),title,body,pinned:false,created:Date.now(),updated:Date.now()};NT.list.unshift(n);LS.set('notes',NT.list);return n}
+const noteTitle=n=>(n.title||'').trim()||((n.body||'').trim().split('\n')[0]||'').replace(/^#+\s*|^[-*]\s*(\[.\]\s*)?/,'').slice(0,60)||'Без названия';
+const noteSnip=n=>(n.body||'').replace(/^#.*$/m,'').replace(/[#*`>\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,90)||'Пустая заметка';
+const notesSorted=()=>{const q=NT.q.toLowerCase();return NT.list.filter(n=>!q||(n.title+' '+n.body).toLowerCase().includes(q)).sort((a,b)=>(b.pinned-a.pinned)||(b.updated-a.updated))};
+const nItem=(n,cur)=>`<a class="nitem${cur&&cur.id===n.id?' on':''}" href="#note-${n.id}" id="ni-${n.id}"><b>${n.pinned?ico('pin','s'):''}<span>${esc(noteTitle(n))}</span></b><small>${esc(noteSnip(n))}</small></a>`;
+function noteMd(body,ro){
+  const L=(body||'').split('\n');let out='',buf=[];const flush=()=>{if(buf.length){out+=md(buf.join('\n'));buf=[]}};
+  L.forEach((l,i)=>{const m=l.match(/^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/);if(m){flush();const done=m[1]!==' ';out+=`<label class="chk${done?' done':''}"><input type="checkbox" ${done?'checked':''} ${ro?'disabled':`data-act="n-tick" data-line="${i}"`}><span>${md(m[2]).replace(/^<p>|<\/p>$/g,'')}</span></label>`}else buf.push(l)});
+  flush();return out||'<span class="muted">Пусто</span>';
+}
+const NAI_ACT=[['improve','Улучшить','Улучши текст: понятнее и грамотнее, сохрани смысл, язык и структуру.','edit'],['fix','Исправить ошибки','Исправь орфографию и пунктуацию, больше ничего не меняй.','edit'],['short','Сократить','Сократи до главного, сохрани важные детали.','edit'],['todo','В список задач','Преврати в чек-лист задач формата «- [ ] задача», сгруппируй по смыслу.','edit'],['struct','Структурировать','Структурируй: заголовки, списки, выдели главное жирным.','edit'],['cont','Продолжить','Продолжи заметку в том же стиле. Верни только продолжение.','append']];
+V.notes=(nid)=>{
+  const list=notesSorted();const cur=nid?NT.list.find(n=>n.id===nid):(matchMedia('(min-width:761px)').matches?list[0]:null);
+  NT.cur=cur||null;
+  return `<div class="notes${nid&&cur?' has-cur':''}">
+   <div class="nlist">
+     <div class="row" style="flex-wrap:nowrap"><div class="sbox" style="flex:1">${ico('search','s')}<input id="nQ" placeholder="Поиск" value="${esc(NT.q)}"></div><button class="btn" data-act="n-new" title="Новая заметка">${ico('plus')}</button></div>
+     <div id="nItems">${list.map(n=>nItem(n,cur)).join('')||`<div class="empty" style="padding:22px"><img src="${IMG.clock}" alt="" style="height:110px;display:block;margin:0 auto 8px">Заметок пока нет.<br>Создай первую или попроси ИИ.</div>`}</div>
+   </div>
+   ${cur?noteEditor(cur):`<div class="ned nph" style="display:grid;place-items:center;text-align:center;color:var(--muted)"><div><img src="${IMG.clock}" alt="" style="height:150px"><p style="margin:8px 0 14px">Выбери заметку слева или создай новую</p><button class="btn" data-act="n-new">${ico('plus')}Новая заметка</button></div></div>`}
+  </div>`;
+};
+function noteEditor(n){
+  return `<div class="ned" data-id="${n.id}">
+    <div class="ned-top"><a class="ib mback" href="#notes" title="Назад">${ico('left')}</a><input class="ntitle" id="nTitle" placeholder="Заголовок" value="${esc(n.title)}">
+      <button class="ib${n.pinned?' act2':''}" data-act="n-pin" title="Закрепить">${ico('pin')}</button>
+      <button class="ib${NT.prev?' act2':''}" data-act="n-view" title="${NT.prev?'Редактировать':'Просмотр'}">${ico(NT.prev?'edit':'eye')}</button>
+      <button class="ib" data-act="n-check" title="Добавить пункт чек-листа">${ico('checks')}</button>
+      <button class="ib" data-act="n-del" title="Удалить">${ico('trash')}</button></div>
+    <div class="nai">${ico('spark','s')}${NAI_ACT.map(([k,t])=>`<button class="chip dark" data-act="n-ai" data-k="${k}">${t}</button>`).join('')}
+      <form id="nAiF"><input id="nAiIn" placeholder="${n.body.trim()?'Попроси ИИ изменить заметку…':'Опиши, какую заметку создать…'}" autocomplete="off"><button class="btn sm" type="submit">${ico('send')}</button></form></div>
+    <div id="nAiOut"></div>
+    <textarea class="nbody" id="nBody" placeholder="Пиши здесь… Поддерживается Markdown и чек-листы: - [ ] задача"${NT.prev?' hidden':''}>${esc(n.body)}</textarea>
+    <div class="md nprev" id="nPrev"${NT.prev?'':' hidden'}>${NT.prev?noteMd(n.body):''}</div>
+    <div class="k nmeta" id="nMeta">Изменено ${new Date(n.updated).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+  </div>`;
+}
+V.after.notes=()=>{
+  const q=$('#nQ');q&&q.addEventListener('input',()=>{NT.q=q.value;$('#nItems').innerHTML=notesSorted().map(n=>nItem(n,NT.cur)).join('')||'<div class="empty">Ничего не найдено</div>'});
+  const n=NT.cur;if(!n)return;
+  const t=$('#nTitle'),b=$('#nBody');
+  const touch=()=>{n.updated=Date.now();ntSave();const it=$('#ni-'+n.id);if(it)it.outerHTML=nItem(n,n);const m=$('#nMeta');if(m)m.textContent='Сохранено'};
+  t.addEventListener('input',()=>{n.title=t.value;touch()});
+  const grow=()=>{b.style.height='';b.style.height=Math.max(340,b.scrollHeight)+'px'};
+  b.addEventListener('input',()=>{n.body=b.value;touch();grow()});grow();
+  $('#nAiF').addEventListener('submit',e=>{e.preventDefault();const v=$('#nAiIn').value.trim();if(!v)return;$('#nAiIn').value='';noteAI(n,v,n.body.trim()?'edit':'create')});
+  if(!n.body&&!n.title&&matchMedia('(min-width:761px)').matches)t.focus();
+};
+async function noteAI(n,instr,mode){
+  if(!AI.on){toast('ИИ не настроен на сервере (AI_API_KEY в Vercel)','x');return}
+  if(NT.ai&&NT.ai.busy){NT.ai.ctl.abort();return}
+  const st=NT.ai={busy:true,text:'',mode,ctl:new AbortController(),nid:n.id};
+  const box=$('#nAiOut');
+  const paint=()=>{const b=$('#nAiOut');if(!b||NT.cur!==n)return;const {ans}=splitThink(st.text);b.innerHTML=`<div class="nai-out"><div class="k" style="margin-bottom:6px">${ico(st.busy?'loader':'spark',st.busy?'ldg s':'s')} ${st.busy?'ИИ пишет…':'Готово — что сделать с результатом?'}</div><div class="md">${ans?noteMd(ans,true):'<span class="dots"><i></i><i></i><i></i></span>'}</div>
+    <div class="row">${st.busy?`<button class="btn ghost sm" data-act="n-ai-stop">${ico('stop')}Стоп</button>`:st.err?`<span class="r" style="font-size:13px">${esc(st.err)}</span><button class="btn ghost sm" data-act="n-ai-cancel">Закрыть</button>`:`<button class="btn sm" data-act="n-ai-apply" data-m="${mode==='append'?'append':'replace'}">${ico('check')}${mode==='append'?'Добавить в конец':mode==='create'?'Вставить в заметку':'Заменить заметку'}</button>${mode!=='append'?`<button class="btn ghost sm" data-act="n-ai-apply" data-m="append">Добавить в конец</button>`:''}<button class="btn ghost sm" data-act="n-ai-apply" data-m="new">В новую заметку</button><button class="btn ghost sm" data-act="n-ai-cancel">Отмена</button>`}</div></div>`};
+  paint();
+  const sys='Ты — ИИ-помощник в заметках сайта TEMPO. Пиши на языке заметки или запроса. Возвращай ТОЛЬКО готовый текст в Markdown — без вступлений, пояснений и кавычек вокруг. Чек-листы оформляй как «- [ ] пункт». Работай быстро и по делу.';
+  const user=mode==='create'?`Создай заметку по запросу: ${instr}\nПервой строкой — заголовок в формате «# Заголовок».`:`Заметка «${noteTitle(n)}»:\n\n${n.body}\n\nЗадача: ${instr}`;
+  let raf=0;
+  try{await aiStream([{role:'system',content:sys},{role:'user',content:user}],{effort:'fast',signal:st.ctl.signal,onDelta:c=>{if(c){st.text+=c;if(!raf)raf=requestAnimationFrame(()=>{raf=0;paint()})}}})}
+  catch(e){if(e.name!=='AbortError')st.err=humanErr(e)}
+  st.busy=false;st.text=splitThink(st.text).ans.trim();if(!st.text&&!st.err)st.err='ИИ вернул пустой ответ';paint();
+}
+function noteApply(m){
+  const st=NT.ai,n=NT.list.find(x=>x.id===(st&&st.nid));if(!st||!n||!st.text)return;
+  let txt=st.text;let title='';const h=txt.match(/^#\s+(.+)\n?/);
+  if(m==='new'){if(h){title=h[1].trim();txt=txt.slice(h[0].length).trim()}const nn=noteNew(title,txt);NT.ai=null;location.hash='#note-'+nn.id;return}
+  if(m==='append')n.body=(n.body.replace(/\s+$/,'')+'\n\n'+txt).trim();
+  else{if(h&&(!n.title.trim()||st.mode==='create')){n.title=h[1].trim();txt=txt.slice(h[0].length).trim()}n.body=txt}
+  n.updated=Date.now();LS.set('notes',NT.list);NT.ai=null;render();toast('Заметка обновлена','check');
+}
+
 /* ---------- finance views ---------- */
-V.finance=()=>pageHead('Финансы','ИИ-помощник, калькулятор, доходы и расходы, таблицы, спред, проценты и история — всё под рукой.','chart')+
-  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
+V.finance=()=>pageHead('Финансы','ИИ-помощник, крипта, заметки, калькулятор, доходы и расходы, таблицы, спред, проценты и история — всё под рукой.','chart')+
+  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
 
 V.calc=()=>{
   const keys=['AC','(',')','÷','7','8','9','×','4','5','6','−','1','2','3','+','%','0',',','='];
@@ -1855,16 +2175,8 @@ const ACT={
     <div class="stat" style="grid-template-columns:1fr 1fr 1fr"><div class="glass" style="padding:12px"><div class="k">Лайков</div><b>${Object.keys(S.likes).length}</b></div><div class="glass" style="padding:12px"><div class="k">Плейлистов</div><b>${S.playlists.length}</b></div><div class="glass" style="padding:12px"><div class="k">Операций</div><b>${S.ops.length}</b></div></div>
     <div class="k" style="margin-bottom:6px">Твои жанры: ${esc(g.join(', ')||'ещё не определены')}</div>
     <p class="k" style="margin:10px 0 14px;line-height:1.5">Данные хранятся в этом браузере. Сделай копию, чтобы перенести их на другое устройство.</p>
-    <div class="card-h" style="margin:6px 0 10px">${ico('spark')}ИИ ${AI.on?'<span class="chip dark" style="padding:4px 10px;font-size:11px">включён · '+esc(AI_SRC)+'</span>':'<span class="chip dark" style="padding:4px 10px;font-size:11px">выключен</span>'}</div>
-    <form id="aiF">
-      <div class="field"><label class="lbl">API-ключ</label><input class="in" name="apiKey" value="${esc(AIC.apiKey)}" placeholder="sk-..." autocomplete="off"></div>
-      <div class="field"><label class="lbl">Base URL</label><input class="in" name="baseURL" value="${esc(AIC.baseURL)}" placeholder="https://.../v1"></div>
-      <div class="field"><label class="lbl">Модель</label><input class="in" name="model" value="${esc(AI.model||AIC.model||'auto')}" placeholder="auto"></div>
-      <div class="row"><button class="btn sm" type="submit">${ico('check')}Сохранить</button><button class="btn ghost sm" type="button" data-act="ai-test">${ico('spark')}Проверить</button><button class="btn ghost sm" type="button" data-act="ai-models">${ico('lists')}Модели провайдера</button></div>
-    </form>
-    <div id="aiList" style="max-height:240px;overflow:auto;margin:8px 0 14px"></div>
     <button class="opt" data-act="backup">${ico('copy')}Скопировать резервную копию</button>
-    <button class="opt" data-act="restore">${ico('import')}Восстановить из копии</button>`);bindAiForm()},
+    <button class="opt" data-act="restore">${ico('import')}Восстановить из копии</button>`)},
   backup(){copyText(JSON.stringify(Object.fromEntries(KEYS.map(k=>[k,S[k]]))))},
   restore(){openSheet(`<h3>${ico('import')}Восстановить<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><textarea class="in" id="rsT" placeholder="Вставь резервную копию"></textarea><button class="btn" data-act="restore-ok" style="width:100%;justify-content:center;margin-top:12px">Восстановить</button>`)},
   'restore-ok'(){try{const d=JSON.parse($('#rsT').value);KEYS.forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});save();closeSheet();homeMix=null;render();toast('Данные восстановлены')}catch(e){toast('Не похоже на резервную копию','x')}},
@@ -1890,6 +2202,24 @@ const ACT={
   'hist-clear'(){S.hist=[];save();render();toast('История расчётов очищена','trash')},
   copy(el){copyText(el.dataset.v)},
   'close-player'(){P.close()},
+  'coin-open'(el,e){if(e.target.closest('[data-act=coin-fav]'))return;location.hash='#coin-'+el.dataset.id},
+  'coin-fav'(el){const id=el.dataset.id;CR.fav=CR.fav.includes(id)?CR.fav.filter(x=>x!==id):[...CR.fav,id];LS.set('cryptoFav',CR.fav);$$(`.fav[data-id="${id}"]`).forEach(b=>b.classList.toggle('on',CR.fav.includes(id)));if(CR.tab==='fav'&&$('#cBody'))$('#cBody').innerHTML=cryptoRows()},
+  'c-tab'(el){CR.tab=el.dataset.v;$$('[data-act=c-tab]').forEach(b=>b.classList.toggle('on',b===el));$('#cBody').innerHTML=cryptoRows()},
+  async 'c-cur'(el){const v=el.dataset.v;if(v==='rub'){await loadRub();if(!CR.rub){toast('Не удалось получить курс рубля','x');return}}CR.cur=v;LS.set('cryptoCur',v);render()},
+  'c-range'(el){CR.range=el.dataset.v;LS.set('cryptoRange',CR.range);$$('[data-act=c-range]').forEach(b=>b.classList.toggle('on',b===el));$('#chartBox').innerHTML=`<div class="msg0">${ico('loader','ldg')}</div>`;coinChart(renderId)},
+  'c-type'(el){CR.type=el.dataset.v;LS.set('cryptoType',CR.type);$$('[data-act=c-type]').forEach(b=>b.classList.toggle('on',b===el));coinChart(renderId)},
+  'c-retry'(){render()},
+  'n-new'(){const n=noteNew();NT.prev=false;location.hash='#note-'+n.id},
+  'n-pin'(){const n=NT.cur;if(!n)return;n.pinned=!n.pinned;n.updated=Date.now();LS.set('notes',NT.list);render()},
+  'n-view'(){NT.prev=!NT.prev;render()},
+  'n-check'(){const n=NT.cur;if(!n)return;n.body=(n.body.replace(/\s+$/,'')+(n.body.trim()?'\n':'')+'- [ ] ');n.updated=Date.now();LS.set('notes',NT.list);NT.prev=false;render();const b=$('#nBody');if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length)}},
+  'n-tick'(el){const n=NT.cur;if(!n)return;const L=n.body.split('\n'),i=+el.dataset.line;L[i]=L[i].replace(/\[( |x|X)\]/,m=>m==='[ ]'?'[x]':'[ ]');n.body=L.join('\n');n.updated=Date.now();LS.set('notes',NT.list);$('#nPrev').innerHTML=noteMd(n.body)},
+  'n-del'(){const n=NT.cur;if(!n)return;openSheet(`<h3>${ico('trash')}Удалить «${esc(noteTitle(n))}»?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><button class="btn danger" data-act="n-del-ok" style="width:100%;justify-content:center">Удалить</button>`)},
+  'n-del-ok'(){const n=NT.cur;NT.list=NT.list.filter(x=>x!==n);LS.set('notes',NT.list);closeSheet();location.hash='#notes';if(route()==='notes')render()},
+  'n-ai'(el){const n=NT.cur;if(!n)return;const a=NAI_ACT.find(x=>x[0]===el.dataset.k);if(!n.body.trim()&&a[3]!=='create'){toast('Сначала напиши что-нибудь — или опиши заметку в поле ИИ','notes');return}noteAI(n,a[2],a[3])},
+  'n-ai-stop'(){NT.ai&&NT.ai.ctl.abort()},
+  'n-ai-cancel'(){NT.ai=null;const b=$('#nAiOut');if(b)b.innerHTML=''},
+  'n-ai-apply'(el){noteApply(el.dataset.m)},
   'chat-new'(){if(CH.busy)CH.ctl&&CH.ctl.abort();CH.msgs=[];chatSave();render()},
   'chat-fin'(el){CH.useFin=!CH.useFin;LS.set('chatFin',CH.useFin);el.classList.toggle('on',CH.useFin);toast(CH.useFin?'ИИ видит сводку твоих операций':'ИИ не видит твои операции','wallet')},
   'chat-copy'(el){const m=CH.msgs[+el.dataset.i];if(m)copyText(m.text||'')},

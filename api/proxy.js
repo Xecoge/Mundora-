@@ -1,7 +1,10 @@
 // Vercel: пересылает запросы сайта к провайдеру ИИ (обходит CORS, держит поток живым).
-// Переменные окружения (Vercel → Settings → Environment Variables):
-//   AI_API_KEY  — ключ провайдера (обязательно, если ключа нет в config.js)
-//   AI_BASE_URL — адрес провайдера (необязательно, по умолчанию ниже)
+// Все настройки ИИ — только здесь, через переменные окружения
+// (Vercel → Settings → Environment Variables), после изменения — Redeploy:
+//   AI_API_KEY  — ключ провайдера (обязательно)
+//   AI_BASE_URL — адрес провайдера, например https://api.drakezakuru.com/v1
+//   AI_MODEL    — модель, например gpt-6.1-sol (можно без приставки: сервер найдёт
+//                 «quince10/gpt-6.1-sol» сам). Не задана — выберется по AI_MODEL_HINT (gpt-6.1).
 export const config = { runtime: 'edge' };
 
 const DEFAULT_BASE = 'https://api.drakezakuru.com/v1';
@@ -10,6 +13,39 @@ const CORS = {
   'access-control-allow-headers': '*',
   'access-control-allow-methods': 'GET,POST,OPTIONS'
 };
+let MODELS = { t: 0, list: [] };
+async function listModels(base, auth) {
+  if (MODELS.list.length && Date.now() - MODELS.t < 5 * 60e3) return MODELS.list;
+  try {
+    const r = await fetch(base + '/models', { headers: auth ? { authorization: auth } : {} });
+    const j = await r.json();
+    const list = (j.data || j.models || []).map(m => typeof m === 'string' ? m : m.id).filter(Boolean);
+    if (list.length) MODELS = { t: Date.now(), list };
+  } catch (e) {}
+  return MODELS.list;
+}
+const norm = m => String(m).toLowerCase().replace(/[^a-z0-9.]/g, '');
+function rank(m, hint) {
+  const n = norm(m); let r = 0;
+  if (hint && n.includes(norm(hint))) r += 10;
+  if (/gpt/i.test(m)) r += 2;
+  if (/mini|nano|audio|realtime|image|tts|whisper|embed|search|transcribe/i.test(m)) r -= 4;
+  return r;
+}
+async function resolveModel(env, base, auth, requested) {
+  const want = String(env.AI_MODEL || '').trim();
+  const list = await listModels(base, auth);
+  if (want) {
+    if (!list.length || list.includes(want)) return want;
+    const w = want.toLowerCase();
+    return list.find(m => m.toLowerCase().endsWith('/' + w)) || list.find(m => m.toLowerCase().endsWith(w)) || list.find(m => m.toLowerCase().includes(w)) || want;
+  }
+  if (requested && requested !== 'auto' && (!list.length || list.includes(requested))) return requested;
+  const hint = env.AI_MODEL_HINT || 'gpt-6.1';
+  if (!list.length) return hint;
+  return [...list].sort((a, b) => rank(b, hint) - rank(a, hint))[0];
+}
+
 const HOP = ['connection', 'keep-alive', 'transfer-encoding', 'te', 'trailer', 'upgrade', 'proxy-authenticate', 'proxy-authorization', 'content-encoding', 'content-length'];
 
 export default async function handler(req) {
@@ -27,9 +63,15 @@ export default async function handler(req) {
   const auth = env.AI_API_KEY ? 'Bearer ' + env.AI_API_KEY : req.headers.get('authorization');
   if (auth) headers.authorization = auth;
 
-  const body = req.method === 'GET' || req.method === 'HEAD' ? undefined : await req.arrayBuffer();
+  let body = req.method === 'GET' || req.method === 'HEAD' ? undefined : await req.arrayBuffer();
   let wantsStream = false;
-  if (body) { try { wantsStream = !!JSON.parse(new TextDecoder().decode(body)).stream; } catch (e) {} }
+  if (body) {
+    try {
+      const j = JSON.parse(new TextDecoder().decode(body));
+      wantsStream = !!j.stream;
+      if (/completions$/.test(path)) { j.model = await resolveModel(env, base, auth, j.model); body = JSON.stringify(j); }
+    } catch (e) {}
+  }
 
   // Потоковый ответ: сразу отвечаем браузеру и шлём «пинги», пока модель думает
   if (wantsStream) {
@@ -44,6 +86,7 @@ export default async function handler(req) {
         const r = await fetch(target, { method: req.method, headers: { ...headers, accept: 'text/event-stream' }, body });
         const ct = r.headers.get('content-type') || '';
         if (!r.ok) {
+          MODELS.t = 0;
           const t = await r.text();
           await send('data: ' + JSON.stringify({ error: { status: r.status, message: t.slice(0, 600) } }) + '\n\n');
         } else if (!/event-stream/.test(ct)) {
