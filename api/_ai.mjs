@@ -10,11 +10,13 @@ const DEFAULT_BASE = 'https://api.drakezakuru.com/v1';
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS' };
 const HOP = ['connection', 'keep-alive', 'transfer-encoding', 'te', 'trailer', 'upgrade', 'proxy-authenticate', 'proxy-authorization', 'content-encoding', 'content-length'];
 const NON_CHAT = /(embed|tts|whisper|audio|image|dall-?e|moderation|realtime|transcri|search|rerank|ocr|speech|similarity|davinci|babbage|-instruct\b)/i;
-const FIRST_MS = 45000, TEST_MS = 15000, BAD_MS = 5 * 60e3, ACTIVE_MS = 10 * 60e3;
+const FIRST_MS = 45000, TEST_MS = 12000, BAD_MS = 5 * 60e3, ACTIVE_MS = 10 * 60e3;
 
 let MODELS = { t: 0, list: [] };
 const ST = { bad: {}, active: '', activeT: 0 };
 const now = () => Date.now();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const family = m => { const n = String(m).toLowerCase().replace(/^[^/]*\//, ''); const f = n.match(/(gpt|o\d|claude|gemini|grok|deepseek|qwen|kimi|glm|llama|mistral|minimax|doubao|ernie|yi|command)/); return f ? f[1] : n.split(/[-_.:]/)[0]; };
 const isBad = m => !!m && ST.bad[m] && now() - ST.bad[m] < BAD_MS;
 const markBad = m => { if (!m) return; ST.bad[m] = now(); if (ST.active === m) ST.active = ''; };
 const norm = m => String(m).toLowerCase().replace(/[^a-z0-9.]/g, '');
@@ -39,12 +41,15 @@ function rankList(list, env) {
 }
 async function listModels(base, auth) {
   if (MODELS.list.length && now() - MODELS.t < 5 * 60e3) return MODELS.list;
-  try {
-    const r = await fetch(base + '/models', { headers: auth ? { authorization: auth } : {} });
-    const j = await r.json();
-    const list = (j.data || j.models || []).map(m => typeof m === 'string' ? m : m.id).filter(Boolean);
-    if (list.length) MODELS = { t: now(), list };
-  } catch (e) {}
+  for (let i = 0; i < 2; i++) {
+    try {
+      const r = await fetch(base + '/models', { headers: auth ? { authorization: auth } : {} });
+      const j = await r.json();
+      const list = (j.data || j.models || []).map(m => typeof m === 'string' ? m : m.id).filter(Boolean);
+      if (list.length) { MODELS = { t: now(), list }; break; }
+    } catch (e) {}
+    await sleep(600);
+  }
   return MODELS.list;
 }
 async function resolveModel(env, base, auth, requested) {
@@ -93,14 +98,22 @@ async function testModel(target, headers, m) {
   } catch (e) { return false; } finally { clearTimeout(tm); }
 }
 async function findAlternative(env, base, auth, target, headers, exclude) {
-  const cands = rankList(await listModels(base, auth), env).filter(m => !exclude.has(m) && !isBad(m)).slice(0, 5);
-  if (!cands.length) return '';
-  const ok = await Promise.all(cands.map(m => testModel(target, headers, m).then(v => { if (!v) markBad(m); return v; })));
-  const i = ok.findIndex(Boolean);
-  if (i < 0) return '';
-  ST.active = cands[i]; ST.activeT = now();
-  return cands[i];
+  const ranked = rankList(await listModels(base, auth), env).filter(m => !exclude.has(m) && !isBad(m));
+  if (!ranked.length) return '';
+  // сначала лучшая модель каждого семейства (gpt, claude, gemini, deepseek…): у них обычно разные каналы провайдера
+  const seen = new Set(), order = [];
+  for (const m of ranked) { const f = family(m); if (!seen.has(f)) { seen.add(f); order.push(m); } }
+  for (const m of ranked) if (!order.includes(m)) order.push(m);
+  for (let i = 0; i < Math.min(order.length, 18); i += 6) {
+    const batch = order.slice(i, i + 6);
+    const ok = await Promise.all(batch.map(m => testModel(target, headers, m).then(v => { if (!v) markBad(m); return v; })));
+    // из ответивших — самая сильная
+    const good = batch.filter((m, k) => ok[k]);
+    if (good.length) { const best = rankList(good, env)[0] || good[0]; ST.active = best; ST.activeT = now(); return best; }
+  }
+  return '';
 }
+const transient = e => { const st = e.status || 0, b = String(e.body || e.message || ''); return [429, 500, 502, 503, 504, 520, 522, 524, 529].includes(st) || /temporar|unavailable|overload|try again|busy|capacity/i.test(b); };
 // Открыть поток и дождаться первого настоящего токена (ответа или рассуждения)
 async function openStream(target, headers, body) {
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), FIRST_MS);
@@ -195,12 +208,12 @@ export async function handleAI(req, env) {
       return '';
     };
     try {
-      for (let attempt = 0; attempt < 4; attempt++) {
+      for (let attempt = 0; attempt < 6; attempt++) {
         let m = next();
         if (!m) { m = await findAlternative(env, base, auth, target, headers, tried); if (!m) break; }
         tried.add(m);
         const body = { ...j, model: m };
-        let ok = false;
+        let ok = false, rr = 0;
         for (let p = 0; p < 2 && !ok; p++) {
           try {
             if (stream) {
@@ -220,6 +233,8 @@ export async function handleAI(req, env) {
           } catch (e) {
             lastErr = e;
             if (p === 0 && paramErr(e)) { delete body.reasoning_effort; delete body.temperature; continue; }
+            // временный сбой канала («temporarily unavailable», 503, 429…) — подождать и повторить ту же модель
+            if (transient(e) && ++rr <= 2) { await sleep(rr * 1200); p--; continue; }
             break;
           }
         }
