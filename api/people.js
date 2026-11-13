@@ -4,6 +4,7 @@
 // POST /api/people?a=me {name,bio,avatar,open} — изменить свой профиль
 import { kv, kvMulti, pairs } from './_store.mjs';
 import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser } from './_auth.mjs';
+import { checkName, claimName } from './_names.mjs';
 export const config = { runtime: 'edge' };
 
 const parse = v => { try { return v == null ? null : JSON.parse(v); } catch (e) { return null; } };
@@ -60,11 +61,11 @@ export default async function handler(req) {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({}));
       const u = await getUser(me.email);
-      if (b.name != null) {
-        const n = String(b.name).replace(/[\u0000-\u001f​-‏‪-‮]/g, '').replace(/\s+/g, ' ').trim();
-        if (n && (n.length < 2 || n.length > 32)) return json({ error: 'Ник — от 2 до 32 символов' }, 400);
-        if (/верифиц|админ|admin|tempo\s*support|поддержк/i.test(n) && !me.admin) return json({ error: 'Такой ник занят для официальных аккаунтов' }, 400);
-        u.name = n;
+      if (b.name != null && String(b.name).trim() !== (u.name || '')) {
+        const nc = await checkName(b.name, me.email, { admin: me.admin });
+        if (!nc.ok) return json({ error: nc.reason, field: 'name' }, 400);
+        if (!(await claimName(nc.name, me.email, u.name))) return json({ error: 'Это имя уже занято', field: 'name' }, 409);
+        u.name = nc.name;
       }
       if (b.bio != null) u.bio = String(b.bio).replace(/[\u0000-\u0009\u000b-\u001f]/g, '').trim().slice(0, 160);
       if (b.avatar != null && AVATARS.includes(b.avatar)) u.avatar = b.avatar;
@@ -82,8 +83,8 @@ export default async function handler(req) {
     if (!q) return json({ people: [] });
     const emails = await kv('SMEMBERS', 'users');
     const us = (await kvMulti(emails.map(e => ['GET', 'u:' + e]))).map(parse).filter(u => u && u.status !== 'banned');
-    const hit = u => (u.id && (String(u.id) === q || (/^\d{3,}$/.test(q) && String(u.id).startsWith(q)))) || displayName(u).toLowerCase().includes(q) || (me.admin && u.email.includes(q));
-    const found = us.filter(hit).sort((x, y) => (String(y.id) === q) - (String(x.id) === q) || (y.seen || 0) - (x.seen || 0)).slice(0, 20);
+    const hit = u => (u.id != null && (String(u.id) === q || (/^\d{2,}$/.test(q) && String(u.id).startsWith(q)))) || displayName(u).toLowerCase().includes(q) || (me.admin && u.email.includes(q));
+    const found = us.filter(hit).sort((x, y) => (String(y.id) === q) - (String(x.id) === q) || (displayName(y).toLowerCase() === q) - (displayName(x).toLowerCase() === q) || (y.seen || 0) - (x.seen || 0)).slice(0, 20);
     const people = await Promise.all(found.map(u => card(u.email, me, false)));
     return json({ people: people.filter(Boolean) });
   } catch (e) { return json({ error: e.message }, 500); }

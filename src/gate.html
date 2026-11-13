@@ -49,7 +49,9 @@ h1{font-size:23px;font-weight:800;text-align:center;letter-spacing:-.01em}
 .f input{width:100%;height:50px;border-radius:15px;background:rgba(255,255,255,.05);border:1px solid var(--line);padding:0 16px;font-size:15.5px;outline:0;transition:.15s}
 .f input:focus{border-color:var(--v2);box-shadow:0 0 0 3px rgba(139,92,246,.22)}
 .f input::placeholder{color:#6f6889}
-.pw{position:relative}.pw input{padding-right:92px}.pw button{position:absolute;right:6px;top:6px;height:38px;padding:0 10px;border-radius:11px;color:var(--muted);font-size:12.5px}
+.pw{position:relative}.pw input{padding-right:92px}
+.hint{display:block;font-size:12.5px;margin:6px 4px 0;color:var(--muted);min-height:0}.hint.ok{color:var(--green)}.hint.bad{color:var(--red)}
+.f input.bad{border-color:rgba(248,113,113,.6)}.f input.good{border-color:rgba(74,222,128,.5)}.pw button{position:absolute;right:6px;top:6px;height:38px;padding:0 10px;border-radius:11px;color:var(--muted);font-size:12.5px}
 .btn{width:100%;height:52px;border-radius:16px;background:linear-gradient(135deg,#8b5cf6,#7c3aed 55%,#a855f7);color:#fff;font-weight:700;font-size:15.5px;box-shadow:0 12px 30px -10px rgba(139,92,246,.9),inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s;margin-top:6px}
 .btn:active{transform:scale(.985)}
 .btn[disabled]{opacity:.6;pointer-events:none}
@@ -102,6 +104,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,2
       <p class="sub" id="authS">Данные будут одинаковыми на телефоне и ПК</p>
       <div class="tabs"><button id="tReg" data-go="reg">Создать аккаунт</button><button id="tLog" data-go="log">Войти</button></div>
       <form id="authF" novalidate>
+        <label class="f" id="nmW"><input id="nm" maxlength="24" autocomplete="nickname" placeholder="Имя (ник) — русские или английские буквы" spellcheck="false"><small class="hint" id="nmH"></small></label>
         <label class="f"><input id="em" type="email" inputmode="email" autocomplete="email" placeholder="Почта" required></label>
         <label class="f pw"><input id="pw" type="password" autocomplete="new-password" placeholder="Пароль (минимум 6 символов)" required><button type="button" data-go="eye">Показать</button></label>
         <label class="f" id="pw2W"><input id="pw2" type="password" autocomplete="new-password" placeholder="Повтори пароль"></label>
@@ -185,6 +188,7 @@ const OTP=otp('#otpBox','#otpIn',6,digits,verify);
 async function checkGate(c){
   msg('#codeMsg','Проверяю…',true);CODE.inp.blur();
   const j=await api('gate',{code:c});
+  if(j.ok&&j.renewed){CODE.good();msg('#codeMsg','Доступ продлён'+(j.days?` на ${j.days} дн.`:' навсегда')+' — открываю TEMPO',true);return setTimeout(()=>location.replace('/'),700)}
   if(j.ok){CODE.good();msg('#codeMsg','Код принят',true);ST.gate=true;setTimeout(()=>auth('reg'),450)}
   else{CODE.bad();msg('#codeMsg',j.error)}
 }
@@ -194,7 +198,7 @@ function auth(mode){
   $('#authT').textContent=reg?'Создай аккаунт':'Вход в аккаунт';
   $('#authS').textContent=reg?'Данные будут одинаковыми на телефоне и ПК':'После пароля придёт код на почту';
   $('#authBT').textContent=reg?'Создать аккаунт':'Войти';
-  $('#pw2W').style.display=reg?'':'none';$('#pw').autocomplete=reg?'new-password':'current-password';
+  $('#pw2W').style.display=reg?'':'none';$('#nmW').style.display=reg?'':'none';$('#pw').autocomplete=reg?'new-password':'current-password';
   $('#fgL').style.display=reg?'none':'';$('#toCode').style.display=ST.gate?'none':'';
   if(ST.email&&!$('#em').value)$('#em').value=ST.email;
   msg('#authMsg',reg&&!ST.gate?'Для нового аккаунта нужен код доступа':'');
@@ -204,15 +208,20 @@ $('#authF').addEventListener('submit',async e=>{
   e.preventDefault();const em=$('#em').value.trim().toLowerCase(),pw=$('#pw').value;
   if(!/^\S+@\S+\.\S+$/.test(em))return msg('#authMsg','Проверь адрес почты');
   if(pw.length<6)return msg('#authMsg','Пароль — минимум 6 символов');
-  if(ST.mode==='reg'){if(!ST.gate){msg('#authMsg','Сначала введи код доступа');return setTimeout(()=>show('code'),700)}if(pw!==$('#pw2').value)return msg('#authMsg','Пароли не совпадают')}
-  busy('#authB',true);msg('#authMsg','');
-  const j=await api(ST.mode==='reg'?'register':'login',{email:em,password:pw});busy('#authB',false);
+  if(ST.mode==='reg'){if(!ST.gate){msg('#authMsg','Сначала введи код доступа');return setTimeout(()=>show('code'),700)}const ne=nmLocal($('#nm').value);if(ne){nmHint(ne,'bad');return msg('#authMsg',ne)}if(pw!==$('#pw2').value)return msg('#authMsg','Пароли не совпадают')}
+  busy('#authB',true);msg('#authMsg',ST.mode==='reg'?'Нейросеть проверяет имя…':'',true);
+  const j=await api(ST.mode==='reg'?'register':'login',{email:em,password:pw,name:$('#nm').value});busy('#authB',false);
+  if(j.field==='name'){nmHint(j.error,'bad');return msg('#authMsg',j.error)}
   if(j.banned||j.blocked)return banScreen(j.banned||j.blocked,!!j.banned,j.support);
   if(j.exists){msg('#authMsg',j.error);return setTimeout(()=>auth('log'),900)}
   if(j.needGate){ST.gate=false;msg('#authMsg',j.error);return setTimeout(()=>show('code'),900)}
   if(j.error)return msg('#authMsg',j.error);
   toOtp(em,ST.mode==='reg'?'reg':'login',j.wait);
 });
+let nmT=0,nmSeq=0;
+function nmHint(t,cls){const h=$('#nmH');h.textContent=t||'';h.className='hint'+(cls?' '+cls:'');$('#nm').classList.toggle('bad',cls==='bad');$('#nm').classList.toggle('good',cls==='ok')}
+const nmLocal=n=>{n=n.replace(/\s+/g,' ').trim();if(n.length<2||n.length>24)return'Имя — от 2 до 24 символов';if(!/^[A-Za-zА-Яа-яЁё0-9 _.\-]+$/.test(n))return'Только русские и английские буквы, цифры, пробел, _ . -';if((n.match(/[A-Za-zА-Яа-яЁё]/g)||[]).length<2)return'В имени нужны хотя бы 2 буквы';return''};
+$('#nm').addEventListener('input',()=>{clearTimeout(nmT);const n=$('#nm').value;if(!n.trim())return nmHint('');const e=nmLocal(n);if(e)return nmHint(e,'bad');nmHint('Проверяю имя…');const q=++nmSeq;nmT=setTimeout(async()=>{const j=await api('name',{name:n,email:$('#em').value.trim().toLowerCase()});if(q!==nmSeq)return;j.ok?nmHint('Имя свободно и прошло проверку','ok'):nmHint(j.error,'bad')},700)});
 function toOtp(em,kind,wait){
   ST.email=em;ST.kind=kind;try{localStorage.setItem('tempo:lastEmail',em)}catch(e){}
   $('#otpEm').textContent=em;OTP.clear();msg('#otpMsg','');show('otp');countdown(wait||45);
@@ -264,6 +273,12 @@ document.addEventListener('click',async e=>{
   if(s.error)return msg('#codeMsg',s.error),show('code');
   if(s.user&&(s.user.status==='banned'||s.user.status==='blocked'))return banScreen(s.user.email,s.user.status==='banned',s.support);
   if(s.banned)return banScreen(s.banned,true,s.support);
+  if(s.user&&s.user.expired){
+    $('#s-code h1').textContent='Доступ закончился';
+    $('#s-code .sub').innerHTML='Срок кода для <b>'+s.user.email.replace(/[<>&]/g,'')+'</b> истёк.<br>Введи новый код — данные аккаунта сохранены.';
+    $('#s-code .links').innerHTML='<button data-go="paste-code">Вставить из буфера</button><button data-go="other">Выйти из аккаунта</button>';
+    return show('code');
+  }
   ST.gate=!!s.gate;
   if(s.gate)auth(ST.email?'log':'reg');else show('code');
 })();

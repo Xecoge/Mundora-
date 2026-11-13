@@ -6,9 +6,10 @@
 //   + база данных Upstash Redis (см. api/_store.mjs)
 import { kv, kvMulti, jget, jset, limit, dbReady } from './_store.mjs';
 import { mailReady, sendMail, codeMail } from './_mail.mjs';
+import { checkName, claimName } from './_names.mjs';
 import {
   ENV, ADMIN, SUPPORT, STATUS_RU, rand, code6, normEmail, okEmail, sign, signed, unsign, hashPass, cookies, setCookie, clearCookie,
-  ipOf, getUser, putUser, ensureId, createSession, currentUser, sessionFromCookie, gatePassed, json, jsonC, b64uStr, unb64uStr
+  ipOf, getUser, putUser, ensureId, gateInfo, accessExpired, displayName, createSession, currentUser, sessionFromCookie, gatePassed, json, jsonC, b64uStr, unb64uStr
 } from './_auth.mjs';
 
 export const config = { runtime: 'nodejs', maxDuration: 30 };
@@ -49,13 +50,13 @@ async function handle(req) {
   if (a === 'state') {
     const u = await currentUser(req).catch(() => null);
     const banned = await banInfo(req);
-    return json({ db: true, mail: mailReady(), code: !!ENV().ACCESS_CODE || (await kv('SCARD', 'codes')) > 0, gate: await gatePassed(req), user: u ? { email: u.email, status: u.status } : null, banned, support: SUPPORT() });
+    return json({ db: true, mail: mailReady(), code: !!ENV().ACCESS_CODE || (await kv('SCARD', 'codes')) > 0, gate: await gatePassed(req), user: u ? { email: u.email, status: u.status, expired: accessExpired(u), until: u.accessUntil || 0, name: u.name ? u.name : '' } : null, banned, support: SUPPORT() });
   }
 
   if (a === 'gate') {
     if (!(await limit('gate:' + ip, 8, 900))) return err('Слишком много попыток. Подожди 15 минут', 429);
     const c = normCode(body.code); if (c.length !== 4) return err('Код — 4 символа');
-    let ok = false;
+    let ok = false, days = 0;
     const envCode = normCode(ENV().ACCESS_CODE);
     if (envCode && c === envCode) {
       // стартовый код из Vercel — срабатывает один раз
@@ -64,11 +65,15 @@ async function handle(req) {
     if (!ok) {
       const rec = await jget('code:' + c);
       if (rec && (!rec.max || (rec.used || 0) < rec.max)) {
-        rec.used = (rec.used || 0) + 1; rec.last = Date.now(); await jset('code:' + c, rec); ok = true;
+        rec.used = (rec.used || 0) + 1; rec.last = Date.now(); await jset('code:' + c, rec); ok = true; days = +rec.days || 0;
       }
     }
     if (!ok) return err('Неверный или уже использованный код', 403);
-    return jsonC({ ok: true }, [setCookie(req, 'tempo_g', await signed('g:' + rand(9)), 3650)]);
+    // вошедший человек с закончившимся доступом — продлеваем аккаунт
+    const me = await currentUser(req).catch(() => null);
+    let renewed = false;
+    if (me) { const u = await getUser(me.email); u.accessUntil = days ? Date.now() + days * 864e5 : null; if (!u.accessUntil) delete u.accessUntil; await putUser(u); renewed = true; }
+    return jsonC({ ok: true, days, renewed }, [setCookie(req, 'tempo_g', await signed('g:' + rand(9) + ':' + days), 3650)]);
   }
 
   if (a === 'register' || a === 'login' || a === 'forgot') {
@@ -82,8 +87,11 @@ async function handle(req) {
       if (await banInfo(req)) return err('С этого устройства регистрация недоступна', 403);
       if (u) return err('Аккаунт с этой почтой уже есть — войди', 409, { exists: true });
       if (pw.length < 6) return err('Пароль — минимум 6 символов');
+      const nc = await checkName(body.name, email);
+      if (!nc.ok) return err(nc.reason, 400, { field: 'name' });
+      const gi = await gateInfo(req);
       const salt = rand(12);
-      const r = await sendCode(req, email, 'reg', { salt, hash: await hashPass(pw, salt) });
+      const r = await sendCode(req, email, 'reg', { salt, hash: await hashPass(pw, salt), name: nc.name, days: gi.days });
       return json({ ok: true, step: 'code', ...r });
     }
     if (!u) return err('Аккаунт не найден — создай его', 404, { missing: true });
@@ -119,6 +127,8 @@ async function handle(req) {
     if (p.kind === 'reg') {
       if (u) return err('Аккаунт уже создан — войди', 409);
       u = { email, salt: p.salt, hash: p.hash, created: Date.now(), seen: Date.now(), status: 'active' };
+      if (p.name && await claimName(p.name, email)) u.name = p.name;
+      if (p.days) u.accessUntil = Date.now() + p.days * 864e5;
       await putUser(u); await kv('SADD', 'users', email); await ensureId(u);
     } else if (p.kind === 'reset') {
       const pw = String(body.password || '');
@@ -140,6 +150,12 @@ async function handle(req) {
     if (!p) return err('Код устарел — запроси новый', 410);
     if (c.length !== 6 || await sign('c:' + email + ':' + c) !== p.h) { p.tries++; await jset('p:' + email, p, CODE_TTL); return err(`Неверный код. Осталось попыток: ${Math.max(0, 5 - p.tries)}`, 403); }
     return json({ ok: true });
+  }
+
+  if (a === 'name') {
+    if (!(await limit('nm:' + ip, 40, 600))) return err('Слишком много проверок, подожди', 429);
+    const r = await checkName(body.name, normEmail(body.email));
+    return json(r.ok ? { ok: true, name: r.name } : { ok: false, error: r.reason });
   }
 
   if (a === 'logout') {

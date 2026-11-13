@@ -71,18 +71,41 @@ export async function currentUser(req) {
   const owner = user.email === ADMIN();
   return { ...user, sid: s.sid, owner, admin: owner || !!adm };
 }
-// Каждому аккаунту — свой ID. У владельца (ADMIN_EMAIL) — блатной №1, остальные с 100001 по порядку
+// Каждому аккаунту — свой ID: владелец (ADMIN_EMAIL) — №0, остальные 1, 2, 3… по порядку регистрации
+let IDV2 = false;
+async function migrateIds() {
+  if (IDV2) return;
+  if (await kv('GET', 'sys:idv2')) { IDV2 = true; return; }
+  if ((await kv('SET', 'sys:idmig', '1', 'NX', 'EX', 30)) !== 'OK') return; // уже переносит другой запрос
+  const emails = await kv('SMEMBERS', 'users');
+  const us = (await kvMulti(emails.map(e => ['GET', 'u:' + e]))).map(v => { try { return JSON.parse(v); } catch (e) { return null; } }).filter(Boolean);
+  us.sort((a, b) => (a.created || 0) - (b.created || 0));
+  const cmds = [], old = us.filter(u => u.id != null).map(u => ['DEL', 'id:' + u.id]);
+  let n = 0;
+  for (const u of us) {
+    u.id = u.email === ADMIN() ? 0 : ++n;
+    cmds.push(['SET', 'u:' + u.email, JSON.stringify(u)], ['SET', 'id:' + u.id, u.email]);
+    if (u.name) cmds.push(['SET', 'nm:' + u.name.trim().toLowerCase(), u.email, 'NX']);
+  }
+  await kvMulti([...old, ...cmds, ['SET', 'idseq', String(n)], ['SET', 'sys:idv2', '1']]);
+  IDV2 = true;
+}
 export async function ensureId(u) {
-  if (u.id) return u.id;
-  if (u.email === ADMIN()) u.id = 1;
-  else { const [, n] = await kvMulti([['SET', 'idseq', '100000', 'NX'], ['INCR', 'idseq']]); u.id = n; }
+  const was = IDV2;
+  await migrateIds();
+  if (u.id != null && was) return u.id;
+  if (IDV2) { const f = JSON.parse((await kv('GET', 'u:' + u.email)) || 'null'); if (f && f.id != null) { u.id = f.id; return u.id; } }
+  else if (u.id != null) return u.id; // перенос идёт в другом запросе
+  u.id = u.email === ADMIN() ? 0 : await kv('INCR', 'idseq');
   await kvMulti([['SET', 'u:' + u.email, JSON.stringify(stripU(u))], ['SET', 'id:' + u.id, u.email]]);
   return u.id;
 }
 const stripU = u => { const { sid, admin, owner, ...rest } = u; return rest; };
 export const isAdminEmail = async email => email === ADMIN() || !!(await kv('SISMEMBER', 'admins', email));
 export const maskEmail = e => { const [a, d] = String(e).split('@'); if (!d) return '•••'; return (a.length <= 2 ? a[0] + '•' : a.slice(0, 2) + '•'.repeat(Math.min(6, a.length - 2))) + '@' + d; };
-export const displayName = u => (u.name && u.name.trim()) || ('Пользователь ' + (u.id || ''));
+export const displayName = u => (u.name && u.name.trim()) || ('Пользователь ' + (u.id ?? ''));
+// Доступ по коду кончился? (владелец и админы — без срока)
+export const accessExpired = u => !!(u && !u.admin && u.accessUntil && Date.now() > u.accessUntil);
 export const AVATARS = ['planet', 'planet2', 'crystal', 'gem_orbit', 'asteroid', 'orbit', 'gift_planet', 'box_open', 'gamepad', 'chat', 'code', 'chart', 'folder', 'browser', 'money', 'gift_stack'];
 export async function dropSessions(email) {
   const sids = await kv('SMEMBERS', 'us:' + email);
@@ -91,7 +114,9 @@ export async function dropSessions(email) {
 export async function touch(u) { if (Date.now() - (u.seen || 0) > 5 * 60e3) { u.seen = Date.now(); await putUser(stripU(u)); } }
 
 // Проход через код доступа (на устройстве)
-export async function gatePassed(req) { const p = await unsign(cookies(req).tempo_g); return !!(p && p.startsWith('g:')); }
+export async function gatePassed(req) { return (await gateInfo(req)).ok; }
+// пропуск хранит, на сколько дней дан доступ кодом (0 — навсегда)
+export async function gateInfo(req) { const p = await unsign(cookies(req).tempo_g); if (!p || !p.startsWith('g:')) return { ok: false, days: 0 }; return { ok: true, days: +(p.split(':')[2] || 0) || 0 }; }
 
 export const json = (obj, status = 200, headers = {}) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
 export const jsonC = (obj, cookiesArr, status = 200) => { const h = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); cookiesArr.forEach(c => h.append('set-cookie', c)); return new Response(JSON.stringify(obj), { status, headers: h }); };
@@ -104,6 +129,7 @@ export async function guard(req, full = false) {
       const u = await currentUser(req);
       if (!u) return { res: json({ error: 'Нужно войти в аккаунт' }, 401) };
       if (u.status === 'blocked' || u.status === 'banned') return { res: json({ error: 'Аккаунт ' + STATUS_RU[u.status] }, 403) };
+      if (accessExpired(u)) return { res: json({ error: 'Срок доступа закончился — введи новый код', expired: true }, 403) };
       return { user: u };
     }
     const s = await sessionFromCookie(req);
