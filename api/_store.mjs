@@ -10,8 +10,8 @@ export function kvConfig(env = ENV()) {
   if (!url || !token) {
     // переменные с префиксом, например STORAGE_KV_REST_API_URL
     for (const k of Object.keys(env)) {
-      if (!url && /(KV_REST_API_URL|REDIS_REST_URL)$/.test(k)) url = env[k];
-      if (!token && /(KV_REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k) && !/READ_ONLY/.test(k)) token = env[k];
+      if (!url && /(REST_API_URL|REDIS_REST_URL)$/.test(k) && /^https:/.test(env[k] || '')) url = env[k];
+      if (!token && /(REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k) && !/READ_ONLY/.test(k)) token = env[k];
     }
   }
   return url && token ? { url: url.replace(/\/+$/, ''), token } : null;
