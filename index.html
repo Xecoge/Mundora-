@@ -1917,7 +1917,7 @@ const CG='https://api.coingecko.com/api/v3';
 const BNR=['https://data-api.binance.vision','https://api.binance.com'];
 const BNW=['wss://data-stream.binance.vision','wss://stream.binance.com:9443'];
 const LWC=['https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js','https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js'];
-const CR={coins:[],byId:{},byPair:{},loaded:0,err:'',cur:LS.get('cryptoCur','usd'),rub:0,fav:LS.get('cryptoFav',[]),q:'',tab:'all',ws:null,wsOk:false,wsTry:0,active:false,poll:0,flash:new Map(),range:LS.get('cryptoRange','1D'),type:LS.get('cryptoType','area'),chart:null,series:null,vol:null,kws:null,first:null,coinId:''};
+const CR={coins:[],byId:{},byPair:{},loaded:0,err:'',cur:LS.get('cryptoCur','usd'),rub:0,fav:LS.get('cryptoFav',[]),q:'',tab:'all',ws:null,wsOk:false,wsTry:0,active:false,poll:0,live:0,lastWs:0,lastTick:0,tickBusy:false,kpoll:0,lastK:0,flash:new Map(),range:LS.get('cryptoRange','1D'),type:LS.get('cryptoType','area'),chart:null,series:null,vol:null,kws:null,first:null,coinId:''};
 const RANGES={'1D':{bn:'5m',lim:288,cg:'1'},'7D':{bn:'1h',lim:168,cg:'7'},'1M':{bn:'4h',lim:180,cg:'30'},'3M':{bn:'12h',lim:180,cg:'90'},'1Y':{bn:'1d',lim:365,cg:'365'},'ALL':{bn:'1w',lim:1000,cg:'max'}};
 const RANGE_RU={'1D':'1Д','7D':'7Д','1M':'1М','3M':'3М','1Y':'1Г','ALL':'Всё'};
 const STABLE=new Set(['USDT','USDC','DAI','FDUSD','TUSD','USDE','USDS','PYUSD','USDD','BUSD']);
@@ -1927,20 +1927,42 @@ function fp(v){v=+v*cK();if(!isFinite(v))return '—';const a=Math.abs(v);const 
 const CMP=new Intl.NumberFormat('ru-RU',{notation:'compact',maximumFractionDigits:2});
 const fb=v=>{v=+v*cK();return isFinite(v)&&v?(cSym()==='$'?'$':'')+CMP.format(v)+(cSym()==='₽'?' ₽':''):'—'};
 const fpc=v=>v==null||!isFinite(v)?'<span class="muted">—</span>':`<span class="${v>=0?'up2':'dn2'}">${v>=0?'▲':'▼'} ${Math.abs(v).toFixed(2).replace('.',',')}%</span>`;
+async function srvGet(what,params={}){await AI.ready();if(!AI.viaProxy)throw new Error('no server');const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),8000);try{const r=await fetch(`/crypto-api/${what}?`+new URLSearchParams(params),{signal:ctl.signal,cache:'no-store'});const j=await r.json();if(!r.ok||(j&&j.error&&!Array.isArray(j)))throw new Error((j&&j.error)||'server '+r.status);return j}finally{clearTimeout(tm)}}
 async function cgGet(path,params={}){const r=await fetch(CG+path+'?'+new URLSearchParams(params));if(!r.ok)throw new Error(r.status===429?'CoinGecko: слишком много запросов, подожди минуту':'CoinGecko '+r.status);return r.json()}
-async function bnGet(path,params){let last;for(const b of BNR){try{const r=await fetch(b+path+'?'+new URLSearchParams(params));if(r.ok)return r.json();last=new Error('Binance '+r.status)}catch(e){last=e}}throw last}
+async function bnGet(path,params){if(path==='/api/v3/klines'){try{return await srvGet('klines',params)}catch(e){}}let last;for(const b of BNR){try{const r=await fetch(b+path+'?'+new URLSearchParams(params));if(r.ok)return r.json();last=new Error('Binance '+r.status)}catch(e){last=e}}throw last}
 async function loadCoins(force){
   if(!force&&CR.coins.length&&Date.now()-CR.loaded<55e3)return;
-  const d=await cgGet('/coins/markets',{vs_currency:'usd',order:'market_cap_desc',per_page:100,page:1,sparkline:'true',price_change_percentage:'1h,24h,7d'});
-  const old=CR.byId;CR.coins=d.map(c=>{const o=old[c.id];const x={id:c.id,sym:String(c.symbol||'').toUpperCase(),name:c.name,img:c.image,rank:c.market_cap_rank,price:c.current_price,ch1h:c.price_change_percentage_1h_in_currency,ch24:c.price_change_percentage_24h_in_currency??c.price_change_percentage_24h,ch7d:c.price_change_percentage_7d_in_currency,mcap:c.market_cap,vol:c.total_volume,supply:c.circulating_supply,max:c.max_supply,ath:c.ath,athCh:c.ath_change_percentage,high:c.high_24h,low:c.low_24h,spark:(c.sparkline_in_7d&&c.sparkline_in_7d.price)||[]};if(o&&o.live&&CR.wsOk){x.price=o.price;x.ch24=o.ch24;x.live=true}return x});
+  let d;try{d=await srvGet('markets')}catch(e){d=await cgGet('/coins/markets',{vs_currency:'usd',order:'market_cap_desc',per_page:100,page:1,sparkline:'true',price_change_percentage:'1h,24h,7d'})}
+  const old=CR.byId;CR.coins=d.map(c=>{const o=old[c.id];const x={id:c.id,sym:String(c.symbol||'').toUpperCase(),name:c.name,img:c.image,rank:c.market_cap_rank,price:c.current_price,ch1h:c.price_change_percentage_1h_in_currency,ch24:c.price_change_percentage_24h_in_currency??c.price_change_percentage_24h,ch7d:c.price_change_percentage_7d_in_currency,mcap:c.market_cap,vol:c.total_volume,supply:c.circulating_supply,max:c.max_supply,ath:c.ath,athCh:c.ath_change_percentage,high:c.high_24h,low:c.low_24h,spark:(c.sparkline_in_7d&&c.sparkline_in_7d.price)||[]};x.p1h=x.ch1h!=null?x.price/(1+x.ch1h/100):0;x.p7d=x.ch7d!=null?x.price/(1+x.ch7d/100):0;x.mk=x.price?x.mcap/x.price:0;if(o&&o.live&&Date.now()-CR.lastTick<15e3){x.price=o.price;x.ch24=o.ch24;x.high=o.high;x.low=o.low;x.live=true;liveDerive(x)}return x});
   CR.byId={};CR.byPair={};const seen={};CR.coins.forEach(c=>{CR.byId[c.id]=c;if(!STABLE.has(c.sym)&&!seen[c.sym]){seen[c.sym]=1;c.pair=c.sym+'USDT';CR.byPair[c.pair]=c}});
   CR.loaded=Date.now();CR.err='';
 }
-async function loadRub(){if(CR.rub)return;try{const d=await cgGet('/simple/price',{ids:'tether',vs_currencies:'rub'});CR.rub=d.tether.rub}catch(e){}}
+async function loadRub(){if(CR.rub)return;try{const d=await srvGet('rub');if(d.rub){CR.rub=d.rub;return}}catch(e){}try{const d=await cgGet('/simple/price',{ids:'tether',vs_currencies:'rub'});CR.rub=d.tether.rub}catch(e){}}
+function liveDerive(c){if(c.p1h)c.ch1h=(c.price/c.p1h-1)*100;if(c.p7d)c.ch7d=(c.price/c.p7d-1)*100;if(c.mk)c.mcap=c.mk*c.price}
+function applyTicks(arr,fromWs){
+  const now=Date.now();
+  for(const t of arr){const c=CR.byPair[t.s];if(!c)continue;const p=+t.c,o=+t.o;if(!p)continue;
+    if(p!==c.price)CR.flash.set(c.id,p>c.price?1:-1);
+    c.price=p;if(o)c.ch24=(p-o)/o*100;if(+t.h)c.high=+t.h;if(+t.l)c.low=+t.l;c.live=true;liveDerive(c)}
+  CR.lastTick=now;if(fromWs)CR.lastWs=now;liveBadge();cryptoPaint();
+}
+async function pollTicks(){
+  if(!CR.active||document.hidden||CR.tickBusy||!CR.coins.length)return;
+  if(Date.now()-CR.lastWs<4000)return;
+  CR.tickBusy=true;
+  try{
+    const syms=Object.keys(CR.byPair);let data;
+    try{data=(await srvGet('tickers',{symbols:syms.join(',')})).data}
+    catch(e){const d=await bnGet('/api/v3/ticker/24hr',{type:'MINI',symbols:JSON.stringify(syms)});data=d.map(t=>({s:t.symbol,c:t.lastPrice,o:t.openPrice,h:t.highPrice,l:t.lowPrice}))}
+    if(Array.isArray(data))applyTicks(data,false);
+  }catch(e){}finally{CR.tickBusy=false}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!CR.active)return;pollTicks();if(!CR.ws||CR.ws.readyState>1){CR.wsTry=0;cryptoWS()}if(Date.now()-CR.loaded>60e3)loadCoins(true).then(()=>cryptoPaint(true)).catch(()=>{});if(CR.coinId&&route().startsWith('coin-'))coinPollK()});
 function cryptoStart(){
   CR.active=true;
   if(!CR.ws||CR.ws.readyState>1)cryptoWS();
-  clearInterval(CR.poll);CR.poll=setInterval(async()=>{if(!CR.active)return;try{await loadCoins(true);if(!CR.wsOk)cryptoPaint(true)}catch(e){}},CR.wsOk?60e3:30e3);
+  clearInterval(CR.poll);CR.poll=setInterval(()=>{if(!CR.active||document.hidden)return;pollTicks();if(Date.now()-CR.loaded>60e3)loadCoins(true).then(()=>cryptoStats()).catch(()=>{})},2000);
+  setTimeout(pollTicks,600);
 }
 function cryptoLeave(r){
   const keep=r==='crypto'||r.startsWith('coin-');
@@ -1953,13 +1975,12 @@ function cryptoWS(){
   let ws;try{ws=new WebSocket(BNW[CR.wsTry%BNW.length]+'/ws/!miniTicker@arr')}catch(e){return}
   CR.ws=ws;
   ws.onopen=()=>{CR.wsOk=true;liveBadge()};
-  ws.onmessage=e=>{let a;try{a=JSON.parse(e.data)}catch(x){return}if(!Array.isArray(a))return;
-    for(const t of a){const c=CR.byPair[t.s];if(!c)continue;const p=+t.c,o=+t.o;if(!p)continue;if(p!==c.price)CR.flash.set(c.id,p>c.price?1:-1);c.price=p;if(o)c.ch24=(p-o)/o*100;c.live=true}
-    cryptoPaint()};
-  ws.onclose=()=>{CR.wsOk=false;liveBadge();if(CR.active&&CR.ws===ws){CR.wsTry++;setTimeout(()=>{if(CR.active)cryptoWS()},CR.wsTry<4?2500:15000)}};
+  ws.onmessage=e=>{let a;try{a=JSON.parse(e.data)}catch(x){return}if(!Array.isArray(a))return;applyTicks(a,true)};
+  ws.onclose=()=>{CR.wsOk=false;liveBadge();if(CR.active&&CR.ws===ws&&!document.hidden){CR.wsTry++;setTimeout(()=>{if(CR.active&&!document.hidden)cryptoWS()},CR.wsTry<4?3000:20000)}};
   ws.onerror=()=>{try{ws.close()}catch(x){}};
 }
-function liveBadge(){$$('.live').forEach(el=>{el.classList.toggle('on',CR.wsOk);const t=el.querySelector('span');if(t)t.textContent=CR.wsOk?'В реальном времени':'Обновление раз в 30 с'})}
+function liveBadge(){const on=Date.now()-CR.lastTick<6000;$$('.live').forEach(el=>{el.classList.toggle('on',on);const t=el.querySelector('span');if(t)t.textContent=on?'В реальном времени':'Подключаюсь…'})}
+setInterval(()=>{if(CR.active)liveBadge()},3000);
 let crRaf=0,crLast=0;
 function cryptoPaint(full){
   if(crRaf)return;
@@ -1969,6 +1990,7 @@ function cryptoPaint(full){
       $$(`[data-cp="${id}"]`).forEach(el=>{el.textContent=fp(c.price);el.classList.remove('fl-up','fl-dn');void el.offsetWidth;el.classList.add(dir>0?'fl-up':'fl-dn');setTimeout(()=>el.classList.remove('fl-up','fl-dn'),350)});
       $$(`[data-c24="${id}"]`).forEach(el=>el.innerHTML=el.classList.contains('pill')?fpc(c.ch24).replace(/<\/?span[^>]*>/g,''):fpc(c.ch24));
       $$(`.pill[data-c24="${id}"]`).forEach(el=>{el.className='pill '+(c.ch24>=0?'up2':'dn2')});
+      $$(`[data-c1h="${id}"]`).forEach(el=>el.innerHTML=fpc(c.ch1h));$$(`[data-c7d="${id}"]`).forEach(el=>el.innerHTML=fpc(c.ch7d));$$(`[data-cm="${id}"]`).forEach(el=>el.textContent=fb(c.mcap));$$(`[data-chl="${id}"]`).forEach(el=>el.textContent=fp(c.high)+' / '+fp(c.low));
     }
     CR.flash.clear();cryptoStats();
   });
@@ -1988,10 +2010,10 @@ function cryptoRows(){
     <td class="hm muted" style="width:34px">${c.rank||''}</td>
     <td><div class="cname"><img loading="lazy" src="${esc(c.img)}" alt=""><b>${esc(c.name)}</b><small>${esc(c.sym)}</small></div></td>
     <td class="n num"><span class="pcell" data-cp="${c.id}">${fp(c.price)}</span></td>
-    <td class="n num hm">${fpc(c.ch1h)}</td>
+    <td class="n num hm" data-c1h="${c.id}">${fpc(c.ch1h)}</td>
     <td class="n num" data-c24="${c.id}">${fpc(c.ch24)}</td>
-    <td class="n num hm">${fpc(c.ch7d)}</td>
-    <td class="n num hm">${fb(c.mcap)}</td>
+    <td class="n num hm" data-c7d="${c.id}">${fpc(c.ch7d)}</td>
+    <td class="n num hm" data-cm="${c.id}">${fb(c.mcap)}</td>
     <td class="n num hm">${fb(c.vol)}</td>
     <td class="hm" style="width:132px">${sparkSVG(c.spark,(c.ch7d??0)>=0)}</td></tr>`).join('');
 }
@@ -2001,7 +2023,7 @@ function cryptoStats(){
   el.innerHTML=`<div class="glass"><div class="k">Капитализация (топ-100)</div><b class="num">${fb(tot)}</b></div><div class="glass"><div class="k">Объём за 24 ч</div><b class="num">${fb(vol)}</b></div><div class="glass"><div class="k">Доминирование BTC</div><b class="num">${btc&&tot?(btc.mcap/tot*100).toFixed(1).replace('.',',')+'%':'—'}</b></div><div class="glass"><div class="k">Bitcoin / Ethereum</div><b class="num" style="font-size:15px">${btc?`<span data-cp="bitcoin">${fp(btc.price)}</span>`:'—'} · ${eth?`<span data-cp="ethereum">${fp(eth.price)}</span>`:'—'}</b></div>`;
 }
 const curSeg=()=>`<div class="seg"><button class="${CR.cur!=='rub'?'on':''}" data-act="c-cur" data-v="usd">$ USD</button><button class="${CR.cur==='rub'?'on':''}" data-act="c-cur" data-v="rub">₽ RUB</button></div>`;
-V.crypto=()=>pageHead('Крипта','Курсы топ-100 монет в реальном времени, изменения за час, сутки и неделю. Нажми на монету — откроется график.','bidask',`<span class="live${CR.wsOk?' on':''}"><i></i><span>${CR.wsOk?'В реальном времени':'Подключаюсь…'}</span></span>`)+
+V.crypto=()=>pageHead('Крипта','Курсы топ-100 монет в реальном времени, изменения за час, сутки и неделю. Нажми на монету — откроется график.','bidask',`<span class="live${Date.now()-CR.lastTick<6000?' on':''}"><i></i><span>${Date.now()-CR.lastTick<6000?'В реальном времени':'Подключаюсь…'}</span></span>`)+
   `<div class="cstats" id="cStats"></div>
   <div class="cbar"><div class="seg"><button class="${CR.tab==='all'?'on':''}" data-act="c-tab" data-v="all">Все</button><button class="${CR.tab==='fav'?'on':''}" data-act="c-tab" data-v="fav">${ico('star','s')} Избранное</button></div>
     <div class="sbox">${ico('search','s')}<input id="cQ" placeholder="Bitcoin, ETH, Solana…" value="${esc(CR.q)}" autocomplete="off"></div>${curSeg()}</div>
@@ -2015,7 +2037,7 @@ V.after.crypto=async(id)=>{
   catch(e){if(id===renderId)$('#cErr').innerHTML=`<div class="notice" style="margin-top:12px">${ico('x')}<div style="flex:1">Не удалось загрузить курсы: ${esc(e.message)}</div><button class="btn sm" data-act="c-retry">${ico('refresh')}Ещё раз</button></div>`}
 };
 /* ----- coin page ----- */
-function coinChartClose(){if(CR.kws){try{CR.kws.onclose=null;CR.kws.close()}catch(e){}CR.kws=null}if(CR.chart){try{CR.chart.remove()}catch(e){}CR.chart=null;CR.series=null;CR.vol=null}}
+function coinChartClose(){clearInterval(CR.kpoll);CR.kpoll=0;if(CR.kws){try{CR.kws.onclose=null;CR.kws.close()}catch(e){}CR.kws=null}if(CR.chart){try{CR.chart.remove()}catch(e){}CR.chart=null;CR.series=null;CR.vol=null}}
 const TZ=-new Date().getTimezoneOffset()*60;
 V.coin=cid=>{
   const c=CR.byId[cid];CR.coinId=cid;
@@ -2026,15 +2048,15 @@ function coinHTML(c){
   return `<a class="btn ghost sm" href="#crypto" style="margin-bottom:14px">${ico('left')}Все монеты</a>
   <div class="coin-top"><img src="${esc(c.img)}" alt=""><h1>${esc(c.name)} <small>${esc(c.sym)}</small><span class="chip dark" style="font-size:12px;padding:4px 10px">#${c.rank||'—'}</span></h1>
     <button class="ib fav${CR.fav.includes(c.id)?' on':''}" data-act="coin-fav" data-id="${c.id}" style="margin-left:auto">${ico('star')}</button></div>
-  <div class="coin-price"><span class="big num pcell" data-cp="${c.id}">${fp(c.price)}</span><span class="pill num ${c.ch24>=0?'up2':'dn2'}" data-c24="${c.id}">${fpc(c.ch24).replace(/<\/?span[^>]*>/g,'')}</span><span class="k">за 24 ч</span><span class="live${CR.wsOk?' on':''}"><i></i><span>${CR.wsOk?'В реальном времени':'Подключаюсь…'}</span></span></div>
+  <div class="coin-price"><span class="big num pcell" data-cp="${c.id}">${fp(c.price)}</span><span class="pill num ${c.ch24>=0?'up2':'dn2'}" data-c24="${c.id}">${fpc(c.ch24).replace(/<\/?span[^>]*>/g,'')}</span><span class="k">за 24 ч</span><span class="live${Date.now()-CR.lastTick<6000?' on':''}"><i></i><span>${Date.now()-CR.lastTick<6000?'В реальном времени':'Подключаюсь…'}</span></span></div>
   <div class="cctl"><div class="seg">${Object.keys(RANGES).map(k=>`<button class="${CR.range===k?'on':''}" data-act="c-range" data-v="${k}">${RANGE_RU[k]}</button>`).join('')}</div>
     <div class="seg"><button class="${CR.type==='area'?'on':''}" data-act="c-type" data-v="area">Линия</button><button class="${CR.type==='candle'?'on':''}" data-act="c-type" data-v="candle">Свечи</button></div>${curSeg()}
     <span class="k" id="cPer"></span></div>
   <div class="chartbox" id="chartBox"><div class="msg0">${ico('loader','ldg')}&nbsp;Загружаю график…</div></div>
   <div class="cgrid">
-    <div class="glass"><div class="k">Капитализация</div><b class="num">${fb(c.mcap)}</b></div>
+    <div class="glass"><div class="k">Капитализация</div><b class="num" data-cm="${c.id}">${fb(c.mcap)}</b></div>
     <div class="glass"><div class="k">Объём за 24 ч</div><b class="num">${fb(c.vol)}</b></div>
-    <div class="glass"><div class="k">Макс. / мин. за 24 ч</div><b class="num" style="font-size:14px">${fp(c.high)} / ${fp(c.low)}</b></div>
+    <div class="glass"><div class="k">Макс. / мин. за 24 ч</div><b class="num" style="font-size:14px" data-chl="${c.id}">${fp(c.high)} / ${fp(c.low)}</b></div>
     <div class="glass"><div class="k">Исторический максимум</div><b class="num" style="font-size:14px">${fp(c.ath)} <span class="${(c.athCh||0)>=0?'up2':'dn2'}" style="font-size:12px">${c.athCh!=null?c.athCh.toFixed(1).replace('.',',')+'%':''}</span></b></div>
     <div class="glass"><div class="k">В обращении</div><b class="num" style="font-size:14px">${c.supply?CMP.format(c.supply)+' '+esc(c.sym):'—'}</b></div>
     <div class="glass"><div class="k">Макс. предложение</div><b class="num" style="font-size:14px">${c.max?CMP.format(c.max)+' '+esc(c.sym):'∞'}</b></div>
@@ -2054,13 +2076,13 @@ async function coinChart(rid){
   const c=CR.byId[CR.coinId],box=$('#chartBox');if(!c||!box)return;
   const rg=RANGES[CR.range],k=cK();let bars=null,line=null,vol=null,src='';
   if(c.pair){try{const d=await bnGet('/api/v3/klines',{symbol:c.pair,interval:rg.bn,limit:rg.lim});if(Array.isArray(d)&&d.length){bars=d.map(x=>({time:Math.floor(x[0]/1000)+TZ,open:+x[1]*k,high:+x[2]*k,low:+x[3]*k,close:+x[4]*k}));vol=d.map(x=>({time:Math.floor(x[0]/1000)+TZ,value:+x[7]*k,color:+x[4]>=+x[1]?'rgba(22,199,132,.35)':'rgba(234,57,67,.35)'}));src='bn'}}catch(e){}}
-  if(!bars){try{const d=await cgGet(`/coins/${encodeURIComponent(c.id)}/market_chart`,{vs_currency:'usd',days:rg.cg});const seen=new Set();line=(d.prices||[]).map(p=>({time:Math.floor(p[0]/1000)+TZ,value:p[1]*k})).filter(p=>!seen.has(p.time)&&seen.add(p.time));const sv=new Set();vol=(d.total_volumes||[]).map(p=>({time:Math.floor(p[0]/1000)+TZ,value:p[1]*k,color:'rgba(139,92,246,.35)'})).filter(p=>!sv.has(p.time)&&sv.add(p.time));src='cg'}catch(e){if(rid===renderId&&$('#chartBox'))$('#chartBox').innerHTML=`<div class="msg0">Не удалось загрузить график: ${esc(e.message)}</div>`;return}}
+  if(!bars){try{let d;try{d=await srvGet('chart',{id:c.id,days:rg.cg})}catch(e){d=await cgGet(`/coins/${encodeURIComponent(c.id)}/market_chart`,{vs_currency:'usd',days:rg.cg})}const seen=new Set();line=(d.prices||[]).map(p=>({time:Math.floor(p[0]/1000)+TZ,value:p[1]*k})).filter(p=>!seen.has(p.time)&&seen.add(p.time));const sv=new Set();vol=(d.total_volumes||[]).map(p=>({time:Math.floor(p[0]/1000)+TZ,value:p[1]*k,color:'rgba(139,92,246,.35)'})).filter(p=>!sv.has(p.time)&&sv.add(p.time));src='cg'}catch(e){if(rid===renderId&&$('#chartBox'))$('#chartBox').innerHTML=`<div class="msg0">Не удалось загрузить график: ${esc(e.message)}</div>`;return}}
   if(rid!==renderId||!$('#chartBox'))return;
   const pts=bars?bars.map(b=>({time:b.time,value:b.close})):line;
   const first=pts[0]?.value,last=pts[pts.length-1]?.value,up=last>=first;CR.first=first;
   const per=$('#cPer');if(per&&first)per.innerHTML=`За период: ${fpc((last-first)/first*100)}`;
   const col=up?'#16c784':'#ea3943';
-  let LW=null;for(const u of LWC){try{LW=await loadLib(u,'LightweightCharts');break}catch(e){}}
+  let LW=null;await AI.ready();for(const u of (AI.viaProxy?['/crypto-api/lwc',...LWC]:LWC)){try{LW=await loadLib(u,'LightweightCharts');break}catch(e){}}
   if(rid!==renderId||!$('#chartBox'))return;
   box.innerHTML='';
   if(!LW){svgChart(box,pts,col);return}
@@ -2071,12 +2093,18 @@ async function coinChart(rid){
   else{CR.series=ch.addAreaSeries({lineColor:col,topColor:up?'rgba(22,199,132,.32)':'rgba(234,57,67,.32)',bottomColor:'rgba(0,0,0,0)',lineWidth:2,priceFormat:pf,crosshairMarkerRadius:5});CR.series.setData(pts);CR.sType='area'}
   if(vol&&vol.length){CR.vol=ch.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'v',lastValueVisible:false,priceLineVisible:false});ch.priceScale('v').applyOptions({scaleMargins:{top:.82,bottom:0}});CR.vol.setData(vol)}
   ch.timeScale().fitContent();
-  if(src==='bn'){let ws;try{ws=new WebSocket(BNW[CR.wsTry%BNW.length]+`/ws/${c.pair.toLowerCase()}@kline_${rg.bn}`)}catch(e){return}CR.kws=ws;
-    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}const K=m.k;if(!K||!CR.series)return;const t=Math.floor(K.t/1000)+TZ;
+  if(src==='bn'){CR.kIv=rg.bn;CR.kPair=c.pair;CR.kK=k;coinPollK();let ws;try{ws=new WebSocket(BNW[CR.wsTry%BNW.length]+`/ws/${c.pair.toLowerCase()}@kline_${rg.bn}`)}catch(e){return}CR.kws=ws;
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}const K=m.k;if(!K||!CR.series)return;CR.lastK=Date.now();const t=Math.floor(K.t/1000)+TZ;
       try{if(CR.sType==='candle')CR.series.update({time:t,open:+K.o*k,high:+K.h*k,low:+K.l*k,close:+K.c*k});else CR.series.update({time:t,value:+K.c*k});if(CR.vol)CR.vol.update({time:t,value:+K.q*k,color:+K.c>=+K.o?'rgba(22,199,132,.35)':'rgba(234,57,67,.35)'})}catch(x){}
       const p=+K.c;if(p&&CR.byId[c.id]){const cc=CR.byId[c.id];if(p!==cc.price){CR.flash.set(cc.id,p>cc.price?1:-1);cc.price=p;cryptoPaint()}}
       if(CR.first){const per=$('#cPer');if(per)per.innerHTML=`За период: ${fpc((p*k-CR.first)/CR.first*100)}`}};
   }
+}
+function coinBar(x,k){const t=Math.floor(x[0]/1000)+TZ;try{if(CR.sType==='candle')CR.series.update({time:t,open:+x[1]*k,high:+x[2]*k,low:+x[3]*k,close:+x[4]*k});else CR.series.update({time:t,value:+x[4]*k});if(CR.vol)CR.vol.update({time:t,value:+x[7]*k,color:+x[4]>=+x[1]?'rgba(22,199,132,.35)':'rgba(234,57,67,.35)'})}catch(e){}if(CR.first){const per=$('#cPer');if(per)per.innerHTML=`За период: ${fpc((+x[4]*k-CR.first)/CR.first*100)}`}}
+function coinPollK(){
+  clearInterval(CR.kpoll);if(!CR.kPair)return;
+  const tick=async()=>{if(!CR.series||document.hidden||Date.now()-CR.lastK<5000)return;try{const d=await bnGet('/api/v3/klines',{symbol:CR.kPair,interval:CR.kIv,limit:2});if(Array.isArray(d)&&CR.series)d.forEach(x=>coinBar(x,CR.kK))}catch(e){}};
+  CR.kpoll=setInterval(tick,3000);tick();
 }
 function svgChart(box,pts,col){
   const W=box.clientWidth||800,H=box.clientHeight||400,P=10;if(pts.length<2){box.innerHTML='<div class="msg0">Мало данных</div>';return}

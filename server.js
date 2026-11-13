@@ -31,6 +31,21 @@ async function resolveModel(auth, requested) {
 
 http.createServer(async (req, res) => {
   if (req.url === '/tempo-ping') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end('tempo' + (env.AI_API_KEY ? ' key' : '') + (env.YT_API_KEY ? ' yt' : '')); }
+  if (req.url.startsWith('/crypto-api/')) {
+    const u = new URL(req.url, 'http://x'), what = u.pathname.split('/')[2], q = u.searchParams;
+    const send = (code, body, cache) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': cache || 'no-store' }); res.end(typeof body === 'string' ? body : JSON.stringify(body)); };
+    const BN = ['https://data-api.binance.vision', 'https://api.binance.com'], CG = 'https://api.coingecko.com/api/v3';
+    const bn = async p => { let last; for (const b of BN) { try { const r = await fetch(b + p); if (r.ok) return r.json(); last = new Error('binance ' + r.status); } catch (e) { last = e; } } throw last; };
+    try {
+      if (what === 'tickers') { const syms = (q.get('symbols') || '').split(',').filter(x => /^[A-Z0-9]{2,20}$/.test(x)); const set = new Set(syms); const d = await bn('/api/v3/ticker/24hr?type=MINI'); return send(200, { t: Date.now(), data: d.filter(t => set.has(t.symbol)).map(t => ({ s: t.symbol, c: t.lastPrice, o: t.openPrice, h: t.highPrice, l: t.lowPrice, q: t.quoteVolume })) }); }
+      if (what === 'lwc') { const r = await fetch('https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js'); res.writeHead(r.status, { 'content-type': 'application/javascript; charset=utf-8' }); return res.end(await r.text()); }
+      if (what === 'klines') return send(200, await bn(`/api/v3/klines?symbol=${encodeURIComponent(q.get('symbol') || '')}&interval=${encodeURIComponent(q.get('interval') || '1h')}&limit=${+q.get('limit') || 200}`));
+      if (what === 'markets') { const r = await fetch(CG + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h,24h,7d'); return send(r.status, await r.text()); }
+      if (what === 'chart') { const r = await fetch(`${CG}/coins/${encodeURIComponent(q.get('id') || '')}/market_chart?vs_currency=usd&days=${encodeURIComponent(q.get('days') || '1')}`); return send(r.status, await r.text()); }
+      if (what === 'rub') { const r = await fetch(CG + '/simple/price?ids=tether&vs_currencies=rub'); const j = await r.json(); return send(200, { rub: j.tether && j.tether.rub }); }
+      return send(400, { error: 'unknown' });
+    } catch (e) { return send(502, { error: e.message }); }
+  }
   if (req.url.startsWith('/music/')) {
     const u = new URL(req.url, 'http://x'); const [, , src, ...rest] = u.pathname.split('/'); const p = rest.join('/');
     const SRC = { deezer: 'https://api.deezer.com/', itunes: 'https://itunes.apple.com/', applerss: 'https://rss.applemarketingtools.com/api/v2/' };

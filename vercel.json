@@ -11,6 +11,10 @@
     {
       "source": "/music/:src/:path*",
       "destination": "/api/music?src=:src&path=:path*"
+    },
+    {
+      "source": "/crypto-api/:what",
+      "destination": "/api/crypto?what=:what"
     }
   ]
 }
