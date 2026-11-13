@@ -2764,7 +2764,7 @@ function tgHTML(){
   const t=TGS.st,c=t.cfg;
   return `<div class="tg-row"><span class="sdot${t.connected?'':' bad'}"></span><b>${t.connected?'Бот работает':'Бот не подключён'}</b><span class="k">@${esc(t.bot.username)} · админов в Telegram: ${t.admins} · продано: ${t.sold}</span></div>
   ${t.lastError?`<div class="k" style="color:#fca5a5;margin-top:6px">Последняя ошибка Telegram: ${esc(t.lastError)}</div>`:''}
-  <div class="row" style="margin-top:12px"><button class="btn sm" data-act="tg-setup">${ico('refresh','s')}${t.connected?'Переподключить':'Подключить бота'}</button><button class="btn ghost sm" data-act="tg-link">${ico('user','s')}Привязать мой Telegram</button><a class="btn ghost sm" href="https://t.me/${esc(t.bot.username)}" target="_blank" rel="noopener">${ico('ext','s')}Открыть бота</a></div>
+  <div class="row" style="margin-top:12px"><button class="btn sm" data-act="tg-setup">${ico('refresh','s')}${t.connected?'Переподключить':'Подключить бота'}</button><button class="btn ghost sm" data-act="tg-link">${ico('user','s')}Привязать мой Telegram</button>${t.group?`<button class="btn ghost sm" data-act="tg-fill">${ico('spark','s')}Заполнить темы группы</button>`:''}<a class="btn ghost sm" href="https://t.me/${esc(t.bot.username)}" target="_blank" rel="noopener">${ico('ext','s')}Открыть бота</a></div>
   <form id="tgCfg" class="tg-cfg">
     <label><span class="k">Цена, ₽</span><input class="in" name="price" type="number" min="0" value="${c.price}"></label>
     <label><span class="k">Дней доступа</span><input class="in" name="days" type="number" min="1" value="${c.days}"></label>
@@ -2772,7 +2772,7 @@ function tgHTML(){
     <label class="wide"><span class="k">Реквизиты для перевода (видит покупатель). Пусто — бот пришлёт тебе заявку, а реквизиты ты напишешь сам</span><textarea class="in" name="details" rows="2" placeholder="Например: карта Т-Банка 2200 0000 0000 0000, Иван П.">${esc(c.details||'')}</textarea></label>
     <button class="btn sm" type="submit">${ico('check','s')}Сохранить</button>
   </form>
-  <details class="tg-help"><summary>Как заполнить темы группы</summary><div class="k">1. Добавь бота в группу Mundora администратором (права: закреплять и удалять сообщения).<br>2. Зайди в каждую тему и отправь <code>/fill</code> — бот сам напишет пост под эту тему и закрепит его. В General — тоже <code>/fill</code>.<br>3. Новость: <code>/news текст</code> — бот оформит и опубликует в «Новости».<br>4. Жалобы из темы «Жалобы» и заявки на покупку приходят тебе в личку от бота (после «Привязать мой Telegram»).</div></details>`;
+  <details class="tg-help"><summary>Как заполнить темы группы</summary><div class="k">1. Нажми «Привязать мой Telegram», потом добавь бота в группу Mundora <b>администратором</b> (закреплять и удалять сообщения, управлять темами) — он сам найдёт все темы, напишет и закрепит посты.<br>2. Заполнить заново — кнопка «Заполнить темы группы», или напиши боту в личку <code>/refill</code> («заполни темы»). Одну тему — <code>/fill</code> внутри неё.<br>3. Новость: <code>/news текст</code> — бот оформит и опубликует в «Новости».<br>4. Жалобы из темы «Жалобы» и заявки на покупку приходят тебе в личку от бота (после «Привязать мой Telegram»).</div></details>`;
 }
 function admDraw(){
   const el=$('#admBody');if(!el)return;
@@ -2946,6 +2946,7 @@ const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${
 
 Object.assign(ACT,{
   async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
+  async 'tg-fill'(el){el.disabled=true;toast('Бот ищет темы и пишет посты — до минуты…','loader');try{const r=await tgApi('fill',{});toast('Заполнено: '+r.topics.length+' тем','check')}catch(e){toast(e.message,'x')}el.disabled=false},
   async 'tg-link'(){try{const r=await tgApi('link',{});window.open(r.url,'_blank');toast('Открой бота и нажми «Старт» — ссылка действует 15 минут','user')}catch(e){toast(e.message,'x')}},
   'acc-logout'(){openSheet(`<h3>${ico('user')}Выйти из аккаунта?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin-bottom:14px;line-height:1.5">Данные останутся в аккаунте. На этом устройстве они будут удалены до следующего входа.</p><button class="btn" style="width:100%;justify-content:center" data-act="acc-logout-ok">Выйти</button>`)},
   'acc-logout-ok'(){accLogout()},

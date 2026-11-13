@@ -58,11 +58,17 @@ async function onPrivate(m) {
     return say(chat, `👋 Привет${from.first_name ? ', ' + tgHtml(from.first_name) : ''}! Я <b>Mundora Bot</b>.\n\nMundora — музыка с умной «Волной», финансы, крипта в реальном времени, заметки и ИИ-помощник, который сам управляет сайтом. Один аккаунт на телефоне и ПК.\n\nСпроси меня о чём угодно про Mundora или купи доступ 👇`, { reply_markup: await mainKb() });
   }
   if (cmd(text, 'buy') !== null) return buyStart(chat, from);
+  if (cmd(text, 'help') !== null && await isTgAdmin(from.id)) return say(chat, '<b>Команды администратора</b>\n/refill — заново заполнить все темы группы (или напиши «заполни темы»)\n/code [дней] [входов] — создать код\n/stats — статистика\n\nВ группе: /news текст — новость, /fill — пост в текущей теме.');
   if (cmd(text, 'help') !== null) return say(chat, 'Я отвечаю на вопросы о Mundora, продаю доступ (/buy) и принимаю жалобы и идеи — просто напиши.', { reply_markup: await mainKb() });
   if (cmd(text, 'support') !== null) return say(chat, '🆘 Напиши свой вопрос прямо сюда — передам администрации. Или почта: <b>mundoraaiapp@gmail.com</b>');
   if (await isTgAdmin(from.id)) {
     const cc = cmd(text, 'code');
     if (cc !== null) { const [d, u] = cc.split(/\s+/).map(Number); const c = await cfg(); const code = await createCode({ days: d >= 0 && cc ? d : c.days, max: u > 0 ? u : 1, note: 'выдан в Telegram' }); return say(chat, `Код: <code>${code}</code> — ${(d >= 0 && cc ? d : c.days) || 'навсегда'} дн., входов: ${u > 0 ? u : 1}`); }
+    if (cmd(text, 'refill') !== null || cmd(text, 'fill_all') !== null || /^(refill|рефилл|заполни( все)?( темы)?|обнови темы)\.?$/i.test(text.trim())) {
+      const g = await kv('GET', 'tg:group');
+      if (!g) return say(chat, 'Я ещё не знаю твою группу. Добавь меня в группу Mundora администратором — я сам всё заполню.');
+      return runFill(+g, chat);
+    }
     if (cmd(text, 'stats') !== null) { const [users, codes, sold] = await kvMulti([['SCARD', 'users'], ['SCARD', 'codes'], ['GET', 'tg:sold']]); return say(chat, `📊 Аккаунтов: <b>${users}</b>\nКодов: <b>${codes}</b>\nПродано через бота: <b>${+sold || 0}</b>`); }
   }
   // ждём подтверждение оплаты
@@ -134,15 +140,68 @@ async function canAdmin(chat, uid) {
   if (await isTgAdmin(uid)) return true;
   try { const cm = await tg('getChatMember', { chat_id: chat, user_id: uid }); return cm.status === 'creator' || cm.status === 'administrator'; } catch (e) { return false; }
 }
-async function fillTopic(chat, thread, name) {
+// Telegram не даёт ботам список тем. Ищем сами: тема = номер сообщения, которым её создали.
+// Шлём «⏳» в тему N ответом на её первое сообщение — в ответе Telegram видно название темы; потом меняем «⏳» на готовый пост.
+async function discoverTopics(chat) {
+  const found = [];
+  let last = 1;
+  for (let start = 2; start <= 400; start += 15) {
+    const ids = Array.from({ length: 15 }, (_, i) => start + i);
+    const probe = async id => {
+      for (let k = 0; k < 3; k++) {
+        try { return { id, m: await tg('sendMessage', { chat_id: chat, message_thread_id: id, text: '⏳', disable_notification: true, reply_parameters: { message_id: id, allow_sending_without_reply: false } }) }; }
+        catch (e) { const ra = e.tg && e.tg.parameters && e.tg.parameters.retry_after; if (!ra) return null; await new Promise(r => setTimeout(r, (ra + 0.5) * 1000)); }
+      }
+      return null;
+    };
+    const res = await Promise.all(ids.map(probe));
+    await new Promise(r => setTimeout(r, 700)); // не частить, чтобы Telegram не ограничил
+    for (const r of res) {
+      if (!r) continue;
+      const t = r.m.reply_to_message && r.m.reply_to_message.forum_topic_created;
+      if (t && t.name) { found.push({ id: r.id, name: t.name, ph: r.m.message_id }); last = r.id; }
+      else tg('deleteMessage', { chat_id: chat, message_id: r.m.message_id }).catch(() => {});
+    }
+    if (start > last + 45) break; // дальше тем нет
+  }
+  return found;
+}
+async function postTo(chat, thread, name, placeholder) {
   const kind = thread ? kindOf(name) : 'general';
   const me = await ME(), c = await cfg();
   const text = await topicPost(kind, name);
   const kb = kind === 'access' || kind === 'general' || kind === 'news' ? { inline_keyboard: [[{ text: `💳 Купить доступ — ${c.price} ₽`, url: `https://t.me/${me.username}?start=buy` }], [{ text: '🌐 Открыть сайт', url: SITE() }]] } : undefined;
-  const sent = await say(chat, text, { ...(thread ? { message_thread_id: thread } : {}), ...(kb ? { reply_markup: kb } : {}) });
-  try { await tg('pinChatMessage', { chat_id: chat, message_id: sent.message_id, disable_notification: true }); } catch (e) {}
-  return sent;
+  let id = placeholder;
+  if (id) {
+    try { await tg('editMessageText', { chat_id: chat, message_id: id, text: tgHtml(text), parse_mode: 'HTML', disable_web_page_preview: true, ...(kb ? { reply_markup: kb } : {}) }); }
+    catch (e) { await tg('deleteMessage', { chat_id: chat, message_id: id }).catch(() => {}); id = 0; }
+  }
+  if (!id) id = (await say(chat, text, { ...(thread ? { message_thread_id: thread } : {}), ...(kb ? { reply_markup: kb } : {}) })).message_id;
+  try { await tg('pinChatMessage', { chat_id: chat, message_id: id, disable_notification: true }); } catch (e) {}
+  // старый пост бота в этой теме — убрать
+  const old = await kv('HGET', 'tg:posts:' + chat, String(thread || 0));
+  if (old && +old !== id) tg('deleteMessage', { chat_id: chat, message_id: +old }).catch(() => {});
+  await kv('HSET', 'tg:posts:' + chat, String(thread || 0), id);
+  return id;
 }
+async function fillAll(chat) {
+  const topics = await discoverTopics(chat);
+  for (const t of topics) await kv('HSET', 'tg:topics:' + chat, t.name, t.id);
+  // тексты пишутся параллельно — так быстрее
+  const res = await Promise.allSettled([postTo(chat, undefined, 'General'), ...topics.map(t => postTo(chat, t.id, t.name, t.ph))]);
+  await kv('SET', 'tg:filled:' + chat, String(Date.now()));
+  return { topics: ['General', ...topics.map(t => t.name)], failed: res.filter(r => r.status === 'rejected').length };
+}
+async function runFill(chat, reportTo) {
+  if (reportTo) await say(reportTo, '⏳ Ищу темы в группе и пишу посты — это займёт до минуты…').catch(() => {});
+  try {
+    const r = await fillAll(chat);
+    if (reportTo) await say(reportTo, `✅ Готово! Заполнил и закрепил: ${r.topics.map(tgHtml).join(', ')}.${r.failed ? `
+Не вышло в ${r.failed} — проверь, что бот админ с правом закреплять сообщения.` : ''}`);
+    return r;
+  } catch (e) { if (reportTo) await say(reportTo, '❌ Не получилось: ' + tgHtml(e.message)); throw e; }
+}
+
 async function onGroup(m) {
   const chat = m.chat.id, from = m.from || {}, text = m.text || m.caption || '', thread = m.is_topic_message ? m.message_thread_id : undefined;
   await rememberTopic(m);
@@ -160,18 +219,13 @@ async function onGroup(m) {
     if (['fill', 'fill_all', 'news'].includes(c.c)) {
       if (!(await canAdmin(chat, from.id))) return;
       tg('deleteMessage', { chat_id: chat, message_id: m.message_id }).catch(() => {});
-      if (c.c === 'fill') return fillTopic(chat, thread, topicName);
+      if (c.c === 'fill') return postTo(chat, thread, topicName);
       if (c.c === 'news') {
         const news = await ai([{ role: 'system', content: await persona() }, { role: 'user', content: `Оформи это как новость для темы «Новости» в Telegram (живо, с эмодзи, до 900 символов, Telegram HTML), ничего не выдумывай сверх текста:\n${c.arg}` }]);
         const map = await kv('HGETALL', 'tg:topics:' + chat); let nt; for (let i = 0; i < map.length; i += 2) if (kindOf(map[i]) === 'news') nt = +map[i + 1];
         return say(chat, news || c.arg, nt ? { message_thread_id: nt } : where);
       }
-      if (c.c === 'fill_all') {
-        const map = await kv('HGETALL', 'tg:topics:' + chat); const done = [];
-        await fillTopic(chat, undefined, 'General'); done.push('General');
-        for (let i = 0; i < map.length; i += 2) { try { await fillTopic(chat, +map[i + 1], map[i]); done.push(map[i]); } catch (e) {} }
-        return say(chat, `✅ Заполнил: ${done.join(', ')}.\nЕсли какой-то темы нет в списке — напиши /fill прямо в ней.`, where);
-      }
+      if (c.c === 'fill_all') return runFill(chat, from.id);
     }
     if (c.c === 'buy') return say(chat, 'Купить доступ можно в личке с ботом 👇', { ...where, reply_markup: { inline_keyboard: [[{ text: '💳 Купить доступ', url: `https://t.me/${me.username}?start=buy` }]] } });
   }
@@ -207,18 +261,25 @@ async function siteAdmin(req, a) {
   if (a === 'setup') {
     const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || new URL(req.url).host;
     const url = `https://${host}/api/tg`;
-    await tg('setWebhook', { url, secret_token: await secretToken(), allowed_updates: ['message', 'callback_query', 'pre_checkout_query'], drop_pending_updates: true });
+    await tg('setWebhook', { url, secret_token: await secretToken(), allowed_updates: ['message', 'callback_query', 'pre_checkout_query', 'my_chat_member'], drop_pending_updates: true });
     const c = await cfg();
     const steps = [
       tg('setMyName', { name: 'Mundora' }),
       tg('setMyShortDescription', { short_description: `Mundora — музыка, финансы, крипта и ИИ в одном месте. Доступ — ${c.price} ₽ / ${c.days} дней.` }),
       tg('setMyDescription', { description: `👋 Я — Mundora Bot.\n\nMundora — сайт «всё в одном»: музыка с умной «Волной» под твой вкус, доходы и расходы, калькуляторы, крипта в реальном времени, заметки и ИИ-помощник, который сам управляет сайтом.\n\n💳 Доступ — ${c.price} ₽ за ${c.days} дней. Нажми «Старт», чтобы купить или задать вопрос.` }),
-      tg('setMyCommands', { commands: [{ command: 'start', description: 'Главное меню' }, { command: 'buy', description: 'Купить доступ' }, { command: 'help', description: 'Что умеет бот' }, { command: 'support', description: 'Поддержка' }], scope: { type: 'all_private_chats' } }),
+      tg('setMyCommands', { commands: [{ command: 'start', description: 'Главное меню' }, { command: 'buy', description: 'Купить доступ' }, { command: 'help', description: 'Что умеет бот' }, { command: 'support', description: 'Поддержка' }, { command: 'refill', description: 'Админ: заполнить все темы группы' }], scope: { type: 'all_private_chats' } }),
       tg('setMyCommands', { commands: [{ command: 'fill', description: 'Бот напишет и закрепит пост в этой теме' }, { command: 'fill_all', description: 'Заполнить все известные темы' }, { command: 'news', description: 'Опубликовать новость: /news текст' }, { command: 'buy', description: 'Купить доступ' }], scope: { type: 'all_chat_administrators' } })
     ];
     const res = await Promise.allSettled(steps);
     const me = await tg('getMe'); await jset('tg:me', me);
     return json({ ok: true, username: me.username, url, warnings: res.filter(r => r.status === 'rejected').map(r => r.reason.message) });
+  }
+  if (a === 'fill') {
+    const gid = await kv('GET', 'tg:group');
+    if (!gid) return json({ error: 'Бот ещё не знает группу: добавь его в группу Mundora администратором' }, 400);
+    const admins = await tgAdmins();
+    const r = await runFill(+gid, admins[0]);
+    return json({ ok: true, ...r });
   }
   if (a === 'link') { const t = rand(12); await kv('SET', 'tg:link:' + t, g.user.email, 'EX', 900); const me = await ME(); return json({ url: `https://t.me/${me.username}?start=link_${t}` }); }
   if (a === 'cfg') {
@@ -243,7 +304,19 @@ export async function handler(req) {
   // Telegram может прислать то же событие повторно — обрабатываем один раз
   if ((await kv('SET', 'tg:upd:' + u.update_id, '1', 'NX', 'EX', 3600)) !== 'OK') return json({ ok: true });
   try {
-    if (u.callback_query) await onCallback(u.callback_query);
+    if (u.my_chat_member) {
+      const mc = u.my_chat_member, ch = mc.chat, now = mc.new_chat_member && mc.new_chat_member.status;
+      if (ch.type === 'supergroup' && (now === 'administrator')) {
+        await kv('SET', 'tg:group', String(ch.id));
+        const admins = await tgAdmins();
+        if (ch.is_forum && (await kv('SET', 'tg:filled:' + ch.id, 'auto', 'NX')) === 'OK') await runFill(ch.id, admins[0] || mc.from.id).catch(() => {});
+        else await notifyAdmins(`🤖 Я админ в группе <b>${tgHtml(ch.title || '')}</b>. Заполнить темы заново — /refill`);
+      } else if (ch.type === 'supergroup' && (now === 'member')) {
+        await kv('SET', 'tg:group', String(ch.id));
+        await notifyAdmins(`🤖 Меня добавили в <b>${tgHtml(ch.title || '')}</b>, но не админом. Сделай меня администратором (закреплять и удалять сообщения, управлять темами) — и я сам заполню все темы.`);
+      }
+    }
+    else if (u.callback_query) await onCallback(u.callback_query);
     else if (u.pre_checkout_query) await tg('answerPreCheckoutQuery', { pre_checkout_query_id: u.pre_checkout_query.id, ok: true });
     else if (u.message) {
       const m = u.message;
