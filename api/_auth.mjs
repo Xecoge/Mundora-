@@ -64,16 +64,31 @@ export async function sessionFromCookie(req) {
 // Полная проверка: сессия есть в базе + данные аккаунта
 export async function currentUser(req) {
   const s = await sessionFromCookie(req); if (!s) return null;
-  const [sess, u] = await kvMulti([['GET', 's:' + s.sid], ['GET', 'u:' + s.email]]);
+  const [sess, u, adm] = await kvMulti([['GET', 's:' + s.sid], ['GET', 'u:' + s.email], ['SISMEMBER', 'admins', s.email]]);
   if (!sess || !u) return null;
   const user = JSON.parse(u);
-  return { ...user, sid: s.sid, admin: user.email === ADMIN() };
+  await ensureId(user);
+  const owner = user.email === ADMIN();
+  return { ...user, sid: s.sid, owner, admin: owner || !!adm };
 }
+// Каждому аккаунту — свой ID. У владельца (ADMIN_EMAIL) — блатной №1, остальные с 100001 по порядку
+export async function ensureId(u) {
+  if (u.id) return u.id;
+  if (u.email === ADMIN()) u.id = 1;
+  else { const [, n] = await kvMulti([['SET', 'idseq', '100000', 'NX'], ['INCR', 'idseq']]); u.id = n; }
+  await kvMulti([['SET', 'u:' + u.email, JSON.stringify(stripU(u))], ['SET', 'id:' + u.id, u.email]]);
+  return u.id;
+}
+const stripU = u => { const { sid, admin, owner, ...rest } = u; return rest; };
+export const isAdminEmail = async email => email === ADMIN() || !!(await kv('SISMEMBER', 'admins', email));
+export const maskEmail = e => { const [a, d] = String(e).split('@'); if (!d) return '•••'; return (a.length <= 2 ? a[0] + '•' : a.slice(0, 2) + '•'.repeat(Math.min(6, a.length - 2))) + '@' + d; };
+export const displayName = u => (u.name && u.name.trim()) || ('Пользователь ' + (u.id || ''));
+export const AVATARS = ['planet', 'planet2', 'crystal', 'gem_orbit', 'asteroid', 'orbit', 'gift_planet', 'box_open', 'gamepad', 'chat', 'code', 'chart', 'folder', 'browser', 'money', 'gift_stack'];
 export async function dropSessions(email) {
   const sids = await kv('SMEMBERS', 'us:' + email);
   await kvMulti([...sids.map(s => ['DEL', 's:' + s]), ['DEL', 'us:' + email]]);
 }
-export async function touch(u) { if (Date.now() - (u.seen || 0) > 5 * 60e3) { u.seen = Date.now(); const { sid, admin, ...rest } = u; await putUser(rest); } }
+export async function touch(u) { if (Date.now() - (u.seen || 0) > 5 * 60e3) { u.seen = Date.now(); await putUser(stripU(u)); } }
 
 // Проход через код доступа (на устройстве)
 export async function gatePassed(req) { const p = await unsign(cookies(req).tempo_g); return !!(p && p.startsWith('g:')); }

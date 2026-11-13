@@ -91,10 +91,11 @@ export function memoryStore(load, persist) {
       case 'SADD': { const o = s(a[0]); r = a.slice(1).filter(m => !o.includes(m) && o.push(m)).length; break; }
       case 'SREM': { if (!live(a[0])) { r = 0; break; } const o = s(a[0]); r = 0; a.slice(1).forEach(m => { const i = o.indexOf(m); if (i >= 0) { o.splice(i, 1); r++; } }); break; }
       case 'SMEMBERS': r = live(a[0]) && D.get(a[0]).s ? [...D.get(a[0]).s] : []; break;
+      case 'SISMEMBER': r = live(a[0]) && D.get(a[0]).s && D.get(a[0]).s.includes(a[1]) ? 1 : 0; break;
       case 'SCARD': r = live(a[0]) && D.get(a[0]).s ? D.get(a[0]).s.length : 0; break;
       default: throw new Error('unsupported ' + c);
     }
-    if (!/^(GET|EXISTS|TTL|HGET|HMGET|HGETALL|HLEN|SMEMBERS|SCARD)$/.test(c)) save();
+    if (!/^(GET|EXISTS|TTL|HGET|HMGET|HGETALL|HLEN|SMEMBERS|SCARD|SISMEMBER)$/.test(c)) save();
     return r;
   }
   return { exec };

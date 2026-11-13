@@ -8,7 +8,7 @@ import { kv, kvMulti, jget, jset, limit, dbReady } from './_store.mjs';
 import { mailReady, sendMail, codeMail } from './_mail.mjs';
 import {
   ENV, ADMIN, SUPPORT, STATUS_RU, rand, code6, normEmail, okEmail, sign, signed, unsign, hashPass, cookies, setCookie, clearCookie,
-  ipOf, getUser, putUser, createSession, currentUser, sessionFromCookie, gatePassed, json, jsonC, b64uStr, unb64uStr
+  ipOf, getUser, putUser, ensureId, createSession, currentUser, sessionFromCookie, gatePassed, json, jsonC, b64uStr, unb64uStr
 } from './_auth.mjs';
 
 export const config = { runtime: 'nodejs', maxDuration: 30 };
@@ -119,7 +119,7 @@ async function handle(req) {
     if (p.kind === 'reg') {
       if (u) return err('Аккаунт уже создан — войди', 409);
       u = { email, salt: p.salt, hash: p.hash, created: Date.now(), seen: Date.now(), status: 'active' };
-      await putUser(u); await kv('SADD', 'users', email);
+      await putUser(u); await kv('SADD', 'users', email); await ensureId(u);
     } else if (p.kind === 'reset') {
       const pw = String(body.password || '');
       if (pw.length < 6) return err('Новый пароль — минимум 6 символов');

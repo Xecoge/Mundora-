@@ -544,6 +544,44 @@ body.noplay .composer{bottom:16px}
 .act.ok .i{color:var(--green)}.act.err{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.28)}.act.err .i{color:var(--red)}
 a.act:hover{background:rgba(139,92,246,.2)}
 @media (max-width:760px){.h3:has(.h3i){flex-wrap:wrap}.h3:has(.h3i) .more{width:100%;margin:0;font-size:12px}.adm-stats{grid-template-columns:1fr 1fr}.adm-form{grid-template-columns:1fr 1fr}.adm-form .note,.adm-form .btn{grid-column:1/-1;justify-content:center}.adm-ph>img{height:120px}.adm-stat{padding:12px}.adm-stat img{width:40px;height:40px}.adm-stat b{font-size:20px}}
+.vb{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;margin-left:5px;vertical-align:-3px;padding:0;flex:none}
+.vb svg{width:18px;height:18px;overflow:visible}.vb.big,.vb.big svg{width:26px;height:26px}.vb.big{vertical-align:-4px;margin-left:8px}
+.vb-s{fill:url(#vbg);fill:#8b5cf6;filter:drop-shadow(0 0 5px rgba(167,139,250,.8))}.vb-c{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.vb::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translate(-50%,4px);white-space:pre;text-align:center;line-height:1.35;font-size:12px;font-weight:600;letter-spacing:0;color:#fff;background:#2a1d4f;border:1px solid rgba(167,139,250,.45);padding:6px 10px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:.15s;z-index:20}
+.vb::before{content:"";position:absolute;bottom:calc(100% + 4px);left:50%;width:8px;height:8px;background:#2a1d4f;border-right:1px solid rgba(167,139,250,.45);border-bottom:1px solid rgba(167,139,250,.45);transform:translate(-50%,4px) rotate(45deg);opacity:0;transition:.15s;z-index:21}
+.vb.show::after{opacity:1;transform:translate(-50%,0)}.vb.show::before{opacity:1;transform:translate(-50%,0) rotate(45deg)}
+.vmini{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#8b5cf6;color:#fff;margin-left:6px;vertical-align:-2px;box-shadow:0 0 8px rgba(139,92,246,.7)}
+.vmini .i{width:11px;height:11px;stroke-width:3}.vmini.big{width:24px;height:24px;margin:0}.vmini.big .i{width:15px;height:15px}
+.pav{width:42px;height:42px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 10px rgba(124,58,237,.45))}
+.person{text-decoration:none}.person .tx b{display:flex;align-items:center;font-size:14.5px}.i.rot{transform:rotate(-90deg);color:var(--muted)}
+.on-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-right:5px;vertical-align:1px}
+#avaImg.own{object-fit:contain;padding:2px}
+.pf-hero{position:relative;display:flex;gap:22px;align-items:center;padding:24px;border-radius:26px;background:linear-gradient(125deg,rgba(76,29,149,.6),rgba(124,58,237,.22) 60%,rgba(255,255,255,.03));border:1px solid rgba(167,139,250,.25);overflow:visible}
+.pf-ava{width:136px;height:136px;object-fit:contain;flex:none;filter:drop-shadow(0 14px 28px rgba(124,58,237,.6));animation:pfl 5s ease-in-out infinite}
+@keyframes pfl{50%{transform:translateY(-6px)}}
+.pf-id{min-width:0;flex:1}.pf-id h1{font-size:30px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;flex-wrap:wrap;word-break:break-word}
+.pf-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.pill{font-size:12px;padding:4px 10px;border-radius:99px;background:rgba(0,0,0,.3);border:1px solid var(--line);color:#e2dbf8}.pill.adm{background:rgba(139,92,246,.3);border-color:rgba(167,139,250,.45)}
+.pf-mail{display:flex;align-items:center;gap:6px;margin-top:8px;word-break:break-all}
+.pf-bio{margin-top:10px;color:#ddd5f5;line-height:1.5;font-size:14px;max-width:560px;white-space:pre-wrap}
+.pf-cap{margin-top:14px;padding:18px 20px}
+.pf-cap-top{display:flex;align-items:center;gap:14px}.pf-cap-top img{width:56px;height:56px;object-fit:contain}
+.pf-cap-top b{display:block;font-size:30px;font-weight:800;letter-spacing:-.5px}.pf-cap-top b small{font-size:14px;color:var(--v1);font-weight:700}
+.pf-lvl{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);display:grid;place-items:center;align-content:center;box-shadow:0 10px 26px rgba(124,58,237,.5);flex:none}
+.pf-lvl b{font-size:24px;line-height:1}.pf-lvl span{font-size:11px;opacity:.85}
+.pf-bar{height:10px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:14px;overflow:hidden}.pf-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7c3aed,#c084fc);box-shadow:0 0 14px rgba(192,132,252,.7)}
+.pf-parts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.pf-parts span{font-size:12px;padding:5px 10px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:#cfc6ea}.pf-parts b{color:#86efac;font-weight:650}
+.pf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.pf-stats .glass{padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:2px}.pf-stats img{width:40px;height:40px;object-fit:contain;margin-bottom:4px}.pf-stats b{font-size:22px}
+.pf-pls{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.pf-pl{display:flex;align-items:center;gap:12px;padding:10px 12px;text-align:left}.pf-pl .mos{width:52px;height:52px;border-radius:12px;flex:none}.pf-pl .tx{min-width:0}.pf-pl b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-miss{text-align:center;padding:40px 10px}.pf-miss img{width:120px}.pf-miss h2{margin:10px 0 6px}.pf-miss .btn{margin-top:14px}
+.ava-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.ava-grid button{aspect-ratio:1;border-radius:14px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;padding:4px}.ava-grid button.on{border-color:var(--v2);background:rgba(139,92,246,.25);box-shadow:0 0 0 2px rgba(139,92,246,.35)}.ava-grid img{width:100%;height:100%;object-fit:contain}
+.pf-tg{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);cursor:pointer}.pf-tg input{width:20px;height:20px;accent-color:#8b5cf6;margin-top:2px;flex:none}.pf-tg b{display:block;font-size:14px}.pf-tg small{display:block;margin-top:2px;line-height:1.45}
+.acc b{display:flex;align-items:center}.acc small{display:block}
+.adm-af{grid-template-columns:minmax(0,1fr) auto}
+.h3 button.more{color:var(--v1)}
+@media (max-width:760px){.pf-hero{flex-direction:column;text-align:center;padding:20px 16px}.pf-ava{width:116px;height:116px;margin-top:-6px}.pf-id h1{justify-content:center;font-size:25px}.pf-meta,.pf-mail,.pf-hero .row{justify-content:center}.pf-stats{grid-template-columns:1fr 1fr}.ava-grid{grid-template-columns:repeat(4,1fr)}.adm-af{grid-template-columns:1fr}.pf-cap-top b{font-size:24px}}
 </style>
 </head>
 <body>
@@ -1486,14 +1524,14 @@ function route(){return (location.hash||'#home').slice(1)||'home'}
 let renderId=0;
 function render(){
   const r=route(),id=++renderId;
-  const base=r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
+  const base=r.startsWith('u-')?'search':r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));
   $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
   cryptoLeave(r);
   const v=$('#view');
-  const fn=r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
+  const fn=r.startsWith('u-')?()=>V.user(r.slice(2)):r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
   v.innerHTML=fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
-  V.after[r.startsWith('artist-')?'artist':r.startsWith('pl-')?'playlist':r.startsWith('coin-')?'coin':r.startsWith('note-')?'notes':r]?.(id,r);
+  V.after[r.startsWith('u-')?'user':r.startsWith('artist-')?'artist':r.startsWith('pl-')?'playlist':r.startsWith('coin-')?'coin':r.startsWith('note-')?'notes':r]?.(id,r);
   window.scrollTo({top:0,behavior:'instant'});
 }
 addEventListener('hashchange',render);
@@ -1603,7 +1641,7 @@ V.flow=()=>{
 };
 
 let sQ='',sMode='all',sT;
-V.search=()=>`<div class="sbox">${ico('search')}<input id="sIn" placeholder="Трек, артист, ремикс…" value="${esc(sQ)}" autocomplete="off" enterkeyhint="search"><div class="seg" style="border:0;background:none;padding:0">${[['all','Всё'],['hits','Хиты'],['full','Полные'],['remix','Ремиксы']].map(([k,n])=>`<button class="${sMode===k?'on':''}" data-act="s-mode" data-v="${k}">${n}</button>`).join('')}</div>${AI.on?`<button class="btn sm" data-act="ai-search" title="Опиши словами, что хочешь послушать">${ico('spark')}ИИ</button>`:''}</div>
+V.search=()=>`<div class="sbox">${ico('search')} <input id="sIn" placeholder="${sMode==='people'?'Ник или ID человека…':'Трек, артист, ремикс или человек…'}" value="${esc(sQ)}" autocomplete="off" enterkeyhint="search"><div class="seg" style="border:0;background:none;padding:0">${[['all','Всё'],['hits','Хиты'],['full','Полные'],['remix','Ремиксы'],...(USR?[['people','Люди']]:[])].map(([k,n])=>`<button class="${sMode===k?'on':''}" data-act="s-mode" data-v="${k}">${n}</button>`).join('')}</div>${AI.on?`<button class="btn sm" data-act="ai-search" title="Опиши словами, что хочешь послушать">${ico('spark')}ИИ</button>`:''}</div>
   <div id="sRes"></div>`;
 const genreTiles=()=>`<div class="h3" style="margin-top:6px">${ico('grid')}Жанры</div><div class="genres">${GENRES.map((g,i)=>`<button data-act="genre" data-g="${esc(g)}" style="--h:${(i*37+250)%360}">${esc(gRu(g))}${ico(['note','wave','disc','headph','flow','spark'][i%6])}</button>`).join('')}</div>`;
 V.after.search=()=>{
@@ -1614,8 +1652,10 @@ V.after.search=()=>{
 };
 async function doSearch(){
   const box=$('#sRes');if(!box)return;const q=sQ.trim();
-  if(!q){box.innerHTML=genreTiles();return}
+  if(!q){box.innerHTML=sMode==='people'?`<div class="empty">Введи ник или ID — например <b>1</b></div>`:genreTiles();return}
+  if(sMode==='people'){box.innerHTML=skelRows(4);peopleSearch(q,box);return}
   box.innerHTML=skelRows(8);const id=renderId;
+  const pq=USR&&(q.length>=2||/^\d+$/.test(q))?peopleApi('q='+encodeURIComponent(q)).catch(()=>({people:[]})):Promise.resolve({people:[]});
   const qq=sMode==='remix'?q+' remix':q;
   const [hits,full,arts]=await Promise.all([sMode==='full'?[]:hitsSearch(qq,40),sMode==='hits'?[]:API.search(qq).catch(()=>[]),sMode==='all'||sMode==='hits'?DZ.searchArtist(q,8).catch(()=>[]):[]]);
   if(id!==renderId||q!==sQ.trim())return;
@@ -1623,8 +1663,10 @@ async function doSearch(){
   if(sMode==='remix')r=r.filter(t=>/remix|edit|flip|bootleg|vip|mix|ремикс/i.test(t.title)).concat(r.filter(t=>!/remix|edit|flip|bootleg|vip|mix|ремикс/i.test(t.title)));
   r=dedupe(r);
   const A=arts.filter(a=>a.picture_medium&&a.nb_fan>500).slice(0,8);
-  if(!r.length&&!A.length){box.innerHTML=`<div class="empty">Ничего не нашлось. Попробуй другое написание</div>`;return}
-  box.innerHTML=(A.length?`<div class="h3" style="margin-top:0">${ico('user')}Артисты</div><div class="arts">${A.map(a=>`<a href="#artist-${a.id}"><img loading="lazy" src="${esc(a.picture_medium)}" alt="">${esc(a.name)}</a>`).join('')}</div>`:'')+
+  const PP=((await pq).people||[]).slice(0,4);if(id!==renderId||q!==sQ.trim())return;
+  const ppl=PP.length?`<div class="h3" style="margin-top:0"><img class="h3i" src="/img/planet2.webp" alt="">Люди<button class="more" data-act="s-mode" data-v="people">все</button></div><div class="hl" style="margin-bottom:14px">${PP.map(personRow).join('')}</div>`:'';
+  if(!r.length&&!A.length){box.innerHTML=ppl+`<div class="empty">Ничего не нашлось. Попробуй другое написание</div>`;return}
+  box.innerHTML=ppl+(A.length?`<div class="h3" style="margin-top:0">${ico('user')}Артисты</div><div class="arts">${A.map(a=>`<a href="#artist-${a.id}"><img loading="lazy" src="${esc(a.picture_medium)}" alt="">${esc(a.name)}</a>`).join('')}</div>`:'')+
     `<div class="h3" style="margin-top:${A.length?14:0}px">${ico('note')}Треки<span class="more">${hits.length&&fullOn()?'хиты — целиком через YouTube':''}</span></div>`+trackList(r,'search',{empty:'Ничего не нашлось'});
 }
 async function aiSearch(){
@@ -2473,12 +2515,13 @@ const ACT={
   'lib-tab'(el){libTab=el.dataset.v;render()},
   import(){doImport()},
   'imp-save'(){const l=doImport.list||[];if(!l.length)return;const p=createPl('Перенесено из Яндекс/Spotify');p.tracks=l.map(lite);save();location.hash='#pl-'+p.id},
-  's-mode'(el){sMode=el.dataset.v;$$('[data-act=s-mode]').forEach(b=>b.classList.toggle('on',b===el));doSearch()},
+  's-mode'(el){sMode=el.dataset.v;{const i=$('#sIn');if(i)i.placeholder=sMode==='people'?'Ник или ID человека…':'Трек, артист, ремикс или человек…'}$$('[data-act=s-mode]').forEach(b=>b.classList.toggle('on',b===el));doSearch()},
   genre(el){openGenre(el.dataset.g)},
   profile(){
     const g=topOf(S.taste.genre,3).map(x=>gRu(x[0]));
     openSheet(`<h3><span class="ava"><span class="pic"><img src="${IMG.crown}" alt=""></span></span>Профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
-    ${USR?`<div class="acc"><img src="/img/planet2.webp" alt=""><div style="min-width:0;flex:1"><b>${esc(USR.email)}</b><small>${USR.admin?'администратор · ':''}${{active:'аккаунт активен',frozen:'аккаунт заморожен'}[USR.status]||USR.status}</small></div></div>
+    ${USR?`<div class="acc"><img src="${avaSrc(USR.avatar)}" alt=""><div style="min-width:0;flex:1"><b>${esc(USR.name||'')}${vBadge(USR)}</b><small><span class="mono" style="letter-spacing:.06em">ID ${USR.id}</span> · ${esc(USR.email)}</small><small>${USR.owner?'владелец · ':USR.admin?'администратор · ':''}${{active:'аккаунт активен',frozen:'аккаунт заморожен'}[USR.status]||USR.status}</small></div></div>
+    <div class="row" style="margin:8px 0 2px"><button class="btn sm" data-act="pf-me">${ico('user','s')}Мой профиль</button><button class="btn ghost sm" data-act="pf-edit">${ico('edit','s')}Изменить</button></div>
     <div class="syncl"><img src="/img/orbit.webp" alt=""><span class="sdot" id="syncDot"></span><span id="syncSt" style="flex:1">${esc(syncText())}</span><button class="btn ghost sm" data-act="acc-sync">${ico('refresh','s')}Сейчас</button></div>
     ${USR.admin?`<button class="opt" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt="">Админ-панель<small class="muted" style="margin-left:auto">коды и аккаунты</small></button>`:''}`:''}
     <div class="stat" style="grid-template-columns:1fr 1fr 1fr"><div class="glass" style="padding:12px"><div class="k">Лайков</div><b>${Object.keys(S.likes).length}</b></div><div class="glass" style="padding:12px"><div class="k">Плейлистов</div><b>${S.playlists.length}</b></div><div class="glass" style="padding:12px"><div class="k">Операций</div><b>${S.ops.length}</b></div></div>
@@ -2686,8 +2729,10 @@ function admDraw(){
   if(ADM.err&&!ADM.data){el.innerHTML=`<div class="notice">${ico('x')}<div>Не загрузилось: ${esc(ADM.err)}</div></div>`;return}
   const d=ADM.data,U=d.users,C=d.codes,now=Date.now();
   const live=C.filter(c=>!c.max||c.used<c.max).length,bad=U.filter(u=>u.status==='banned'||u.status==='blocked').length;
-  const q=ADM.q.trim().toLowerCase();
-  const list=U.filter(u=>(ADM.f==='all'||u.status===ADM.f)&&(!q||u.email.includes(q)||(u.note||'').toLowerCase().includes(q)));
+  // сохранить то, что уже введено в формах, — панель перерисовывается при обновлении
+  const keep={};el.querySelectorAll('form input,form select').forEach(i=>{if(i.name)keep[i.form.id+':'+i.name]=i.value});const foc=document.activeElement&&el.contains(document.activeElement)&&document.activeElement.form?document.activeElement.form.id+':'+document.activeElement.name:'';
+  const q=ADM.q.trim().toLowerCase().replace(/^(id|#)\s*/,'');
+  const list=U.filter(u=>(ADM.f==='all'||(ADM.f==='admins'?u.admin:ADM.f==='verified'?u.verified:u.status===ADM.f))&&(!q||u.email.includes(q)||String(u.id)===q||(/^\d{2,}$/.test(q)&&String(u.id).startsWith(q))||(u.name||'').toLowerCase().includes(q)||(u.note||'').toLowerCase().includes(q)));
   el.innerHTML=`<div class="adm-stats">
     <div class="glass adm-stat"><img src="/img/planet.webp" alt=""><div><b>${U.length}</b><span class="k">аккаунтов</span></div></div>
     <div class="glass adm-stat"><img src="/img/orbit.webp" alt=""><div><b>${U.filter(u=>now-(u.seen||0)<864e5).length}</b><span class="k">заходили за сутки</span></div></div>
@@ -2702,19 +2747,28 @@ function admDraw(){
     <button class="btn" type="submit">${ico('plus','s')}Создать код</button>
   </form>
   <div class="adm-codes">${C.length?C.map(c=>{const done=c.max&&c.used>=c.max;return `<div class="adm-code${done?' done':''}"><b class="mono">${esc(c.code)}</b><div class="tx"><span>${c.max?`использован ${c.used} из ${c.max}`:`без лимита · входов: ${c.used}`}${done?' · закончился':''}</span><small>${esc(c.note||'без заметки')} · ${new Date(c.created).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</small></div><button class="ib" data-act="adm-copy" data-c="${esc(c.code)}" title="Скопировать">${ico('copy','s')}</button><button class="ib" data-act="adm-code-del" data-c="${esc(c.code)}" title="Удалить">${ico('trash','s')}</button></div>`}).join(''):`<div class="empty">Кодов пока нет — создай первый, чтобы пригласить друга</div>`}</div>
+  ${d.owner?`<div class="h3"><img class="h3i" src="/img/gem_orbit.webp" alt="">Администраторы<span class="more">назначает только владелец</span></div>
+  <form class="glass adm-form adm-af" id="admAdmF"><input class="in" name="who" placeholder="Почта или ID" autocomplete="off"><button class="btn" type="submit">${ico('plus','s')}Сделать админом</button></form>
+  <div class="hl" style="margin-bottom:6px">${U.filter(u=>u.admin).map(u=>`<div class="hi"><img class="pav" src="${avaSrc(u.avatar||(u.owner?'gem_orbit':'planet'))}" alt=""><div class="tx"><b>${esc(u.name)}<span class="vmini">${ico('check','s')}</span></b><small class="k">ID ${u.id} · ${esc(u.email)}</small></div>${u.owner?'<span class="badge admin">владелец</span>':`<button class="btn sm danger" data-act="adm-u" data-a="admin-del" data-e="${esc(u.email)}">Убрать</button>`}</div>`).join('')}</div>`:''}
   <div class="h3"><img class="h3i" src="/img/planet2.webp" alt="">Аккаунты<span class="more">${list.length} из ${U.length}</span></div>
-  <div class="adm-filter"><input class="in" id="admQ" placeholder="Поиск по почте или заметке" value="${esc(ADM.q)}"><div class="seg">${[['all','Все'],['active','Активные'],['frozen','Замороженные'],['blocked','Блок'],['banned','Бан']].map(([v,n])=>`<button class="${ADM.f===v?'on':''}" data-act="adm-f" data-v="${v}">${n}</button>`).join('')}</div></div>
-  <div class="hl">${list.length?list.map(u=>`<button class="hi adm-u" data-act="adm-user" data-e="${esc(u.email)}"><div class="ic">${ico('user')}</div><div class="tx"><b>${esc(u.email)}${u.admin?' <span class="badge admin">админ</span>':''}</b><small class="k">${ago(u.seen)} · устройств: ${u.devices}${u.note?' · '+esc(u.note):''}</small></div><span class="badge ${u.status}">${ST_RU[u.status]||u.status}</span></button>`).join(''):'<div class="empty">Никого не нашлось</div>'}</div>`;
-  $('#admCodeF').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);const b=e.target.querySelector('button');b.disabled=true;try{const r=await admApi('code-new',{code:f.get('code'),max:f.get('max'),note:f.get('note')});copyText(r.code);toast('Код '+r.code+' создан и скопирован','check');await admLoad()}catch(x){toast(x.message,'x')}b.disabled=false});
+  <div class="adm-filter"><input class="in" id="admQ" placeholder="ID, ник, почта или заметка" value="${esc(ADM.q)}" inputmode="search"><div class="seg">${[['all','Все'],['admins','Админы'],['verified','С галочкой'],['active','Активные'],['frozen','Заморожены'],['blocked','Блок'],['banned','Бан']].map(([v,n])=>`<button class="${ADM.f===v?'on':''}" data-act="adm-f" data-v="${v}">${n}</button>`).join('')}</div></div>
+  <div class="hl">${list.length?list.map(u=>`<button class="hi adm-u" data-act="adm-user" data-e="${esc(u.email)}"><img class="pav" src="${avaSrc(u.avatar||(u.owner?'gem_orbit':'planet'))}" alt=""><div class="tx"><b>${esc(u.name)}${u.verified?'<span class="vmini">'+ico('check','s')+'</span>':''}${u.owner?' <span class="badge admin">владелец</span>':u.admin?' <span class="badge admin">админ</span>':''}</b><small class="k"><span class="mono" style="letter-spacing:.04em">ID ${u.id||'—'}</span> · ${esc(u.email)}</small><small class="k">${ago(u.seen)} · устройств: ${u.devices}${u.note?' · '+esc(u.note):''}</small></div><span class="badge ${u.status}">${ST_RU[u.status]||u.status}</span></button>`).join(''):'<div class="empty">Никого не нашлось</div>'}</div>`;
+  el.querySelectorAll('form input,form select').forEach(i=>{const k=i.form.id+':'+i.name;if(k in keep)i.value=keep[k];if(k===foc)i.focus()});
+  const af=$('#admAdmF');if(af)af.addEventListener('submit',async e=>{e.preventDefault();const w=new FormData(af).get('who').trim();if(!w)return;try{const r=await admApi('user',{email:w,id:w,action:'admin-add'});af.reset();toast(r.email+' — теперь админ','check');await admLoad()}catch(x){toast(x.message,'x')}});
+  $('#admCodeF').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);const b=e.target.querySelector('button');b.disabled=true;try{const r=await admApi('code-new',{code:f.get('code'),max:f.get('max'),note:f.get('note')});e.target.reset();copyText(r.code);toast('Код '+r.code+' создан и скопирован','check');await admLoad()}catch(x){toast(x.message,'x')}b.disabled=false});
   const qi=$('#admQ');qi.addEventListener('input',()=>{ADM.q=qi.value;clearTimeout(admDraw.t);admDraw.t=setTimeout(()=>{admDraw();const n=$('#admQ');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)});
 }
 function admUserSheet(email){
   const u=ADM.data&&ADM.data.users.find(x=>x.email===email);if(!u)return;
   const st=u.status,act=(a,ic,t,s,cls='')=>`<button class="opt${cls}" data-act="adm-u" data-a="${a}" data-e="${esc(email)}">${ic}<span style="flex:1">${t}<br><small class="muted">${s}</small></span></button>`;
   const img=`<img src="/img/${st==='banned'?'asteroid':st==='frozen'?'crystal':st==='blocked'?'gem_orbit':'planet2'}.webp" alt="" style="width:46px;height:46px">`;
-  openSheet(`<h3>${img}<span style="min-width:0;font-size:15px;word-break:break-all">${esc(email)}<br><span class="badge ${st}">${ST_RU[st]||st}</span></span><button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  const D=ADM.data,canMod=!u.owner&&(!u.admin||D.owner);
+  openSheet(`<h3><img src="${avaSrc(u.avatar||(u.owner?'gem_orbit':'planet'))}" alt="" style="width:46px;height:46px"><span style="min-width:0;font-size:15px;word-break:break-all">${esc(u.name)}${vBadge({verified:u.verified,admin:u.admin,owner:u.owner})}<br><small class="muted" style="font-weight:400">ID ${u.id} · ${esc(email)}</small><br><span class="badge ${st}">${ST_RU[st]||st}</span>${u.admin?' <span class="badge admin">'+(u.owner?'владелец':'админ')+'</span>':''}</span><button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
   <div class="k" style="margin:-4px 0 12px;line-height:1.6">Создан: ${u.created?new Date(u.created).toLocaleString('ru-RU'):'—'}<br>Был на сайте: ${ago(u.seen)} · устройств: ${u.devices} · разделов данных: ${u.keys}</div>
-  ${u.admin?'<div class="notice">'+ico('lock')+'<div>Это твой аккаунт администратора — его статус менять нельзя.</div></div>':`
+  <a class="opt" href="#u-${u.id}" data-act="close-sheet">${ico('user')}<span style="flex:1">Открыть профиль<br><small class="muted">Как его видят другие</small></span></a>
+  ${u.owner?'':act(u.verified?'unverify':'verify','<span class="vmini big">'+ico('check','s')+'</span>',u.verified?'Снять галочку':'Дать галочку','«Верифицированный аккаунт» — видят все')}
+  ${D.owner&&!u.owner?act(u.admin?'admin-del':'admin-add',ico('gem'),u.admin?'Убрать из админов':'Сделать админом',u.admin?'Потеряет доступ к админ-панели':'Получит админ-панель и галочку'):''}
+  ${!canMod?'<div class="notice" style="margin-top:8px">'+ico('lock')+'<div>'+(u.owner?'Это аккаунт владельца — его статус менять нельзя.':'Это администратор — менять его может только владелец.')+'</div></div>':`
   ${st==='active'?'':act('activate',ico('check'),'Сделать активным','Вернуть полный доступ')}
   ${st==='frozen'?'':act('freeze','<img src="/img/crystal.webp" class="oi" alt="">','Заморозить','Может смотреть, но изменения не сохраняются')}
   ${st==='blocked'?'':act('block','<img src="/img/gem_orbit.webp" class="oi" alt="">','Заблокировать','Временно закрыть доступ к сайту')}
@@ -2724,7 +2778,7 @@ function admUserSheet(email){
   <div class="row" style="flex-wrap:nowrap"><input class="in" id="admNote" maxlength="120" value="${esc(u.note||'')}" placeholder="Например: друг из универа"><button class="btn sm" data-act="adm-u" data-a="note" data-e="${esc(email)}">${ico('check','s')}</button></div>
   <button class="btn danger" style="width:100%;justify-content:center;margin-top:16px" data-act="adm-u" data-a="delete-ask" data-e="${esc(email)}">${ico('trash','s')}Удалить аккаунт</button>`}`);
 }
-const ADM_DONE={activate:'Аккаунт снова активен',freeze:'Аккаунт заморожен',block:'Аккаунт заблокирован',ban:'Аккаунт забанен',logout:'Сессии завершены',note:'Заметка сохранена',delete:'Аккаунт удалён'};
+const ADM_DONE={verify:'Галочка выдана',unverify:'Галочка снята','admin-add':'Теперь это админ','admin-del':'Больше не админ',activate:'Аккаунт снова активен',freeze:'Аккаунт заморожен',block:'Аккаунт заблокирован',ban:'Аккаунт забанен',logout:'Сессии завершены',note:'Заметка сохранена',delete:'Аккаунт удалён'};
 
 /* ===================== ИИ управляет сайтом ===================== */
 const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',admin:'Админ-панель'};
@@ -2852,6 +2906,101 @@ Object.assign(ACT,{
   }
 });
 
+/* ===================== люди: ID, галочки, профили ===================== */
+const AVA_LIST=['planet','planet2','crystal','gem_orbit','asteroid','orbit','gift_planet','box_open','gamepad','chat','code','chart','folder','browser','money','gift_stack'];
+const avaSrc=k=>'/img/'+(AVA_LIST.includes(k)?k:'planet')+'.webp';
+// галочка: нажал — сверху подпись «Верифицированный аккаунт»
+const vBadge=(p,big)=>p&&p.verified?`<button class="vb${big?' big':''}" data-act="vb" data-tip="${p.owner?'Верифицированный аккаунт\nвладелец TEMPO':p.admin?'Верифицированный аккаунт\nадминистратор':'Верифицированный аккаунт'}" aria-label="Верифицированный аккаунт"><svg viewBox="0 0 24 24"><path class="vb-s" d="M12 1.8l2.4 1.9 3-.3 1 2.9 2.6 1.6-.6 3 1.4 2.7-2.2 2.1-.1 3.1-3 .6-1.8 2.5-2.8-1.2-2.9 1.2-1.7-2.5-3-.6-.2-3.1L1.8 13.6l1.4-2.7-.6-3 2.6-1.6 1-2.9 3 .3z"/><path class="vb-c" d="m7.8 12.2 2.9 2.9 5.5-5.6"/></svg></button>`:'';
+const PEOPLE={cache:{},search:null};
+const seenTxt=p=>p.online?'<span class="on-dot"></span>в сети':p.seen?'был(а) '+ago(p.seen):'';
+async function peopleApi(qs,body){
+  const r=await fetch('/api/people?'+qs,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{cache:'no-store'});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j;
+}
+const personRow=p=>`<a class="hi person" href="#u-${p.id}"><img class="pav" src="${avaSrc(p.avatar)}" alt=""><div class="tx"><b>${esc(p.name)}${vBadge(p)}</b><small class="k">ID ${p.id}${USR&&USR.admin?' · '+esc(p.email):''} · ${seenTxt(p)}</small></div>${ico('chev','s rot')}</a>`;
+function meHead(){if(!USR)return;$('#uName').textContent=USR.name||'Профиль';const im=$('#avaImg');if(im){im.src=avaSrc(USR.avatar);im.classList.add('own')}}
+
+V.user=id=>{
+  const p=PEOPLE.cache[id];
+  return `<div id="pfBox">${p?pfHTML(p):`<div class="glass pf-hero skel" style="height:210px"></div><div class="glass skel" style="height:150px;margin-top:14px"></div>`}</div>`;
+};
+V.after.user=async(rid,r)=>{
+  const id=r.slice(2);
+  try{const j=await peopleApi('id='+encodeURIComponent(id));PEOPLE.cache[id]=j.profile;if(route()===r){$('#pfBox').innerHTML=pfHTML(j.profile)}}
+  catch(e){if(route()===r)$('#pfBox').innerHTML=`<div class="pf-miss"><img src="/img/asteroid.webp" alt=""><h2>Профиль не найден</h2><p class="k">${esc(e.message)}</p><a class="btn ghost" href="#search">${ico('search','s')}Искать людей</a></div>`}
+};
+function pfHTML(p){
+  const c=p.capital,pct=Math.max(3,Math.min(100,Math.round((c.score-c.from)/(c.to-c.from)*100)));
+  const joined=p.joined?new Date(p.joined).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}).replace(/\s*г\.$/,''):'';
+  const open=p.genres!==undefined;
+  const s=c.stats;
+  return `<div class="pf-hero">
+    <img class="pf-ava" src="${avaSrc(p.avatar)}" alt="">
+    <div class="pf-id">
+      <h1>${esc(p.name)}${vBadge(p,true)}</h1>
+      <div class="pf-meta"><span class="pill mono">ID ${p.id}</span>${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span class="k">${seenTxt(p)}</span></div>
+      <div class="k pf-mail">${ico('lock','s')}${esc(p.email)}${joined?' · в TEMPO с '+joined:''}</div>
+      ${p.bio?`<p class="pf-bio">${esc(p.bio)}</p>`:''}
+      <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button></div>
+    </div>
+  </div>
+  <div class="glass pf-cap">
+    <div class="pf-cap-top"><img src="/img/money.webp" alt=""><div style="flex:1;min-width:0"><span class="k">Капитализация</span><b class="num">${c.score.toLocaleString('ru-RU')} <small>TP</small></b></div><div class="pf-lvl"><b>${c.level}</b><span>ур.</span></div></div>
+    <div class="pf-bar"><i style="width:${pct}%"></i></div>
+    <div class="k" style="display:flex;justify-content:space-between;margin-top:6px"><span>${esc(c.title)}</span><span>до ур. ${c.level+1}: ${(c.to-c.score).toLocaleString('ru-RU')} TP</span></div>
+    <div class="pf-parts">${c.parts.map(([n,v])=>`<span>${esc(n)} <b>+${v.toLocaleString('ru-RU')}</b></span>`).join('')}</div>
+  </div>
+  <div class="pf-stats">
+    <div class="glass"><img src="/img/gift_planet.webp" alt=""><b>${s.likes}</b><span class="k">лайков</span></div>
+    <div class="glass"><img src="/img/folder.webp" alt=""><b>${s.playlists}</b><span class="k">плейлистов</span></div>
+    <div class="glass"><img src="/img/orbit.webp" alt=""><b>${s.plays}</b><span class="k">прослушиваний</span></div>
+    <div class="glass"><img src="/img/planet.webp" alt=""><b>${s.days}</b><span class="k">дней в TEMPO</span></div>
+  </div>
+  ${open?`
+  ${p.genres.length||p.artists.length?`<div class="h3">${ico('spark')}Вкус</div><div class="row">${p.genres.map(g=>`<span class="chip dark">${esc(gRu(g))}</span>`).join('')}${p.artists.map(a=>`<span class="chip dark">${ico('user','s')}${esc(a)}</span>`).join('')}</div>`:''}
+  ${p.playlists.length?`<div class="h3">${ico('lists')}Плейлисты</div><div class="pf-pls">${p.playlists.map((pl,i)=>`<button class="glass pf-pl" data-act="pf-pl" data-id="${p.id}" data-i="${i}">${mosaic(pl.tracks)}<div class="tx"><b>${esc(pl.name)}</b><small class="k">${pl.count} тр.</small></div></button>`).join('')}</div>`:''}
+  ${p.likes.length?`<div class="h3">${ico('heart')}Любимое<button class="btn sm" style="margin-left:auto" data-act="play-list" data-list="pf-likes">${ico('play','f')}Слушать</button></div>${trackList(p.likes,'pf-likes')}`:''}
+  ${p.crypto.length?`<div class="h3">${ico('coin')}Следит за криптой</div><div class="row">${p.crypto.map(id=>{const c=CR.byId[id];return `<a class="chip dark" href="#coin-${esc(id)}">${c&&c.img?`<img src="${esc(c.img)}" alt="" style="width:16px;height:16px;border-radius:50%">`:''}${esc(c?c.sym:id)}</a>`}).join('')}</div>`:''}
+  `:`<div class="notice" style="margin-top:16px">${ico('lock')}<div>Пользователь скрыл музыку и подборки в своём профиле. Видна только капитализация.</div></div>`}`;
+}
+function pfEdit(){
+  let av=USR.avatar;
+  openSheet(`<h3>${ico('edit')}Мой профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  <div class="k" style="margin-bottom:6px">Аватар</div>
+  <div class="ava-grid">${AVA_LIST.map(k=>`<button class="${k===av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
+  <label class="k" style="display:block;margin:14px 0 6px">Ник</label><input class="in" id="pfName" maxlength="32" value="${esc(USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'')}" placeholder="Как тебя показывать">
+  <label class="k" style="display:block;margin:12px 0 6px">О себе</label><textarea class="in" id="pfBio" maxlength="160" rows="3" style="height:auto;padding:10px 14px;resize:none" placeholder="Пара слов — видят все">${esc(USR.bio||'')}</textarea>
+  <label class="pf-tg"><input type="checkbox" id="pfOpen" ${USR.open!==false?'checked':''}><span><b>Открытый профиль</b><small class="k">Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
+  <button class="btn" style="width:100%;justify-content:center;margin-top:14px" data-act="pf-save">${ico('check','s')}Сохранить</button>`);
+  pfEdit.av=av;
+}
+async function peopleSearch(q,box){
+  if(!box)return;
+  try{const j=await peopleApi('q='+encodeURIComponent(q));if(q!==sQ.trim())return;
+    box.innerHTML=j.people.length?`<div class="h3" style="margin-top:0"><img class="h3i" src="/img/planet2.webp" alt="">Люди</div><div class="hl">${j.people.map(personRow).join('')}</div>`:(sMode==='people'?`<div class="empty">Никого не нашлось. Ищи по нику или ID — например <b>1</b></div>`:'')}
+  catch(e){box.innerHTML=sMode==='people'?`<div class="notice">${ico('x')}<div>${esc(e.message)}</div></div>`:''}
+}
+
+Object.assign(ACT,{
+  vb(el,e){e.stopPropagation();const on=!el.classList.contains('show');$$('.vb.show').forEach(b=>b.classList.remove('show'));if(on){el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2600)}},
+  'pf-edit'(){closeSheet();pfEdit()},
+  'pf-me'(){closeSheet();location.hash='#u-'+USR.id},
+  'pf-ava'(el){pfEdit.av=el.dataset.k;$$('.ava-grid button').forEach(b=>b.classList.toggle('on',b===el))},
+  async 'pf-save'(el){
+    el.disabled=true;
+    try{const j=await peopleApi('a=me',{name:$('#pfName').value,bio:$('#pfBio').value,avatar:pfEdit.av,open:$('#pfOpen').checked});
+      const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open});PEOPLE.cache[p.id]=p;meHead();closeSheet();toast('Профиль сохранён','check');if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p)}
+    catch(e){toast(e.message,'x');el.disabled=false}
+  },
+  'pf-share'(el){copyText(el.dataset.id)},
+  'pf-pl'(el){const p=PEOPLE.cache[el.dataset.id];const pl=p&&p.playlists[+el.dataset.i];if(!pl)return;
+    openSheet(`<h3>${mosaic(pl.tracks)}<span style="min-width:0;font-size:15px">${esc(pl.name)}<br><small class="muted" style="font-weight:400">${esc(p.name)} · ${pl.count} тр.</small></span><button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    <div class="row" style="margin-bottom:10px"><button class="btn sm" data-act="play-list" data-list="pf-pl">${ico('play','f')}Слушать</button><button class="btn ghost sm" data-act="pf-pl-copy" data-id="${p.id}" data-i="${el.dataset.i}">${ico('plus','s')}Себе</button></div>${trackList(pl.tracks,'pf-pl')}`)},
+  'pf-pl-copy'(el){const p=PEOPLE.cache[el.dataset.id];const pl=p&&p.playlists[+el.dataset.i];if(!pl)return;const n=createPl(pl.name+' · '+p.name);n.tracks=pl.tracks.map(lite);save();closeSheet();toast('Плейлист сохранён к тебе','lists')},
+  async 'pf-manage'(el){if(!ADM.data)await admLoad();const u=ADM.data&&ADM.data.users.find(x=>String(x.id)===el.dataset.id);if(u)admUserSheet(u.email);else toast('Аккаунт не найден в админке','x')}
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.vb'))$$('.vb.show').forEach(b=>b.classList.remove('show'))},true);
+
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');if(!el)return;
   const a=ACT[el.dataset.act];if(!a)return;
@@ -2861,7 +3010,7 @@ document.addEventListener('click',e=>{
 addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();$('#full').classList.remove('open')}if(e.code==='Space'&&!e.target.matches('input,textarea,button,select')&&route()!=='calc'){e.preventDefault();P.toggle()}});
 
 document.body.classList.add('noplay');
-if(USR)$('#uName').textContent=USR.email.split('@')[0];
+meHead();
 accBar();
 render();
 syncStart();

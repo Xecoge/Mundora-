@@ -26,6 +26,7 @@ const H = {
   auth: () => import('./api/auth.js').then(m => m.handler),
   sync: () => import('./api/sync.js').then(m => m.default),
   admin: () => import('./api/admin.js').then(m => m.default),
+  people: () => import('./api/people.js').then(m => m.default),
   ping: () => import('./api/ping.js').then(m => m.default),
   proxy: () => import('./api/proxy.js').then(m => m.default),
   music: () => import('./api/music.js').then(m => m.default),
@@ -37,7 +38,7 @@ async function page(req) {
   const read = f => fs.readFileSync(path.join(ROOT, 'src', f), 'utf8');
   let u = null; try { u = await auth.currentUser(req); } catch (e) {}
   if (u && (u.status === 'active' || u.status === 'frozen')) {
-    const boot = `<script>window.TEMPO_USER=${JSON.stringify({ email: u.email, admin: u.admin, status: u.status, support: auth.SUPPORT() }).replace(/</g, '\\u003c')}</script>`;
+    const boot = `<script>window.TEMPO_USER=${JSON.stringify({ email: u.email, id: u.id, name: auth.displayName(u), avatar: u.avatar || (u.owner ? 'gem_orbit' : 'planet'), bio: u.bio || '', open: u.open !== false, verified: !!(u.verified || u.admin), admin: u.admin, owner: u.owner, status: u.status, support: auth.SUPPORT() }).replace(/</g, '\\u003c')}</script>`;
     return new Response(read('app.html').replace('</head>', boot + '</head>'), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
   }
   return new Response(read('gate.html'), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
@@ -49,6 +50,7 @@ function route(u) {
   if (p === '/api/auth') return ['auth', u];
   if (p === '/api/sync') return ['sync', u];
   if (p === '/api/admin') return ['admin', u];
+  if (p === '/api/people') return ['people', u];
   if (p === '/tempo-ping') return ['ping', u];
   let m;
   if ((m = p.match(/^\/ai-proxy\/(.*)$/))) { const n = new URL('http://local/api/proxy'); n.searchParams.set('path', m[1]); u.searchParams.forEach((v, k) => n.searchParams.append(k, v)); return ['proxy', n]; }
