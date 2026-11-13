@@ -26,10 +26,11 @@ function capital(u, d) {
 }
 
 async function card(email, viewer, full) {
-  const [uj, adm] = await kvMulti([['GET', 'u:' + email], ['SISMEMBER', 'admins', email]]);
+  const [uj, adm0, sh] = await kvMulti([['GET', 'u:' + email], ['SISMEMBER', 'admins', email], ['SISMEMBER', 'shadow_admins', email]]);
   const u = parse(uj); if (!u) return null;
   await ensureId(u);
   const owner = email === ADMIN(), self = viewer.email === email;
+  const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
     id: u.id, name: displayName(u), bio: u.bio || '', avatar: AVATARS.includes(u.avatar) ? u.avatar : (owner ? 'gem_orbit' : 'planet'),
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,

@@ -39,7 +39,7 @@ async function page(req) {
   const read = f => fs.readFileSync(path.join(ROOT, 'src', f), 'utf8');
   let u = null; try { u = await auth.currentUser(req); } catch (e) {}
   if (u && (u.status === 'active' || u.status === 'frozen') && !auth.accessExpired(u)) {
-    const boot = `<script>window.TEMPO_USER=${JSON.stringify({ email: u.email, id: u.id, name: auth.displayName(u), avatar: u.avatar || (u.owner ? 'gem_orbit' : 'planet'), bio: u.bio || '', hasName: !!(u.name && u.name.trim()), until: u.accessUntil || 0, open: u.open !== false, verified: !!(u.verified || u.admin), admin: u.admin, owner: u.owner, status: u.status, support: auth.SUPPORT() }).replace(/</g, '\\u003c')}</script>`;
+    const boot = `<script>window.TEMPO_USER=${JSON.stringify({ email: u.email, id: u.id, name: auth.displayName(u), avatar: u.avatar || (u.owner ? 'gem_orbit' : 'planet'), bio: u.bio || '', hasName: !!(u.name && u.name.trim()), until: u.accessUntil || 0, open: u.open !== false, verified: !!(u.verified || u.admin || u.shadow), admin: !!(u.admin || u.shadow), owner: u.owner, status: u.status, support: auth.SUPPORT() }).replace(/</g, '\\u003c')}</script>`;
     return new Response(read('app.html').replace('</head>', boot + '</head>'), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
   }
   return new Response(read('gate.html'), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });

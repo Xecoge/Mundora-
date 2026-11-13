@@ -64,12 +64,14 @@ export async function sessionFromCookie(req) {
 // Полная проверка: сессия есть в базе + данные аккаунта
 export async function currentUser(req) {
   const s = await sessionFromCookie(req); if (!s) return null;
-  const [sess, u, adm] = await kvMulti([['GET', 's:' + s.sid], ['GET', 'u:' + s.email], ['SISMEMBER', 'admins', s.email]]);
+  const [sess, u, adm, sh] = await kvMulti([['GET', 's:' + s.sid], ['GET', 'u:' + s.email], ['SISMEMBER', 'admins', s.email], ['SISMEMBER', 'shadow_admins', s.email]]);
   if (!sess || !u) return null;
   const user = JSON.parse(u);
   await ensureId(user);
   const owner = user.email === ADMIN();
-  return { ...user, sid: s.sid, owner, admin: owner || !!adm };
+  const admin = owner || !!adm;
+  // «визуальный админ»: видит панель, но его действия ничего не меняют (кроме создания кодов)
+  return { ...user, sid: s.sid, owner, admin, shadow: !admin && !!sh };
 }
 // Каждому аккаунту — свой ID: владелец (ADMIN_EMAIL) — №0, остальные 1, 2, 3… по порядку регистрации
 let IDV2 = false;
@@ -100,7 +102,7 @@ export async function ensureId(u) {
   await kvMulti([['SET', 'u:' + u.email, JSON.stringify(stripU(u))], ['SET', 'id:' + u.id, u.email]]);
   return u.id;
 }
-const stripU = u => { const { sid, admin, owner, ...rest } = u; return rest; };
+const stripU = u => { const { sid, admin, owner, shadow, ...rest } = u; return rest; };
 export const isAdminEmail = async email => email === ADMIN() || !!(await kv('SISMEMBER', 'admins', email));
 export const maskEmail = e => { const [a, d] = String(e).split('@'); if (!d) return '•••'; return (a.length <= 2 ? a[0] + '•' : a.slice(0, 2) + '•'.repeat(Math.min(6, a.length - 2))) + '@' + d; };
 export const displayName = u => (u.name && u.name.trim()) || ('Пользователь ' + (u.id ?? ''));

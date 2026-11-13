@@ -251,7 +251,7 @@ async function onGroup(m) {
 // ---------- настройка из админ-панели сайта ----------
 async function siteAdmin(req, a) {
   const g = await guard(req, true); if (g.res) return g.res;
-  if (!g.user.admin) return json({ error: 'Только для администратора' }, 403);
+  if (!g.user.owner) return json({ error: 'Только для владельца' }, 403);
   if (!TOKEN()) return json({ error: 'Нет TELEGRAM_BOT_TOKEN в Vercel → Environment Variables (после добавления — Redeploy)', noToken: true }, 400);
   if (a === 'status') {
     let me = null, wh = null; try { me = await tg('getMe'); await jset('tg:me', me); wh = await tg('getWebhookInfo'); } catch (e) { return json({ error: e.message }, 502); }
