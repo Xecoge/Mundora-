@@ -539,6 +539,9 @@ body.noplay .composer{bottom:16px}
 .adm-code .tx{flex:1;min-width:0;display:flex;flex-direction:column;font-size:12.5px}
 .adm-code .tx small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .adm-code.done{opacity:.5}
+.tgbox{padding:16px 18px}.tg-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.tg-row b{font-size:15px}
+.tg-cfg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;align-items:end}.tg-cfg label{display:flex;flex-direction:column;gap:6px}.tg-cfg .wide{grid-column:1/-1}.tg-cfg textarea{height:auto;padding:10px 14px;resize:vertical}.tg-cfg .btn{justify-self:start}
+.tg-help{margin-top:12px}.tg-help summary{cursor:pointer;color:var(--v1);font-size:13px}.tg-help .k{margin-top:8px;line-height:1.7}
 .adm-filter{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
 .adm-filter .in{flex:1;min-width:200px}
 .adm-u{width:100%;text-align:left}
@@ -552,6 +555,7 @@ a.act:hover{background:rgba(139,92,246,.2)}
 .ngate-card img{width:110px;height:110px;object-fit:contain;margin:-70px auto 4px;display:block;filter:drop-shadow(0 14px 26px rgba(124,58,237,.6))}
 .ngate-card h2{font-size:22px;margin-bottom:6px}.ngate-card p{line-height:1.5;margin-bottom:14px}.ngate-card .btn{width:100%;justify-content:center;margin-top:10px;height:46px}
 .ng-msg{min-height:18px;font-size:13px;margin-top:8px;color:var(--muted)}.ng-msg.ok{color:var(--green)}.ng-msg.bad{color:var(--red)}
+@media (max-width:760px){.tg-cfg{grid-template-columns:1fr 1fr}.tg-cfg label:nth-child(3){grid-column:1/-1}}
 @media (max-width:760px){.h3:has(.h3i){flex-wrap:wrap}.h3:has(.h3i) .more{width:100%;margin:0;font-size:12px}.adm-stats{grid-template-columns:1fr 1fr}.adm-form{grid-template-columns:1fr 1fr}.adm-form .note,.adm-form .btn,.adm-form [name=days]{grid-column:1/-1;justify-content:center}.adm-ph>img{height:120px}.adm-stat{padding:12px}.adm-stat img{width:40px;height:40px}.adm-stat b{font-size:20px}}
 .vb{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;margin-left:5px;vertical-align:-3px;padding:0;flex:none}
 .vb svg{width:18px;height:18px;overflow:visible}.vb.big,.vb.big svg{width:26px;height:26px}.vb.big{vertical-align:-4px;margin-left:8px}
@@ -2749,7 +2753,27 @@ V.admin=()=>{
   if(!USR||!USR.admin)return `<div class="empty">Этот раздел только для администратора</div>`;
   return `<div class="phead adm-ph"><h1>Админ-панель</h1><p>Коды доступа к сайту и аккаунты: заморозка, блокировка, бан.</p><div class="ctl"><button class="btn ghost sm" data-act="adm-refresh">${ico('refresh','s')}Обновить</button></div><img src="/img/code.webp" alt=""></div><div id="admBody">${ADM.data?'':`<div class="adm-stats">${'<div class="glass adm-stat skel" style="height:78px"></div>'.repeat(4)}</div>`}</div>`;
 };
-V.after.admin=()=>{if(!USR||!USR.admin)return;if(ADM.data)admDraw();admLoad()};
+V.after.admin=()=>{if(!USR||!USR.admin)return;if(ADM.data)admDraw();admLoad();tgLoad()};
+/* Telegram-бот: состояние и настройки */
+const TGS={st:null,err:'',busy:''};
+async function tgApi(a,body){const r=await fetch('/api/tg?a='+a,body!==undefined?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error||'HTTP '+r.status),j);return j}
+async function tgLoad(){try{TGS.st=await tgApi('status');TGS.err='';TGS.noToken=false}catch(e){TGS.err=e.message;TGS.noToken=!!e.noToken}const b=$('#tgBox');if(b)b.innerHTML=tgHTML()}
+function tgHTML(){
+  if(TGS.noToken)return `<div class="notice">${ico('lock')}<div><b>Добавь токен бота.</b> Vercel → Settings → Environment Variables → <code>TELEGRAM_BOT_TOKEN</code> = токен от @BotFather → Redeploy. Потом вернись сюда и нажми «Подключить бота».</div></div>`;
+  if(!TGS.st)return TGS.err?`<div class="notice">${ico('x')}<div>${esc(TGS.err)}</div></div>`:`<div class="k">${ico('loader','ldg s')} Проверяю бота…</div>`;
+  const t=TGS.st,c=t.cfg;
+  return `<div class="tg-row"><span class="sdot${t.connected?'':' bad'}"></span><b>${t.connected?'Бот работает':'Бот не подключён'}</b><span class="k">@${esc(t.bot.username)} · админов в Telegram: ${t.admins} · продано: ${t.sold}</span></div>
+  ${t.lastError?`<div class="k" style="color:#fca5a5;margin-top:6px">Последняя ошибка Telegram: ${esc(t.lastError)}</div>`:''}
+  <div class="row" style="margin-top:12px"><button class="btn sm" data-act="tg-setup">${ico('refresh','s')}${t.connected?'Переподключить':'Подключить бота'}</button><button class="btn ghost sm" data-act="tg-link">${ico('user','s')}Привязать мой Telegram</button><a class="btn ghost sm" href="https://t.me/${esc(t.bot.username)}" target="_blank" rel="noopener">${ico('ext','s')}Открыть бота</a></div>
+  <form id="tgCfg" class="tg-cfg">
+    <label><span class="k">Цена, ₽</span><input class="in" name="price" type="number" min="0" value="${c.price}"></label>
+    <label><span class="k">Дней доступа</span><input class="in" name="days" type="number" min="1" value="${c.days}"></label>
+    <label><span class="k">Цена в звёздах ⭐ (0 — выкл.)</span><input class="in" name="stars" type="number" min="0" value="${c.stars}"></label>
+    <label class="wide"><span class="k">Реквизиты для перевода (видит покупатель). Пусто — бот пришлёт тебе заявку, а реквизиты ты напишешь сам</span><textarea class="in" name="details" rows="2" placeholder="Например: карта Т-Банка 2200 0000 0000 0000, Иван П.">${esc(c.details||'')}</textarea></label>
+    <button class="btn sm" type="submit">${ico('check','s')}Сохранить</button>
+  </form>
+  <details class="tg-help"><summary>Как заполнить темы группы</summary><div class="k">1. Добавь бота в группу Mundora администратором (права: закреплять и удалять сообщения).<br>2. Зайди в каждую тему и отправь <code>/fill</code> — бот сам напишет пост под эту тему и закрепит его. В General — тоже <code>/fill</code>.<br>3. Новость: <code>/news текст</code> — бот оформит и опубликует в «Новости».<br>4. Жалобы из темы «Жалобы» и заявки на покупку приходят тебе в личку от бота (после «Привязать мой Telegram»).</div></details>`;
+}
 function admDraw(){
   const el=$('#admBody');if(!el)return;
   if(ADM.err&&!ADM.data){el.innerHTML=`<div class="notice">${ico('x')}<div>Не загрузилось: ${esc(ADM.err)}</div></div>`;return}
@@ -2765,6 +2789,8 @@ function admDraw(){
     <div class="glass adm-stat"><img src="/img/crystal.webp" alt=""><div><b>${live}</b><span class="k">рабочих кодов</span></div></div>
     <div class="glass adm-stat"><img src="/img/asteroid.webp" alt=""><div><b>${bad}</b><span class="k">бан и блок</span></div></div>
   </div>
+  <div class="h3"><img class="h3i" src="/img/chat.webp" alt="">Telegram-бот Mundora<span class="more">${TGS.st&&TGS.st.bot?'@'+esc(TGS.st.bot.username):''}</span></div>
+  <div class="glass tgbox" id="tgBox">${tgHTML()}</div>
   <div class="h3"><img class="h3i" src="/img/box_open.webp" alt="">Коды доступа<span class="more">${d.envCodeUsed?'стартовый код из Vercel уже использован':'стартовый код из Vercel ещё не использован'}</span></div>
   <form class="glass adm-form" id="admCodeF">
     <input class="in mono" name="code" maxlength="4" placeholder="Авто" autocomplete="off" title="4 символа — буквы или цифры. Пусто — придумаю сам">
@@ -2781,6 +2807,7 @@ function admDraw(){
   <div class="adm-filter"><input class="in" id="admQ" placeholder="ID, ник, почта или заметка" value="${esc(ADM.q)}" inputmode="search"><div class="seg">${[['all','Все'],['admins','Админы'],['verified','С галочкой'],['active','Активные'],['frozen','Заморожены'],['blocked','Блок'],['banned','Бан']].map(([v,n])=>`<button class="${ADM.f===v?'on':''}" data-act="adm-f" data-v="${v}">${n}</button>`).join('')}</div></div>
   <div class="hl">${list.length?list.map(u=>`<button class="hi adm-u" data-act="adm-user" data-e="${esc(u.email)}"><img class="pav" src="${avaSrc(u.avatar||(u.owner?'gem_orbit':'planet'))}" alt=""><div class="tx"><b>${esc(u.name)}${u.verified?'<span class="vmini">'+ico('check','s')+'</span>':''}${u.owner?' <span class="badge admin">владелец</span>':u.admin?' <span class="badge admin">админ</span>':''}</b><small class="k"><span class="mono" style="letter-spacing:.04em">ID ${u.id??'—'}</span> · ${esc(u.email)}</small><small class="k">${ago(u.seen)} · устройств: ${u.devices}${u.until&&!u.admin?' · '+(u.until<Date.now()?'<b style="color:#fca5a5">доступ истёк</b>':'доступ до '+new Date(u.until).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):''}${u.note?' · '+esc(u.note):''}</small></div><span class="badge ${u.status}">${ST_RU[u.status]||u.status}</span></button>`).join(''):'<div class="empty">Никого не нашлось</div>'}</div>`;
   el.querySelectorAll('form input,form select').forEach(i=>{const k=i.form.id+':'+i.name;if(k in keep)i.value=keep[k];if(k===foc)i.focus()});
+  const tf=$('#tgCfg');if(tf)tf.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(tf);try{const r=await tgApi('cfg',Object.fromEntries(f));TGS.st.cfg=r.cfg;toast('Настройки бота сохранены','check')}catch(x){toast(x.message,'x')}});
   const af=$('#admAdmF');if(af)af.addEventListener('submit',async e=>{e.preventDefault();const w=new FormData(af).get('who').trim();if(!w)return;try{const r=await admApi('user',{email:w,id:w,action:'admin-add'});af.reset();toast(r.email+' — теперь админ','check');await admLoad()}catch(x){toast(x.message,'x')}});
   $('#admCodeF').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);const b=e.target.querySelector('button');b.disabled=true;try{const r=await admApi('code-new',{code:f.get('code'),max:f.get('max'),days:f.get('days'),note:f.get('note')});e.target.reset();copyText(r.code);toast('Код '+r.code+' создан и скопирован','check');await admLoad()}catch(x){toast(x.message,'x')}b.disabled=false});
   const qi=$('#admQ');qi.addEventListener('input',()=>{ADM.q=qi.value;clearTimeout(admDraw.t);admDraw.t=setTimeout(()=>{admDraw();const n=$('#admQ');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)});
@@ -2918,6 +2945,8 @@ async function aiRunActions(am,list){
 const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
 
 Object.assign(ACT,{
+  async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
+  async 'tg-link'(){try{const r=await tgApi('link',{});window.open(r.url,'_blank');toast('Открой бота и нажми «Старт» — ссылка действует 15 минут','user')}catch(e){toast(e.message,'x')}},
   'acc-logout'(){openSheet(`<h3>${ico('user')}Выйти из аккаунта?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin-bottom:14px;line-height:1.5">Данные останутся в аккаунте. На этом устройстве они будут удалены до следующего входа.</p><button class="btn" style="width:100%;justify-content:center" data-act="acc-logout-ok">Выйти</button>`)},
   'acc-logout-ok'(){accLogout()},
   'acc-sync'(){syncNow()},

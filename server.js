@@ -27,6 +27,7 @@ const H = {
   sync: () => import('./api/sync.js').then(m => m.default),
   admin: () => import('./api/admin.js').then(m => m.default),
   people: () => import('./api/people.js').then(m => m.default),
+  tg: () => import('./api/tg.js').then(m => m.handler),
   ping: () => import('./api/ping.js').then(m => m.default),
   proxy: () => import('./api/proxy.js').then(m => m.default),
   music: () => import('./api/music.js').then(m => m.default),
@@ -51,6 +52,7 @@ function route(u) {
   if (p === '/api/sync') return ['sync', u];
   if (p === '/api/admin') return ['admin', u];
   if (p === '/api/people') return ['people', u];
+  if (p === '/api/tg') return ['tg', u];
   if (p === '/tempo-ping') return ['ping', u];
   let m;
   if ((m = p.match(/^\/ai-proxy\/(.*)$/))) { const n = new URL('http://local/api/proxy'); n.searchParams.set('path', m[1]); u.searchParams.forEach((v, k) => n.searchParams.append(k, v)); return ['proxy', n]; }
