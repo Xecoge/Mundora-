@@ -257,7 +257,7 @@ document.addEventListener('click',async e=>{
   let s;try{s=await api('state')}catch(e){s={error:'Нет связи с сервером'}}
   if(s.support)ST.support=s.support;
   if(s.db===false||(s.db&&(!s.mail||(!s.code&&!s.gate&&!s.user)))){
-    const it=[[s.db,'База данных','Vercel → Storage → Create Database → <b>Upstash for Redis</b> → Connect to project'],[s.mail,'Почта для кодов','Переменные <code>SMTP_USER</code> и <code>SMTP_PASS</code> (пароль приложения Gmail)'],[s.code,'Стартовый код доступа','Переменная <code>ACCESS_CODE</code>']];
+    const it=[[s.db,'База данных','Vercel → Storage → Create Database → <b>Upstash for Redis</b> → Connect to project'],[s.mail,'Почта для кодов','Переменная <code>BREVO_API_KEY</code> (или <code>SMTP_USER</code> + <code>SMTP_PASS</code>)'],[s.code,'Стартовый код доступа','Переменная <code>ACCESS_CODE</code>']];
     $('#setupL').innerHTML=it.map(([ok,t,d])=>`<li><span class="d${ok?' y':''}">${ok?'✓':'!'}</span><div><b>${t}</b>${ok?'<span style="color:var(--green)">подключено</span>':d}</div></li>`).join('');
     return show('setup');
   }

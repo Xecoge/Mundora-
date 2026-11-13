@@ -1,12 +1,13 @@
 // TEMPO — отправка писем с кодом. Только для Node (Vercel Node.js function или локальный server.js).
 // Вариант 1 (Gmail): SMTP_USER=mundoraaiapp@gmail.com, SMTP_PASS=пароль приложения Google (16 букв).
 //   Необязательно: SMTP_HOST (smtp.gmail.com), SMTP_PORT (465), MAIL_FROM.
-// Вариант 2: RESEND_API_KEY (+ MAIL_FROM с подтверждённым доменом).
+// Вариант 2: BREVO_API_KEY (brevo.com) + MAIL_FROM — подтверждённый отправитель.
+// Вариант 3: RESEND_API_KEY (+ MAIL_FROM с подтверждённым доменом).
 import tls from 'node:tls';
 import net from 'node:net';
 
 const ENV = () => process.env;
-export const mailReady = () => !!((ENV().SMTP_USER && ENV().SMTP_PASS) || ENV().RESEND_API_KEY || ENV().MAIL_DEV);
+export const mailReady = () => !!((ENV().SMTP_USER && ENV().SMTP_PASS) || ENV().BREVO_API_KEY || ENV().RESEND_API_KEY || ENV().MAIL_DEV);
 
 const b64 = s => Buffer.from(s, 'utf8').toString('base64');
 const wrap = s => s.replace(/.{1,76}/g, '$&\r\n');
@@ -79,6 +80,12 @@ export async function sendMail(to, { subject, text, html }) {
   const from = e.MAIL_FROM || e.SMTP_USER || 'mundoraaiapp@gmail.com', fromName = e.MAIL_FROM_NAME || 'TEMPO';
   if (e.SMTP_USER && e.SMTP_PASS) {
     return smtp({ host: e.SMTP_HOST || 'smtp.gmail.com', port: +(e.SMTP_PORT || 465), user: e.SMTP_USER, pass: String(e.SMTP_PASS).replace(/\s+/g, ''), from, fromName, to, subject, text, html });
+  }
+  if (e.BREVO_API_KEY) {
+    // Brevo (brevo.com): ключ из SMTP & API → API Keys; отправитель MAIL_FROM должен быть подтверждён в Brevo → Senders
+    const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': e.BREVO_API_KEY.trim(), 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ sender: { name: fromName, email: e.MAIL_FROM || 'mundoraaiapp@gmail.com' }, to: [{ email: to }], subject, htmlContent: html, textContent: text }) });
+    if (!r.ok) throw new Error('Brevo: ' + (await r.text()).slice(0, 200));
+    return;
   }
   if (e.RESEND_API_KEY) {
     const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + e.RESEND_API_KEY, 'content-type': 'application/json' }, body: JSON.stringify({ from: `${fromName} <${from}>`, to: [to], subject, text, html }) });
