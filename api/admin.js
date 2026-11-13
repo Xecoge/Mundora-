@@ -1,0 +1,57 @@
+// TEMPO — админ-панель (только для ADMIN_EMAIL): коды доступа и аккаунты.
+import { kv, kvMulti, jget, jset, pairs } from './_store.mjs';
+import { guard, json, getUser, putUser, dropSessions, ADMIN } from './_auth.mjs';
+export const config = { runtime: 'edge' };
+
+const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const normCode = c => String(c || '').trim().toUpperCase().replace(/[^0-9A-ZА-ЯЁ]/g, '');
+const genCode = () => Array.from(crypto.getRandomValues(new Uint8Array(4)), b => ALPH[b % ALPH.length]).join('');
+
+export default async function handler(req) {
+  const g = await guard(req, true); if (g.res) return g.res;
+  if (!g.user.admin) return json({ error: 'Только для администратора' }, 403);
+  const url = new URL(req.url), a = url.searchParams.get('a') || '';
+  const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+  try {
+    if (a === 'overview') {
+      const [emails, codes] = await kvMulti([['SMEMBERS', 'users'], ['SMEMBERS', 'codes']]);
+      const res = await kvMulti([...emails.map(e => ['GET', 'u:' + e]), ...emails.map(e => ['SCARD', 'us:' + e]), ...emails.map(e => ['HLEN', 'd:' + e]), ...codes.map(c => ['GET', 'code:' + c])]);
+      const n = emails.length;
+      const users = emails.map((e, i) => { const u = res[i] ? JSON.parse(res[i]) : { email: e }; return { email: e, status: u.status || 'active', created: u.created, seen: u.seen, note: u.note || '', devices: res[n + i] || 0, keys: res[2 * n + i] || 0, admin: e === ADMIN() }; })
+        .sort((x, y) => (y.seen || 0) - (x.seen || 0));
+      const cl = codes.map((c, i) => { const r = res[3 * n + i]; return r ? { code: c, ...JSON.parse(r) } : null; }).filter(Boolean).sort((x, y) => y.created - x.created);
+      const envUsed = await kv('GET', 'gate:env:' + normCode((typeof process !== 'undefined' && process.env.ACCESS_CODE) || ''));
+      return json({ users, codes: cl, envCodeUsed: !!envUsed, me: g.user.email });
+    }
+    if (a === 'code-new') {
+      let c = normCode(body.code) || genCode();
+      if (c.length !== 4) return json({ error: 'Код — ровно 4 символа' }, 400);
+      if (await kv('EXISTS', 'code:' + c)) return json({ error: 'Такой код уже есть' }, 409);
+      const max = Math.max(0, Math.min(10000, parseInt(body.max ?? 1, 10) || 0));
+      const rec = { max, used: 0, note: String(body.note || '').slice(0, 80), created: Date.now() };
+      await kvMulti([['SET', 'code:' + c, JSON.stringify(rec)], ['SADD', 'codes', c]]);
+      return json({ ok: true, code: c, ...rec });
+    }
+    if (a === 'code-del') {
+      const c = normCode(body.code);
+      await kvMulti([['DEL', 'code:' + c], ['SREM', 'codes', c]]);
+      return json({ ok: true });
+    }
+    if (a === 'user') {
+      const email = String(body.email || '').toLowerCase(), act = body.action;
+      if (email === ADMIN() && act !== 'note') return json({ error: 'Свой аккаунт админа менять нельзя' }, 400);
+      const u = await getUser(email); if (!u) return json({ error: 'Аккаунт не найден' }, 404);
+      const ST = { freeze: 'frozen', block: 'blocked', ban: 'banned', activate: 'active' };
+      if (ST[act]) { u.status = ST[act]; u.statusAt = Date.now(); await putUser(u); return json({ ok: true, status: u.status }); }
+      if (act === 'logout') { await dropSessions(email); return json({ ok: true }); }
+      if (act === 'note') { u.note = String(body.note || '').slice(0, 120); await putUser(u); return json({ ok: true }); }
+      if (act === 'delete') {
+        await dropSessions(email);
+        await kvMulti([['DEL', 'u:' + email], ['DEL', 'd:' + email], ['DEL', 'dt:' + email], ['DEL', 'dv:' + email], ['DEL', 'p:' + email], ['SREM', 'users', email]]);
+        return json({ ok: true });
+      }
+      return json({ error: 'Неизвестное действие' }, 400);
+    }
+    return json({ error: 'Неизвестный запрос' }, 404);
+  } catch (e) { return json({ error: e.message }, 500); }
+}

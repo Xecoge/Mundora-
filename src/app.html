@@ -501,6 +501,49 @@ body.noplay .composer{bottom:16px}
   .hub small{max-width:64%}
   .pgrid{grid-template-columns:repeat(2,1fr);gap:12px}
 }
+.accbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:18px;background:linear-gradient(110deg,rgba(56,189,248,.14),rgba(139,92,246,.12));border:1px solid rgba(125,211,252,.3);margin-bottom:16px}
+.accbar[hidden]{display:none}
+.accbar img{width:40px;height:40px;object-fit:contain;flex:none}
+.accbar b{display:block;font-size:13.5px}.accbar small{color:#b9d9ea;font-size:12.5px}
+.accbar>div{flex:1;min-width:0}
+.acc{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:linear-gradient(125deg,rgba(76,29,149,.5),rgba(124,58,237,.16));border:1px solid rgba(167,139,250,.28);margin-bottom:4px}
+.acc img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(124,58,237,.55));flex:none}
+.acc b{display:block;font-size:14.5px;word-break:break-all}.acc small{color:#bfb5e0;font-size:12.5px}
+.syncl{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#cfc6ea;padding:10px 2px 12px}
+.syncl img{width:30px;height:30px;object-fit:contain;flex:none}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex:none}
+.sdot.busy{background:var(--v2);box-shadow:0 0 8px var(--v2);animation:sk 1s infinite}
+.sdot.bad{background:var(--red);box-shadow:0 0 8px var(--red)}
+.opt .oi{width:24px;height:24px;object-fit:contain;flex:none}
+.badge{font-size:11px;font-weight:650;padding:3px 9px;border-radius:99px;white-space:nowrap;display:inline-block;vertical-align:middle}
+.badge.active{background:rgba(74,222,128,.14);color:#86efac}
+.badge.frozen{background:rgba(56,189,248,.16);color:#7dd3fc}
+.badge.blocked{background:rgba(251,146,60,.16);color:#fdba74}
+.badge.banned{background:rgba(248,113,113,.16);color:#fca5a5}
+.badge.admin{background:rgba(139,92,246,.25);color:#ddd6fe;margin-left:6px}
+.adm-ph>img{height:170px;bottom:-6px;right:14px}
+.adm-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.adm-stat{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.adm-stat img{width:50px;height:50px;object-fit:contain;flex:none;filter:drop-shadow(0 6px 12px rgba(124,58,237,.4))}
+.adm-stat b{font-size:24px;display:block;line-height:1.1}
+.h3 .h3i{width:30px;height:30px;object-fit:contain}
+.adm-form{display:grid;grid-template-columns:100px 140px minmax(0,1fr) auto;gap:10px;padding:14px;margin-bottom:10px}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
+.adm-codes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.adm-code{display:flex;align-items:center;gap:12px;padding:12px 10px 12px 14px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+.adm-code b{font-size:20px;font-weight:800;color:#e9e2ff;text-shadow:0 0 14px rgba(167,139,250,.5)}
+.adm-code .tx{flex:1;min-width:0;display:flex;flex-direction:column;font-size:12.5px}
+.adm-code .tx small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-code.done{opacity:.5}
+.adm-filter{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.adm-filter .in{flex:1;min-width:200px}
+.adm-u{width:100%;text-align:left}
+.adm-u .tx b{display:block;word-break:break-all;font-size:14px}
+.acts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.act{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 11px;border-radius:12px;background:rgba(139,92,246,.12);border:1px solid rgba(167,139,250,.22);color:#e4dcfb}
+.act.ok .i{color:var(--green)}.act.err{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.28)}.act.err .i{color:var(--red)}
+a.act:hover{background:rgba(139,92,246,.2)}
+@media (max-width:760px){.h3:has(.h3i){flex-wrap:wrap}.h3:has(.h3i) .more{width:100%;margin:0;font-size:12px}.adm-stats{grid-template-columns:1fr 1fr}.adm-form{grid-template-columns:1fr 1fr}.adm-form .note,.adm-form .btn{grid-column:1/-1;justify-content:center}.adm-ph>img{height:120px}.adm-stat{padding:12px}.adm-stat img{width:40px;height:40px}.adm-stat b{font-size:20px}}
 </style>
 </head>
 <body>
@@ -590,6 +633,7 @@ body.noplay .composer{bottom:16px}
       <a class="search-pill" href="#search"><svg class="i s"><use href="#i-search"/></svg>Трек, артист, ремикс или жанр…</a>
       <button class="ava" data-act="profile"><span class="nm" id="uName">Профиль</span><span class="pic"><img alt="" id="avaImg"></span></button>
     </header>
+    <div class="accbar" id="accBar" hidden></div>
     <div id="view"></div>
   </main>
 </div>
@@ -699,8 +743,29 @@ const curMonth=()=>today().slice(0,7);
 const shiftMonth=(k,n)=>{const [y,m]=k.split('-').map(Number);const d=new Date(y,m-1+n,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
 const mLabel=k=>{const [y,m]=k.split('-').map(Number);return `${MONTHS_F[m-1]} ${y}`};
 
+/* ===================== аккаунт: кто вошёл (сервер кладёт TEMPO_USER в страницу) ===================== */
+const USR=window.TEMPO_USER||null;
+const SYNC_LIST=['likes','playlists','plays','recent','taste','banned','imported','ops','hist','seeded','prefs','notes','chat','chatFin','cryptoFav','cryptoCur','cryptoType','cryptoRange'];
+const SYNC_SET=new Set(SYNC_LIST);
+const SY={ver:0,dirty:new Set(),busy:false,again:false,t:0,last:0,err:'',frozen:!!(USR&&USR.status==='frozen'),iv:0,pend:false};
+(()=>{
+  if(!USR)return;
+  try{
+    const owner=localStorage.getItem('tempo:owner');
+    // на этом устройстве раньше был другой аккаунт — его данные не смешиваем
+    if(owner&&owner!==USR.email)SYNC_LIST.concat(['syncVer','syncDirty']).forEach(k=>localStorage.removeItem('tempo:'+k));
+    SY.ver=+(localStorage.getItem('tempo:syncVer')||0);
+    const d=JSON.parse(localStorage.getItem('tempo:syncDirty')||'null');
+    if(Array.isArray(d))d.forEach(k=>SY.dirty.add(k));
+    else if(!owner)SYNC_LIST.forEach(k=>{if(localStorage.getItem('tempo:'+k)!=null)SY.dirty.add(k)}); // первый вход: объединить данные этого браузера с аккаунтом
+    localStorage.setItem('tempo:owner',USR.email);
+    localStorage.setItem('tempo:syncDirty',JSON.stringify([...SY.dirty]));
+  }catch(e){}
+})();
+function syncMark(k){if(!USR||!SYNC_SET.has(k))return;SY.dirty.add(k);try{localStorage.setItem('tempo:syncDirty',JSON.stringify([...SY.dirty]))}catch(e){}clearTimeout(SY.t);SY.t=setTimeout(()=>syncNow(),1200)}
+
 /* ===================== storage ===================== */
-const LS={get(k,d){try{const v=localStorage.getItem('tempo:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('tempo:'+k,JSON.stringify(v))}catch(e){}}};
+const LS={get(k,d){try{const v=localStorage.getItem('tempo:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{const s=JSON.stringify(v);if(localStorage.getItem('tempo:'+k)===s)return;localStorage.setItem('tempo:'+k,s);syncMark(k)}catch(e){}}};
 const KEYS=['likes','playlists','plays','recent','taste','banned','imported','ops','hist','seeded','vol','prefs'];
 const S={likes:{},playlists:[],plays:[],recent:[],taste:{genre:{},mood:{},tag:{},artist:{},artistName:{},events:0},banned:{},imported:[],ops:[],hist:[],seeded:false,vol:80,prefs:{}};
 KEYS.forEach(k=>{const v=LS.get(k,undefined);if(v!==undefined)S[k]=v});
@@ -1412,7 +1477,7 @@ const pcMini=()=>{const v=pnum(PS.b)*pnum(PS.a)/100;return isFinite(v)?money(v):
 const NAV_M=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Плейлисты'],['remixes','disc','Ремиксы'],['library','lib','Медиатека']];
 const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n])=>`<a class="it" href="#${v}" data-v="${v}" title="${n}">${ico(i)}<span class="lt">${n}</span></a>`;
-$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки']].map(navItem).join('');
+$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
 $('#tabs').innerHTML=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Моё'],['finance','wallet','Финансы']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
 const FIN=['finance','ai','crypto','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
@@ -1706,6 +1771,7 @@ function chatSave(){
     CH.msgs.forEach((m,i)=>{if(i<CH.msgs.length-4)(m.files||[]).forEach(f=>{delete f.data;delete f.pages})});
     try{localStorage.setItem('tempo:chat',JSON.stringify(CH.msgs))}catch(e2){}
   }
+  syncMark('chat');
 }
 const LIBS={};
 function loadLib(url,glob){if(window[glob])return Promise.resolve(window[glob]);if(LIBS[url])return LIBS[url];return LIBS[url]=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=url;sc.onload=()=>window[glob]?res(window[glob]):rej(new Error('библиотека не загрузилась'));sc.onerror=()=>{delete LIBS[url];rej(new Error('нет доступа к библиотеке для чтения файла'))};document.head.appendChild(sc)})}
@@ -1788,14 +1854,16 @@ function finContext(){
 const FIN_RX=/расход|доход|бюджет|деньг|трат|зарплат|баланс|категор|операц|финанс|₽|руб|сэконом|копи|накоп|кредит|вклад|долг|потрат|сколько я|мои /i;
 function finRelevant(){return CH.msgs.filter(m=>m.role==='user').slice(-3).some(m=>FIN_RX.test(m.text||''))}
 function chatSystem(){
-  return `Ты — ИИ-помощник в разделе «Финансы» сайта TEMPO. Отвечай на языке пользователя (по умолчанию по-русски), понятно и по делу.
-Ты умеешь: считать и проверять расчёты, разбирать бюджет, доходы и расходы, проценты, вклады и кредиты, спред; читать документы, таблицы, код и любые присланные файлы; понимать изображения (скриншоты, фото чеков, графики, документы).
-Это живой чат: отвечай сразу и по делу, как собеседник. На простые сообщения — 1–3 предложения. Подробно, со списками и таблицами — только когда задача этого требует или просят. Расчёты проверяй, но не расписывай лишнего.
-Оформление — Markdown, когда оно помогает: списки, таблицы, **жирный** для главного. Числа пиши с пробелами между разрядами, валюту — ₽, если не указано иное. Не придумывай данные: если чего-то не хватает — скажи, что нужно уточнить.
-Сегодня ${new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}.`+(CH.useFin&&finRelevant()?`\n\nДанные пользователя из TEMPO (используй, если вопрос про его финансы):\n${finContext()}`:'');
+  return `Ты — ИИ-помощник сайта TEMPO: музыка (поиск, «Волна», плейлисты, лайки), финансы (доходы и расходы, калькуляторы, проценты, спред, таблицы), заметки и криптовалюты. Отвечай на языке пользователя (по умолчанию по-русски), понятно и по делу.
+Ты умеешь: считать и проверять расчёты, разбирать бюджет, проценты, вклады и кредиты; советовать музыку; вести заметки и списки дел; читать документы, таблицы, код и любые присланные файлы; понимать изображения (скриншоты, фото чеков, графики). И главное — сам выполняешь действия на сайте.
+Это живой чат: отвечай сразу, как собеседник. На простые сообщения — 1–3 предложения. Подробно, со списками и таблицами — только когда задача этого требует или просят.
+Оформление — Markdown, когда помогает. Числа пиши с пробелами между разрядами, валюту — ₽, если не указано иное. Не придумывай данные: если чего-то не хватает — уточни.
+Сегодня ${new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})} (${today()}).
+
+${AI_ACTIONS_HELP}`+(CH.useFin?`\n\n## Данные сайта сейчас\n${siteContext()}`:`\n\n(Пользователь выключил доступ ИИ к своим данным — для изменения существующих записей попроси включить «Мои данные».)`);
 }
 function apiContent(m,withImages){
-  if(m.role==='assistant')return m.text||'(ответ пуст)';
+  if(m.role==='assistant')return (m.text||'(ответ пуст)')+(m.acts&&m.acts.length?'\n\n[Выполнено на сайте: '+m.acts.map(x=>(x.s==='ok'?'✓ ':'✗ ')+x.t).join('; ')+']':'');
   let text=m.text||'';const imgs=[];
   (m.files||[]).forEach(f=>{
     if(f.kind==='image'){if(withImages&&f.data)imgs.push(f.data);text+=`\n\n[Изображение: ${f.name}${f.note?' — '+f.note:''}${!withImages||!f.data?' (было в предыдущем сообщении)':''}]`}
@@ -1854,7 +1922,7 @@ function msgHTML(m,i){
   const live=!!m.pending,hasAns=!!(m.text&&m.text.trim());
   const think=m.reasoning?`<details class="think"${live&&!hasAns?' open':''}><summary>${ico(live&&!hasAns?'loader':'spark',live&&!hasAns?'ldg s':'s')}<span>${live&&!hasAns?'Рассуждает…':'Рассуждение'+(m.secs?` · ${m.secs} с`:'')}</span>${ico('chev','s chev')}</summary><div class="th md">${md(m.reasoning||'')||'<span class="muted">Думаю над задачей…</span>'}</div></details>`:'';
   return `<div class="msg a" data-i="${i}"><div class="av"><img src="${IMG.thumbs}" alt=""></div><div class="bub">${think}
-    <div class="ans md">${hasAns?md(m.text):live?'<span class="dots"><i></i><i></i><i></i></span>':''}</div>
+    <div class="ans md">${hasAns?md(aiShown(m.text,live)):live?'<span class="dots"><i></i><i></i><i></i></span>':''}</div>${actsHTML(m.acts)}
     ${m.error?`<div class="notice" style="margin-top:8px">${ico('x')}<div style="flex:1;word-break:break-word">Ошибка: ${esc(m.error)}</div><button class="btn sm" data-act="chat-retry" data-i="${i}">${ico('refresh')}Ещё раз</button></div>`:''}
     ${!live&&!m.error?`<div class="mact"><button class="ib" data-act="chat-copy" data-i="${i}" title="Копировать">${ico('copy','s')}</button><button class="ib" data-act="chat-retry" data-i="${i}" title="Ответить заново">${ico('refresh','s')}</button>${m.stopped?'<span class="k">остановлено</span>':''}</div>`:''}
   </div></div>`;
@@ -1887,12 +1955,14 @@ async function chatRun(am,effort='medium'){
   try{for(let a=0;;a++){try{await aiStream(msgs,{signal:CH.ctl.signal,effort,onDelta:(c,r)=>{if(c)raw+=c;if(r)nat+=r;upd()}});break}catch(e){if(e.name!=='AbortError'&&isNetErr(e)&&!e.provider&&!raw&&!nat&&a<1){await new Promise(r=>setTimeout(r,700));continue}throw e}}}
   catch(e){if(e.name==='AbortError')am.stopped=true;else am.error=raw?'Связь оборвалась — ответ может быть неполным. Нажми «Ещё раз».':humanErr(e)}
   const {th,ans}=splitThink(raw);am.text=ans.trim();am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);
-  if(!am.text&&!am.error&&!am.stopped)am.error='Модель вернула пустой ответ';
+  const AX=aiExtract(am.text);am.text=AX.text;
+  if(!am.text&&!AX.list.length&&!am.error&&!am.stopped)am.error='Модель вернула пустой ответ';
   delete am.pending;CH.busy=false;CH.ctl=null;setBusy(false);chatSave();cancelAnimationFrame(paintRaf);paintRaf=0;chatPaint(am);
+  if(AX.list.length&&!am.stopped)await aiRunActions(am,AX.list);
 }
 V.ai=()=>`<div class="chat" id="chatBox">
   <div class="chat-top"><div class="h2">${ico('chat')}ИИ-помощник</div>${CH.msgs.length?`<button class="btn ghost sm" data-act="chat-new">${ico('plus')}Новый чат</button>`:''}</div>
-  ${CH.msgs.length?'':`<div class="chat-empty"><img src="${IMG.thumbs}" alt=""><h2>Спроси что угодно</h2><p>Пиши вопрос, прикрепляй файлы любого типа и изображения. Перед ответом ИИ всегда рассуждает. ${CH.useFin?'Он видит сводку твоих операций из «Доходов и расходов».':''}</p></div>`}
+  ${CH.msgs.length?'':`<div class="chat-empty"><img src="${IMG.thumbs}" alt=""><h2>Спроси или попроси сделать</h2><p>ИИ сам управляет сайтом: «запиши расход 450 ₽ на кофе», «включи что-нибудь бодрое», «создай заметку со списком покупок», «добавь биткоин в избранное». Файлы и изображения тоже можно прикреплять.</p></div>`}
   <div class="msgs" id="msgs">${CH.msgs.map(msgHTML).join('')}</div>
   <form class="composer" id="chatF">
     <div class="att" id="att"></div>
@@ -1901,7 +1971,7 @@ V.ai=()=>`<div class="chat" id="chatBox">
       <textarea id="chatIn" rows="1" placeholder="Сообщение или файл…">${esc(CH.draft)}</textarea>
       <button class="send" id="chatSend" type="submit" title="Отправить">${ico('send')}</button>
     </div>
-    <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои финансы</button>${AI.on?'':'<span class="k">ИИ не настроен на сервере</span>'}</div>
+    <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои данные</button>${AI.on?'':'<span class="k">ИИ не настроен на сервере</span>'}</div>
   </form></div>`;
 V.after.ai=()=>{
   const f=$('#chatF'),inp=$('#chatIn'),box=$('#chatBox');
@@ -2408,11 +2478,15 @@ const ACT={
   profile(){
     const g=topOf(S.taste.genre,3).map(x=>gRu(x[0]));
     openSheet(`<h3><span class="ava"><span class="pic"><img src="${IMG.crown}" alt=""></span></span>Профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    ${USR?`<div class="acc"><img src="/img/planet2.webp" alt=""><div style="min-width:0;flex:1"><b>${esc(USR.email)}</b><small>${USR.admin?'администратор · ':''}${{active:'аккаунт активен',frozen:'аккаунт заморожен'}[USR.status]||USR.status}</small></div></div>
+    <div class="syncl"><img src="/img/orbit.webp" alt=""><span class="sdot" id="syncDot"></span><span id="syncSt" style="flex:1">${esc(syncText())}</span><button class="btn ghost sm" data-act="acc-sync">${ico('refresh','s')}Сейчас</button></div>
+    ${USR.admin?`<button class="opt" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt="">Админ-панель<small class="muted" style="margin-left:auto">коды и аккаунты</small></button>`:''}`:''}
     <div class="stat" style="grid-template-columns:1fr 1fr 1fr"><div class="glass" style="padding:12px"><div class="k">Лайков</div><b>${Object.keys(S.likes).length}</b></div><div class="glass" style="padding:12px"><div class="k">Плейлистов</div><b>${S.playlists.length}</b></div><div class="glass" style="padding:12px"><div class="k">Операций</div><b>${S.ops.length}</b></div></div>
     <div class="k" style="margin-bottom:6px">Твои жанры: ${esc(g.join(', ')||'ещё не определены')}</div>
-    <p class="k" style="margin:10px 0 14px;line-height:1.5">Данные хранятся в этом браузере. Сделай копию, чтобы перенести их на другое устройство.</p>
+    <p class="k" style="margin:10px 0 8px;line-height:1.5">${USR?'Всё сохраняется в аккаунте и одинаково на телефоне и ПК.':'Данные хранятся в этом браузере.'}</p>
     <button class="opt" data-act="backup">${ico('copy')}Скопировать резервную копию</button>
-    <button class="opt" data-act="restore">${ico('import')}Восстановить из копии</button>`)},
+    <button class="opt" data-act="restore">${ico('import')}Восстановить из копии</button>
+    ${USR?`<button class="opt" data-act="acc-logout" style="color:#fca5a5">${ico('back')}Выйти из аккаунта</button>`:''}`)},
   backup(){copyText(JSON.stringify(Object.fromEntries(KEYS.map(k=>[k,S[k]]))))},
   restore(){openSheet(`<h3>${ico('import')}Восстановить<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><textarea class="in" id="rsT" placeholder="Вставь резервную копию"></textarea><button class="btn" data-act="restore-ok" style="width:100%;justify-content:center;margin-top:12px">Восстановить</button>`)},
   'restore-ok'(){try{const d=JSON.parse($('#rsT').value);KEYS.forEach(k=>{if(d[k]!==undefined)S[k]=d[k]});save();closeSheet();homeMix=null;render();toast('Данные восстановлены')}catch(e){toast('Не похоже на резервную копию','x')}},
@@ -2459,7 +2533,7 @@ const ACT={
   'n-ai-cancel'(){NT.ai=null;const b=$('#nAiOut');if(b)b.innerHTML=''},
   'n-ai-apply'(el){noteApply(el.dataset.m)},
   'chat-new'(){if(CH.busy)CH.ctl&&CH.ctl.abort();CH.msgs=[];chatSave();render()},
-  'chat-fin'(el){CH.useFin=!CH.useFin;LS.set('chatFin',CH.useFin);el.classList.toggle('on',CH.useFin);toast(CH.useFin?'ИИ видит сводку твоих операций':'ИИ не видит твои операции','wallet')},
+  'chat-fin'(el){CH.useFin=!CH.useFin;LS.set('chatFin',CH.useFin);el.classList.toggle('on',CH.useFin);toast(CH.useFin?'ИИ видит твои данные на сайте и может их менять':'ИИ не видит твои данные','wallet')},
   'chat-copy'(el){const m=CH.msgs[+el.dataset.i];if(m)copyText(m.text||'')},
   'chat-retry'(el){if(CH.busy)return;const i=+el.dataset.i;CH.msgs=CH.msgs.slice(0,i);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);chatDraw();toBottom();chatRun(am,'fast')},
   'att-rm'(el){CH.files=CH.files.filter(f=>f.id!==el.dataset.id);drawAtt()},
@@ -2468,6 +2542,316 @@ const ACT={
   'ai-model'(el){AI.setModel(el.dataset.m);$$('#aiList [data-act=ai-model]').forEach(b=>b.innerHTML=ico(b===el?'check':'spark')+esc(b.dataset.m));toast('Модель: '+el.dataset.m,'spark')},
   async 'ai-models'(){const box=$('#aiList');box.innerHTML=`<div class="k">${ico('loader','ldg s')} Загружаю модели…</div>`;try{const ms=await AI.listModels();box.innerHTML=ms.map(m=>`<button class="opt" data-act="ai-model" data-m="${esc(m)}">${ico(m===AI.model?'check':'spark')}${esc(m)}</button>`).join('')||'<div class="k">Провайдер не вернул список</div>'}catch(e){box.innerHTML='<div class="k">Не удалось получить список моделей — проверь apiKey и baseURL</div>'}}
 };
+/* ===================== синхронизация с аккаунтом ===================== */
+const SYNC_MAX=900000;
+const SYNC_VIEWS={likes:/^(home|playlists|pl-|library|flow)/,playlists:/^(home|playlists|pl-)/,plays:/^(home|library)/,recent:/^home/,imported:/^(library|playlists)/,ops:/^(finance|budget|tables|home)/,hist:/^(history|calc|percent|spread)/,notes:/^(notes|note-)/,chat:/^ai$/,chatFin:/^ai$/,cryptoFav:/^(crypto|coin-)/,cryptoCur:/^(crypto|coin-)/,prefs:/^(flow|home)/};
+function syncLocal(k){try{const s=localStorage.getItem('tempo:'+k);return s==null?undefined:JSON.parse(s)}catch(e){return undefined}}
+function syncPack(k,v){
+  if(k!=='chat'||!Array.isArray(v))return v;
+  // в облако чат уходит без тяжёлых вложений (картинки остаются превью)
+  let msgs=v.filter(m=>!m.pending).map(m=>m.files&&m.files.length?{...m,files:m.files.map(f=>({name:f.name,type:f.type,size:f.size,kind:f.kind,note:f.note,thumb:f.thumb,text:f.text&&f.text.length>6000?f.text.slice(0,6000)+'\n…[сокращено]':f.text}))}:m);
+  while(msgs.length>2&&JSON.stringify(msgs).length>SYNC_MAX)msgs=msgs.slice(2);
+  return msgs;
+}
+const itemKey=(k,x)=>x==null?'':typeof x!=='object'?String(x):k==='chat'?x.role+':'+x.ts:x.id!=null?String(x.id):x.t&&x.t.id!=null?'t:'+x.t.id:JSON.stringify(x);
+const itemT=x=>x&&typeof x==='object'?(x.updated||x.ts||x.created||0):0;
+const SYNC_CAP={recent:80,plays:150,hist:300,chat:40};
+function syncMerge(k,loc,rem){
+  if(rem==null)return loc;if(loc==null)return rem;
+  if(Array.isArray(loc)&&Array.isArray(rem)){
+    const m=new Map(rem.map(x=>[itemKey(k,x),x]));const out=[],seen=new Set();
+    for(const x of loc){const key=itemKey(k,x);const r=m.get(key);out.push(r&&itemT(r)>itemT(x)?r:x);seen.add(key)}
+    for(const x of rem){const key=itemKey(k,x);if(!seen.has(key)){out.push(x);seen.add(key)}}
+    if(k==='plays')out.sort((a,b)=>(b.ts||0)-(a.ts||0));
+    if(k==='chat')out.sort((a,b)=>(a.ts||0)-(b.ts||0));
+    const cap=SYNC_CAP[k];return cap?(k==='chat'?out.slice(-cap):out.slice(0,cap)):out;
+  }
+  if(typeof loc==='object'&&typeof rem==='object'&&!Array.isArray(loc)&&!Array.isArray(rem)){
+    if(k==='taste')return (loc.events||0)>=(rem.events||0)?loc:rem;
+    return {...rem,...loc};
+  }
+  return loc;
+}
+// чат с другого устройства: сохранить у себя полные вложения тех же сообщений
+function syncKeepFiles(rem,loc){
+  if(!Array.isArray(rem)||!Array.isArray(loc))return rem;
+  const L=new Map(loc.map(m=>[m.role+':'+m.ts,m]));
+  return rem.map(m=>{const l=L.get(m.role+':'+m.ts);if(!l||!l.files||!m.files)return m;return{...m,files:m.files.map(f=>{const lf=l.files.find(x=>x.name===f.name);return lf?{...f,...lf}:f})}});
+}
+function syncApplyMem(k,v){
+  if(KEYS.includes(k)){if(v!==undefined)S[k]=v;if(k==='taste'){S.taste=S.taste||{genre:{},mood:{},tag:{},artist:{},artistName:{},events:0};S.taste.lang=S.taste.lang||{}}if(k==='ops')S.ops=(S.ops||[]).filter(o=>!o.demo);if(k==='likes'||k==='banned')homeMix=null}
+  else if(k==='notes'){NT.list=Array.isArray(v)?v:[];if(NT.cur)NT.cur=NT.list.find(n=>n.id===NT.cur.id)||NT.cur}
+  else if(k==='chat'){if(!CH.busy)CH.msgs=Array.isArray(v)?v:[]}
+  else if(k==='chatFin')CH.useFin=v!==false;
+  else if(k==='cryptoFav')CR.fav=Array.isArray(v)?v:[];
+  else if(k==='cryptoCur')CR.cur=v||'usd';
+  else if(k==='cryptoType')CR.type=v;
+  else if(k==='cryptoRange')CR.range=v;
+}
+function syncRefresh(keys){
+  try{UI.likeState()}catch(e){}
+  const r=route();if(!keys.some(k=>SYNC_VIEWS[k]&&SYNC_VIEWS[k].test(r)))return;
+  const a=document.activeElement;
+  if(a&&a.matches&&a.matches('#view input,#view textarea,#view [contenteditable]')||$('#sheet').classList.contains('open')||(r==='ai'&&CH.busy)){SY.pend=true;return}
+  const y=scrollY;render();scrollTo(0,y);
+}
+document.addEventListener('focusout',()=>{if(SY.pend)setTimeout(()=>{const a=document.activeElement;if(SY.pend&&!(a&&a.matches&&a.matches('#view input,#view textarea'))){SY.pend=false;const y=scrollY;render();scrollTo(0,y)}},300)});
+async function syncPull(){
+  const r=await fetch('/api/sync?since='+SY.ver,{cache:'no-store',credentials:'same-origin'});
+  if(r.status===401||r.status===403){location.reload();return}
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);
+  if(j.status&&j.status!==USR.status){USR.status=j.status;SY.frozen=j.status==='frozen';accBar()}
+  const changed=[];
+  for(const [k,rv] of Object.entries(j.data||{})){
+    if(!SYNC_SET.has(k))continue;
+    const lv=syncLocal(k);
+    let nv=SY.dirty.has(k)?syncMerge(k,lv,rv):rv;
+    if(k==='chat')nv=syncKeepFiles(nv,lv);
+    const s=JSON.stringify(nv);
+    if(s!==localStorage.getItem('tempo:'+k)){try{localStorage.setItem('tempo:'+k,s)}catch(e){}syncApplyMem(k,nv);changed.push(k)}
+  }
+  SY.ver=+j.ver||0;try{localStorage.setItem('tempo:syncVer',String(SY.ver))}catch(e){}
+  if(changed.length)syncRefresh(changed);
+}
+async function syncPush(){
+  if(!SY.dirty.size||SY.frozen)return;
+  const keys=[...SY.dirty],set={},snap={};
+  for(const k of keys){const raw=localStorage.getItem('tempo:'+k);snap[k]=raw;if(raw==null)continue;try{set[k]=syncPack(k,JSON.parse(raw))}catch(e){}}
+  const r=await fetch('/api/sync',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({set}),credentials:'same-origin'});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===423){SY.frozen=true;accBar();return}
+  if(r.status===401||r.status===403){location.reload();return}
+  if(!r.ok)throw new Error(j.error||'HTTP '+r.status);
+  keys.forEach(k=>{if(localStorage.getItem('tempo:'+k)===snap[k]&&!(j.skipped||[]).includes(k))SY.dirty.delete(k)});
+  try{localStorage.setItem('tempo:syncDirty',JSON.stringify([...SY.dirty]))}catch(e){}
+  if(+j.ver===SY.ver+1){SY.ver=+j.ver;try{localStorage.setItem('tempo:syncVer',String(SY.ver))}catch(e){}}
+}
+async function syncNow(){
+  if(!USR)return;if(SY.busy){SY.again=true;return}
+  SY.busy=true;syncUI();
+  try{await syncPull();await syncPush();SY.err='';SY.last=Date.now()}catch(e){SY.err=isNetErr(e)?'нет связи':(e.message||String(e))}
+  SY.busy=false;syncUI();
+  if(SY.again){SY.again=false;setTimeout(syncNow,250)}
+}
+function syncText(){
+  if(SY.frozen)return 'Аккаунт заморожен — изменения не сохраняются';
+  if(SY.busy)return 'Синхронизирую…';
+  if(SY.err)return 'Не синхронизировано: '+SY.err;
+  if(SY.dirty.size)return 'Есть несохранённые изменения';
+  return SY.last?'Синхронизировано · '+new Date(SY.last).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'Ожидает синхронизации';
+}
+function syncUI(){const el=$('#syncSt');if(el)el.textContent=syncText();const d=$('#syncDot');if(d)d.className='sdot'+(SY.err?' bad':SY.busy?' busy':'')}
+function syncStart(){
+  if(!USR)return;
+  syncNow();
+  SY.iv=setInterval(()=>{if(document.visibilityState==='visible'){syncNow();if(route()==='admin'&&!$('#sheet').classList.contains('open')&&!(document.activeElement&&document.activeElement.matches('#admBody input')))admLoad()}},15000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncNow()});
+  addEventListener('online',()=>syncNow());
+  addEventListener('pagehide',()=>{
+    if(!SY.dirty.size||SY.frozen)return;
+    const set={};SY.dirty.forEach(k=>{const raw=localStorage.getItem('tempo:'+k);if(raw!=null)try{set[k]=syncPack(k,JSON.parse(raw))}catch(e){}});
+    const b=JSON.stringify({set});if(b.length<60000)try{navigator.sendBeacon('/api/sync',new Blob([b],{type:'application/json'}))}catch(e){}
+  });
+}
+function accBar(){
+  const el=$('#accBar');if(!el)return;
+  const st=USR&&USR.status;
+  if(st!=='frozen'){el.hidden=true;return}
+  const sub=encodeURIComponent('TEMPO: аккаунт заморожен '+USR.email);
+  el.hidden=false;el.innerHTML=`<img src="/img/crystal.webp" alt=""><div><b>Аккаунт заморожен администратором</b><small>Можно смотреть, но изменения не сохраняются и не синхронизируются.</small></div><a class="btn sm ghost" href="mailto:${esc(USR.support||'mundoraaiapp@gmail.com')}?subject=${sub}">${ico('chat','s')}Поддержка</a>`;
+}
+async function accLogout(){
+  try{if(SY.dirty.size&&!SY.frozen)await syncPush()}catch(e){}
+  try{await fetch('/api/auth?a=logout',{method:'POST',headers:{'content-type':'application/json'},body:'{}'})}catch(e){}
+  try{SYNC_LIST.concat(['syncVer','syncDirty','owner']).forEach(k=>localStorage.removeItem('tempo:'+k))}catch(e){}
+  location.replace('/');
+}
+
+/* ===================== админ-панель ===================== */
+const ADM={data:null,q:'',f:'all',err:'',busy:false};
+const ST_RU={active:'Активен',frozen:'Заморожен',blocked:'Заблокирован',banned:'Забанен'};
+const ago=t=>{if(!t)return'никогда';const s=(Date.now()-t)/1000;if(s<90)return'только что';if(s<3600)return Math.round(s/60)+' мин назад';if(s<86400)return Math.round(s/3600)+' ч назад';if(s<86400*30)return Math.round(s/86400)+' дн назад';return new Date(t).toLocaleDateString('ru-RU')};
+async function admApi(a,body){
+  const r=await fetch('/api/admin?a='+a,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{cache:'no-store'});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j;
+}
+async function admLoad(){try{ADM.data=await admApi('overview');ADM.err=''}catch(e){ADM.err=e.message}if(route()==='admin')admDraw()}
+V.admin=()=>{
+  if(!USR||!USR.admin)return `<div class="empty">Этот раздел только для администратора</div>`;
+  return `<div class="phead adm-ph"><h1>Админ-панель</h1><p>Коды доступа к сайту и аккаунты: заморозка, блокировка, бан.</p><div class="ctl"><button class="btn ghost sm" data-act="adm-refresh">${ico('refresh','s')}Обновить</button></div><img src="/img/code.webp" alt=""></div><div id="admBody">${ADM.data?'':`<div class="adm-stats">${'<div class="glass adm-stat skel" style="height:78px"></div>'.repeat(4)}</div>`}</div>`;
+};
+V.after.admin=()=>{if(!USR||!USR.admin)return;if(ADM.data)admDraw();admLoad()};
+function admDraw(){
+  const el=$('#admBody');if(!el)return;
+  if(ADM.err&&!ADM.data){el.innerHTML=`<div class="notice">${ico('x')}<div>Не загрузилось: ${esc(ADM.err)}</div></div>`;return}
+  const d=ADM.data,U=d.users,C=d.codes,now=Date.now();
+  const live=C.filter(c=>!c.max||c.used<c.max).length,bad=U.filter(u=>u.status==='banned'||u.status==='blocked').length;
+  const q=ADM.q.trim().toLowerCase();
+  const list=U.filter(u=>(ADM.f==='all'||u.status===ADM.f)&&(!q||u.email.includes(q)||(u.note||'').toLowerCase().includes(q)));
+  el.innerHTML=`<div class="adm-stats">
+    <div class="glass adm-stat"><img src="/img/planet.webp" alt=""><div><b>${U.length}</b><span class="k">аккаунтов</span></div></div>
+    <div class="glass adm-stat"><img src="/img/orbit.webp" alt=""><div><b>${U.filter(u=>now-(u.seen||0)<864e5).length}</b><span class="k">заходили за сутки</span></div></div>
+    <div class="glass adm-stat"><img src="/img/crystal.webp" alt=""><div><b>${live}</b><span class="k">рабочих кодов</span></div></div>
+    <div class="glass adm-stat"><img src="/img/asteroid.webp" alt=""><div><b>${bad}</b><span class="k">бан и блок</span></div></div>
+  </div>
+  <div class="h3"><img class="h3i" src="/img/box_open.webp" alt="">Коды доступа<span class="more">${d.envCodeUsed?'стартовый код из Vercel уже использован':'стартовый код из Vercel ещё не использован'}</span></div>
+  <form class="glass adm-form" id="admCodeF">
+    <input class="in mono" name="code" maxlength="4" placeholder="Авто" autocomplete="off" title="4 символа — буквы или цифры. Пусто — придумаю сам">
+    <select class="in" name="max"><option value="1">1 вход</option><option value="3">3 входа</option><option value="10">10 входов</option><option value="0">Без лимита</option></select>
+    <input class="in note" name="note" maxlength="80" placeholder="Для кого (необязательно)">
+    <button class="btn" type="submit">${ico('plus','s')}Создать код</button>
+  </form>
+  <div class="adm-codes">${C.length?C.map(c=>{const done=c.max&&c.used>=c.max;return `<div class="adm-code${done?' done':''}"><b class="mono">${esc(c.code)}</b><div class="tx"><span>${c.max?`использован ${c.used} из ${c.max}`:`без лимита · входов: ${c.used}`}${done?' · закончился':''}</span><small>${esc(c.note||'без заметки')} · ${new Date(c.created).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</small></div><button class="ib" data-act="adm-copy" data-c="${esc(c.code)}" title="Скопировать">${ico('copy','s')}</button><button class="ib" data-act="adm-code-del" data-c="${esc(c.code)}" title="Удалить">${ico('trash','s')}</button></div>`}).join(''):`<div class="empty">Кодов пока нет — создай первый, чтобы пригласить друга</div>`}</div>
+  <div class="h3"><img class="h3i" src="/img/planet2.webp" alt="">Аккаунты<span class="more">${list.length} из ${U.length}</span></div>
+  <div class="adm-filter"><input class="in" id="admQ" placeholder="Поиск по почте или заметке" value="${esc(ADM.q)}"><div class="seg">${[['all','Все'],['active','Активные'],['frozen','Замороженные'],['blocked','Блок'],['banned','Бан']].map(([v,n])=>`<button class="${ADM.f===v?'on':''}" data-act="adm-f" data-v="${v}">${n}</button>`).join('')}</div></div>
+  <div class="hl">${list.length?list.map(u=>`<button class="hi adm-u" data-act="adm-user" data-e="${esc(u.email)}"><div class="ic">${ico('user')}</div><div class="tx"><b>${esc(u.email)}${u.admin?' <span class="badge admin">админ</span>':''}</b><small class="k">${ago(u.seen)} · устройств: ${u.devices}${u.note?' · '+esc(u.note):''}</small></div><span class="badge ${u.status}">${ST_RU[u.status]||u.status}</span></button>`).join(''):'<div class="empty">Никого не нашлось</div>'}</div>`;
+  $('#admCodeF').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);const b=e.target.querySelector('button');b.disabled=true;try{const r=await admApi('code-new',{code:f.get('code'),max:f.get('max'),note:f.get('note')});copyText(r.code);toast('Код '+r.code+' создан и скопирован','check');await admLoad()}catch(x){toast(x.message,'x')}b.disabled=false});
+  const qi=$('#admQ');qi.addEventListener('input',()=>{ADM.q=qi.value;clearTimeout(admDraw.t);admDraw.t=setTimeout(()=>{admDraw();const n=$('#admQ');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)});
+}
+function admUserSheet(email){
+  const u=ADM.data&&ADM.data.users.find(x=>x.email===email);if(!u)return;
+  const st=u.status,act=(a,ic,t,s,cls='')=>`<button class="opt${cls}" data-act="adm-u" data-a="${a}" data-e="${esc(email)}">${ic}<span style="flex:1">${t}<br><small class="muted">${s}</small></span></button>`;
+  const img=`<img src="/img/${st==='banned'?'asteroid':st==='frozen'?'crystal':st==='blocked'?'gem_orbit':'planet2'}.webp" alt="" style="width:46px;height:46px">`;
+  openSheet(`<h3>${img}<span style="min-width:0;font-size:15px;word-break:break-all">${esc(email)}<br><span class="badge ${st}">${ST_RU[st]||st}</span></span><button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  <div class="k" style="margin:-4px 0 12px;line-height:1.6">Создан: ${u.created?new Date(u.created).toLocaleString('ru-RU'):'—'}<br>Был на сайте: ${ago(u.seen)} · устройств: ${u.devices} · разделов данных: ${u.keys}</div>
+  ${u.admin?'<div class="notice">'+ico('lock')+'<div>Это твой аккаунт администратора — его статус менять нельзя.</div></div>':`
+  ${st==='active'?'':act('activate',ico('check'),'Сделать активным','Вернуть полный доступ')}
+  ${st==='frozen'?'':act('freeze','<img src="/img/crystal.webp" class="oi" alt="">','Заморозить','Может смотреть, но изменения не сохраняются')}
+  ${st==='blocked'?'':act('block','<img src="/img/gem_orbit.webp" class="oi" alt="">','Заблокировать','Временно закрыть доступ к сайту')}
+  ${st==='banned'?'':act('ban','<img src="/img/asteroid.webp" class="oi" alt="">','Забанить','Закрыть доступ навсегда; увидит кнопку «Написать в поддержку»')}
+  ${act('logout',ico('refresh'),'Выйти на всех устройствах','Придётся войти заново по почте')}
+  <label class="k" style="display:block;margin:12px 0 6px">Заметка (видишь только ты)</label>
+  <div class="row" style="flex-wrap:nowrap"><input class="in" id="admNote" maxlength="120" value="${esc(u.note||'')}" placeholder="Например: друг из универа"><button class="btn sm" data-act="adm-u" data-a="note" data-e="${esc(email)}">${ico('check','s')}</button></div>
+  <button class="btn danger" style="width:100%;justify-content:center;margin-top:16px" data-act="adm-u" data-a="delete-ask" data-e="${esc(email)}">${ico('trash','s')}Удалить аккаунт</button>`}`);
+}
+const ADM_DONE={activate:'Аккаунт снова активен',freeze:'Аккаунт заморожен',block:'Аккаунт заблокирован',ban:'Аккаунт забанен',logout:'Сессии завершены',note:'Заметка сохранена',delete:'Аккаунт удалён'};
+
+/* ===================== ИИ управляет сайтом ===================== */
+const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',admin:'Админ-панель'};
+const usd=v=>v==null||!isFinite(v)?'—':v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:2}):v.toPrecision(3);
+function siteContext(){
+  const L=[];
+  const ops=[...S.ops].sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,15);
+  L.push('### Финансы\n'+finContext()+(ops.length?'\nid операций (для изменения или удаления):\n'+ops.map(o=>`${o.id}: ${o.date} ${o.type==='in'?'+':'−'}${fmt(o.amount)} ₽ ${o.cat}${o.note?' «'+o.note+'»':''}`).join('\n'):''));
+  const ns=[...NT.list].sort((a,b)=>(b.pinned-a.pinned)||((b.updated||0)-(a.updated||0)));
+  L.push(`### Заметки (${ns.length})\n`+(ns.length?ns.slice(0,25).map((n,i)=>`- id ${n.id}${n.pinned?' (закреплена)':''}: «${noteTitle(n)}»`+(i<6&&n.body?`\n  текст: ${String(n.body).slice(0,600).replace(/\n/g,'\n  ')}`:'')).join('\n'):'нет'));
+  L.push('### Плейлисты\n'+(S.playlists.length?S.playlists.slice(0,20).map(p=>`- id ${p.id}: «${p.name}», треков: ${p.tracks.length}`).join('\n'):'нет'));
+  const lk=Object.values(S.likes).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  L.push(`### Музыка\nСейчас играет: ${P.cur?`${P.cur.artist} — ${P.cur.title}${audio.paused?' (пауза)':''}`:'ничего'}\nЛайков: ${lk.length}${lk.length?'. Последние: '+lk.slice(0,6).map(t=>t.artist+' — '+t.title).join('; '):''}\nЛюбимые жанры: ${topOf(S.taste.genre,3).map(x=>gRu(x[0])).join(', ')||'пока не ясно'}`);
+  const cs=CR.coins.slice(0,12);
+  L.push('### Крипта\n'+(cs.length?cs.map(c=>`${c.sym} (id ${c.id}): $${usd(c.price)}, 24ч ${(c.ch24||0)>=0?'+':''}${(c.ch24||0).toFixed(2)}%`).join('\n'):'курсы не загружены')+(CR.fav.length?'\nИзбранное: '+CR.fav.join(', '):''));
+  L.push('Сейчас открыт раздел: '+(AI_PAGES[route().replace(/-.*/,'')]||route()));
+  return L.join('\n\n');
+}
+const AI_ACTIONS_HELP=`## Ты управляешь сайтом
+Ты можешь сам делать на сайте всё, что умеет пользователь. Когда он просит что-то сделать (добавить, записать, удалить, включить, поставить, создать, открыть, изменить…) — сделай: в КОНЦЕ ответа добавь блок
+
+\`\`\`tempo
+[{"do":"…", …}]
+\`\`\`
+
+Пользователь не видит блок — он видит отметки о выполненном. Перед блоком одной фразой скажи, что делаешь. Можно несколько действий в одном массиве. id бери ТОЛЬКО из данных сайта ниже, не выдумывай. Если не хватает данных (сумма, какой трек…) — переспроси, без блока. На вопросы без просьбы что-то сделать — отвечай без блока.
+
+Действия:
+- {"do":"op.add","type":"out"|"in","amount":число,"cat":"категория","note":"описание","date":"ГГГГ-ММ-ДД"} — расход или доход. Категории расходов: ${CATS.out.join(', ')}; доходов: ${CATS.in.join(', ')}. Без даты — сегодня.
+- {"do":"op.edit","id":"…","amount"?,"cat"?,"note"?,"date"?,"type"?} · {"do":"op.del","id":"…"}
+- {"do":"note.add","title":"…","body":"Markdown; задачи — строки «- [ ] дело»"}
+- {"do":"note.edit","id":"…","title"?:"…","body"?:"весь новый текст","append"?:"дописать в конец"} · {"do":"note.del","id":"…"} · {"do":"note.pin","id":"…","on":true|false}
+- {"do":"music.play","query":"артист трек"} — найти и включить (дальше играет похожее)
+- {"do":"music.queue","queries":["артист трек",…],"name":"название"} — включить подборку из нескольких треков
+- {"do":"music.wave","mood":"energy"|"happy"|"calm"|"sad"|""} — включить «Волну» (пусто — по вкусу)
+- {"do":"music.pause"} · {"do":"music.resume"} · {"do":"music.next"} · {"do":"music.prev"} · {"do":"music.like"} (лайк текущему) · {"do":"music.volume","value":0-100}
+- {"do":"pl.create","name":"…","queries":["артист трек",…]} — новый плейлист с треками
+- {"do":"pl.add","playlist":"id или название","queries":["артист трек",…]} · {"do":"pl.del","id":"…"} · {"do":"pl.play","id":"…"}
+- {"do":"crypto.fav","coin":"id или тикер","on":true|false} · {"do":"crypto.cur","cur":"usd"|"rub"}
+- {"do":"open","page":"home|flow|search|playlists|remixes|library|finance|budget|tables|history|calc|percent|spread|crypto|notes|ai${USR&&USR.admin?'|admin':''}"} · {"do":"open","page":"coin","coin":"btc"} · {"do":"open","page":"note","id":"…"} · {"do":"open","page":"playlist","id":"…"}
+- {"do":"search","query":"…"} — открыть поиск музыки с этим запросом`;
+function aiExtract(text){
+  const list=[];let found=false;
+  const out=String(text||'').replace(/```\s*tempo\s*\n?([\s\S]*?)(```|$)/gi,(m,body)=>{
+    found=true;const b=body.trim();if(!b)return '';
+    let v=null;try{v=JSON.parse(b)}catch(e){try{v=b.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>JSON.parse(l.replace(/,$/,'')))}catch(e2){v=null}}
+    if(v)(Array.isArray(v)?v:[v]).forEach(x=>{if(x&&typeof x==='object')list.push(x)});
+    else list.push({do:'_bad'});
+    return '';
+  }).replace(/\n{3,}/g,'\n\n').trim();
+  return {text:out,list,found};
+}
+const aiShown=(t,live)=>{const i=String(t||'').search(/```\s*tempo/i);if(i<0)return t;return String(t).slice(0,i).trim()+(live&&!/```\s*tempo[\s\S]*```/i.test(t)?'\n\n*Выполняю…*':'')};
+const findPl=x=>{const s=String(x||'').toLowerCase().trim();return S.playlists.find(p=>p.id===x)||S.playlists.find(p=>p.name.toLowerCase()===s)||S.playlists.find(p=>s&&p.name.toLowerCase().includes(s))};
+const findCoin=x=>{const s=String(x||'').toLowerCase().trim();return CR.coins.find(c=>c.id===s)||CR.coins.find(c=>c.sym.toLowerCase()===s)||CR.coins.find(c=>c.name.toLowerCase()===s)};
+async function firstHits(qs){const r=await Promise.all(qs.slice(0,40).map(q=>hitsSearch(String(q),5).catch(()=>[])));return r.map(x=>x[0]).filter(Boolean)}
+const catOf=(type,c)=>{const s=String(c||'').toLowerCase();return CATS[type].find(x=>x.toLowerCase()===s)||CATS[type].find(x=>s&&(x.toLowerCase().startsWith(s.slice(0,4))||s.includes(x.toLowerCase())))||'Другое'};
+async function aiDo(a){
+  const d=String(a.do||a.action||'');const ro=()=>{if(SY.frozen)throw new Error('аккаунт заморожен')};
+  switch(d){
+    case 'op.add':{ro();const type=a.type==='in'?'in':'out',amount=pnum(String(a.amount??''));if(!(amount>0))throw new Error('не указана сумма');
+      const o={id:uid(),type,amount,cat:catOf(type,a.cat),note:String(a.note||'').trim().slice(0,120),date:/^\d{4}-\d{2}-\d{2}$/.test(a.date||'')?a.date:today(),ts:Date.now()};
+      S.ops.push(o);save();return{t:`${type==='in'?'Доход':'Расход'} ${money(amount)} · ${o.cat}${o.note?' · '+o.note:''}`,go:'#budget'}}
+    case 'op.edit':{ro();const o=S.ops.find(x=>x.id===a.id);if(!o)throw new Error('операция не найдена');
+      if(a.type==='in'||a.type==='out')o.type=a.type;if(a.amount!=null&&pnum(String(a.amount))>0)o.amount=pnum(String(a.amount));if(a.cat)o.cat=catOf(o.type,a.cat);if(a.note!=null)o.note=String(a.note).slice(0,120);if(/^\d{4}-\d{2}-\d{2}$/.test(a.date||''))o.date=a.date;o.ts=Date.now();save();return{t:`Операция изменена: ${money(o.amount)} · ${o.cat}`,go:'#budget'}}
+    case 'op.del':{ro();const o=S.ops.find(x=>x.id===a.id);if(!o)throw new Error('операция не найдена');S.ops=S.ops.filter(x=>x!==o);save();return{t:`Удалена операция ${money(o.amount)} · ${o.cat}`}}
+    case 'note.add':{ro();const n=noteNew(String(a.title||'').slice(0,120),String(a.body||''));return{t:`Заметка «${noteTitle(n)}»`,go:'#note-'+n.id}}
+    case 'note.edit':{ro();const n=NT.list.find(x=>x.id===a.id);if(!n)throw new Error('заметка не найдена');if(a.title!=null)n.title=String(a.title);if(a.body!=null)n.body=String(a.body);if(a.append)n.body=(n.body?n.body.replace(/\s+$/,'')+'\n':'')+String(a.append);n.updated=Date.now();LS.set('notes',NT.list);return{t:`Заметка «${noteTitle(n)}» изменена`,go:'#note-'+n.id}}
+    case 'note.del':{ro();const n=NT.list.find(x=>x.id===a.id);if(!n)throw new Error('заметка не найдена');NT.list=NT.list.filter(x=>x!==n);LS.set('notes',NT.list);return{t:`Заметка «${noteTitle(n)}» удалена`}}
+    case 'note.pin':{ro();const n=NT.list.find(x=>x.id===a.id);if(!n)throw new Error('заметка не найдена');n.pinned=a.on!==false;n.updated=Date.now();LS.set('notes',NT.list);return{t:`Заметка ${n.pinned?'закреплена':'откреплена'}`}}
+    case 'music.play':{unlock();const r=await hitsSearch(String(a.query||''),10);if(!r.length)throw new Error('трек не нашёлся');await flowFromTrack(r[0]);return{t:`Играет: ${r[0].artist} — ${r[0].title}`}}
+    case 'music.queue':{unlock();const l=await firstHits(a.queries||[]);if(!l.length)throw new Error('треки не нашлись');P.playList(dedupe(l),0,'ai',a.name||'Подборка ИИ');return{t:`Включена подборка: ${l.length} тр.`}}
+    case 'music.wave':{const w=W8();w.mood=MOOD_GROUPS[a.mood]?a.mood:'';save();await startFlow();return{t:'Включена «Волна»'+(w.mood?' · '+MOOD_GROUPS[w.mood].name.toLowerCase():'')}}
+    case 'music.pause':audio.pause();return{t:'Пауза'};
+    case 'music.resume':if(!P.cur){await startFlow();return{t:'Включена «Волна»'}}audio.play().catch(()=>{});return{t:'Играет дальше'};
+    case 'music.next':if(!P.cur)throw new Error('ничего не играет');P.next(true);return{t:'Следующий трек'};
+    case 'music.prev':if(!P.cur)throw new Error('ничего не играет');P.prev();return{t:'Предыдущий трек'};
+    case 'music.like':{if(!P.cur)throw new Error('ничего не играет');if(!S.likes[P.cur.id])toggleLike(P.cur);return{t:`Лайк: ${P.cur.artist} — ${P.cur.title}`}}
+    case 'music.volume':{const v=Math.max(0,Math.min(100,+a.value||0));audio.volume=v/100;S.vol=v;setRange(vol,v);save();return{t:'Громкость '+v+'%'}}
+    case 'pl.create':{ro();const p=createPl(String(a.name||'Плейлист от ИИ').slice(0,60));const l=await firstHits(a.queries||[]);p.tracks=dedupe(l).map(lite);p.updated=Date.now();save();return{t:`Плейлист «${p.name}» · ${p.tracks.length} тр.`,go:'#pl-'+p.id}}
+    case 'pl.add':{ro();let p=findPl(a.playlist);if(!p)p=createPl(String(a.playlist||'Плейлист от ИИ').slice(0,60));const l=await firstHits(a.queries||[]);let n=0;l.forEach(t=>{if(!p.tracks.some(x=>x.id===t.id)){p.tracks.push(lite(t));n++}});p.updated=Date.now();save();return{t:`В «${p.name}» добавлено ${n} тр.`,go:'#pl-'+p.id}}
+    case 'pl.del':{ro();const p=findPl(a.id||a.playlist);if(!p)throw new Error('плейлист не найден');S.playlists=S.playlists.filter(x=>x!==p);save();return{t:`Плейлист «${p.name}» удалён`}}
+    case 'pl.play':{const p=findPl(a.id||a.playlist);if(!p||!p.tracks.length)throw new Error('плейлист пуст или не найден');unlock();P.playList(p.tracks,0,'pl',p.name);return{t:`Играет «${p.name}»`}}
+    case 'crypto.fav':{if(!CR.coins.length)await loadCoins().catch(()=>{});const c=findCoin(a.coin);if(!c)throw new Error('монета не найдена');const on=a.on!==false;CR.fav=on?[...new Set([...CR.fav,c.id])]:CR.fav.filter(x=>x!==c.id);LS.set('cryptoFav',CR.fav);return{t:`${c.sym} ${on?'в избранном':'убрана из избранного'}`,go:'#crypto'}}
+    case 'crypto.cur':{CR.cur=a.cur==='rub'?'rub':'usd';LS.set('cryptoCur',CR.cur);return{t:'Валюта крипты: '+CR.cur.toUpperCase(),go:'#crypto'}}
+    case 'open':{const pg=String(a.page||'');let h='';
+      if(pg==='coin'){if(!CR.coins.length)await loadCoins().catch(()=>{});const c=findCoin(a.coin);if(!c)throw new Error('монета не найдена');h='#coin-'+c.id}
+      else if(pg==='note'){if(!NT.list.some(n=>n.id===a.id))throw new Error('заметка не найдена');h='#note-'+a.id}
+      else if(pg==='playlist'){const p=findPl(a.id);if(!p)throw new Error('плейлист не найден');h='#pl-'+p.id}
+      else if(AI_PAGES[pg]&&(pg!=='admin'||(USR&&USR.admin)))h='#'+pg;else throw new Error('нет такого раздела');
+      return{t:'Открываю: '+(AI_PAGES[pg]||pg),nav:h}}
+    case 'search':{sQ=String(a.query||'');return{t:'Поиск: '+sQ,nav:'#search'}}
+    case '_bad':throw new Error('ИИ прислал непонятную команду');
+    default:throw new Error('неизвестное действие «'+d+'»');
+  }
+}
+async function aiRunActions(am,list){
+  am.acts=list.map(()=>({s:'run',t:'…'}));chatPaint(am);let nav='';
+  for(let i=0;i<list.length;i++){
+    try{const r=await aiDo(list[i]);am.acts[i]={s:'ok',t:r.t,go:r.go||''};if(r.nav)nav=r.nav}
+    catch(e){am.acts[i]={s:'err',t:(list[i].do||'действие')+': '+(e.message||e)}}
+    chatPaint(am);
+  }
+  chatSave();
+  if(nav){if(location.hash===nav)render();else location.hash=nav}
+  else if(route()!=='ai')render();
+}
+const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
+
+Object.assign(ACT,{
+  'acc-logout'(){openSheet(`<h3>${ico('user')}Выйти из аккаунта?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin-bottom:14px;line-height:1.5">Данные останутся в аккаунте. На этом устройстве они будут удалены до следующего входа.</p><button class="btn" style="width:100%;justify-content:center" data-act="acc-logout-ok">Выйти</button>`)},
+  'acc-logout-ok'(){accLogout()},
+  'acc-sync'(){syncNow()},
+  'acc-admin'(){closeSheet();location.hash='#admin'},
+  'adm-refresh'(){admLoad();toast('Обновляю…','refresh')},
+  'adm-f'(el){ADM.f=el.dataset.v;admDraw()},
+  'adm-copy'(el){copyText(el.dataset.c)},
+  async 'adm-code-del'(el){try{await admApi('code-del',{code:el.dataset.c});toast('Код '+el.dataset.c+' удалён','trash');admLoad()}catch(e){toast(e.message,'x')}},
+  'adm-user'(el){admUserSheet(el.dataset.e)},
+  async 'adm-u'(el){
+    const a=el.dataset.a,email=el.dataset.e;
+    if(a==='delete-ask'){openSheet(`<h3>${ico('trash')}Удалить ${esc(email)}?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin-bottom:14px;line-height:1.5">Аккаунт и все его данные (музыка, финансы, заметки, чат) будут удалены навсегда. Почту можно будет зарегистрировать заново.</p><button class="btn danger" style="width:100%;justify-content:center" data-act="adm-u" data-a="delete" data-e="${esc(email)}">Удалить навсегда</button>`);return}
+    el.disabled=true;
+    try{await admApi('user',{email,action:a,note:a==='note'?($('#admNote')||{}).value:undefined});toast(ADM_DONE[a]||'Готово','check');closeSheet();await admLoad()}catch(e){toast(e.message,'x');el.disabled=false}
+  }
+});
+
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');if(!el)return;
   const a=ACT[el.dataset.act];if(!a)return;
@@ -2477,7 +2861,10 @@ document.addEventListener('click',e=>{
 addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();$('#full').classList.remove('open')}if(e.code==='Space'&&!e.target.matches('input,textarea,button,select')&&route()!=='calc'){e.preventDefault();P.toggle()}});
 
 document.body.classList.add('noplay');
+if(USR)$('#uName').textContent=USR.email.split('@')[0];
+accBar();
 render();
+syncStart();
 AI.ready().then(()=>{if(AI.serverKey&&!AIC.apiKey)render();if(AI.on)AI.pickModel()});
 </script>
 </body>

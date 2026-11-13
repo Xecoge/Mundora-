@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api/app"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/app"
+    },
+    {
       "source": "/tempo-ping",
       "destination": "/api/ping"
     },
@@ -15,6 +23,17 @@
     {
       "source": "/crypto-api/:what",
       "destination": "/api/crypto?what=:what"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/img/(.*)",
+      "headers": [
+        {
+          "key": "cache-control",
+          "value": "public, max-age=604800"
+        }
+      ]
     }
   ]
 }

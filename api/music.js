@@ -10,7 +10,9 @@ const SRC = {
 const H = { 'access-control-allow-origin': '*', 'content-type': 'application/json; charset=utf-8' };
 const out = (obj, status = 200, cache = 'no-store') => new Response(JSON.stringify(obj), { status, headers: { ...H, 'cache-control': cache } });
 
+import { guard } from './_auth.mjs';
 export default async function handler(req) {
+  { const g = await guard(req); if (g.res) return g.res; }
   const env = (typeof process !== 'undefined' && process.env) || {};
   const u = new URL(req.url);
   const src = u.searchParams.get('src') || '';

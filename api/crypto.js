@@ -22,7 +22,9 @@ async function okxTickers(want) {
 }
 const okSym = s => /^[A-Z0-9]{2,20}$/.test(s);
 
+import { guard } from './_auth.mjs';
 export default async function handler(req) {
+  { const g = await guard(req); if (g.res) return g.res; }
   const u = new URL(req.url), what = u.searchParams.get('what');
   try {
     if (what === 'tickers') {

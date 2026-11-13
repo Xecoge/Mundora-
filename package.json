@@ -1,0 +1,9 @@
+{
+  "name": "tempo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "build:pages": "node build.mjs"
+  }
+}
