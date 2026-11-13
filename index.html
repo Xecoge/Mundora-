@@ -1037,7 +1037,7 @@ async function waveBatch(n=20,opts={}){
 }
 
 /* ===================== AI (OpenAI-compatible, settings in config.js) ===================== */
-const AIC=Object.assign({apiKey:'',baseURL:'',model:'auto',modelHint:'gpt-6-astra',temperature:.5,headers:{},timeout:25000},CFG.ai||{});
+const AIC=Object.assign({apiKey:'',baseURL:'',model:'auto',modelHint:'gpt-6-astra',temperature:.5,headers:{},timeout:75000},CFG.ai||{});
 const AI={
   warned:false,models:null,model:AIC.model&&AIC.model!=='auto'?AIC.model:'',
   get on(){return (this.viaProxy&&this.serverKey)||!!(AIC.apiKey&&AIC.baseURL)},
@@ -1075,7 +1075,10 @@ const AI={
       const fe=LS.get('fastEffort','');const b={model,messages};if(fe&&!LS.get('noReasonParam',false))b.reasoning_effort=fe;else b.temperature=AIC.temperature;
       const r=await fetch(this.url('/chat/completions'),{method:'POST',signal:ctl.signal,headers:this.hdr(),body:JSON.stringify(b)});
       if(!r.ok)throw new Error('HTTP '+r.status);
-      const j=await r.json();const txt=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
+      const j=JSON.parse((await r.text()).trim()||'{}');
+      if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'')}`);er.provider=true;er.srv=j.error.message;throw er}
+      if(j.tempo)aiFallbackNote(j.tempo);
+      const txt=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
       const m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('no json');
       return JSON.parse(m[0]);
     }catch(e){if(!this.warned){this.warned=true;toast(humanErr(e),'x')}throw e}
@@ -1654,6 +1657,7 @@ async function doImport(){
 function isNetErr(e){return e&&(e.name==='TypeError'||/failed to fetch|networkerror|load failed|network request failed/i.test(String(e.message||e)))}
 function humanErr(e){
   const m=String(e&&e.message||e||'');
+  if(e&&e.srv&&/^(ИИ сейчас недоступен|Провайдер ИИ отклонил)/.test(e.srv))return e.srv;
   if(e&&e.name==='AbortError')return 'ИИ не ответил вовремя — попробуй ещё раз';
   if(isNetErr(e)&&!e.provider)return AI.viaProxy?'Связь с ИИ оборвалась. Нажми «Ещё раз»; если повторяется — проверь в Vercel переменные AI_API_KEY и AI_BASE_URL и сделай Redeploy.':'Браузер не смог связаться с провайдером ИИ (Failed to fetch). Обычно провайдер запрещает запросы прямо со страницы (CORS). Открой сайт через Vercel или локальный server.js — ключ хранится только на сервере.';
   if(/HTTP 401|HTTP 403/.test(m))return 'Провайдер отклонил ключ ('+m.slice(0,140)+'). Проверь переменную AI_API_KEY в Vercel и сделай Redeploy.';
@@ -1820,6 +1824,8 @@ async function aiStream(messages,{onDelta,signal,effort}){
   }
   throw lastErr;
 }
+// Сервер сам подменил модель, потому что основная не отвечала — говорим об этом один раз за 10 минут
+function aiFallbackNote(t){if(!t||!t.fallback)return;const k=Date.now();if(k-(aiFallbackNote.t||0)<10*60e3)return;aiFallbackNote.t=k;toast('Основная модель ИИ не отвечает — временно отвечает запасная','refresh')}
 async function aiStreamOnce(messages,{model,eff,signal,onDelta}){
   const body={model,messages,stream:true};
   if(eff)body.reasoning_effort=eff;else body.temperature=AIC.chatTemperature??.6;
@@ -1827,7 +1833,7 @@ async function aiStreamOnce(messages,{model,eff,signal,onDelta}){
   if(!r.ok){let t='';try{t=(await r.text()).slice(0,400)}catch(e){}const er=new Error(`HTTP ${r.status}${t?' — '+t:''}`);er.provider=true;throw er}
   const rz=d=>typeof d==='string'?d:Array.isArray(d)?d.map(x=>x&&(x.text||x.summary||x.content)||'').join(''):(d&&(d.text||d.content))||'';
   const ct=r.headers.get('content-type')||'';
-  if(!r.body||!/event-stream/.test(ct)){const j=await r.json();if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'')}`);er.provider=true;throw er}const m=(j.choices&&j.choices[0]&&j.choices[0].message)||{};onDelta(m.content||'',rz(m.reasoning_content||m.reasoning||m.reasoning_details));return}
+  if(!r.body||!/event-stream/.test(ct)){const j=await r.json();if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'')}`);er.provider=true;er.srv=j.error.message;throw er}if(j.tempo)aiFallbackNote(j.tempo);const m=(j.choices&&j.choices[0]&&j.choices[0].message)||{};onDelta(m.content||'',rz(m.reasoning_content||m.reasoning||m.reasoning_details));return}
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
   for(;;){
     const {value,done}=await rd.read();if(done)break;
@@ -1836,7 +1842,8 @@ async function aiStreamOnce(messages,{model,eff,signal,onDelta}){
       const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
       if(!line.startsWith('data:'))continue;const d=line.slice(5).trim();if(d==='[DONE]')return;
       let j;try{j=JSON.parse(d)}catch(e){continue}
-      if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'').slice(0,300)}`.trim());er.provider=true;throw er}
+      if(j.error){const er=new Error(`HTTP ${j.error.status||''} — ${String(j.error.message||'').slice(0,300)}`.trim());er.provider=true;er.srv=j.error.message;throw er}
+      if(j.tempo){aiFallbackNote(j.tempo);continue}
       const c=j.choices&&j.choices[0]||{};const dl=c.delta||c.message||{};
       onDelta(typeof dl.content==='string'?dl.content:rz(dl.content),rz(dl.reasoning_content||dl.reasoning||dl.reasoning_details));
     }

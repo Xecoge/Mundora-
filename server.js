@@ -13,22 +13,6 @@ const env = process.env;
 const BASE = (env.AI_BASE_URL || 'https://api.drakezakuru.com/v1').replace(/\/+$/, '');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
-let MODELS = { t: 0, list: [] };
-async function listModels(auth) {
-  if (MODELS.list.length && Date.now() - MODELS.t < 5 * 60e3) return MODELS.list;
-  try { const r = await fetch(BASE + '/models', { headers: auth ? { authorization: auth } : {} }); const j = await r.json(); const list = (j.data || j.models || []).map(m => typeof m === 'string' ? m : m.id).filter(Boolean); if (list.length) MODELS = { t: Date.now(), list }; } catch (e) {}
-  return MODELS.list;
-}
-const norm = m => String(m).toLowerCase().replace(/[^a-z0-9.]/g, '');
-const rank = (m, h) => { const n = norm(m); let r = 0; if (h && n.includes(norm(h))) r += 10; if (/gpt/i.test(m)) r += 2; if (/mini|nano|audio|realtime|image|tts|whisper|embed|search|transcribe/i.test(m)) r -= 4; return r; };
-async function resolveModel(auth, requested) {
-  const want = String(env.AI_MODEL || '').trim(), list = await listModels(auth);
-  if (want) { if (!list.length || list.includes(want)) return want; const w = want.toLowerCase(); return list.find(m => m.toLowerCase().endsWith('/' + w)) || list.find(m => m.toLowerCase().includes(w)) || want; }
-  if (requested && requested !== 'auto' && (!list.length || list.includes(requested))) return requested;
-  const hint = env.AI_MODEL_HINT || 'gpt-6-astra';
-  return list.length ? [...list].sort((a, b) => rank(b, hint) - rank(a, hint))[0] : hint;
-}
-
 http.createServer(async (req, res) => {
   if (req.url === '/tempo-ping') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end('tempo' + (env.AI_API_KEY ? ' key' : '') + (env.YT_API_KEY ? ' yt' : '')); }
   if (req.url.startsWith('/crypto-api/')) {
@@ -62,15 +46,15 @@ http.createServer(async (req, res) => {
     } catch (e) { return send(502, { error: e.message }); }
   }
   if (req.url.startsWith('/ai-proxy/')) {
-    const p = req.url.slice('/ai-proxy/'.length).replace(/^\/+/, '');
+    // Та же логика, что на Vercel (api/_ai.mjs): автозамена модели, если основная не отвечает
+    const [p, q] = req.url.slice('/ai-proxy/'.length).replace(/^\/+/, '').split('?');
     const chunks = []; for await (const c of req) chunks.push(c);
-    let body = chunks.length ? Buffer.concat(chunks) : undefined;
-    const auth = env.AI_API_KEY ? 'Bearer ' + env.AI_API_KEY : req.headers.authorization;
-    try { if (body && /completions(\?|$)/.test(p)) { const j = JSON.parse(body.toString()); j.model = await resolveModel(auth, j.model); body = JSON.stringify(j); } } catch (e) {}
     try {
-      const r = await fetch(BASE + '/' + p, { method: req.method, headers: { 'content-type': req.headers['content-type'] || 'application/json', ...(auth ? { authorization: auth } : {}) }, body });
-      const h = { 'content-type': r.headers.get('content-type') || 'application/json', 'cache-control': 'no-cache', 'access-control-allow-origin': '*' };
-      res.writeHead(r.status, h);
+      const { handleAI } = await import('./api/_ai.mjs');
+      const h = new Headers(); for (const [k, v] of Object.entries(req.headers)) if (typeof v === 'string') h.set(k, v);
+      const wreq = new Request('http://local/api/proxy?' + new URLSearchParams({ path: p }) + (q ? '&' + q : ''), { method: req.method, headers: h, body: chunks.length ? Buffer.concat(chunks) : undefined });
+      const r = await handleAI(wreq, env);
+      res.writeHead(r.status, Object.fromEntries(r.headers));
       if (r.body) for await (const c of r.body) res.write(c);
       res.end();
     } catch (e) {
