@@ -926,7 +926,7 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 /* ===== обменники ===== */
 .exf{gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.exf .chips{display:flex;gap:6px;flex-wrap:wrap}
 .exlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr));gap:14px}.excard{min-width:0}
-.excard{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.excard{padding:16px 18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:transform .2s,border-color .2s}.excard:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.18)}.exd-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}.exd-row b{text-align:right;font-weight:600}
 .exh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.exh b{font-size:17px}
 .exv{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-size:11.5px;padding:2px 8px;border-radius:99px;background:rgba(198,255,77,.14);color:#c6ff4d;vertical-align:2px}
 .extbl{overflow-x:auto}.extbl table{width:100%;border-collapse:collapse;font-size:13.5px}
@@ -2937,7 +2937,7 @@ const exDiff=(v,m)=>m&&v?((v/m-1)*100):null;
 function exPairRow(r){const m=exMarket(r),db=exDiff(r.buy,m),ds=exDiff(r.sell,m);
   return `<tr><td><b>${esc(r.asset)}</b> → ${esc(r.fiat)}</td><td class="num">${exNum(r.buy)}${db!=null?`<small class="${db>=0?'up':'down'}">${db>=0?'+':''}${fmt(db)}%</small>`:''}</td><td class="num">${exNum(r.sell)}${ds!=null?`<small class="${ds<=0?'up':'down'}">${ds>=0?'+':''}${fmt(ds)}%</small>`:''}</td><td class="num k">${r.min||r.max?`${exNum(r.min,0)} – ${exNum(r.max,0)}`:'—'}</td><td class="num k">${exNum(r.reserve,0)}</td></tr>`}
 function exCard(x){const adm=USR&&USR.admin;
-  return `<div class="glass excard" data-id="${esc(x.id)}">
+  return `<div class="glass excard" data-act="ex-open" data-id="${esc(x.id)}" role="button" tabindex="0">
     <div class="exh"><div><b>${esc(x.name)}</b>${x.verified?`<span class="exv">${ico('check','s')}проверен</span>`:''}<div class="k">${esc(x.countries||'')}</div></div>
       <div class="row" style="gap:6px">${adm?`<button class="ib" data-act="ex-edit" data-id="${esc(x.id)}" title="Изменить">${ico('edit')}</button>`:''}<button class="btn sm" data-act="tg-go" data-u="${esc(x.tg)}">${TGI}Написать</button></div></div>
     ${x.pairs&&x.pairs.length?`<div class="extbl"><table><thead><tr><th>Пара</th><th>Покупает у вас</th><th>Продаёт вам</th><th>Мин – макс</th><th>Резерв</th></tr></thead><tbody>${x.pairs.map(exPairRow).join('')}</tbody></table></div>`:''}
@@ -2945,6 +2945,17 @@ function exCard(x){const adm=USR&&USR.admin;
     ${x.note?`<div class="k exn">${esc(x.note)}</div>`:''}
     <div class="k exu">обновлено ${new Date(x.updated).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · @${esc(x.tg)}</div>
   </div>`}
+// подробная карточка обменника (открывается по нажатию на карточку)
+function exDetail(x){const adm=USR&&USR.admin;
+  openSheet(`<h3>${ico('spread')}${esc(x.name)}${x.verified?`<span class="exv">${ico('check','s')}проверен</span>`:''}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  ${x.countries?`<div class="exd-row"><span class="k">Страны</span><b>${esc(x.countries)}</b></div>`:''}
+  ${x.methods?`<div class="exd-row"><span class="k">Принимает / способы</span><b>${esc(x.methods)}</b></div>`:''}
+  <div class="exd-row"><span class="k">Telegram</span><b>@${esc(x.tg)}</b></div>
+  ${x.pairs&&x.pairs.length?`<div class="k" style="margin:12px 0 4px">Курсы</div><div class="extbl"><table><thead><tr><th>Пара</th><th>Покупает у вас</th><th>Продаёт вам</th><th>Мин – макс</th><th>Резерв</th></tr></thead><tbody>${x.pairs.map(exPairRow).join('')}</tbody></table></div>`:'<div class="k" style="margin-top:10px">Курсы пока не указаны — уточняйте у обменника.</div>'}
+  ${x.note?`<div class="k" style="margin:12px 0 4px">Подробнее</div><div class="exn" style="font-size:14px;color:#e6e0f7">${esc(x.note)}</div>`:''}
+  <div class="k exu" style="margin-top:10px">обновлено ${new Date(x.updated).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}</div>
+  <div class="row" style="margin-top:14px;gap:8px"><button class="btn" style="flex:1;justify-content:center" data-act="tg-go" data-u="${esc(x.tg)}">${TGI}Написать в Telegram</button>${adm?`<button class="btn ghost" data-act="ex-edit" data-id="${esc(x.id)}">${ico('edit','s')}Изменить</button>`:''}</div>
+  <div class="k" style="margin-top:10px;font-size:12px">Mundora не проводит обмены и не отвечает за сделки. Уточняйте курс и условия перед обменом.</div>`)}
 function exFiltered(){const q=EX.q.trim().toLowerCase();return (EX.list||[]).filter(x=>(!EX.cur||(x.pairs||[]).some(r=>r.fiat===EX.cur||r.asset===EX.cur))&&(!q||(x.name+' '+x.countries+' '+x.methods+' '+x.tg).toLowerCase().includes(q)))}
 function exListHTML(){if(EX.list==null)return '<div class="glass skel" style="height:180px"></div>'.repeat(3);const L=exFiltered();
   if(!L.length)return `<div class="glass" style="padding:28px;text-align:center"><img src="/img/exch.webp" alt="" style="height:130px"><p class="k" style="margin-top:10px">${(EX.list||[]).length?'По этому фильтру обменников нет.':'Пока обменников нет — администрация скоро добавит проверенные.'}</p></div>`;
@@ -2970,6 +2981,7 @@ function exForm(x){x=x||{name:'',tg:'',countries:'',methods:'',note:'',verified:
   <div class="row" style="margin-top:12px;gap:8px"><button class="btn" style="flex:1;justify-content:center" data-act="ex-save">${ico('check','s')}Сохранить</button>${x.id?`<button class="btn ghost" data-act="ex-del">${ico('trash','s')}Удалить</button>`:''}</div><div id="exErr" class="r" style="margin-top:8px;font-size:13px"></div>`)}
 const EX_ACT={
   'ex-cur'(el){EX.cur=el.dataset.c;$$('.exf .chip').forEach(b=>b.classList.toggle('on',b===el));$('#exList').innerHTML=exListHTML()},
+  'ex-open'(el){const x=(EX.list||[]).find(v=>v.id===el.dataset.id);if(x)exDetail(x)},
   'ex-edit'(el){exForm(el.dataset.id?(EX.list||[]).find(x=>x.id===el.dataset.id):null)},
   async 'ex-save'(el){const v=id=>($('#'+id)||{}).value||'';const n=x=>x==null||x==='-'||x===''?null:x;
     const pairs=v('exP').split('\n').map(l=>l.trim().split(/\s+/)).filter(a=>a.length>=3&&a[0]).map(a=>({asset:a[0],fiat:a[1],buy:n(a[2]),sell:n(a[3]),min:n(a[4]),max:n(a[5]),reserve:n(a[6])}));
