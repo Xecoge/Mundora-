@@ -854,6 +854,25 @@ img[src*="img=ava"]{border-radius:50%!important;object-fit:cover!important;paddi
 .sheet h3 .tgi{width:22px;height:22px;margin-right:2px}
 .btn .tgi{width:18px;height:18px}
 @media(max-width:760px){.pf-tglink{margin-left:auto;margin-right:auto}}
+
+/* ===== курсы ценностей ===== */
+.mbar{width:30px;height:18px;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+.bt-coin:not(.bt-mrow){grid-template-columns:54px 64px 1fr auto}.bt-mrow{grid-template-columns:28px minmax(0,1fr) 46px auto auto!important;gap:8px!important}.bt-mrow .ch{min-width:52px!important}
+.bt-mrow b{font-size:13.5px}
+.mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.mcard{position:relative;padding:18px 18px 16px;overflow:hidden;min-height:300px;display:flex;flex-direction:column}
+.mcard .mimg{position:absolute;right:-14px;top:-6px;width:150px;height:150px;object-fit:contain;filter:drop-shadow(0 16px 30px rgba(124,58,237,.45));animation:pfl 5s ease-in-out infinite;pointer-events:none}
+.mcard[data-m=XAG] .mimg{animation-delay:-1.2s}.mcard[data-m=XPT] .mimg{animation-delay:-2.4s}.mcard[data-m=XPD] .mimg{animation-delay:-3.6s}
+.mtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:60%}.mtop b{font-size:18px}.mtop .k{width:100%;font-size:12px}
+.mprice{font-size:30px;font-weight:850;letter-spacing:-1px;margin-top:62px;border-radius:10px;padding:0 4px;margin-left:-4px;width:max-content}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.mspark{margin-top:auto;padding-top:14px}.mspark svg{width:100%;height:56px;display:block}
+.msince{font-size:11.5px;margin-top:6px}
+.fl-up{animation:flUp .9s ease}.fl-dn{animation:flDn .9s ease}
+@keyframes flUp{0%{background:rgba(198,255,77,.28)}100%{background:transparent}}
+@keyframes flDn{0%{background:rgba(255,107,139,.28)}100%{background:transparent}}
+@media(max-width:1100px){.mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.mgrid{gap:10px}.mcard{min-height:250px;padding:14px}.mcard .mimg{width:104px;height:104px;right:-10px}.mprice{font-size:22px;margin-top:52px}.mtop b{font-size:15px}.mspark svg{height:44px}}
 </style>
 </head>
 <body>
@@ -1217,10 +1236,8 @@ async function srcFor(t){
 }
 const YTM=LS.get('ytmap',{});
 const YTQ=new Map();
-// видео, которые не открылись во встроенном плеере (запрещено встраивание, недоступно в стране, удалено)
-const YTB=new Set(LS.get('ytbad',[]));
-function ytBad(id){if(!id)return;YTB.add(id);LS.set('ytbad',[...YTB].slice(-600))}
-function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
+try{localStorage.removeItem('tempo:ytbad')}catch(e){}
+function ytPick(t,items){items=items||[];
   const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
   const A=nz(t.artist),T=nz(cleanTitle(t.title)||t.title),bad=/(live|концерт|cover|кавер|karaoke|караоке|reaction|реакция|sped ?up|speed ?up|slowed|nightcore|8d|instrumental|минус|lyrics|текст песни|tutorial|разбор|acoustic|акустич|премия|выпускной|фестивал|шок|с дочкой)/i;
   let best=null,bs=-99;
@@ -1235,7 +1252,7 @@ function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id)
 const ytOff=()=>{try{return +localStorage.getItem('tempo:ytOff')>Date.now()}catch(e){return false}};
 function ytQuota(sec){try{localStorage.setItem('tempo:ytOff',String(Date.now()+Math.min(sec||3600,86400)*1000))}catch(e){}if(!ytQuota.told){ytQuota.told=1;toast('Полные версии с YouTube временно недоступны — сегодняшний лимит исчерпан. Пока играют превью','headph')}}
 async function ytFind(t){
-  if(YTM[t.id]&&!YTB.has(YTM[t.id]))return YTM[t.id];
+  if(YTM[t.id])return YTM[t.id];
   if(ytOff())return '';
   if(YTQ.has(t.id))return YTQ.get(t.id);
   const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);throw e}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
@@ -1530,11 +1547,8 @@ const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
     if(!this.p){await new Promise((res,rej)=>{this.p=new YT.Player('ytPlayer',{videoId:id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{try{this.p.setVolume(AUD.volume*100);if(AUD.muted)this.p.mute();this.p.playVideo()}catch(e){}res()},onStateChange:e=>this.onState(e.data),onError:()=>this.onErr()}});setTimeout(res,8000)})}
     else this.p.loadVideoById(id);
   },
-  // видео не открылось — пробуем следующий результат поиска YouTube (до 4 раз), и только потом отрывок
-  onErr(){const t=P.cur,bad=this.cur;ytBad(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap',YTM)}
-    const fb=()=>{if(P.cur!==t)return;ME.toAudio();if(t&&isPreview(t))srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)});else ME.emit('error',true)};
-    if(t&&isPreview(t)&&(t._ytTry=(t._ytTry||0)+1)<=4){ytFind(t).then(v=>{if(P.cur!==t)return;if(v&&v!==bad)ME.playYT(v).then(()=>{t._yt=v;UI.why(t)}).catch(fb);else fb()}).catch(fb);return}
-    fb()},
+  // видео не открывается во встроенном плеере — другое видео не подставляем, играет отрывок этого же трека
+  onErr(){const t=P.cur;ME.toAudio();if(t&&isPreview(t)){delete YTM[t.id];LS.set('ytmap',YTM);srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)})}else ME.emit('error',true)},
   onState(s){this.state=s;if(s===1){ME.emit('playing');ME.emit('loadedmetadata');this.tick(true)}else if(s===2){this.tick(false);ME.emit('pause')}else if(s===0){this.tick(false);ME.emit('ended')}},
   tick(on){clearInterval(this.timer);if(on)this.timer=setInterval(()=>ME.emit('timeupdate'),400)},
   stop(){try{this.p&&this.p.stopVideo()}catch(e){}this.cur='';this.state=-1;this.tick(false);const b=$('#ytBox');if(b)b.hidden=true}
@@ -1592,7 +1606,7 @@ const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:nul
   playList(list,i=0,ctx='',name='',refill=null){if(!list||!list.length){toast('Нечего играть — каталог не ответил','x');return}this.anchor=null;this.queue=list.map(t=>({...t}));this.idx=i;this.ctx=ctx;this.ctxName=name;this.refill=refill;this.load(true)},
   async load(autoplay=true){
     const t=this.cur;if(!t)return;const seq=this.seq=(this.seq||0)+1;
-    t._full=false;t._start=Date.now();t._ytTry=0;
+    t._full=false;t._start=Date.now();
     UI.nowPlaying();
     if(this.idx>=this.queue.length-3)this.top();
     if(isPreview(t)&&fullOn()){
@@ -1846,11 +1860,11 @@ const pcMini=()=>{const v=pnum(PS.b)*pnum(PS.a)/100;return isFinite(v)?money(v):
 
 /* ===================== navigation ===================== */
 const NAV_M=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Плейлисты'],['remixes','disc','Ремиксы'],['library','lib','Медиатека']];
-const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
+const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['metals','gem','Курсы ценностей'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n],k)=>`<a class="it" href="#${v}" data-v="${v}" title="${n}" style="--k:${k}">${ico(i)}<span class="lt">${n}</span></a>`;
 $('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
 $('#tabs').innerHTML=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Моё'],['finance','wallet','Финансы']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
-const FIN=['finance','ai','crypto','notes','calc','budget','tables','spread','percent','history'];
+const FIN=['finance','ai','crypto','metals','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
 
 function route(){return (location.hash||'#home').slice(1)||'home'}
@@ -1860,7 +1874,7 @@ function render(){
   const base=r.startsWith('u-')?'search':r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));sideHL();
   $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
-  cryptoLeave(r);if(r!=='home')homeLive(false);
+  cryptoLeave(r);if(r!=='home')homeLive(false);if(r!=='home'&&r!=='metals')metLive(false);
   const v=$('#view');
   const fn=r.startsWith('u-')?()=>V.user(r.slice(2)):r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
   v.innerHTML=fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
@@ -1895,7 +1909,7 @@ function homeLive(on){clearInterval(HC.t);HC.t=0;if(!on)return;
     finally{HC.busy=false}
     const b=$('.bento3 .bt-crypto');if(b&&route()==='home')b.innerHTML=coinTile();
   };
-  tick();HC.t=setInterval(tick,5000);
+  tick();HC.t=setInterval(tick,1000);
 }
 function homeBento(){
   const n=[...NT.list].sort((a,b)=>(b.pinned-a.pinned)||((b.updated||0)-(a.updated||0))).find(x=>/- \[[ x]\]/.test(x.body||''))||NT.list[0];
@@ -1905,9 +1919,7 @@ function homeBento(){
     <a class="glass bt-crypto" href="#crypto">${coinTile()}</a>
     <a class="glass" href="${n?'#note-'+n.id:'#notes'}"><div class="bt-h">${ico('notes','s')}${n?esc(noteTitle(n)):'Заметки'}</div>
       ${todo.length?`<ul class="bt-note">${todo.map(x=>`<li class="${x.d?'done':''}"><span class="ck ${x.d?'on':''}">${x.d?ico('check','s'):''}</span><span>${esc(x.t)}</span></li>`).join('')}</ul>`:`<div class="k">${n?esc(String(n.body||'').slice(0,120)):'Список дел, идеи, покупки — ИИ поможет разобрать'}</div>`}</a>
-    <a class="glass bt-capw" href="${USR?'#u-'+USR.id:'#home'}"><div class="bt-h">${ico('star','s')}Капитализация</div>
-      <div class="bt-cap"><img src="/img/money.webp" alt=""><div><div class="v num" id="btCap">${cap?cap.score.toLocaleString('ru-RU'):'—'} <small>TP</small></div><div class="k" id="btLvl">${cap?'ур. '+cap.level+' · '+esc(cap.title):'твой уровень в Mundora'}</div></div></div>
-      <div class="bt-lvl"><i id="btBar" style="width:${cap?Math.max(4,Math.round((cap.score-cap.from)/(cap.to-cap.from)*100)):4}%"></i></div></a>
+    <a class="glass bt-met" href="#metals">${metTile()}</a>
   </section>`;
 }
 const fiat=v=>{if(v==null||!isFinite(v))return '—';const rub=CR.cur==='rub'&&CR.rub;v=v*(rub?CR.rub:1);return (rub?'':'$')+(v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:v>=1000?0:2}):v.toPrecision(3))+(rub?' ₽':'')};
@@ -1974,7 +1986,7 @@ V.home=()=>{
 let homeMix=null,homeMixKey='',homeMixAt=0;
 const tasteKey=()=>(S.taste.events||0)+':'+Object.keys(S.likes).length+':'+((S.plays||[])[0]?.t?.id||'');
 V.after.home=async(id)=>{
-  homeLive(true);
+  homeLive(true);metLive(true,()=>{const b=$('.bento3 .bt-met');if(b&&route()==='home')b.innerHTML=metTile()});
   if(USR&&!PEOPLE.cache[USR.id])peopleApi('id='+USR.id).then(j=>{PEOPLE.cache[USR.id]=j.profile;sideMe();if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
   bindHomeMini();
   const rec=$('#hRec'),tr=$('#hTrend');
@@ -2688,8 +2700,45 @@ function noteApply(m){
 }
 
 /* ---------- finance views ---------- */
+
+/* ===================== курсы ценностей: золото, серебро, платина, палладий ===================== */
+IMG.metals='/img/met_gold.webp';
+const MET=[{s:'XAU',n:'Золото',img:'/img/met_gold.webp',c:'#ffd45a',d:'#b7860c'},{s:'XAG',n:'Серебро',img:'/img/met_silver.webp',c:'#eef2f8',d:'#8b95a8'},{s:'XPT',n:'Платина',img:'/img/met_platinum.webp',c:'#dfe5fb',d:'#7d89b6'},{s:'XPD',n:'Палладий',img:'/img/met_palladium.webp',c:'#e4d6ff',d:'#8a6fca'}];
+const MT={by:{},t:0,err:'',timer:0,busy:false,built:false};
+const OZ=31.1034768;
+const barIco=m=>`<svg class="mbar" viewBox="0 0 34 20" aria-hidden="true"><defs><linearGradient id="mg${m.s}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".38" stop-color="${m.c}"/><stop offset="1" stop-color="${m.d}"/></linearGradient></defs><path d="M8 2.5h18l6 15H2z" fill="url(#mg${m.s})"/><path d="M8 2.5h18l-2.2 5.2H10.2z" fill="#fff" opacity=".45"/></svg>`;
+async function metLoad(){const d=await srvGet('metals');const now=Date.now();(d.data||[]).forEach(x=>{const o=MT.by[x.s];x.fl=o&&o.price!==x.price?(x.price>o.price?1:-1):0;MT.by[x.s]=x});MT.t=now;MT.err=''}
+function metLive(on,paint){clearInterval(MT.timer);MT.timer=0;if(!on)return;
+  const tick=async()=>{if(document.hidden||MT.busy)return;MT.busy=true;try{if(CR.cur==='rub')loadRub();await metLoad()}catch(e){MT.err=String(e.message||e)}finally{MT.busy=false}try{paint()}catch(e){}};
+  tick();MT.timer=setInterval(tick,1000)}
+const metOn=()=>Date.now()-MT.t<5000&&!MT.err;
+function metSpark(x,w=64,h=24){const p=(x.spark||[]).filter(isFinite);if(isFinite(x.price))p.push(x.price);if(p.length<2)return `<svg width="${w}" height="${h}"></svg>`;const mx=Math.max(...p),mn=Math.min(...p);
+  const d=p.map((v,i)=>`${i?'L':'M'}${(i/(p.length-1)*w).toFixed(1)},${(h-3-(v-mn)/(mx-mn||1)*(h-6)).toFixed(1)}`).join(' ');const up=(x.ch24==null?p[p.length-1]>=p[0]:x.ch24>=0);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${up?'var(--green)':'var(--red)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+const metCh=x=>x.ch24==null?'<span class="ch num" style="margin:0;color:var(--muted)">—</span>':`<span class="ch num ${x.ch24>=0?'up':'down'}" style="margin:0">${x.ch24>=0?'+':''}${fmt(x.ch24)}%</span>`;
+function metTile(){const on=metOn(),have=MET.filter(m=>MT.by[m.s]);
+  return `<div class="bt-h">${ico('gem','s')}Курсы ценностей<span class="live${on?' on':''}">онлайн</span></div>
+  ${have.length?have.map(m=>{const x=MT.by[m.s];return `<div class="bt-coin bt-mrow">${barIco(m)}<b>${m.n}</b>${metSpark(x,46,22)}<span class="pr num${x.fl>0?' fl-up':x.fl<0?' fl-dn':''}">${fiat(x.price)}</span>${metCh(x)}</div>`}).join(''):`<div class="k">${MT.err?'Курсы временно недоступны':'Загружаю курсы…'}</div>`}`}
+function metCard(m){const x=MT.by[m.s];
+  return `<div class="glass mcard" data-m="${m.s}"><img class="mimg" src="${m.img}" alt="">
+    <div class="mtop">${barIco(m)}<b>${m.n}</b><span class="k">${m.s} · унция</span></div>
+    <div class="mprice num" data-mp>${x?fiat(x.price):'—'}</div>
+    <div class="mrow"><span data-mc>${x?metCh(x):''}</span><span class="k" data-mg>${x?fiat(x.price/OZ)+' за грамм':''}</span></div>
+    <div class="mspark" data-ms>${x?metSpark(x,260,56):''}</div>
+    <div class="k msince" data-mt>${x&&x.ch24!=null&&Date.now()-x.since<23*3600e3?'изменение с '+new Date(x.since).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):x?'изменение за 24 ч':''}</div></div>`}
+function metPaint(){const g=$('#mGrid');if(!g)return;const b=$('#mLive');if(b){const on=metOn();b.className='live'+(on?' on':'');b.innerHTML=`<i></i><span>${on?'В реальном времени':MT.err?'Нет связи':'Подключаюсь…'}</span>`}
+  const e=$('#mErr');if(e)e.innerHTML=MT.err&&!Object.keys(MT.by).length?`<div class="notice" style="margin-top:12px">${ico('x')}<div>Не удалось загрузить курсы: ${esc(MT.err)}</div></div>`:'';
+  if(!MT.built&&Object.keys(MT.by).length){g.innerHTML=MET.map(metCard).join('');MT.built=true;return}
+  MET.forEach(m=>{const x=MT.by[m.s],c=g.querySelector(`[data-m="${m.s}"]`);if(!x||!c)return;const p=c.querySelector('[data-mp]');p.textContent=fiat(x.price);
+    if(x.fl){p.classList.remove('fl-up','fl-dn');void p.offsetWidth;p.classList.add(x.fl>0?'fl-up':'fl-dn')}
+    c.querySelector('[data-mc]').innerHTML=metCh(x);c.querySelector('[data-mg]').textContent=fiat(x.price/OZ)+' за грамм';c.querySelector('[data-ms]').innerHTML=metSpark(x,260,56)})}
+V.metals=()=>{MT.built=false;const on=metOn();
+  return `<div class="phead mhead"><h1>Курсы ценностей</h1><p>Золото, серебро, платина и палладий — мировая цена за тройскую унцию (31,1 г) и за грамм. Обновляется каждую секунду.</p><div class="ctl"><span class="live${on?' on':''}" id="mLive"><i></i><span>${on?'В реальном времени':'Подключаюсь…'}</span></span>${curSeg()}</div><img src="/img/met_gold.webp" alt=""></div>
+  <div class="mgrid" id="mGrid">${Object.keys(MT.by).length?(MT.built=true,MET.map(metCard).join('')):MET.map(()=>'<div class="glass skel" style="height:300px"></div>').join('')}</div><div id="mErr"></div>`};
+V.after.metals=()=>{loadRub();metLive(true,metPaint)};
+
 V.finance=()=>pageHead('Финансы','ИИ-помощник, крипта, заметки, калькулятор, доходы и расходы, таблицы, спред, проценты и история — всё под рукой.','chart')+
-  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
+  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
 
 V.calc=()=>{
   const keys=['AC','(',')','÷','7','8','9','×','4','5','6','−','1','2','3','+','%','0',',','='];
