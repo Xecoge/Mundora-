@@ -3527,7 +3527,7 @@ function pfHTML(p){
   const joined=p.joined?new Date(p.joined).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}).replace(/\s*г\.$/,''):'';
   const open=p.genres!==undefined;
   const s=c.stats;
-  const canCov=USR&&USR.admin&&(p.self||!p.owner||USR.owner);
+  const canCov=USR&&USR.admin&&p.self; // обложку админ меняет только себе
   return `<div class="pf-hero${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
     ${canCov?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
     <img class="pf-ava" src="${avaSrc(p.avatar)}" alt="">
@@ -3613,10 +3613,10 @@ Object.assign(ACT,{
   'pf-cover'(el){const p=PEOPLE.cache[el.dataset.id];if(!p)return;
     openSheet(`<h3>${ico('edit')}Обложка профиля<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
     <div class="pf-covprev"${p.cover?` style="background-image:url('${esc(p.cover)}')"`:''}>${p.cover?'':'<span class="k">Сейчас стандартная фиолетовая</span>'}</div>
-    <div class="k" style="margin:10px 0 12px">Обложку видят все, кто открывает профиль ${esc(p.name)}. Лучше горизонтальная картинка — она обрежется под 3:1.</div>
+    <div class="k" style="margin:10px 0 12px">Обложку твоего профиля видят все. Лучше горизонтальная картинка — она обрежется под 3:1.</div>
     <button class="btn" style="width:100%;justify-content:center" data-act="pf-cover-up" data-id="${p.id}">${ico('plus','s')}Загрузить из галереи</button>
     ${p.cover?`<button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="pf-cover-del" data-id="${p.id}">${ico('trash','s')}Убрать обложку</button>`:''}
-    ${!p.self&&String(p.avatar).startsWith('/')?`<button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="pf-ava-reset" data-id="${p.id}">${ico('x','s')}Убрать его аватарку</button>`:''}`)},
+`)},
   async 'pf-cover-up'(el){const f=await pickImg();if(!f)return;el.disabled=true;
     try{const data=await imgPrep(f,1500,500,650e3);pfApply((await peopleApi('a=cover',{id:el.dataset.id,data})).profile);closeSheet()}catch(e){toast(e.message,'x');el.disabled=false}},
   async 'pf-cover-del'(el){el.disabled=true;try{pfApply((await peopleApi('a=cover',{id:el.dataset.id,data:null})).profile);closeSheet()}catch(e){toast(e.message,'x');el.disabled=false}},

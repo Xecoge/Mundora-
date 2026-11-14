@@ -3,8 +3,7 @@
 // GET  /api/people?q=…         — поиск (ID, ник; админы — ещё и по почте)
 // POST /api/people?a=me {name,bio,avatar,open} — изменить свой профиль
 // POST /api/people?a=avatar {data}        — своя аватарка из галереи (видят все)
-// POST /api/people?a=cover {id,data|null} — обложка профиля (только админы)
-// POST /api/people?a=avatar-reset {id}    — админ убирает чужую загруженную аватарку
+// POST /api/people?a=cover {data|null}    — обложка СВОЕГО профиля (только админы); чужие обложки и аватарки не меняет никто
 // GET  /api/people?img=ava|cov&id=…       — сама картинка
 import { kv, kvMulti, pairs, jget, jset } from './_store.mjs';
 import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser, avatarOf, coverOf, unlinkTg, rand } from './_auth.mjs';
@@ -126,6 +125,7 @@ export default async function handler(req) {
       const em = /^\d{1,12}$/.test(tid) ? await kv('GET', 'id:' + tid) : null; if (!em) return json({ error: 'Аккаунт не найден' }, 404);
       const t = await getUser(em); if (!t) return json({ error: 'Аккаунт не найден' }, 404);
       const self = em === me.email, tOwner = em === ADMIN();
+      if (!self || a !== 'cover') return json({ error: 'Чужие обложки и аватарки менять нельзя — только свои' }, 403);
       if (tOwner && !me.owner) return json({ error: 'Профиль владельца менять нельзя' }, 403);
       if (a === 'cover' && b.data) { const bad = checkImg(b.data, 'cov'); if (bad) return json({ error: bad }, 400); }
       if (me.shadow && !self) { // визуальный админ: меняется только его личный слой
