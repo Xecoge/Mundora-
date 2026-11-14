@@ -2712,28 +2712,33 @@ function metLive(on,paint){clearInterval(MT.timer);MT.timer=0;if(!on)return;
   const tick=async()=>{if(document.hidden||MT.busy)return;MT.busy=true;try{if(CR.cur==='rub')loadRub();await metLoad()}catch(e){MT.err=String(e.message||e)}finally{MT.busy=false}try{paint()}catch(e){}};
   tick();MT.timer=setInterval(tick,1000)}
 const metOn=()=>Date.now()-MT.t<5000&&!MT.err;
+// мировой рынок металлов: вс 23:00 – пт 22:00 UTC, каждый день перерыв 22:00–23:00 UTC; в выходные цена стоит
+function metOpen(d=new Date()){const w=d.getUTCDay(),h=d.getUTCHours();if(w===6)return false;if(w===5&&h>=22)return false;if(w===0&&h<23)return false;return h!==22}
+function metNextOpen(){const d=new Date();d.setUTCMinutes(0,0,0);for(let i=0;i<80;i++){d.setUTCHours(d.getUTCHours()+1);if(metOpen(d))return d}return d}
+const metOpenTxt=()=>{const d=metNextOpen();return 'откроется '+d.toLocaleString('ru-RU',{weekday:'short',hour:'2-digit',minute:'2-digit'})};
+const metBadge=()=>{const open=metOpen(),on=metOn();return open?`<i></i><span>${on?'В реальном времени':MT.err?'Нет связи':'Подключаюсь…'}</span>`:`<i></i><span>Биржа закрыта · ${metOpenTxt()}</span>`};
 function metSpark(x,w=64,h=24){const p=(x.spark||[]).filter(isFinite);if(isFinite(x.price))p.push(x.price);if(p.length<2)return `<svg width="${w}" height="${h}"></svg>`;const mx=Math.max(...p),mn=Math.min(...p);
   const d=p.map((v,i)=>`${i?'L':'M'}${(i/(p.length-1)*w).toFixed(1)},${(h-3-(v-mn)/(mx-mn||1)*(h-6)).toFixed(1)}`).join(' ');const up=(x.ch24==null?p[p.length-1]>=p[0]:x.ch24>=0);
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${up?'var(--green)':'var(--red)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
 const metCh=x=>x.ch24==null?'<span class="ch num" style="margin:0;color:var(--muted)">—</span>':`<span class="ch num ${x.ch24>=0?'up':'down'}" style="margin:0">${x.ch24>=0?'+':''}${fmt(x.ch24)}%</span>`;
 function metTile(){const on=metOn(),have=MET.filter(m=>MT.by[m.s]);
-  return `<div class="bt-h">${ico('gem','s')}Курсы ценностей<span class="live${on?' on':''}">онлайн</span></div>
+  return `<div class="bt-h">${ico('gem','s')}Курсы ценностей<span class="live${on&&metOpen()?' on':''}">${metOpen()?'онлайн':'биржа закрыта'}</span></div><div class="k" style="font-size:11.5px;margin:-4px 0 4px">цена за 1 тройскую унцию (31,1 г)</div>
   ${have.length?have.map(m=>{const x=MT.by[m.s];return `<div class="bt-coin bt-mrow">${barIco(m)}<b>${m.n}</b>${metSpark(x,46,22)}<span class="pr num${x.fl>0?' fl-up':x.fl<0?' fl-dn':''}">${fiat(x.price)}</span>${metCh(x)}</div>`}).join(''):`<div class="k">${MT.err?'Курсы временно недоступны':'Загружаю курсы…'}</div>`}`}
 function metCard(m){const x=MT.by[m.s];
   return `<div class="glass mcard" data-m="${m.s}"><img class="mimg" src="${m.img}" alt="">
-    <div class="mtop">${barIco(m)}<b>${m.n}</b><span class="k">${m.s} · унция</span></div>
+    <div class="mtop">${barIco(m)}<b>${m.n}</b><span class="k">${m.s} · за 1 тройскую унцию</span></div>
     <div class="mprice num" data-mp>${x?fiat(x.price):'—'}</div>
     <div class="mrow"><span data-mc>${x?metCh(x):''}</span><span class="k" data-mg>${x?fiat(x.price/OZ)+' за грамм':''}</span></div>
     <div class="mspark" data-ms>${x?metSpark(x,260,56):''}</div>
     <div class="k msince" data-mt>${x&&x.ch24!=null&&Date.now()-x.since<23*3600e3?'изменение с '+new Date(x.since).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):x?'изменение за 24 ч':''}</div></div>`}
-function metPaint(){const g=$('#mGrid');if(!g)return;const b=$('#mLive');if(b){const on=metOn();b.className='live'+(on?' on':'');b.innerHTML=`<i></i><span>${on?'В реальном времени':MT.err?'Нет связи':'Подключаюсь…'}</span>`}
+function metPaint(){const g=$('#mGrid');if(!g)return;const b=$('#mLive');if(b){b.className='live'+(metOn()&&metOpen()?' on':'');b.innerHTML=metBadge()}
   const e=$('#mErr');if(e)e.innerHTML=MT.err&&!Object.keys(MT.by).length?`<div class="notice" style="margin-top:12px">${ico('x')}<div>Не удалось загрузить курсы: ${esc(MT.err)}</div></div>`:'';
   if(!MT.built&&Object.keys(MT.by).length){g.innerHTML=MET.map(metCard).join('');MT.built=true;return}
   MET.forEach(m=>{const x=MT.by[m.s],c=g.querySelector(`[data-m="${m.s}"]`);if(!x||!c)return;const p=c.querySelector('[data-mp]');p.textContent=fiat(x.price);
     if(x.fl){p.classList.remove('fl-up','fl-dn');void p.offsetWidth;p.classList.add(x.fl>0?'fl-up':'fl-dn')}
     c.querySelector('[data-mc]').innerHTML=metCh(x);c.querySelector('[data-mg]').textContent=fiat(x.price/OZ)+' за грамм';c.querySelector('[data-ms]').innerHTML=metSpark(x,260,56)})}
 V.metals=()=>{MT.built=false;const on=metOn();
-  return `<div class="phead mhead"><h1>Курсы ценностей</h1><p>Золото, серебро, платина и палладий — мировая цена за тройскую унцию (31,1 г) и за грамм. Обновляется каждую секунду.</p><div class="ctl"><span class="live${on?' on':''}" id="mLive"><i></i><span>${on?'В реальном времени':'Подключаюсь…'}</span></span>${curSeg()}</div><img src="/img/met_gold.webp" alt=""></div>
+  return `<div class="phead mhead"><h1>Курсы ценностей</h1><p>Золото, серебро, платина и палладий — мировая биржевая цена (спот) в долларах за 1 тройскую унцию (31,1 г) и за 1 грамм. В будни обновляется каждую секунду, в выходные биржа закрыта и цена стоит на месте.</p><div class="ctl"><span class="live${on&&metOpen()?' on':''}" id="mLive">${metBadge()}</span>${curSeg()}</div><img src="/img/met_gold.webp" alt=""></div>
   <div class="mgrid" id="mGrid">${Object.keys(MT.by).length?(MT.built=true,MET.map(metCard).join('')):MET.map(()=>'<div class="glass skel" style="height:300px"></div>').join('')}</div><div id="mErr"></div>`};
 V.after.metals=()=>{loadRub();metLive(true,metPaint)};
 
