@@ -1121,14 +1121,11 @@ function ytPick(t,items){
     if(sc>bs){bs=sc;best=it}}
   return best;
 }
-// лимит YouTube API кончился — до сброса не ищем, играют превью
-const ytOff=()=>{try{return +localStorage.getItem('tempo:ytOff')>Date.now()}catch(e){return false}};
-function ytQuota(sec){try{localStorage.setItem('tempo:ytOff',String(Date.now()+Math.min(sec||3600,86400)*1000))}catch(e){}if(!ytQuota.told){ytQuota.told=1;toast('Полные версии с YouTube временно недоступны — сегодняшний лимит исчерпан. Пока играют превью','headph')}}
+// Full-track search uses Invidious; legacy YouTube Data API quota state is no longer consulted.
 async function ytFind(t){
   if(YTM[t.id])return YTM[t.id];
-  if(ytOff())return '';
   if(YTQ.has(t.id))return YTQ.get(t.id);
-  const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);throw e}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
+  const p=MUS.get('invidious','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
   YTQ.set(t.id,p);return p;
 }
 const LITE=['id','title','artist','artistId','handle','genre','mood','tags','duration','plays','favs','art','artS','artL','ava','mir','lang','bpm','key','permalink','src','dz','dzArtist','preview','album','explicit'];
@@ -1419,7 +1416,7 @@ const ME={mode:'a',ls:{},
   get muted(){return AUD.muted},set muted(v){AUD.muted=v;try{YTP.p&&(v?YTP.p.mute():YTP.p.unMute())}catch(e){}},
   get src(){return AUD.src},set src(v){this.toAudio();AUD.src=v},
   toAudio(){if(this.mode==='yt'){YTP.stop();this.mode='a';document.body.classList.remove('ytmode');ytDock()}},
-  async playYT(id){AUD.pause();this.mode='yt';document.body.classList.add('ytmode');ytDock();await YTP.play(id);ytDock()},
+  async playYT(id,autoplay=true){this.toAudio();const d=await MUS.get('invidious','streams/'+encodeURIComponent(id));if(!d||!d.url)throw new Error('Invidious не вернул аудиопоток');AUD.src=d.url;if(autoplay)await AUD.play()},
   removeAttribute(a){this.toAudio();AUD.removeAttribute(a)},load(){AUD.load()},setAttribute(a,b){AUD.setAttribute(a,b)}
 };
 const audio=ME;
@@ -1464,7 +1461,7 @@ const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:nul
     if(this.idx>=this.queue.length-3)this.top();
     if(isPreview(t)&&fullOn()){
       const vid=await ytFind(t).catch(()=>'');if(seq!==this.seq)return;
-      if(vid){try{await ME.playYT(vid);if(seq===this.seq){t._yt=vid;UI.why(t)}return}catch(e){ME.toAudio();toast('YouTube недоступен — играет отрывок','x')}}
+      if(vid){try{await ME.playYT(vid,autoplay);if(seq===this.seq){t._yt=vid;UI.why(t)}return}catch(e){ME.toAudio();toast('Аудиопоток Invidious недоступен — играет отрывок','x')}}
     }
     const u=await srcFor(t);if(seq!==this.seq)return;
     if(!u){toast('Нет аудио у трека — включаю следующий','next');setTimeout(()=>{if(seq===this.seq)this.next()},500);return}
@@ -2980,7 +2977,7 @@ function admDraw(){
     <div class="glass adm-stat"><img src="/img/crystal.webp" alt=""><div><b>${live}</b><span class="k">рабочих кодов</span></div></div>
     <div class="glass adm-stat"><img src="/img/asteroid.webp" alt=""><div><b>${bad}</b><span class="k">бан и блок</span></div></div>
   </div>
-  ${d.owner&&d.yt?(()=>{const y=d.yt,bad=!y.key||y.quota||(y.lastErr&&y.lastErr.t>y.lastOk);return `<div class="glass ytst${bad?' bad':''}"><span class="sdot${bad?' bad':''}"></span><div><b>YouTube (полные версии): ${!y.key?'нет ключа YT_API_KEY':y.quota?'лимит на сегодня исчерпан':bad?'ошибка':'работает'}</b><small class="k">${y.quota?'Сбросится через '+Math.ceil(y.quota/3600)+' ч (в 13:00 по Екатеринбургу). Пока играют превью.':''}${y.lastErr&&y.lastErr.t>y.lastOk&&!y.quota?'Google ответил: '+esc(y.lastErr.msg)+(y.lastErr.reason?' ('+esc(y.lastErr.reason)+')':''):''}${!bad?'Последний успешный поиск: '+ago(y.lastOk):''} · запросов к YouTube сегодня: ${y.calls} (лимит ≈100 в сутки, повторы берутся из кэша)</small></div></div>`})():''}
+  ${d.owner?'<div class="glass ytst bad"><span class="sdot bad"></span><div><b>YouTube Data API (legacy): отключён</b><small class="k">Официальный API сохранён в проекте, но не используется. Поиск треков и аудио идут через Invidious REST API; встроенный видеоплеер не используется.</small></div></div>':''}
   ${d.owner?`<div class="h3"><img class="h3i" src="/img/chat.webp" alt="">Telegram-бот Mundora<span class="more">${TGS.st&&TGS.st.bot?'@'+esc(TGS.st.bot.username):''}</span></div>
   <div class="glass tgbox" id="tgBox">${tgHTML()}</div>`:''}
   <div class="h3"><img class="h3i" src="/img/box_open.webp" alt="">Коды доступа<span class="more">${d.envCodeUsed?'стартовый код из Vercel уже использован':'стартовый код из Vercel ещё не использован'}</span></div>
