@@ -335,7 +335,7 @@ body.fullyt .ytfloat{z-index:65}body.fullyt .ytin{border:0;border-radius:20px}bo
 .think summary::-webkit-details-marker{display:none}
 .think summary .chev{margin-left:auto;transition:transform .2s}
 .think[open] summary .chev{transform:rotate(180deg)}
-.think .th{padding:2px 12px 10px;font-size:12.5px;color:#b5aed0;max-height:340px;overflow:auto}
+.think .th{white-space:pre-wrap;word-break:break-word;padding:2px 12px 10px;font-size:12.5px;color:#b5aed0;max-height:340px;overflow:auto}
 .md{line-height:1.62;font-size:14.5px;overflow-wrap:anywhere}
 .md p{margin:0 0 9px}.md>:last-child{margin-bottom:0}
 .md h2,.md h3,.md h4{margin:14px 0 6px;font-size:16px;letter-spacing:-.2px}
@@ -873,6 +873,27 @@ img[src*="img=ava"]{border-radius:50%!important;object-fit:cover!important;paddi
 @keyframes flDn{0%{background:rgba(255,107,139,.28)}100%{background:transparent}}
 @media(max-width:1100px){.mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.mgrid{gap:10px}.mcard{min-height:250px;padding:14px}.mcard .mimg{width:104px;height:104px;right:-10px}.mprice{font-size:22px;margin-top:52px}.mtop b{font-size:15px}.mspark svg{height:44px}}
+
+/* ===== плеер вне музыкальных разделов (ПК): компактная стеклянная плашка справа снизу ===== */
+@media(min-width:761px){
+body:not(.mroute) .player:not(.empty){left:auto!important;top:auto!important;right:16px!important;bottom:16px!important;width:420px!important;height:68px!important;border-radius:24px!important;
+ display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;padding:0 10px 0 10px!important;gap:6px!important;flex-direction:row!important;animation:plIn .35s cubic-bezier(.2,.85,.25,1) both}
+body:not(.mroute) .player:not(.empty)::before{display:none!important}
+body:not(.mroute) .player:not(.empty) .p-left{flex-direction:row!important;align-items:center!important;gap:10px!important;min-width:0}
+body:not(.mroute) .player:not(.empty) .p-left .art{width:46px!important;height:46px!important;aspect-ratio:auto!important;border-radius:13px!important;flex:none;transform:none!important}
+body:not(.mroute) .player:not(.empty) .p-meta{min-width:0}
+body:not(.mroute) .player:not(.empty) .p-meta b{font-size:14px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block}
+body:not(.mroute) .player:not(.empty) .p-meta small{font-size:12px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:1px!important}
+body:not(.mroute) .player:not(.empty) #pLike{position:static!important}
+body:not(.mroute) .player:not(.empty) .p-center{order:0!important}
+body:not(.mroute) .player:not(.empty) .prow,body:not(.mroute) .player:not(.empty) .p-right,body:not(.mroute) .player:not(.empty) #bShuffle,body:not(.mroute) .player:not(.empty) #bRepeat,body:not(.mroute) .player:not(.empty) [data-act=prev]{display:none!important}
+body:not(.mroute) .player:not(.empty) .pbtns{width:auto!important;gap:4px!important}
+body:not(.mroute) .player:not(.empty) .pp{width:44px!important;height:44px!important}
+body:not(.mroute) .player:not(.empty) .mprog{display:block!important;left:20px!important;right:20px!important;top:auto!important;bottom:0!important}
+body:not(.mroute):has(#player:not(.empty)) .app{margin-right:0!important}
+body:not(.mroute) .main{padding-bottom:110px!important}
+body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
+}
 </style>
 </head>
 <body>
@@ -1236,8 +1257,16 @@ async function srcFor(t){
 }
 const YTM=LS.get('ytmap',{});
 const YTQ=new Map();
-try{localStorage.removeItem('tempo:ytbad')}catch(e){}
-function ytPick(t,items){items=items||[];
+// видео, которые правообладатель запретил показывать на других сайтах
+const YTB=new Set(LS.get('ytblk',[]));
+function ytBlock(id){if(!id)return;YTB.add(id);LS.set('ytblk',[...YTB].slice(-600))}
+const ytNz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
+const YT_BADV=/(slowed|sped ?up|speed ?up|nightcore|8d|reverb|bass ?boost|remix|ремикс|cover|кавер|karaoke|караоке|instrumental|минус|live|концерт|lyrics|текст песни|reaction|реакция|tutorial|разбор|acoustic|акустич|mashup|edit\b|1 ?hour|час)/i;
+// тот же самый трек: название и артист совпадают, без slowed/sped up/ремиксов/каверов (если их нет в оригинале)
+function ytSame(t,it){const n=ytNz(it.title),ch=ytNz(it.channel),T=ytNz(cleanTitle(t.title)||t.title),A=ytNz(String(t.artist||'').split(/,|&|feat\.?|ft\.?| x | и /i)[0]);
+  if(!T||!n.includes(T))return false;if(A&&!n.includes(A)&&!ch.includes(A))return false;
+  const bad=String(it.title||'').match(YT_BADV);if(bad&&!new RegExp(bad[1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(t.title))return false;return true}
+function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
   const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
   const A=nz(t.artist),T=nz(cleanTitle(t.title)||t.title),bad=/(live|концерт|cover|кавер|karaoke|караоке|reaction|реакция|sped ?up|speed ?up|slowed|nightcore|8d|instrumental|минус|lyrics|текст песни|tutorial|разбор|acoustic|акустич|премия|выпускной|фестивал|шок|с дочкой)/i;
   let best=null,bs=-99;
@@ -1251,8 +1280,16 @@ function ytPick(t,items){items=items||[];
 // лимит YouTube API кончился — до сброса не ищем, играют превью
 const ytOff=()=>{try{return +localStorage.getItem('tempo:ytOff')>Date.now()}catch(e){return false}};
 function ytQuota(sec){try{localStorage.setItem('tempo:ytOff',String(Date.now()+Math.min(sec||3600,86400)*1000))}catch(e){}if(!ytQuota.told){ytQuota.told=1;toast('Полные версии с YouTube временно недоступны — сегодняшний лимит исчерпан. Пока играют превью','headph')}}
+// другая загрузка того же трека: сначала из уже найденных результатов, потом один дополнительный поиск
+async function ytAlt(t){
+  const q1=`${t.artist} - ${cleanTitle(t.title)||t.title}`;
+  const pick=items=>(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id)&&ytSame(t,it))[0];
+  let it=pick((await MUS.get('yt','search',{q:q1}).catch(()=>({}))).items);
+  if(!it&&!t._ytAlt2){t._ytAlt2=1;it=pick((await MUS.get('yt','search',{q:`${t.artist} ${cleanTitle(t.title)||t.title} audio`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);return {}})).items)}
+  if(!it)return '';YTM[t.id]=it.id;LS.set('ytmap',YTM);return it.id;
+}
 async function ytFind(t){
-  if(YTM[t.id])return YTM[t.id];
+  if(YTM[t.id]&&!YTB.has(YTM[t.id]))return YTM[t.id];
   if(ytOff())return '';
   if(YTQ.has(t.id))return YTQ.get(t.id);
   const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);throw e}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
@@ -1547,8 +1584,12 @@ const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
     if(!this.p){await new Promise((res,rej)=>{this.p=new YT.Player('ytPlayer',{videoId:id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{try{this.p.setVolume(AUD.volume*100);if(AUD.muted)this.p.mute();this.p.playVideo()}catch(e){}res()},onStateChange:e=>this.onState(e.data),onError:()=>this.onErr()}});setTimeout(res,8000)})}
     else this.p.loadVideoById(id);
   },
-  // видео не открывается во встроенном плеере — другое видео не подставляем, играет отрывок этого же трека
-  onErr(){const t=P.cur;ME.toAudio();if(t&&isPreview(t)){delete YTM[t.id];LS.set('ytmap',YTM);srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)})}else ME.emit('error',true)},
+  // видео запрещено показывать на сайтах — ищем ЭТОТ ЖЕ трек, загруженный другим каналом (без slowed/sped up/ремиксов);
+  // не нашли — играет отрывок этого трека
+  onErr(){const t=P.cur,bad=this.cur;ytBlock(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap',YTM)}
+    const fb=()=>{if(P.cur!==t)return;ME.toAudio();if(t&&isPreview(t))srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)});else ME.emit('error',true)};
+    if(!t||!isPreview(t)||(t._ytTry=(t._ytTry||0)+1)>4)return fb();
+    ytAlt(t).then(v=>{if(P.cur!==t)return;if(v&&v!==bad)ME.playYT(v).then(()=>{t._yt=v;UI.why(t)}).catch(fb);else fb()}).catch(fb)},
   onState(s){this.state=s;if(s===1){ME.emit('playing');ME.emit('loadedmetadata');this.tick(true)}else if(s===2){this.tick(false);ME.emit('pause')}else if(s===0){this.tick(false);ME.emit('ended')}},
   tick(on){clearInterval(this.timer);if(on)this.timer=setInterval(()=>ME.emit('timeupdate'),400)},
   stop(){try{this.p&&this.p.stopVideo()}catch(e){}this.cur='';this.state=-1;this.tick(false);const b=$('#ytBox');if(b)b.hidden=true}
@@ -1606,7 +1647,7 @@ const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:nul
   playList(list,i=0,ctx='',name='',refill=null){if(!list||!list.length){toast('Нечего играть — каталог не ответил','x');return}this.anchor=null;this.queue=list.map(t=>({...t}));this.idx=i;this.ctx=ctx;this.ctxName=name;this.refill=refill;this.load(true)},
   async load(autoplay=true){
     const t=this.cur;if(!t)return;const seq=this.seq=(this.seq||0)+1;
-    t._full=false;t._start=Date.now();
+    t._full=false;t._start=Date.now();t._ytTry=0;t._ytAlt2=0;
     UI.nowPlaying();
     if(this.idx>=this.queue.length-3)this.top();
     if(isPreview(t)&&fullOn()){
@@ -1874,6 +1915,8 @@ function render(){
   const base=r.startsWith('u-')?'search':r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));sideHL();
   $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
+  // большой плеер «Сейчас играет» — только в музыкальных разделах; в остальных — компактная плашка
+  document.body.classList.toggle('mroute',['home','flow','search','playlists','remixes','library'].includes(r)||/^(artist|pl)-/.test(r));
   cryptoLeave(r);if(r!=='home')homeLive(false);if(r!=='home'&&r!=='metals')metLive(false);
   const v=$('#view');
   const fn=r.startsWith('u-')?()=>V.user(r.slice(2)):r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
@@ -2296,7 +2339,8 @@ function chatSystem(){
 ${AI_ACTIONS_HELP}`+(CH.useFin?`\n\n## Данные сайта сейчас\n${siteContext()}`:`\n\n(Пользователь выключил доступ ИИ к своим данным — для изменения существующих записей попроси включить «Мои данные».)`);
 }
 function apiContent(m,withImages){
-  if(m.role==='assistant')return (m.text||'(ответ пуст)')+(m.acts&&m.acts.length?'\n\n[Выполнено на сайте: '+m.acts.map(x=>(x.s==='ok'?'✓ ':'✗ ')+x.t).join('; ')+']':'');
+  // что сайт реально сделал — отдельной пометкой, которую модель не должна повторять
+  if(m.role==='assistant')return (m.text||'(ответ пуст)')+(m.acts&&m.acts.length?'\n\n(служебно, пишет сайт, не повторяй: '+m.acts.map(x=>(x.s==='ok'?'сделано ':'ошибка ')+x.t).join('; ')+')':'');
   let text=m.text||'';const imgs=[];
   (m.files||[]).forEach(f=>{
     if(f.kind==='image'){if(withImages&&f.data)imgs.push(f.data);text+=`\n\n[Изображение: ${f.name}${f.note?' — '+f.note:''}${!withImages||!f.data?' (было в предыдущем сообщении)':''}]`}
@@ -2353,7 +2397,7 @@ async function aiStreamOnce(messages,{model,eff,signal,onDelta}){
 function msgHTML(m,i){
   if(m.role==='user')return `<div class="msg u" data-i="${i}"><div class="bub">${filesHTML(m.files)}${m.text?`<div class="md">${esc(m.text).replace(/\n/g,'<br>')}</div>`:''}</div></div>`;
   const live=!!m.pending,hasAns=!!(m.text&&m.text.trim());
-  const think=m.reasoning?`<details class="think"${live&&!hasAns?' open':''}><summary>${ico(live&&!hasAns?'loader':'spark',live&&!hasAns?'ldg s':'s')}<span>${live&&!hasAns?'Рассуждает…':'Рассуждение'+(m.secs?` · ${m.secs} с`:'')}</span>${ico('chev','s chev')}</summary><div class="th md">${md(m.reasoning||'')||'<span class="muted">Думаю над задачей…</span>'}</div></details>`:'';
+  const think=m.reasoning?`<details class="think"${m._thOpen?' open':''}><summary>${ico(live&&!hasAns?'loader':'spark',live&&!hasAns?'ldg s':'s')}<span>${live&&!hasAns?'Думает'+(m.secs?` · ${m.secs} с`:'…'):'Ход мыслей'+(m.secs?` · ${m.secs} с`:'')}</span>${ico('chev','s chev')}</summary><div class="th">${m._thOpen?esc(thTail(m.reasoning)):''}</div></details>`:'';
   return `<div class="msg a" data-i="${i}"><div class="av"><img src="${IMG.thumbs}" alt=""></div><div class="bub">${think}
     <div class="ans md">${hasAns?md(aiShown(m.text,live)):live?'<span class="dots"><i></i><i></i><i></i></span>':''}</div>${actsHTML(m.acts)}
     ${m.error?`<div class="notice" style="margin-top:8px">${ico('x')}<div style="flex:1;word-break:break-word">Ошибка: ${esc(m.error)}</div><button class="btn sm" data-act="chat-retry" data-i="${i}">${ico('refresh')}Ещё раз</button></div>`:''}
@@ -2364,7 +2408,10 @@ const nearBottom=()=>innerHeight+scrollY>=document.documentElement.scrollHeight-
 const toBottom=()=>scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 function chatDraw(){const el=$('#msgs');if(!el)return;el.innerHTML=CH.msgs.map(msgHTML).join('');const e=$('.chat-empty');if(e&&CH.msgs.length)e.remove()}
 let paintRaf=0;
-function chatPaint(m){const i=CH.msgs.indexOf(m);const el=$(`#msgs .msg[data-i="${i}"]`);if(!el)return;const stick=nearBottom();const det=el.querySelector('details');const userOpen=det&&det.dataset.user?det.open:null;el.outerHTML=msgHTML(m,i);if(userOpen!==null){const d=$(`#msgs .msg[data-i="${i}"] details`);if(d){d.open=userOpen;d.dataset.user=1}}if(stick)toBottom()}
+const thTail=t=>{t=String(t||'');return t.length>6000?'…'+t.slice(-6000):t};
+function chatPaint(m){const i=CH.msgs.indexOf(m);const el=$(`#msgs .msg[data-i="${i}"]`);if(!el)return;const stick=nearBottom();el.outerHTML=msgHTML(m,i);if(stick)toBottom()}
+// раскрыли «Ход мыслей» — показываем текст только тогда (иначе огромные рассуждения тормозят страницу)
+document.addEventListener('toggle',e=>{const d=e.target;if(!d.matches||!d.matches('details.think'))return;const el=d.closest('.msg');const m=el&&CH.msgs[+el.dataset.i];if(!m)return;m._thOpen=d.open;const th=d.querySelector('.th');if(th)th.textContent=d.open?thTail(m.reasoning):''},true);
 function setBusy(b){const btn=$('#chatSend');if(!btn)return;btn.classList.toggle('stop',b);btn.innerHTML=ico(b?'stop':'send');btn.title=b?'Остановить':'Отправить'}
 async function chatSend(){
   const inp=$('#chatIn');const text=(inp?inp.value:CH.draft).trim();
@@ -2384,14 +2431,17 @@ async function chatRun(am,effort='medium'){
   const idx=CH.msgs.indexOf(am);const hist=CH.msgs.slice(0,idx).filter(m=>!m.error&&(m.role==='user'||m.text)).slice(-12);
   const msgs=[{role:'system',content:chatSystem()},...hist.map((m,i)=>({role:m.role,content:apiContent(m,i>=hist.length-5)}))];
   let raw='',nat='';const t0=Date.now();
-  const upd=()=>{const {th,ans}=splitThink(raw);am.text=ans;am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);if(!paintRaf)paintRaf=requestAnimationFrame(()=>{paintRaf=0;chatPaint(am)})};
+  const upd=()=>{const {th,ans}=splitThink(raw);am.text=ans;am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);if(!paintRaf)paintRaf=setTimeout(()=>{paintRaf=0;chatPaint(am)},140)};
   try{for(let a=0;;a++){try{await aiStream(msgs,{signal:CH.ctl.signal,effort,onDelta:(c,r)=>{if(c)raw+=c;if(r)nat+=r;upd()}});break}catch(e){if(e.name!=='AbortError'&&isNetErr(e)&&!e.provider&&!raw&&!nat&&a<1){await new Promise(r=>setTimeout(r,700));continue}throw e}}}
   catch(e){if(e.name==='AbortError')am.stopped=true;else am.error=raw?'Связь оборвалась — ответ может быть неполным. Нажми «Ещё раз».':humanErr(e)}
   const {th,ans}=splitThink(raw);am.text=ans.trim();am.reasoning=(nat+(nat&&th?'\n\n':'')+th).trim();am.secs=Math.round((Date.now()-t0)/1000);
-  const AX=aiExtract(am.text);am.text=AX.text;
+  const said=am.text,AX=aiExtract(am.text);am.text=AX.text;
   if(!am.text&&!AX.list.length&&!am.error&&!am.stopped)am.error='Модель вернула пустой ответ';
-  delete am.pending;CH.busy=false;CH.ctl=null;setBusy(false);chatSave();cancelAnimationFrame(paintRaf);paintRaf=0;chatPaint(am);
-  if(AX.list.length&&!am.stopped)await aiRunActions(am,AX.list);
+  delete am.pending;CH.busy=false;CH.ctl=null;setBusy(false);chatSave();clearTimeout(paintRaf);paintRaf=0;chatPaint(am);
+  let list=AX.list;
+  // модель сказала «включаю / открываю / выполнено», но не прислала команду — просим команду отдельно и выполняем
+  if(!list.length&&!am.stopped&&!am.error&&aiClaims(said)){am.acts=[{s:'run',t:'…'}];chatPaint(am);list=await aiRepair(msgs,said).catch(()=>[]);if(!list.length){am.acts=[{s:'err',t:'ИИ не прислал команду — попробуй сказать иначе'}];chatPaint(am);chatSave()}}
+  if(list.length&&!am.stopped)await aiRunActions(am,list);
 }
 V.ai=()=>`<div class="chat" id="chatBox">
   <div class="chat-top"><div class="h2">${ico('chat')}ИИ-помощник</div>${CH.msgs.length?`<button class="btn ghost sm" data-act="chat-new">${ico('plus')}Новый чат</button>`:''}</div>
@@ -3246,7 +3296,7 @@ const SH_ACT={ban:'забанил',block:'заблокировал',freeze:'за
 const ADM_DONE={'shadow-on':'Визуальная админка включена','shadow-off':'Визуальная админка выключена',extend:'Доступ продлён на 30 дней',forever:'Доступ теперь бессрочный',verify:'Галочка выдана',unverify:'Галочка снята','admin-add':'Теперь это админ','admin-del':'Больше не админ',activate:'Аккаунт снова активен',freeze:'Аккаунт заморожен',block:'Аккаунт заблокирован',ban:'Аккаунт забанен',logout:'Сессии завершены',note:'Заметка сохранена',delete:'Аккаунт удалён'};
 
 /* ===================== ИИ управляет сайтом ===================== */
-const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',admin:'Админ-панель'};
+const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',metals:'Курсы ценностей',admin:'Админ-панель'};
 const usd=v=>v==null||!isFinite(v)?'—':v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:2}):v.toPrecision(3);
 function siteContext(){
   const L=[];
@@ -3259,6 +3309,8 @@ function siteContext(){
   L.push(`### Музыка\nСейчас играет: ${P.cur?`${P.cur.artist} — ${P.cur.title}${audio.paused?' (пауза)':''}`:'ничего'}\nЛайков: ${lk.length}${lk.length?'. Последние: '+lk.slice(0,6).map(t=>t.artist+' — '+t.title).join('; '):''}\nЛюбимые жанры: ${topOf(S.taste.genre,3).map(x=>gRu(x[0])).join(', ')||'пока не ясно'}`);
   const cs=CR.coins.slice(0,12);
   L.push('### Крипта\n'+(cs.length?cs.map(c=>`${c.sym} (id ${c.id}): $${usd(c.price)}, 24ч ${(c.ch24||0)>=0?'+':''}${(c.ch24||0).toFixed(2)}%`).join('\n'):'курсы не загружены')+(CR.fav.length?'\nИзбранное: '+CR.fav.join(', '):''));
+  const mt=MET.filter(m=>MT.by[m.s]);if(mt.length)L.push('### Курсы ценностей ($ за 1 тройскую унцию)\n'+mt.map(m=>`${m.n}: $${usd(MT.by[m.s].price)}`).join('\n')+(metOpen()?'':'\n(биржа металлов сейчас закрыта)'));
+  if(USR)L.push(`### Аккаунт\nИмя: ${USR.name||''}, ID ${USR.id}${USR.tg?', Telegram: '+tgLabel(USR.tg):', Telegram не привязан'}${USR.admin?', администратор':''}`);
   L.push('Сейчас открыт раздел: '+(AI_PAGES[route().replace(/-.*/,'')]||route()));
   return L.join('\n\n');
 }
@@ -3269,6 +3321,7 @@ const AI_ACTIONS_HELP=`## Ты управляешь сайтом
 [{"do":"…", …}]
 \`\`\`
 
+ВАЖНО: отметки «сделано» показывает сам сайт после выполнения блока. Никогда не пиши сам «Выполнено…», «Открыт…», «[…]» — без блока tempo ничего не произойдёт. Пиши в будущем/настоящем: «Открываю…», «Включаю…». Рассуждай коротко.
 Пользователь не видит блок — он видит отметки о выполненном. Перед блоком одной фразой скажи, что делаешь. Можно несколько действий в одном массиве. id бери ТОЛЬКО из данных сайта ниже, не выдумывай. Если не хватает данных (сумма, какой трек…) — переспроси, без блока. На вопросы без просьбы что-то сделать — отвечай без блока.
 
 Действия:
@@ -3284,10 +3337,16 @@ const AI_ACTIONS_HELP=`## Ты управляешь сайтом
 - {"do":"pl.add","playlist":"id или название","queries":["артист трек",…]} · {"do":"pl.del","id":"…"} · {"do":"pl.play","id":"…"}
 - {"do":"crypto.fav","coin":"id или тикер","on":true|false} · {"do":"crypto.cur","cur":"usd"|"rub"}
 - {"do":"open","page":"home|flow|search|playlists|remixes|library|finance|budget|tables|history|calc|percent|spread|crypto|notes|ai${USR&&USR.admin?'|admin':''}"} · {"do":"open","page":"coin","coin":"btc"} · {"do":"open","page":"note","id":"…"} · {"do":"open","page":"playlist","id":"…"}
+- {"do":"open","page":"metals"} — курсы ценностей (золото, серебро, платина, палладий)
+- {"do":"open","page":"user","id":число} — профиль человека по ID · {"do":"open","page":"me"} — мой профиль · {"do":"open","page":"artist","name":"артист"} — страница артиста
+- {"do":"people.find","query":"ник или ID"} — найти человека на сайте и открыть его профиль
+- {"do":"profile.edit","bio"?:"о себе","name"?:"имя","open"?:true|false} — изменить мой профиль · {"do":"profile.form"} — открыть окно «Изменить профиль» (аватарка, Telegram)
+- {"do":"music.dislike"} — «не нравится» текущему · {"do":"music.shuffle","on":true|false} · {"do":"music.repeat","on":true|false}
 - {"do":"search","query":"…"} — открыть поиск музыки с этим запросом`;
+const stripFake=t=>String(t||'').replace(/\[?\s*Выполнено на сайте:[^\]\n]*\]?/gi,'').replace(/\(служебно[^)]*\)/gi,'');
 function aiExtract(text){
   const list=[];let found=false;
-  const out=String(text||'').replace(/```\s*tempo\s*\n?([\s\S]*?)(```|$)/gi,(m,body)=>{
+  const out=stripFake(text).replace(/```\s*tempo\s*\n?([\s\S]*?)(```|$)/gi,(m,body)=>{
     found=true;const b=body.trim();if(!b)return '';
     let v=null;try{v=JSON.parse(b)}catch(e){try{v=b.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>JSON.parse(l.replace(/,$/,'')))}catch(e2){v=null}}
     if(v)(Array.isArray(v)?v:[v]).forEach(x=>{if(x&&typeof x==='object')list.push(x)});
@@ -3296,7 +3355,7 @@ function aiExtract(text){
   }).replace(/\n{3,}/g,'\n\n').trim();
   return {text:out,list,found};
 }
-const aiShown=(t,live)=>{const i=String(t||'').search(/```\s*tempo/i);if(i<0)return t;return String(t).slice(0,i).trim()+(live&&!/```\s*tempo[\s\S]*```/i.test(t)?'\n\n*Выполняю…*':'')};
+const aiShown=(t,live)=>{t=stripFake(t);const i=String(t||'').search(/```\s*tempo/i);if(i<0)return t;return String(t).slice(0,i).trim()+(live&&!/```\s*tempo[\s\S]*```/i.test(t)?'\n\n*Выполняю…*':'')};
 const findPl=x=>{const s=String(x||'').toLowerCase().trim();return S.playlists.find(p=>p.id===x)||S.playlists.find(p=>p.name.toLowerCase()===s)||S.playlists.find(p=>s&&p.name.toLowerCase().includes(s))};
 const findCoin=x=>{const s=String(x||'').toLowerCase().trim();return CR.coins.find(c=>c.id===s)||CR.coins.find(c=>c.sym.toLowerCase()===s)||CR.coins.find(c=>c.name.toLowerCase()===s)};
 async function firstHits(qs){const r=await Promise.all(qs.slice(0,40).map(q=>hitsSearch(String(q),5).catch(()=>[])));return r.map(x=>x[0]).filter(Boolean)}
@@ -3333,12 +3392,28 @@ async function aiDo(a){
       if(pg==='coin'){if(!CR.coins.length)await loadCoins().catch(()=>{});const c=findCoin(a.coin);if(!c)throw new Error('монета не найдена');h='#coin-'+c.id}
       else if(pg==='note'){if(!NT.list.some(n=>n.id===a.id))throw new Error('заметка не найдена');h='#note-'+a.id}
       else if(pg==='playlist'){const p=findPl(a.id);if(!p)throw new Error('плейлист не найден');h='#pl-'+p.id}
+      else if(pg==='user'){const id=String(a.id??'').replace(/\D/g,'');if(!id)throw new Error('нет ID');h='#u-'+id;return{t:'Профиль ID '+id,nav:h}}
+      else if(pg==='me'||pg==='profile'){if(!USR)throw new Error('нужно войти');return{t:'Мой профиль',nav:'#u-'+USR.id}}
+      else if(pg==='artist'){const r=await hitsSearch(String(a.name||a.query||''),5);const t=r.find(x=>x.dzArtist)||r[0];const id=t&&(t.dzArtist||await dzArtistId(t));if(!id)throw new Error('артист не найден');return{t:'Артист: '+t.artist,nav:'#artist-'+id}}
       else if(AI_PAGES[pg]&&(pg!=='admin'||(USR&&USR.admin)))h='#'+pg;else throw new Error('нет такого раздела');
       return{t:'Открываю: '+(AI_PAGES[pg]||pg),nav:h}}
+    case 'people.find':{const j=await peopleApi('q='+encodeURIComponent(String(a.query||'')));const p=j.people&&j.people[0];if(!p)throw new Error('никого не нашлось');return{t:`Профиль: ${p.name} (ID ${p.id})`,nav:'#u-'+p.id}}
+    case 'profile.edit':{ro();const b={};if(a.bio!=null)b.bio=String(a.bio);if(a.name!=null)b.name=String(a.name);if(a.open!=null)b.open=!!a.open;const j=await peopleApi('a=me',b);const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,open:p.open});PEOPLE.cache[p.id]=p;meHead();return{t:'Профиль обновлён',go:'#u-'+p.id}}
+    case 'profile.form':setTimeout(()=>pfEdit(),300);return{t:'Окно «Изменить профиль»'};
+    case 'music.dislike':{if(!P.cur)throw new Error('ничего не играет');const t=P.cur;dislike(t);return{t:`Больше не предложу: ${t.artist} — ${t.title}`}}
+    case 'music.shuffle':{P.shuffle=a.on!==false;UI.modes();return{t:'Перемешивание '+(P.shuffle?'включено':'выключено')}}
+    case 'music.repeat':{P.repeat=a.on!==false;UI.modes();return{t:'Повтор '+(P.repeat?'включён':'выключен')}}
     case 'search':{sQ=String(a.query||'');return{t:'Поиск: '+sQ,nav:'#search'}}
     case '_bad':throw new Error('ИИ прислал непонятную команду');
     default:throw new Error('неизвестное действие «'+d+'»');
   }
+}
+const aiClaims=t=>/Выполнено на сайте|служебно|\[\s*✓|✓\s*(Играет|Открыт|Включ|Добавл|Создан|Записан|Удал)/i.test(t||'')||/^(Включаю|Открываю|Добавляю|Записываю|Создаю|Удаляю|Ставлю|Запускаю|Переключаю|Ищу и включаю)/im.test(String(t||'').trim());
+async function aiRepair(msgs,said){
+  let out='';
+  const m=[...msgs,{role:'assistant',content:stripFake(said)},{role:'user',content:'(служебно) Ты написал, что выполняешь действие, но не прислал блок команд — на сайте ничего не произошло. Пришли ТОЛЬКО блок ```tempo``` с нужными действиями, без текста.'}];
+  await aiStream(m,{effort:'fast',onDelta:c=>{if(c)out+=c}});
+  return aiExtract(splitThink(out).ans).list;
 }
 async function aiRunActions(am,list){
   am.acts=list.map(()=>({s:'run',t:'…'}));chatPaint(am);let nav='';
@@ -3550,7 +3625,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.vb'))$$('.vb.show')
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');if(!el)return;
   const a=ACT[el.dataset.act];if(!a)return;
-  if(el.tagName==='BUTTON'||el.dataset.act!=='play-row')e.preventDefault();
+  // ссылка-переход внутри шторки («Открыть артиста») — закрываем шторку и даём перейти
+  if(el.tagName==='BUTTON'||(el.dataset.act!=='play-row'&&!(el.tagName==='A'&&el.dataset.act==='close-sheet'&&/^#/.test(el.getAttribute('href')||''))))e.preventDefault();
   a(el,e);
 });
 addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();$('#full').classList.remove('open')}if(e.code==='Space'&&!e.target.matches('input,textarea,button,select')&&route()!=='calc'){e.preventDefault();P.toggle()}});
