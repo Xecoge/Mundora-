@@ -1263,13 +1263,18 @@ function ytBlock(id){if(!id)return;YTB.add(id);LS.set('ytblk',[...YTB].slice(-60
 const ytNz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
 const TRL={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
 // латиницей и без гласных-вариантов: «Мияги» ≈ «Miyagi», «Скриптонит» ≈ «Skriptonit»
-const ytLat=x=>ytNz(x).replace(/[а-я]/g,c=>TRL[c]??c).replace(/[aeiouy]/g,'').replace(/(.)\1+/g,'$1');
-const YT_BADV=/(slowed|sped ?up|speed ?up|nightcore|8d|reverb|bass ?boost|remix|ремикс|cover|кавер|karaoke|караоке|instrumental|минус|live|концерт|lyrics|текст песни|reaction|реакция|tutorial|разбор|acoustic|акустич|mashup|edit\b|1 ?hour|час)/i;
+const ytLat=x=>ytNz(x).replace(/[а-я]/g,c=>TRL[c]??c).replace(/(.)\1+/g,'$1');
+// слова целиком: короткое название («R.I.P», «Луна») не должно совпадать с куском другого слова (trip, лунатик)
+const ytWords=x=>' '+String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/gi,' ').trim()+' ';
+const ytWordsL=x=>' '+ytWords(x).trim().split(' ').map(w=>w.replace(/[а-я]/g,c=>TRL[c]??c)).join(' ')+' ';
+function ytHas(hay,needle){const n=ytNz(needle);if(!n)return false;if(n.length>=5&&(ytNz(hay).includes(n)||ytLat(hay).includes(ytLat(needle))))return true;
+  const w=ytWords(needle).trim(),wl=ytWordsL(needle).trim();if(!w)return false;
+  const sq=x=>x.replace(/ /g,'');return ytWords(hay).includes(' '+w+' ')||ytWordsL(hay).includes(' '+wl+' ')||(sq(w).length<=4&&w.split(' ').every(c=>c.length===1)&&ytNz(hay).includes(sq(w))&&new RegExp('(^|[^a-z])'+w.split(' ').join('[^a-z0-9]?')+'([^a-z]|$)','i').test(String(hay).toLowerCase()))}
+const YT_BADV=/(slowed|sped ?up|speed ?up|nightcore|8d|reverb|bass ?boost|remix|ремикс|cover|кавер|karaoke|караоке|instrumental|инструментал|минус|type ?beat|free ?beat|\bbeats?\b|\bбит\b|биты|how to|как сделать|как написать|fl ?studio|tutorial|урок|shorts|live|концерт|lyrics|текст песни|reaction|реакция|разбор|acoustic|акустич|mashup|edit\b|1 ?hour|час)/i;
 // тот же самый трек: название и артист совпадают, без slowed/sped up/ремиксов/каверов (если их нет в оригинале)
 function ytSame(t,it){const T0=cleanTitle(t.title)||t.title,A0=String(t.artist||'').split(/,|&|feat\.?|ft\.?| x | и /i)[0];
-  const n=ytNz(it.title),ch=ytNz(it.channel),T=ytNz(T0),A=ytNz(A0),nL=ytLat(it.title),chL=ytLat(it.channel),TL=ytLat(T0),AL=ytLat(A0);
-  if(!T||!(n.includes(T)||(TL.length>=2&&nL.includes(TL))))return false;
-  if(A&&!n.includes(A)&&!ch.includes(A)&&!(AL.length>=2&&(nL.includes(AL)||chL.includes(AL))))return false;
+  if(!ytNz(T0)||!ytHas(it.title,T0))return false;
+  if(ytNz(A0)&&!ytHas(it.title,A0)&&!ytHas(it.channel,A0))return false;
   const bad=String(it.title||'').match(YT_BADV);if(bad&&!new RegExp(bad[1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(t.title))return false;return true}
 function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
   const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
