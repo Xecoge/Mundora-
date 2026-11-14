@@ -280,6 +280,12 @@ async function onGroup(m) {
   }
   if (!text || from.is_bot) return;
   const kind = thread ? kindOf(topicName) : 'general';
+  // «Общий чат»: каждому новому человеку один раз — куда смотреть и где задавать вопросы
+  if (kind === 'chat') {
+    const admins = await groupAdmins(chat);
+    if (!(admins && admins.includes(from.id)) && (await kv('SET', 'tg:hi:' + chat + ':' + from.id, '1', 'NX', 'EX', 180 * 86400)) === 'OK')
+      await say(chat, 'Посмотри пожалуйста https://t.me/c/3929724135/2. Если есть вопросы задавай в https://t.me/c/3929724135/27/38 быстро ответим.', { ...where, reply_parameters: { message_id: m.message_id }, link_preview_options: { is_disabled: true } }).catch(() => {});
+  }
   // жалобы — администрации
   if (kind === 'complaints' && !(await isTgAdmin(from.id))) {
     await notifyAdmins(`🚨 <b>Жалоба</b> от ${userLink(from)}:\n\n${tgHtml(text).slice(0, 1800)}`);
