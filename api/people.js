@@ -102,6 +102,24 @@ export default async function handler(req) {
       const key = img === 'cov' && url.searchParams.get('sh') && me.shadow ? 'img:cov:sh:' + me.email + ':' + id0 : 'img:' + img + ':' + em;
       return imgResponse(await kv('GET', key));
     }
+    // ---------- Обменники: справочник, ведут админы ----------
+    if (a === 'exch' && req.method === 'GET') return json({ list: (await jget('exch:list')) || [] });
+    if (req.method === 'POST' && (a === 'exch-save' || a === 'exch-del')) {
+      if (!me.admin && !me.shadow) return json({ error: 'Это могут только администраторы' }, 403);
+      const b = await req.json().catch(() => ({}));
+      let list = (await jget('exch:list')) || [];
+      const fake = !me.admin; // визуальный админ: изменения только на экране, в базу не пишем
+      if (a === 'exch-del') { list = list.filter(x => x.id !== b.id); if (!fake) await jset('exch:list', list); return json({ list }); }
+      const str = (v, n) => String(v ?? '').trim().slice(0, n);
+      const num = v => { const x = +String(v ?? '').replace(',', '.').replace(/\s/g, ''); return isFinite(x) && x > 0 ? x : null; };
+      const pairs = (Array.isArray(b.pairs) ? b.pairs : []).slice(0, 30).map(r => ({ asset: str(r.asset, 10).toUpperCase(), fiat: str(r.fiat, 10).toUpperCase(), buy: num(r.buy), sell: num(r.sell), min: num(r.min), max: num(r.max), reserve: num(r.reserve) })).filter(r => r.asset && r.fiat && (r.buy || r.sell));
+      const tg = str(b.tg, 40).replace(/^@|https?:\/\/t\.me\//g, '').replace(/[^\w]/g, '');
+      if (!str(b.name, 60)) return json({ error: 'Укажи название' }, 400);
+      if (!tg) return json({ error: 'Укажи Telegram-ник обменника' }, 400);
+      const item = { id: str(b.id, 20) || Math.random().toString(36).slice(2, 10), name: str(b.name, 60), tg, countries: str(b.countries, 160), methods: str(b.methods, 240), note: str(b.note, 600), verified: !!b.verified, pairs, updated: Date.now(), by: me.id };
+      const i = list.findIndex(x => x.id === item.id); if (i >= 0) list[i] = item; else list.unshift(item);
+      if (!fake) await jset('exch:list', list.slice(0, 300)); return json({ list, item });
+    }
     if (req.method === 'POST' && a === 'tg-link') { // ссылка на бота: /start acc_<token> привяжет Telegram
       let me2 = (await jget('tg:me')) || null;
       const tok = String((typeof process !== 'undefined' && process.env && (process.env.TELEGRAM_BOT_TOKEN || process.env.TG_BOT_TOKEN)) || '').trim();

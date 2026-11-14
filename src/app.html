@@ -912,6 +912,31 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 
 /* без «плавающих» анимаций у аватарок, персонажей и логотипа */
 .pf-ava,.mcard .mimg,.side .logo .mk img,.phead img,.hero img,.tile img,img.mascot{animation:none!important}
+
+/* галочки в заметках: на главной и в самой заметке */
+.bt-notew{cursor:pointer}
+.bt-note .ck{cursor:pointer;width:22px;height:22px;margin:-2px 0;transition:transform .15s,background .2s}.bt-note .ck:hover{transform:scale(1.1);border-color:#fff}
+.ntasks{display:flex;flex-direction:column;gap:2px;margin:4px 0 12px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.ntasks .k{font-size:12px;margin-bottom:4px}
+.ntask{display:flex;align-items:center;gap:10px;text-align:left;padding:7px 4px;border-radius:10px;background:none;border:0;color:inherit;font-size:14.5px;cursor:pointer}
+.ntask:hover{background:rgba(255,255,255,.04)}
+.ntask .ck{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(255,255,255,.45);flex:none;display:grid;place-items:center}
+.ntask .ck.on{background:#fff;border-color:#fff;color:#1c0b3d}.ntask.done span:last-child{opacity:.5;text-decoration:line-through}
+
+/* ===== обменники ===== */
+.exf{gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.exf .chips{display:flex;gap:6px;flex-wrap:wrap}
+.exlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr));gap:14px}.excard{min-width:0}
+.excard{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.exh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.exh b{font-size:17px}
+.exv{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-size:11.5px;padding:2px 8px;border-radius:99px;background:rgba(198,255,77,.14);color:#c6ff4d;vertical-align:2px}
+.extbl{overflow-x:auto}.extbl table{width:100%;border-collapse:collapse;font-size:13.5px}
+.extbl th{font-size:11px;font-weight:600;color:var(--muted);text-align:right;padding:4px 6px;white-space:nowrap}.extbl th:first-child{text-align:left}
+.extbl td{padding:7px 6px;border-top:1px solid rgba(255,255,255,.06);text-align:right;white-space:nowrap}.extbl td:first-child{text-align:left}
+.extbl small{display:block;font-size:11px}.extbl small.up{color:var(--green)}.extbl small.down{color:var(--red)}
+.exm{display:flex;gap:6px;align-items:center;font-size:13px;color:#d6cfee}.exn{font-size:13px;white-space:pre-wrap}.exu{font-size:11.5px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fgrid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.fgrid input,#exP,#exNo{width:100%;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;font:inherit;font-size:14px;margin-top:4px}
+@media(max-width:760px){.exlist{grid-template-columns:minmax(0,1fr)}.fgrid{grid-template-columns:1fr}.exf .chips{overflow-x:auto;flex-wrap:nowrap;width:100%}}
 </style>
 </head>
 <body>
@@ -1933,11 +1958,11 @@ const pcMini=()=>{const v=pnum(PS.b)*pnum(PS.a)/100;return isFinite(v)?money(v):
 
 /* ===================== navigation ===================== */
 const NAV_M=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Плейлисты'],['remixes','disc','Ремиксы'],['library','lib','Медиатека']];
-const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['metals','gem','Курсы ценностей'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
+const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['metals','gem','Курсы ценностей'],['exch','spread','Обменники'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n],k)=>`<a class="it" href="#${v}" data-v="${v}" title="${n}" style="--k:${k}">${ico(i)}<span class="lt">${n}</span></a>`;
 $('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
 $('#tabs').innerHTML=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Моё'],['finance','wallet','Финансы']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
-const FIN=['finance','ai','crypto','metals','notes','calc','budget','tables','spread','percent','history'];
+const FIN=['finance','ai','crypto','metals','exch','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
 
 function route(){return (location.hash||'#home').slice(1)||'home'}
@@ -1986,14 +2011,16 @@ function homeLive(on){clearInterval(HC.t);HC.t=0;if(!on)return;
   };
   tick();HC.t=setInterval(tick,1000);
 }
+function noteTileInner(n){const todo=n?noteTasks(n).slice(0,4):[];
+  return `<div class="bt-h">${ico('notes','s')}${n?esc(noteTitle(n)):'Заметки'}</div>
+  ${todo.length?`<ul class="bt-note">${todo.map(x=>`<li class="${x.d?'done':''}"><span class="ck ${x.d?'on':''}" data-act="home-tick" data-id="${n.id}" data-line="${x.i}" role="checkbox" aria-checked="${x.d}" title="${x.d?'Снять галочку':'Отметить'}">${x.d?ico('check','s'):''}</span><span>${esc(x.t)}</span></li>`).join('')}</ul>`:`<div class="k">${n?esc(String(n.body||'').slice(0,120)):'Список дел, идеи, покупки — ИИ поможет разобрать'}</div>`}`}
 function homeBento(){
   const n=[...NT.list].sort((a,b)=>(b.pinned-a.pinned)||((b.updated||0)-(a.updated||0))).find(x=>/- \[[ x]\]/.test(x.body||''))||NT.list[0];
-  const todo=n?String(n.body||'').split('\n').filter(l=>/^\s*- \[[ x]\]/.test(l)).slice(0,4).map(l=>({d:/\[x\]/.test(l),t:l.replace(/^\s*- \[[ x]\]\s*/,'')})):[];
+
   const P0=USR&&PEOPLE.cache[USR.id],cap=P0&&P0.capital;
   return `<section class="bento3">
     <a class="glass bt-crypto" href="#crypto">${coinTile()}</a>
-    <a class="glass" href="${n?'#note-'+n.id:'#notes'}"><div class="bt-h">${ico('notes','s')}${n?esc(noteTitle(n)):'Заметки'}</div>
-      ${todo.length?`<ul class="bt-note">${todo.map(x=>`<li class="${x.d?'done':''}"><span class="ck ${x.d?'on':''}">${x.d?ico('check','s'):''}</span><span>${esc(x.t)}</span></li>`).join('')}</ul>`:`<div class="k">${n?esc(String(n.body||'').slice(0,120)):'Список дел, идеи, покупки — ИИ поможет разобрать'}</div>`}</a>
+    <div class="glass bt-notew" data-act="open-note" data-href="${n?'#note-'+n.id:'#notes'}" role="link" tabindex="0">${noteTileInner(n)}</div>
     <a class="glass bt-met" href="#metals">${metTile()}</a>
   </section>`;
 }
@@ -2714,6 +2741,12 @@ const noteTitle=n=>(n.title||'').trim()||((n.body||'').trim().split('\n')[0]||''
 const noteSnip=n=>(n.body||'').replace(/^#.*$/m,'').replace(/[#*`>\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,90)||'Пустая заметка';
 const notesSorted=()=>{const q=NT.q.toLowerCase();return NT.list.filter(n=>!q||(n.title+' '+n.body).toLowerCase().includes(q)).sort((a,b)=>(b.pinned-a.pinned)||(b.updated-a.updated))};
 const nItem=(n,cur)=>`<a class="nitem${cur&&cur.id===n.id?' on':''}" href="#note-${n.id}" id="ni-${n.id}"><b>${n.pinned?ico('pin','s'):''}<span>${esc(noteTitle(n))}</span></b><small>${esc(noteSnip(n))}</small></a>`;
+// отметить/снять галочку в строке i заметки n
+function noteTick(n,i){const L=String(n.body||'').split('\n');if(!/\[( |x|X)\]/.test(L[i]||''))return;L[i]=L[i].replace(/\[( |x|X)\]/,m=>m==='[ ]'?'[x]':'[ ]');n.body=L.join('\n');n.updated=Date.now();LS.set('notes',NT.list)}
+const noteTasks=n=>String(n&&n.body||'').split('\n').map((l,i)=>{const m=l.match(/^\s*[-*]\s+\[( |x|X)\]\s*(.*)$/);return m?{i,d:m[1]!==' ',t:m[2]}:null}).filter(Boolean);
+// чек-лист над текстом заметки: галочки ставятся прямо тут, без режима просмотра
+function noteTaskPanel(n){const T=noteTasks(n);if(!T.length)return '';const done=T.filter(x=>x.d).length;
+  return `<div class="ntasks"><div class="k">Задачи · ${done} из ${T.length}</div>${T.map(x=>`<button class="ntask${x.d?' done':''}" data-act="n-tick" data-line="${x.i}"><span class="ck ${x.d?'on':''}">${x.d?ico('check','s'):''}</span><span>${esc(x.t||'(пустая задача)')}</span></button>`).join('')}</div>`}
 function noteMd(body,ro){
   const L=(body||'').split('\n');let out='',buf=[];const flush=()=>{if(buf.length){out+=md(buf.join('\n'));buf=[]}};
   L.forEach((l,i)=>{const m=l.match(/^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/);if(m){flush();const done=m[1]!==' ';out+=`<label class="chk${done?' done':''}"><input type="checkbox" ${done?'checked':''} ${ro?'disabled':`data-act="n-tick" data-line="${i}"`}><span>${md(m[2]).replace(/^<p>|<\/p>$/g,'')}</span></label>`}else buf.push(l)});
@@ -2741,6 +2774,7 @@ function noteEditor(n){
     <div class="nai">${ico('spark','s')}${NAI_ACT.map(([k,t])=>`<button class="chip dark" data-act="n-ai" data-k="${k}">${t}</button>`).join('')}
       <form id="nAiF"><input id="nAiIn" placeholder="${n.body.trim()?'Попроси ИИ изменить заметку…':'Опиши, какую заметку создать…'}" autocomplete="off"><button class="btn sm" type="submit">${ico('send')}</button></form></div>
     <div id="nAiOut"></div>
+    <div id="nTasks"${NT.prev?' hidden':''}>${noteTaskPanel(n)}</div>
     <textarea class="nbody" id="nBody" placeholder="Пиши здесь… Поддерживается Markdown и чек-листы: - [ ] задача"${NT.prev?' hidden':''}>${esc(n.body)}</textarea>
     <div class="md nprev" id="nPrev"${NT.prev?'':' hidden'}>${NT.prev?noteMd(n.body):''}</div>
     <div class="k nmeta" id="nMeta">Изменено ${new Date(n.updated).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
@@ -2753,7 +2787,7 @@ V.after.notes=()=>{
   const touch=()=>{n.updated=Date.now();ntSave();const it=$('#ni-'+n.id);if(it)it.outerHTML=nItem(n,n);const m=$('#nMeta');if(m)m.textContent='Сохранено'};
   t.addEventListener('input',()=>{n.title=t.value;touch()});
   const grow=()=>{b.style.height='';b.style.height=Math.max(340,b.scrollHeight)+'px'};
-  b.addEventListener('input',()=>{n.body=b.value;touch();grow()});grow();
+  b.addEventListener('input',()=>{n.body=b.value;touch();grow();const tp=$('#nTasks');if(tp)tp.innerHTML=noteTaskPanel(n)});grow();
   $('#nAiF').addEventListener('submit',e=>{e.preventDefault();const v=$('#nAiIn').value.trim();if(!v)return;$('#nAiIn').value='';noteAI(n,v,n.body.trim()?'edit':'create')});
   if(!n.body&&!n.title&&matchMedia('(min-width:761px)').matches)t.focus();
 };
@@ -2887,8 +2921,61 @@ V.metals=()=>{MT.built=false;const on=metOn();
   <div class="mgrid" id="mGrid">${Object.keys(MT.by).length?(MT.built=true,MET.map(metCard).join('')):MET.map(()=>'<div class="glass skel" style="height:300px"></div>').join('')}</div><div id="mErr"></div>`};
 V.after.metals=()=>{loadRub();metLive(true,metPaint)};
 
+
+/* ===================== Обменники: справочник с курсами покупки/продажи ===================== */
+const EX={list:null,q:'',cur:'',err:'',edit:null};
+const EX_CUR=['RUB','USD','EUR','KZT','UAH','BYN','UZS','TRY','AED','GEL'];
+async function exLoad(){try{EX.list=(await peopleApi('a=exch')).list||[];EX.err=''}catch(e){EX.err=e.message;EX.list=EX.list||[]}}
+const exNum=(v,d=2)=>v==null?'—':(+v).toLocaleString('ru-RU',{maximumFractionDigits:v>=1000?0:d});
+// рыночная цена для сравнения: USDT/RUB с биржи, BTC/ETH/… в долларах
+function exMarket(r){if(r.asset==='USDT'&&r.fiat==='RUB'&&CR.rub)return CR.rub;if(r.fiat==='USD'||r.fiat==='USDT'){if(r.asset==='USDT'||r.asset==='USD')return 1;const c=CR.byPair[r.asset+'USDT'];return c&&c.price}if(r.fiat==='RUB'&&CR.rub){const c=CR.byPair[r.asset+'USDT'];return c&&c.price*CR.rub}return null}
+const exDiff=(v,m)=>m&&v?((v/m-1)*100):null;
+function exPairRow(r){const m=exMarket(r),db=exDiff(r.buy,m),ds=exDiff(r.sell,m);
+  return `<tr><td><b>${esc(r.asset)}</b> → ${esc(r.fiat)}</td><td class="num">${exNum(r.buy)}${db!=null?`<small class="${db>=0?'up':'down'}">${db>=0?'+':''}${fmt(db)}%</small>`:''}</td><td class="num">${exNum(r.sell)}${ds!=null?`<small class="${ds<=0?'up':'down'}">${ds>=0?'+':''}${fmt(ds)}%</small>`:''}</td><td class="num k">${r.min||r.max?`${exNum(r.min,0)} – ${exNum(r.max,0)}`:'—'}</td><td class="num k">${exNum(r.reserve,0)}</td></tr>`}
+function exCard(x){const adm=USR&&USR.admin;
+  return `<div class="glass excard" data-id="${esc(x.id)}">
+    <div class="exh"><div><b>${esc(x.name)}</b>${x.verified?`<span class="exv">${ico('check','s')}проверен</span>`:''}<div class="k">${esc(x.countries||'')}</div></div>
+      <div class="row" style="gap:6px">${adm?`<button class="ib" data-act="ex-edit" data-id="${esc(x.id)}" title="Изменить">${ico('edit')}</button>`:''}<button class="btn sm" data-act="tg-go" data-u="${esc(x.tg)}">${TGI}Написать</button></div></div>
+    ${x.pairs&&x.pairs.length?`<div class="extbl"><table><thead><tr><th>Пара</th><th>Покупает у вас</th><th>Продаёт вам</th><th>Мин – макс</th><th>Резерв</th></tr></thead><tbody>${x.pairs.map(exPairRow).join('')}</tbody></table></div>`:''}
+    ${x.methods?`<div class="exm">${ico('wallet','s')}${esc(x.methods)}</div>`:''}
+    ${x.note?`<div class="k exn">${esc(x.note)}</div>`:''}
+    <div class="k exu">обновлено ${new Date(x.updated).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · @${esc(x.tg)}</div>
+  </div>`}
+function exFiltered(){const q=EX.q.trim().toLowerCase();return (EX.list||[]).filter(x=>(!EX.cur||(x.pairs||[]).some(r=>r.fiat===EX.cur||r.asset===EX.cur))&&(!q||(x.name+' '+x.countries+' '+x.methods+' '+x.tg).toLowerCase().includes(q)))}
+function exListHTML(){if(EX.list==null)return '<div class="glass skel" style="height:180px"></div>'.repeat(3);const L=exFiltered();
+  if(!L.length)return `<div class="glass" style="padding:28px;text-align:center"><img src="${IMG.bidask}" alt="" style="height:110px"><p class="k" style="margin-top:10px">${(EX.list||[]).length?'По этому фильтру обменников нет.':'Пока обменников нет — администрация скоро добавит проверенные.'}</p></div>`;
+  return L.map(exCard).join('')}
+V.exch=()=>`<div class="phead"><h1>Обменники</h1><p>Курсы покупки и продажи у обменников для P2P и трейда: что принимают, лимиты, резерв. Рядом — разница с биржевым курсом. Нажми «Написать», чтобы перейти к обменнику в Telegram.</p><div class="ctl">${curSeg()}</div><img src="${IMG.bidask}" alt=""></div>
+  <div class="row exf"><div class="sbox" style="flex:1;min-width:200px">${ico('search','s')}<input id="exQ" placeholder="Название, страна, банк…" value="${esc(EX.q)}"></div>
+  <div class="chips">${['',...EX_CUR,'USDT','BTC'].map(c=>`<button class="chip${EX.cur===c?' on':''}" data-act="ex-cur" data-c="${c}">${c||'Все'}</button>`).join('')}</div>
+  ${USR&&USR.admin?`<button class="btn" data-act="ex-edit">${ico('plus','s')}Добавить</button>`:''}</div>
+  <div id="exList" class="exlist">${exListHTML()}</div>
+  <div class="k" style="margin-top:12px">«Покупает у вас» — сколько обменник даёт за 1 единицу, когда вы продаёте. «Продаёт вам» — сколько берёт за 1 единицу, когда вы покупаете. Курсы и условия обменники меняют сами — уточняйте перед сделкой. Mundora не проводит обмены и не отвечает за сделки.</div>`;
+V.after.exch=()=>{loadRub();if(!CR.coins.length)loadCoins().catch(()=>{});exLoad().then(()=>{const b=$('#exList');if(b)b.innerHTML=exListHTML()});
+  const q=$('#exQ');if(q)q.addEventListener('input',()=>{EX.q=q.value;$('#exList').innerHTML=exListHTML()})};
+function exForm(x){x=x||{name:'',tg:'',countries:'',methods:'',note:'',verified:false,pairs:[]};EX.edit=x;
+  const lines=(x.pairs||[]).map(r=>[r.asset,r.fiat,r.buy??'-',r.sell??'-',r.min??'-',r.max??'-',r.reserve??'-'].join(' ')).join('\n');
+  openSheet(`<h3>${ico('spread')}${x.id?'Изменить обменник':'Новый обменник'}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  <div class="fgrid"><label>Название<input id="exN" value="${esc(x.name)}" placeholder="Например, Crypto Exchange"></label>
+  <label>Telegram (ник)<input id="exT" value="${esc(x.tg)}" placeholder="@nickname"></label>
+  <label>Страны<input id="exC" value="${esc(x.countries)}" placeholder="Россия, Казахстан, ОАЭ"></label>
+  <label>Что принимает / способы<input id="exM" value="${esc(x.methods)}" placeholder="Сбер, Т-Банк, наличные, SWIFT"></label></div>
+  <label class="k" style="display:block;margin-top:10px">Курсы — по строке на пару: <b>актив валюта покупает продаёт мин макс резерв</b> (прочерк, если нет)<textarea id="exP" rows="5" placeholder="USDT RUB 80.5 83.2 5000 1000000 3000000\nUSDT USD 0.99 1.01 100 50000 200000">${esc(lines)}</textarea></label>
+  <label class="k" style="display:block;margin-top:8px">Подробнее<textarea id="exNo" rows="3" placeholder="Сроки, комиссии, условия">${esc(x.note)}</textarea></label>
+  <label class="pf-tg" style="margin-top:8px"><input type="checkbox" id="exV" ${x.verified?'checked':''}> Проверенный обменник</label>
+  <div class="row" style="margin-top:12px;gap:8px"><button class="btn" style="flex:1;justify-content:center" data-act="ex-save">${ico('check','s')}Сохранить</button>${x.id?`<button class="btn ghost" data-act="ex-del">${ico('trash','s')}Удалить</button>`:''}</div><div id="exErr" class="r" style="margin-top:8px;font-size:13px"></div>`)}
+const EX_ACT={
+  'ex-cur'(el){EX.cur=el.dataset.c;$$('.exf .chip').forEach(b=>b.classList.toggle('on',b===el));$('#exList').innerHTML=exListHTML()},
+  'ex-edit'(el){exForm(el.dataset.id?(EX.list||[]).find(x=>x.id===el.dataset.id):null)},
+  async 'ex-save'(el){const v=id=>($('#'+id)||{}).value||'';const n=x=>x==null||x==='-'||x===''?null:x;
+    const pairs=v('exP').split('\n').map(l=>l.trim().split(/\s+/)).filter(a=>a.length>=3&&a[0]).map(a=>({asset:a[0],fiat:a[1],buy:n(a[2]),sell:n(a[3]),min:n(a[4]),max:n(a[5]),reserve:n(a[6])}));
+    el.disabled=true;try{const j=await peopleApi('a=exch-save',{id:EX.edit&&EX.edit.id,name:v('exN'),tg:v('exT'),countries:v('exC'),methods:v('exM'),note:v('exNo'),verified:$('#exV').checked,pairs});EX.list=j.list;closeSheet();const b=$('#exList');if(b)b.innerHTML=exListHTML()}
+    catch(e){$('#exErr').textContent=e.message;el.disabled=false}},
+  async 'ex-del'(el){if(!EX.edit||!EX.edit.id)return;el.disabled=true;try{EX.list=(await peopleApi('a=exch-del',{id:EX.edit.id})).list;closeSheet();const b=$('#exList');if(b)b.innerHTML=exListHTML()}catch(e){$('#exErr').textContent=e.message;el.disabled=false}},
+};
+
 V.finance=()=>pageHead('Финансы','ИИ-помощник, крипта, заметки, калькулятор, доходы и расходы, таблицы, спред, проценты и история — всё под рукой.','chart')+
-  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
+  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['exch','bidask','Обменники','Курсы покупки и продажи, Telegram'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
 
 V.calc=()=>{
   const keys=['AC','(',')','÷','7','8','9','×','4','5','6','−','1','2','3','+','%','0',',','='];
@@ -3147,7 +3234,10 @@ const ACT={
   'n-pin'(){const n=NT.cur;if(!n)return;n.pinned=!n.pinned;n.updated=Date.now();LS.set('notes',NT.list);render()},
   'n-view'(){NT.prev=!NT.prev;render()},
   'n-check'(){const n=NT.cur;if(!n)return;n.body=(n.body.replace(/\s+$/,'')+(n.body.trim()?'\n':'')+'- [ ] ');n.updated=Date.now();LS.set('notes',NT.list);NT.prev=false;render();const b=$('#nBody');if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length)}},
-  'n-tick'(el){const n=NT.cur;if(!n)return;const L=n.body.split('\n'),i=+el.dataset.line;L[i]=L[i].replace(/\[( |x|X)\]/,m=>m==='[ ]'?'[x]':'[ ]');n.body=L.join('\n');n.updated=Date.now();LS.set('notes',NT.list);$('#nPrev').innerHTML=noteMd(n.body)},
+  'n-tick'(el){const n=NT.cur;if(!n)return;noteTick(n,+el.dataset.line);const pv=$('#nPrev');if(pv&&!pv.hidden)pv.innerHTML=noteMd(n.body);const b=$('#nBody');if(b)b.value=n.body;const tp=$('#nTasks');if(tp)tp.innerHTML=noteTaskPanel(n);const it=$('#ni-'+n.id);if(it)it.outerHTML=nItem(n,n)},
+  // главная: квадратик — галочка, пустое место плитки — открыть заметку
+  'home-tick'(el,e){const n=NT.list.find(x=>x.id===el.dataset.id);if(!n)return;noteTick(n,+el.dataset.line);const t=el.closest('.bt-notew');if(t)t.innerHTML=noteTileInner(n)},
+  'open-note'(el,e){if(e&&e.target.closest('[data-act=home-tick]'))return;location.hash=el.dataset.href},
   'n-del'(){const n=NT.cur;if(!n)return;openSheet(`<h3>${ico('trash')}Удалить «${esc(noteTitle(n))}»?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><button class="btn danger" data-act="n-del-ok" style="width:100%;justify-content:center">Удалить</button>`)},
   'n-del-ok'(){const n=NT.cur;NT.list=NT.list.filter(x=>x!==n);LS.set('notes',NT.list);closeSheet();location.hash='#notes';if(route()==='notes')render()},
   'n-ai'(el){const n=NT.cur;if(!n)return;const a=NAI_ACT.find(x=>x[0]===el.dataset.k);if(!n.body.trim()&&a[3]!=='create'){toast('Сначала напиши что-нибудь — или опиши заметку в поле ИИ','notes');return}noteAI(n,a[2],a[3])},
@@ -3391,7 +3481,7 @@ const SH_ACT={ban:'забанил',block:'заблокировал',freeze:'за
 const ADM_DONE={'shadow-on':'Визуальная админка включена','shadow-off':'Визуальная админка выключена',extend:'Доступ продлён на 30 дней',forever:'Доступ теперь бессрочный',verify:'Галочка выдана',unverify:'Галочка снята','admin-add':'Теперь это админ','admin-del':'Больше не админ',activate:'Аккаунт снова активен',freeze:'Аккаунт заморожен',block:'Аккаунт заблокирован',ban:'Аккаунт забанен',logout:'Сессии завершены',note:'Заметка сохранена',delete:'Аккаунт удалён'};
 
 /* ===================== ИИ управляет сайтом ===================== */
-const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',metals:'Курсы ценностей',admin:'Админ-панель'};
+const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',metals:'Курсы ценностей',exch:'Обменники',admin:'Админ-панель'};
 const usd=v=>v==null||!isFinite(v)?'—':v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:2}):v.toPrecision(3);
 function siteContext(){
   const L=[];
@@ -3523,6 +3613,7 @@ async function aiRunActions(am,list){
 }
 const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
 
+Object.assign(ACT,EX_ACT);
 Object.assign(ACT,{
   async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
   async 'tg-fill'(el){el.disabled=true;toast('Бот ищет темы и пишет посты — до минуты…','loader');try{const r=await tgApi('fill',{});toast('Заполнено: '+r.topics.length+' тем','check')}catch(e){toast(e.message,'x')}el.disabled=false},
