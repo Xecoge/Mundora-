@@ -1255,16 +1255,21 @@ async function srcFor(t){
   if(t.src==='it')return t.preview||'';
   return API.stream(t.id);
 }
-const YTM=LS.get('ytmap',{});
+const YTM=LS.get('ytmap2',{});
 const YTQ=new Map();
 // видео, которые правообладатель запретил показывать на других сайтах
 const YTB=new Set(LS.get('ytblk',[]));
 function ytBlock(id){if(!id)return;YTB.add(id);LS.set('ytblk',[...YTB].slice(-600))}
 const ytNz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
+const TRL={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
+// латиницей и без гласных-вариантов: «Мияги» ≈ «Miyagi», «Скриптонит» ≈ «Skriptonit»
+const ytLat=x=>ytNz(x).replace(/[а-я]/g,c=>TRL[c]??c).replace(/[aeiouy]/g,'').replace(/(.)\1+/g,'$1');
 const YT_BADV=/(slowed|sped ?up|speed ?up|nightcore|8d|reverb|bass ?boost|remix|ремикс|cover|кавер|karaoke|караоке|instrumental|минус|live|концерт|lyrics|текст песни|reaction|реакция|tutorial|разбор|acoustic|акустич|mashup|edit\b|1 ?hour|час)/i;
 // тот же самый трек: название и артист совпадают, без slowed/sped up/ремиксов/каверов (если их нет в оригинале)
-function ytSame(t,it){const n=ytNz(it.title),ch=ytNz(it.channel),T=ytNz(cleanTitle(t.title)||t.title),A=ytNz(String(t.artist||'').split(/,|&|feat\.?|ft\.?| x | и /i)[0]);
-  if(!T||!n.includes(T))return false;if(A&&!n.includes(A)&&!ch.includes(A))return false;
+function ytSame(t,it){const T0=cleanTitle(t.title)||t.title,A0=String(t.artist||'').split(/,|&|feat\.?|ft\.?| x | и /i)[0];
+  const n=ytNz(it.title),ch=ytNz(it.channel),T=ytNz(T0),A=ytNz(A0),nL=ytLat(it.title),chL=ytLat(it.channel),TL=ytLat(T0),AL=ytLat(A0);
+  if(!T||!(n.includes(T)||(TL.length>=2&&nL.includes(TL))))return false;
+  if(A&&!n.includes(A)&&!ch.includes(A)&&!(AL.length>=2&&(nL.includes(AL)||chL.includes(AL))))return false;
   const bad=String(it.title||'').match(YT_BADV);if(bad&&!new RegExp(bad[1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(t.title))return false;return true}
 function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
   const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
@@ -1286,13 +1291,17 @@ async function ytAlt(t){
   const pick=items=>(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id)&&ytSame(t,it))[0];
   let it=pick((await MUS.get('yt','search',{q:q1}).catch(()=>({}))).items);
   if(!it&&!t._ytAlt2){t._ytAlt2=1;it=pick((await MUS.get('yt','search',{q:`${t.artist} ${cleanTitle(t.title)||t.title} audio`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);return {}})).items)}
-  if(!it)return '';YTM[t.id]=it.id;LS.set('ytmap',YTM);return it.id;
+  if(!it)return '';YTM[t.id]=it.id;LS.set('ytmap2',YTM);return it.id;
 }
 async function ytFind(t){
   if(YTM[t.id]&&!YTB.has(YTM[t.id]))return YTM[t.id];
   if(ytOff())return '';
   if(YTQ.has(t.id))return YTQ.get(t.id);
-  const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);throw e}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
+  const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);throw e}).then(async d=>{
+    // только ЭТОТ трек: другие песни того же артиста не подставляем
+    let it=ytPick(t,(d.items||[]).filter(x=>ytSame(t,x)));
+    if(!it){const d2=await MUS.get('yt','search',{q:`${t.artist} ${cleanTitle(t.title)||t.title} audio`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);return {}});it=ytPick(t,(d2.items||[]).filter(x=>ytSame(t,x)))}
+    if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap2',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
   YTQ.set(t.id,p);return p;
 }
 const LITE=['id','title','artist','artistId','handle','genre','mood','tags','duration','plays','favs','art','artS','artL','ava','mir','lang','bpm','key','permalink','src','dz','dzArtist','preview','album','explicit'];
@@ -1586,7 +1595,7 @@ const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
   },
   // видео запрещено показывать на сайтах — ищем ЭТОТ ЖЕ трек, загруженный другим каналом (без slowed/sped up/ремиксов);
   // не нашли — играет отрывок этого трека
-  onErr(){const t=P.cur,bad=this.cur;ytBlock(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap',YTM)}
+  onErr(){const t=P.cur,bad=this.cur;ytBlock(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap2',YTM)}
     const fb=()=>{if(P.cur!==t)return;ME.toAudio();if(t&&isPreview(t))srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)});else ME.emit('error',true)};
     if(!t||!isPreview(t)||(t._ytTry=(t._ytTry||0)+1)>4)return fb();
     ytAlt(t).then(v=>{if(P.cur!==t)return;if(v&&v!==bad)ME.playYT(v).then(()=>{t._yt=v;UI.why(t)}).catch(fb);else fb()}).catch(fb)},
