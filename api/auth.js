@@ -9,7 +9,7 @@ import { mailReady, sendMail, codeMail } from './_mail.mjs';
 import { checkName, claimName } from './_names.mjs';
 import {
   ENV, ADMIN, SUPPORT, STATUS_RU, rand, code6, normEmail, okEmail, sign, signed, unsign, hashPass, cookies, setCookie, clearCookie,
-  ipOf, getUser, putUser, ensureId, gateInfo, accessExpired, displayName, createSession, currentUser, sessionFromCookie, gatePassed, json, jsonC, b64uStr, unb64uStr
+  ipOf, getUser, putUser, ensureId, gateInfo, linkTg, accessExpired, displayName, createSession, currentUser, sessionFromCookie, gatePassed, json, jsonC, b64uStr, unb64uStr
 } from './_auth.mjs';
 
 export const config = { runtime: 'nodejs', maxDuration: 30 };
@@ -56,7 +56,7 @@ async function handle(req) {
   if (a === 'gate') {
     if (!(await limit('gate:' + ip, 8, 900))) return err('Слишком много попыток. Подожди 15 минут', 429);
     const c = normCode(body.code); if (c.length !== 4) return err('Код — 4 символа');
-    let ok = false, days = 0;
+    let ok = false, days = 0, tgAcc = null;
     const envCode = normCode(ENV().ACCESS_CODE);
     if (envCode && c === envCode) {
       // стартовый код из Vercel — срабатывает один раз
@@ -65,15 +65,18 @@ async function handle(req) {
     if (!ok) {
       const rec = await jget('code:' + c);
       if (rec && (!rec.max || (rec.used || 0) < rec.max)) {
-        rec.used = (rec.used || 0) + 1; rec.last = Date.now(); await jset('code:' + c, rec); ok = true; days = +rec.days || 0;
+        rec.used = (rec.used || 0) + 1; rec.last = Date.now(); await jset('code:' + c, rec); ok = true; days = +rec.days || 0; tgAcc = rec.tg || null;
       }
     }
     if (!ok) return err('Неверный или уже использованный код', 403);
     // вошедший человек с закончившимся доступом — продлеваем аккаунт
     const me = await currentUser(req).catch(() => null);
     let renewed = false;
-    if (me) { const u = await getUser(me.email); u.accessUntil = days ? Date.now() + days * 864e5 : null; if (!u.accessUntil) delete u.accessUntil; await putUser(u); renewed = true; }
-    return jsonC({ ok: true, days, renewed }, [setCookie(req, 'tempo_g', await signed('g:' + rand(9) + ':' + days), 3650)]);
+    if (me) { const u = await getUser(me.email); u.accessUntil = days ? Date.now() + days * 864e5 : null; if (!u.accessUntil) delete u.accessUntil; await putUser(u); renewed = true; if (tgAcc) await linkTg(me.email, tgAcc).catch(() => {}); }
+    // код из Telegram-бота: запоминаем, чей это Telegram, — при регистрации он привяжется к аккаунту
+    const rid = rand(9);
+    if (tgAcc && !me) await jset('gp:' + rid, tgAcc, 30 * 86400);
+    return jsonC({ ok: true, days, renewed }, [setCookie(req, 'tempo_g', await signed('g:' + rid + ':' + days), 3650)]);
   }
 
   if (a === 'register' || a === 'login' || a === 'forgot') {
@@ -91,7 +94,8 @@ async function handle(req) {
       if (!nc.ok) return err(nc.reason, 400, { field: 'name' });
       const gi = await gateInfo(req);
       const salt = rand(12);
-      const r = await sendCode(req, email, 'reg', { salt, hash: await hashPass(pw, salt), name: nc.name, days: gi.days });
+      const tgAcc = gi.rid ? await jget('gp:' + gi.rid) : null;
+      const r = await sendCode(req, email, 'reg', { salt, hash: await hashPass(pw, salt), name: nc.name, days: gi.days, ...(tgAcc ? { tg: tgAcc } : {}) });
       return json({ ok: true, step: 'code', ...r });
     }
     if (!u) return err('Аккаунт не найден — создай его', 404, { missing: true });
@@ -130,6 +134,7 @@ async function handle(req) {
       if (p.name && await claimName(p.name, email)) u.name = p.name;
       if (p.days) u.accessUntil = Date.now() + p.days * 864e5;
       await putUser(u); await kv('SADD', 'users', email); await ensureId(u);
+      if (p.tg) { await linkTg(email, p.tg).catch(() => {}); u = await getUser(email); }
     } else if (p.kind === 'reset') {
       const pw = String(body.password || '');
       if (pw.length < 6) return err('Новый пароль — минимум 6 символов');

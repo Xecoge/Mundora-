@@ -116,12 +116,24 @@ export async function dropSessions(email) {
   const sids = await kv('SMEMBERS', 'us:' + email);
   await kvMulti([...sids.map(s => ['DEL', 's:' + s]), ['DEL', 'us:' + email]]);
 }
+// Привязка Telegram к аккаунту: один Telegram — один аккаунт (со старого снимаем)
+export const tgPublic = t => t && t.id ? { id: +t.id, username: t.username ? String(t.username).replace(/[^\w]/g, '').slice(0, 32) : '', name: String(t.first_name || t.name || '').slice(0, 64) } : null;
+export async function linkTg(email, t) {
+  const tp = tgPublic(t); if (!tp) return null;
+  const u = await getUser(email); if (!u) return null;
+  const was = await kv('GET', 'tg:uid:' + tp.id);
+  if (was && was !== email) { const o = await getUser(was); if (o && o.tg && +o.tg.id === tp.id) { delete o.tg; await putUser(stripU(o)); } }
+  if (u.tg && u.tg.id && +u.tg.id !== tp.id) await kv('DEL', 'tg:uid:' + u.tg.id);
+  u.tg = { ...tp, at: Date.now() }; await putUser(stripU(u)); await kv('SET', 'tg:uid:' + tp.id, email);
+  return u.tg;
+}
+export async function unlinkTg(email) { const u = await getUser(email); if (!u || !u.tg) return; await kv('DEL', 'tg:uid:' + u.tg.id); delete u.tg; await putUser(stripU(u)); }
 export async function touch(u) { if (Date.now() - (u.seen || 0) > 5 * 60e3) { u.seen = Date.now(); await putUser(stripU(u)); } }
 
 // Проход через код доступа (на устройстве)
 export async function gatePassed(req) { return (await gateInfo(req)).ok; }
 // пропуск хранит, на сколько дней дан доступ кодом (0 — навсегда)
-export async function gateInfo(req) { const p = await unsign(cookies(req).tempo_g); if (!p || !p.startsWith('g:')) return { ok: false, days: 0 }; return { ok: true, days: +(p.split(':')[2] || 0) || 0 }; }
+export async function gateInfo(req) { const p = await unsign(cookies(req).tempo_g); if (!p || !p.startsWith('g:')) return { ok: false, days: 0 }; return { ok: true, rid: p.split(':')[1] || '', days: +(p.split(':')[2] || 0) || 0 }; }
 
 export const json = (obj, status = 200, headers = {}) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
 export const jsonC = (obj, cookiesArr, status = 200) => { const h = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); cookiesArr.forEach(c => h.append('set-cookie', c)); return new Response(JSON.stringify(obj), { status, headers: h }); };

@@ -1,7 +1,7 @@
 // Mundora Bot — Telegram-бот, живёт на этом же сайте (Telegram присылает сообщения сюда, webhook).
 // Нужна переменная TELEGRAM_BOT_TOKEN в Vercel, потом в админ-панели сайта: «Подключить бота».
 import { kv, kvMulti, jget, jset, limit, dbReady } from './_store.mjs';
-import { guard, json, rand } from './_auth.mjs';
+import { guard, json, rand, linkTg, getUser, putUser, displayName } from './_auth.mjs';
 import { tg, TOKEN, SITE, secretToken, cfg, DEF_CFG, persona, ai, say, tgHtml, createCode, kindOf, topicPost } from './_tg.mjs';
 
 export const config = { runtime: 'nodejs', maxDuration: 60 };
@@ -35,9 +35,9 @@ async function buyStart(chat, from) {
 }
 async function issueCode(buyerChat, buyer, by) {
   const c = await cfg();
-  const code = await createCode({ days: c.days, max: 1, note: 'Telegram ' + (uname(buyer) || buyerChat) });
+  const code = await createCode({ days: c.days, max: 1, note: 'Telegram ' + (uname(buyer) || buyerChat), tg: buyer && buyer.id ? buyer : null });
   await kv('INCR', 'tg:sold');
-  await say(buyerChat, `🎉 <b>Оплата подтверждена!</b>\n\nТвой код доступа: <code>${code}</code>\nОн действует ${c.days} дней с момента ввода.\n\n<b>Дальше:</b>\n1. Открой ${SITE()}\n2. Введи код (можно вставить)\n3. Создай аккаунт — почта, пароль, имя\n\nЕсли что-то не получится — просто напиши мне.`, { reply_markup: { inline_keyboard: [[{ text: '🌐 Открыть Mundora', url: SITE() }]] } });
+  await say(buyerChat, `🎉 <b>Оплата подтверждена!</b>\n\nТвой код доступа: <code>${code}</code>\nОн действует ${c.days} дней с момента ввода.\n\n<b>Дальше:</b>\n1. Открой ${SITE()}\n2. Введи код (можно вставить)\n3. Создай аккаунт — почта, пароль, имя\n\nТвой Telegram сам привяжется к профилю на сайте\n\nЕсли что-то не получится — просто напиши мне.`, { reply_markup: { inline_keyboard: [[{ text: '🌐 Открыть Mundora', url: SITE() }]] } });
   await kv('DEL', 'tg:st:' + buyerChat);
   return code;
 }
@@ -46,8 +46,17 @@ async function issueCode(buyerChat, buyer, by) {
 async function onPrivate(m) {
   const chat = m.chat.id, from = m.from, text = m.text || m.caption || '';
   const st = await jget('tg:st:' + chat);
+  // ник в Telegram поменялся — обновим в профиле Mundora
+  try { const em = await kv('GET', 'tg:uid:' + from.id); if (em) { const u = await getUser(em); if (u && u.tg && ((u.tg.username || '') !== (from.username || '') || (u.tg.name || '') !== (from.first_name || ''))) await linkTg(em, from); } } catch (e) {}
   const start = cmd(text, 'start');
   if (start !== null) {
+    if (start.startsWith('acc_')) {
+      const email = await kv('GET', 'tg:acc:' + start.slice(4));
+      if (!email) return say(chat, 'Ссылка устарела — нажми «Привязать Telegram» в профиле на сайте ещё раз.');
+      await kv('DEL', 'tg:acc:' + start.slice(4));
+      await linkTg(email, from); const u = await getUser(email);
+      return say(chat, `✅ Telegram привязан к аккаунту Mundora <b>${tgHtml(u ? displayName(u) : '')}</b>${u && u.id != null ? ' (ID ' + u.id + ')' : ''}.\n\nТеперь в профиле на сайте видно твой Telegram${from.username ? ' — @' + tgHtml(from.username) : ''}.`, { reply_markup: { inline_keyboard: [[{ text: '🌐 Открыть Mundora', url: SITE() }]] } });
+    }
     if (start.startsWith('link_')) {
       const email = await kv('GET', 'tg:link:' + start.slice(5));
       if (!email) return say(chat, 'Ссылка устарела — получи новую в админ-панели сайта.');

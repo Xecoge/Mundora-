@@ -80,10 +80,10 @@ export async function say(chat_id, text, extra = {}) {
 
 // ---------- коды доступа (та же база, что у сайта) ----------
 const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-export async function createCode({ days = 30, max = 1, note = '' }) {
+export async function createCode({ days = 30, max = 1, note = '', tg = null }) {
   for (let i = 0; i < 20; i++) {
     const c = Array.from(crypto.getRandomValues(new Uint8Array(4)), b => ALPH[b % ALPH.length]).join('');
-    const rec = { max, used: 0, days, note: String(note).slice(0, 80), created: Date.now(), via: 'telegram' };
+    const rec = { max, used: 0, days, note: String(note).slice(0, 80), created: Date.now(), via: 'telegram', ...(tg && tg.id ? { tg: { id: tg.id, username: tg.username || '', first_name: tg.first_name || '' } } : {}) };
     if ((await kv('SET', 'code:' + c, JSON.stringify(rec), 'NX')) === 'OK') { await kv('SADD', 'codes', c); return c; }
   }
   throw new Error('не удалось создать код');

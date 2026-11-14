@@ -14,7 +14,7 @@ export default async function handler(req) {
   if (dbReady()) { try { u = await currentUser(req); } catch (e) {} }
   if (u && (u.status === 'active' || u.status === 'frozen') && !accessExpired(u)) {
     touch(u).catch(() => {});
-    const boot = `<script>window.TEMPO_USER=${safe({ email: u.email, id: u.id, name: displayName(u), avatar: avatarOf(u), bio: u.bio || '', hasName: !!(u.name && u.name.trim()), until: u.accessUntil || 0, open: u.open !== false, verified: !!(u.verified || u.admin || u.shadow), admin: !!(u.admin || u.shadow), owner: u.owner, status: u.status, support: SUPPORT() })}</script>`;
+    const boot = `<script>window.TEMPO_USER=${safe({ email: u.email, id: u.id, name: displayName(u), avatar: avatarOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null, bio: u.bio || '', hasName: !!(u.name && u.name.trim()), until: u.accessUntil || 0, open: u.open !== false, verified: !!(u.verified || u.admin || u.shadow), admin: !!(u.admin || u.shadow), owner: u.owner, status: u.status, support: SUPPORT() })}</script>`;
     return new Response(PAGE.replace('</head>', boot + '</head>'), { headers: H });
   }
   return new Response(GATE, { headers: H });

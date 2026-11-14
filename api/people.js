@@ -7,7 +7,7 @@
 // POST /api/people?a=avatar-reset {id}    — админ убирает чужую загруженную аватарку
 // GET  /api/people?img=ava|cov&id=…       — сама картинка
 import { kv, kvMulti, pairs, jget, jset } from './_store.mjs';
-import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser, avatarOf, coverOf } from './_auth.mjs';
+import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser, avatarOf, coverOf, unlinkTg, rand } from './_auth.mjs';
 import { checkName, claimName } from './_names.mjs';
 export const config = { runtime: 'edge' };
 
@@ -52,7 +52,7 @@ async function card(email, viewer, full) {
   const owner = email === ADMIN(), self = viewer.email === email;
   const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
-    id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u),
+    id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null,
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false
@@ -103,6 +103,15 @@ export default async function handler(req) {
       const key = img === 'cov' && url.searchParams.get('sh') && me.shadow ? 'img:cov:sh:' + me.email + ':' + id0 : 'img:' + img + ':' + em;
       return imgResponse(await kv('GET', key));
     }
+    if (req.method === 'POST' && a === 'tg-link') { // ссылка на бота: /start acc_<token> привяжет Telegram
+      let me2 = (await jget('tg:me')) || null;
+      const tok = String((typeof process !== 'undefined' && process.env && (process.env.TELEGRAM_BOT_TOKEN || process.env.TG_BOT_TOKEN)) || '').trim();
+      if (!me2 && tok) { try { const r = await fetch(`https://api.telegram.org/bot${tok}/getMe`); const j = await r.json(); if (j.ok) { me2 = j.result; await jset('tg:me', me2); } } catch (e) {} }
+      if (!me2 || !me2.username) return json({ error: 'Бот Mundora ещё не подключён — напиши администратору' }, 503);
+      const t = rand(12); await kv('SET', 'tg:acc:' + t, me.email, 'EX', 900);
+      return json({ url: `https://t.me/${me2.username}?start=acc_${t}` });
+    }
+    if (req.method === 'POST' && a === 'tg-unlink') { await unlinkTg(me.email); return json({ ok: true, profile: await card(me.email, me, true) }); }
     if (req.method === 'POST' && a === 'avatar') {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({})), bad = checkImg(b.data, 'ava'); if (bad) return json({ error: bad }, 400);
