@@ -42,7 +42,7 @@ export default async function handler(req) {
           if (quota > 0) return out({ error: 'Дневной лимит YouTube API исчерпан', quota: true, retryIn: quota }, 429);
         } catch (e) {}
       }
-      const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '8', videoEmbeddable: 'true', videoCategoryId: '10', q, key }));
+      const r = await fetch('https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({ part: 'snippet', type: 'video', maxResults: '10', videoEmbeddable: 'true', videoSyndicated: 'true', videoCategoryId: '10', q, key }));
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         const reason = (j.error && j.error.errors && j.error.errors[0] && j.error.errors[0].reason) || '', msg = (j.error && j.error.message) || 'YouTube ' + r.status;

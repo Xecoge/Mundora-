@@ -1207,7 +1207,10 @@ async function srcFor(t){
 }
 const YTM=LS.get('ytmap',{});
 const YTQ=new Map();
-function ytPick(t,items){
+// видео, которые не открылись во встроенном плеере (запрещено встраивание, недоступно в стране, удалено)
+const YTB=new Set(LS.get('ytbad',[]));
+function ytBad(id){if(!id)return;YTB.add(id);LS.set('ytbad',[...YTB].slice(-600))}
+function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
   const nz=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/gi,'');
   const A=nz(t.artist),T=nz(cleanTitle(t.title)||t.title),bad=/(live|концерт|cover|кавер|karaoke|караоке|reaction|реакция|sped ?up|speed ?up|slowed|nightcore|8d|instrumental|минус|lyrics|текст песни|tutorial|разбор|acoustic|акустич|премия|выпускной|фестивал|шок|с дочкой)/i;
   let best=null,bs=-99;
@@ -1222,7 +1225,7 @@ function ytPick(t,items){
 const ytOff=()=>{try{return +localStorage.getItem('tempo:ytOff')>Date.now()}catch(e){return false}};
 function ytQuota(sec){try{localStorage.setItem('tempo:ytOff',String(Date.now()+Math.min(sec||3600,86400)*1000))}catch(e){}if(!ytQuota.told){ytQuota.told=1;toast('Полные версии с YouTube временно недоступны — сегодняшний лимит исчерпан. Пока играют превью','headph')}}
 async function ytFind(t){
-  if(YTM[t.id])return YTM[t.id];
+  if(YTM[t.id]&&!YTB.has(YTM[t.id]))return YTM[t.id];
   if(ytOff())return '';
   if(YTQ.has(t.id))return YTQ.get(t.id);
   const p=MUS.get('yt','search',{q:`${t.artist} - ${cleanTitle(t.title)||t.title}`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);throw e}).then(d=>{const it=ytPick(t,d.items||[]);if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
@@ -1514,9 +1517,14 @@ const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
   load(){if(this.ready)return this.ready;this.ready=new Promise((res,rej)=>{if(window.YT&&YT.Player)return res();const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{prev&&prev();res()};const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';sc.onerror=()=>{this.ready=null;rej(new Error('YouTube недоступен'))};document.head.appendChild(sc);setTimeout(()=>{if(!(window.YT&&YT.Player)){this.ready=null;rej(new Error('YouTube не загрузился'))}},12000)});return this.ready},
   async play(id){
     await this.load();$('#ytBox').hidden=false;this.cur=id;
-    if(!this.p){await new Promise((res,rej)=>{this.p=new YT.Player('ytPlayer',{videoId:id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{try{this.p.setVolume(AUD.volume*100);if(AUD.muted)this.p.mute();this.p.playVideo()}catch(e){}res()},onStateChange:e=>this.onState(e.data),onError:()=>{const t=P.cur;ME.toAudio();if(t&&isPreview(t)){delete YTM[t.id];LS.set('ytmap',YTM);toast('Это видео нельзя встроить — играет отрывок','note');srcFor(t).then(u=>{if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)})}else ME.emit('error',true)}}});setTimeout(res,8000)})}
+    if(!this.p){await new Promise((res,rej)=>{this.p=new YT.Player('ytPlayer',{videoId:id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{try{this.p.setVolume(AUD.volume*100);if(AUD.muted)this.p.mute();this.p.playVideo()}catch(e){}res()},onStateChange:e=>this.onState(e.data),onError:()=>this.onErr()}});setTimeout(res,8000)})}
     else this.p.loadVideoById(id);
   },
+  // видео не открылось — пробуем следующий результат поиска YouTube (до 4 раз), и только потом отрывок
+  onErr(){const t=P.cur,bad=this.cur;ytBad(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap',YTM)}
+    const fb=()=>{if(P.cur!==t)return;ME.toAudio();if(t&&isPreview(t))srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)});else ME.emit('error',true)};
+    if(t&&isPreview(t)&&(t._ytTry=(t._ytTry||0)+1)<=4){ytFind(t).then(v=>{if(P.cur!==t)return;if(v&&v!==bad)ME.playYT(v).then(()=>{t._yt=v;UI.why(t)}).catch(fb);else fb()}).catch(fb);return}
+    fb()},
   onState(s){this.state=s;if(s===1){ME.emit('playing');ME.emit('loadedmetadata');this.tick(true)}else if(s===2){this.tick(false);ME.emit('pause')}else if(s===0){this.tick(false);ME.emit('ended')}},
   tick(on){clearInterval(this.timer);if(on)this.timer=setInterval(()=>ME.emit('timeupdate'),400)},
   stop(){try{this.p&&this.p.stopVideo()}catch(e){}this.cur='';this.state=-1;this.tick(false);const b=$('#ytBox');if(b)b.hidden=true}
@@ -1574,7 +1582,7 @@ const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:nul
   playList(list,i=0,ctx='',name='',refill=null){if(!list||!list.length){toast('Нечего играть — каталог не ответил','x');return}this.anchor=null;this.queue=list.map(t=>({...t}));this.idx=i;this.ctx=ctx;this.ctxName=name;this.refill=refill;this.load(true)},
   async load(autoplay=true){
     const t=this.cur;if(!t)return;const seq=this.seq=(this.seq||0)+1;
-    t._full=false;t._start=Date.now();
+    t._full=false;t._start=Date.now();t._ytTry=0;
     UI.nowPlaying();
     if(this.idx>=this.queue.length-3)this.top();
     if(isPreview(t)&&fullOn()){
