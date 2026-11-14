@@ -6,11 +6,14 @@
 //  • через 5 мин основная модель снова пробуется первой.
 // Переменные окружения: AI_API_KEY, AI_BASE_URL, AI_MODEL, AI_FALLBACK_MODELS (необязательно: свой порядок запасных через запятую).
 
+import { kv, kvMulti, dbReady } from './_store.mjs';
 const DEFAULT_BASE = 'https://api.drakezakuru.com/v1';
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS' };
 const HOP = ['connection', 'keep-alive', 'transfer-encoding', 'te', 'trailer', 'upgrade', 'proxy-authenticate', 'proxy-authorization', 'content-encoding', 'content-length'];
 const NON_CHAT = /(embed|tts|whisper|audio|image|dall-?e|moderation|realtime|transcri|search|rerank|ocr|speech|similarity|davinci|babbage|-instruct\b)/i;
-const FIRST_MS = 45000, TEST_MS = 12000, BAD_MS = 5 * 60e3, ACTIVE_MS = 10 * 60e3;
+const FIRST_MS = 25000, TEST_MS = 10000, BAD_MS = 5 * 60e3, ACTIVE_MS = 10 * 60e3;
+// если основная модель молчит дольше HEDGE_MS — параллельно спрашиваем запасную и берём того, кто ответит первым
+const HEDGE_MS = 7000;
 
 let MODELS = { t: 0, list: [] };
 const ST = { bad: {}, active: '', activeT: 0 };
@@ -18,7 +21,24 @@ const now = () => Date.now();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const family = m => { const n = String(m).toLowerCase().replace(/^[^/]*\//, ''); const f = n.match(/(gpt|o\d|claude|gemini|grok|deepseek|qwen|kimi|glm|llama|mistral|minimax|doubao|ernie|yi|command)/); return f ? f[1] : n.split(/[-_.:]/)[0]; };
 const isBad = m => !!m && ST.bad[m] && now() - ST.bad[m] < BAD_MS;
-const markBad = m => { if (!m) return; ST.bad[m] = now(); if (ST.active === m) ST.active = ''; };
+// Состояние общее для всех серверов Vercel (через базу): сломанные модели и рабочая запасная.
+// Иначе каждый «холодный» сервер заново ждёт ответа от неработающей модели.
+const sharedOn = () => { try { return dbReady(); } catch (e) { return false; } };
+async function loadShared() {
+  if (!sharedOn()) return;
+  try {
+    const [b, a] = await kvMulti([['GET', 'ai:bad'], ['GET', 'ai:active']]);
+    const bad = b ? JSON.parse(b) : {}; for (const [m, t] of Object.entries(bad)) if (now() - t < BAD_MS && !(ST.bad[m] > t)) ST.bad[m] = t;
+    if (a) { const x = JSON.parse(a); if (x && x.m && now() - x.t < ACTIVE_MS && !isBad(x.m) && !(ST.activeT > x.t)) { ST.active = x.m; ST.activeT = x.t; } }
+  } catch (e) {}
+}
+function saveShared() {
+  if (!sharedOn()) return;
+  const bad = {}; for (const [m, t] of Object.entries(ST.bad)) if (now() - t < BAD_MS) bad[m] = t;
+  kvMulti([['SET', 'ai:bad', JSON.stringify(bad), 'EX', 600], ...(ST.active ? [['SET', 'ai:active', JSON.stringify({ m: ST.active, t: ST.activeT }), 'EX', 900]] : [['DEL', 'ai:active']])]).catch(() => {});
+}
+const markBad = m => { if (!m) return; ST.bad[m] = now(); if (ST.active === m) ST.active = ''; saveShared(); };
+const markGood = m => { if (!m) return; delete ST.bad[m]; ST.active = m; ST.activeT = now(); saveShared(); };
 const norm = m => String(m).toLowerCase().replace(/[^a-z0-9.]/g, '');
 
 // «Ум» модели по названию: версия, класс (pro/opus/…), штраф за mini/flash/…
@@ -41,12 +61,13 @@ function rankList(list, env) {
 }
 async function listModels(base, auth) {
   if (MODELS.list.length && now() - MODELS.t < 5 * 60e3) return MODELS.list;
+  if (sharedOn()) { try { const c = await kv('GET', 'ai:models'); if (c) { const x = JSON.parse(c); if (x.list && x.list.length) { MODELS = { t: now(), list: x.list }; return MODELS.list; } } } catch (e) {} }
   for (let i = 0; i < 2; i++) {
     try {
       const r = await fetch(base + '/models', { headers: auth ? { authorization: auth } : {} });
       const j = await r.json();
       const list = (j.data || j.models || []).map(m => typeof m === 'string' ? m : m.id).filter(Boolean);
-      if (list.length) { MODELS = { t: now(), list }; break; }
+      if (list.length) { MODELS = { t: now(), list }; if (sharedOn()) kv('SET', 'ai:models', JSON.stringify({ list }), 'EX', 900).catch(() => {}); break; }
     } catch (e) {}
     await sleep(600);
   }
@@ -109,14 +130,15 @@ async function findAlternative(env, base, auth, target, headers, exclude) {
     const ok = await Promise.all(batch.map(m => testModel(target, headers, m).then(v => { if (!v) markBad(m); return v; })));
     // из ответивших — самая сильная
     const good = batch.filter((m, k) => ok[k]);
-    if (good.length) { const best = rankList(good, env)[0] || good[0]; ST.active = best; ST.activeT = now(); return best; }
+    if (good.length) { const best = rankList(good, env)[0] || good[0]; markGood(best); return best; }
   }
   return '';
 }
 const transient = e => { const st = e.status || 0, b = String(e.body || e.message || ''); return [429, 500, 502, 503, 504, 520, 522, 524, 529].includes(st) || /temporar|unavailable|overload|try again|busy|capacity/i.test(b); };
 // Открыть поток и дождаться первого настоящего токена (ответа или рассуждения)
-async function openStream(target, headers, body) {
+async function openStream(target, headers, body, outer) {
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), FIRST_MS);
+  if (outer) { if (outer.aborted) ctl.abort(); else outer.addEventListener('abort', () => ctl.abort(), { once: true }); }
   try {
     const r = await fetch(target, { method: 'POST', headers: { ...headers, accept: 'text/event-stream' }, body, signal: ctl.signal });
     if (!r.ok) throw httpErr(r.status, await r.text().catch(() => ''));
@@ -150,6 +172,28 @@ async function openStream(target, headers, body) {
     if (e.name === 'AbortError') throw httpErr(0, 'timeout');
     throw e;
   }
+}
+// Гонка: основная модель + (через HEDGE_MS тишины) запасная; побеждает первая, кто начал отвечать
+function raceFirst(target, headers, j, m1, pickAlt) {
+  return new Promise((resolve, reject) => {
+    let done = false, pending = 0, hedged = false, lastE = null; const ctls = [], failed = [];
+    const finish = (fn, v) => { if (done) return; done = true; clearTimeout(t); fn(v); };
+    const start = m => {
+      const c = new AbortController(); ctls.push(c); pending++;
+      openStream(target, headers, JSON.stringify({ ...j, model: m }), c.signal).then(s => {
+        if (done) { try { c.abort(); } catch (e) {} return; }
+        ctls.forEach(x => { if (x !== c) try { x.abort(); } catch (e) {} });
+        finish(resolve, { s, m });
+      }, e => { if (done) return; lastE = e; failed.push(m); e.failed = failed; if (--pending === 0 && (hedged || true)) { if (!hedged) { clearTimeout(t); } finish(reject, lastE); } });
+    };
+    const t = setTimeout(async () => {
+      if (done) return; hedged = true;
+      const m2 = await pickAlt().catch(() => '');
+      if (done) return;
+      if (m2 && m2 !== m1) start(m2);
+    }, HEDGE_MS);
+    start(m1);
+  });
 }
 async function fetchJSON(target, headers, body) {
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), FIRST_MS);
@@ -191,6 +235,7 @@ export async function handleAI(req, env) {
     }
   }
 
+  await loadShared();
   const primary = await resolveModel(env, base, auth, j.model);
   const stream = !!j.stream;
   const enc = new TextEncoder();
@@ -217,7 +262,13 @@ export async function handleAI(req, env) {
         for (let p = 0; p < 2 && !ok; p++) {
           try {
             if (stream) {
-              const s = await openStream(target, headers, JSON.stringify(body));
+              let s;
+              if (p === 0 && rr === 0) {
+                // основная модель + запасная «на подхвате»
+                const pickAlt = async () => { if (ST.active && ST.active !== m && !isBad(ST.active)) return ST.active; const r = rankList(await listModels(base, auth), env).filter(x => x !== m && !tried.has(x) && !isBad(x)); return r[0] || ''; };
+                try { const w = await raceFirst(target, headers, body, m, pickAlt); s = w.s; if (w.m !== m) { tried.add(w.m); ST.bad[m] = now(); m = w.m; markGood(m); } } // основная тормозит — 5 минут сразу отвечает запасная
+                catch (e) { (e.failed || []).filter(x => x !== m).forEach(x => { tried.add(x); markBad(x); }); throw e; }
+              } else s = await openStream(target, headers, JSON.stringify(body));
               if (m !== primary) await send('data: ' + JSON.stringify({ tempo: { fallback: true, model: m } }) + '\n\n');
               if (s.whole) await send(s.whole);
               else {
@@ -238,7 +289,7 @@ export async function handleAI(req, env) {
             break;
           }
         }
-        if (ok) { if (m === primary) delete ST.bad[primary]; return; }
+        if (ok) { if (m === primary) { if (ST.bad[primary]) { delete ST.bad[primary]; saveShared(); } } else if (ST.active !== m) markGood(m); return; }
         if (!retriable(lastErr)) break;   // ключ/доступ/размер — менять модель бесполезно
         markBad(m);
       }
