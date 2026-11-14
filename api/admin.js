@@ -1,4 +1,4 @@
-// TEMPO — админ-панель (только для ADMIN_EMAIL): коды доступа и аккаунты.
+// Mundora — админ-панель (только для ADMIN_EMAIL): коды доступа и аккаунты.
 import { kv, kvMulti, jget, jset, pairs } from './_store.mjs';
 import { guard, json, getUser, putUser, dropSessions, ADMIN, ensureId, displayName, normEmail, maskEmail } from './_auth.mjs';
 export const config = { runtime: 'edge' };

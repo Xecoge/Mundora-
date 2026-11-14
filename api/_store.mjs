@@ -1,4 +1,4 @@
-// TEMPO — база данных.
+// Mundora — база данных.
 // На Vercel: Upstash Redis (Vercel → Storage → Create → Upstash for Redis → Connect to project).
 // Подключение само добавляет переменные KV_REST_API_URL и KV_REST_API_TOKEN (или UPSTASH_REDIS_REST_URL/TOKEN).
 // Локально (node server.js) без этих переменных данные хранятся в файле data/db.json.

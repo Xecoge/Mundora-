@@ -3,11 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07050d">
-<title>TEMPO — музыка и финансы</title>
+<meta name="theme-color" content="#07040f">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/img/favicon-64.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Mundora">
+<meta name="application-name" content="Mundora">
+<title>Mundora — музыка, финансы и ИИ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#07050d;--panel:rgba(255,255,255,.045);--panel2:rgba(255,255,255,.07);--line:rgba(255,255,255,.08);--muted:#8f88ab;--muted2:#6f6889;--text:#f4f1ff;--v1:#c4b5fd;--v2:#a78bfa;--v3:#8b5cf6;--v4:#6d28d9;--pink:#e879f9;--green:#4ade80;--red:#f87171;--side:236px;--pl:84px;--r:22px;--safe:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -597,6 +602,162 @@ a.act:hover{background:rgba(139,92,246,.2)}
 .adm-af{grid-template-columns:minmax(0,1fr) auto}
 .h3 button.more{color:var(--v1)}
 @media (max-width:760px){.pf-hero{flex-direction:column;text-align:center;padding:20px 16px}.pf-ava{width:116px;height:116px;margin-top:-6px}.pf-id h1{justify-content:center;font-size:25px}.pf-meta,.pf-mail,.pf-hero .row{justify-content:center}.pf-stats{grid-template-columns:1fr 1fr}.ava-grid{grid-template-columns:repeat(4,1fr)}.adm-af{grid-template-columns:1fr}.pf-cap-top b{font-size:24px}}
+/* =====================================================================
+   MUNDORA 2 — гибрид «Liquid Glass» (A) + «Bento Neon» (C)
+   стекло и свечение · крупные ровные цифры · лайм только для роста
+   ===================================================================== */
+:root{--bg:#07040f;--panel:rgba(255,255,255,.06);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.1);--muted:#9b94b8;--muted2:#77708f;--text:#fbf9ff;
+  --v1:#d6c4ff;--v2:#b98bff;--v3:#9b6bff;--v4:#6d3ff0;--pink:#ff6ec7;--green:#c6ff4d;--red:#ff6b8b;--r:26px;
+  --glass:linear-gradient(160deg,rgba(255,255,255,.115),rgba(255,255,255,.035) 55%,rgba(255,255,255,.05));
+  --hi:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04);
+  --acc:linear-gradient(120deg,#b98bff,#ff6ec7)}
+html,body{background:var(--bg)}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-optical-sizing:auto}
+.bgfx{background:
+  radial-gradient(760px 560px at 12% -8%,rgba(150,80,255,.42),transparent 62%),
+  radial-gradient(620px 520px at 105% 28%,rgba(255,80,170,.2),transparent 62%),
+  radial-gradient(700px 520px at 40% 112%,rgba(50,110,255,.2),transparent 62%),var(--bg)}
+::selection{background:rgba(185,139,255,.45)}
+.num,.big,.res b,.io b{font-variant-numeric:tabular-nums}
+
+/* ---------- стеклянные поверхности ---------- */
+.glass,.pf-cap,.pf-stats .glass,.adm-stat,.tgbox,.ytst,.adm-form{background:var(--glass);border:1px solid rgba(255,255,255,.12);box-shadow:var(--hi),0 18px 40px -22px rgba(0,0,0,.7);border-radius:var(--r)}
+.glass:hover{border-color:rgba(255,255,255,.18)}
+.phead{background:linear-gradient(140deg,rgba(185,139,255,.32),rgba(255,110,199,.14) 55%,rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.16);box-shadow:var(--hi),0 24px 50px -24px rgba(109,63,240,.6);border-radius:30px}
+.phead h1{letter-spacing:-1px;font-weight:800}
+.hero{border-radius:30px;background:linear-gradient(140deg,rgba(185,139,255,.55),rgba(255,110,199,.3) 58%,rgba(120,80,255,.25));border:1px solid rgba(255,255,255,.2);box-shadow:var(--hi),0 30px 60px -24px rgba(150,80,255,.65)}
+.hero h1{letter-spacing:-1.8px}
+.hero .tag{color:#fff;opacity:.85}
+.hero p{color:#f3ecff}
+.bigplay{background:#fff;color:#2a0f55;box-shadow:0 10px 30px rgba(255,255,255,.35)}
+
+/* ---------- цифры как в бенто (C) ---------- */
+.big{font-size:40px;font-weight:850;letter-spacing:-1.6px;line-height:1.05}
+.up{color:var(--green);font-weight:650}.down{color:var(--red)}
+.stat .glass b,.cstats b{letter-spacing:-.6px}
+
+/* ---------- кнопки и чипы ---------- */
+.btn{background:#fff;color:#1c0b3d;box-shadow:0 10px 26px -10px rgba(255,255,255,.45);font-weight:700}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 30px -10px rgba(255,255,255,.55)}
+.btn.ghost{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.16);box-shadow:none}
+.btn.danger{background:rgba(255,107,139,.14);color:#ffb3c3;border:1px solid rgba(255,107,139,.3);box-shadow:none}
+.chip{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14)}
+.chip.on,.chip.dark.on{background:#fff;color:#1c0b3d;border-color:#fff}
+.chip.on .i{color:#7c3aed}
+.seg{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+.seg button.on{background:#fff;color:#1c0b3d;box-shadow:none}
+.seg.inc button.on[data-v=in]{background:var(--green);color:#132000;box-shadow:none}
+.seg.inc button.on[data-v=out]{background:#ff6b8b;color:#2a0010;box-shadow:none}
+.pp{background:#fff;color:#1c0b3d;box-shadow:0 8px 24px -6px rgba(255,255,255,.5)}
+input[type=range]{background:linear-gradient(90deg,#b98bff 0,#ff6ec7 var(--p,0%),rgba(255,255,255,.14) var(--p,0%))}
+.in,.mini-in,.sbox,.search-pill{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12)}
+.in:focus,.mini-in:focus{border-color:rgba(214,196,255,.6);box-shadow:0 0 0 3px rgba(185,139,255,.2)}
+
+/* ---------- боковое меню (ПК) ---------- */
+.side{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border-right:1px solid rgba(255,255,255,.07);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.logo{gap:10px;font-size:20px;letter-spacing:.2px;font-weight:800}
+.logo .mk{width:34px;height:34px;background:none;box-shadow:none;border-radius:0}
+.logo .mk img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(150,80,255,.6))}
+.it{border-radius:14px;color:#b4add0}
+.it.on{background:var(--glass);color:#fff;box-shadow:var(--hi),0 0 0 1px rgba(255,255,255,.12)}
+.it.on .i{color:#fff;filter:drop-shadow(0 0 8px rgba(214,196,255,.9))}
+.sec{color:#6e6890}
+
+/* ---------- шторки, тосты ---------- */
+.sheet{background:linear-gradient(170deg,rgba(40,24,78,.92),rgba(16,10,32,.94));border:1px solid rgba(255,255,255,.14);box-shadow:var(--hi),0 40px 90px rgba(0,0,0,.65);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
+.toast{background:linear-gradient(160deg,rgba(60,36,110,.92),rgba(24,14,44,.94));border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+
+/* ---------- плеер (ПК: низ) ---------- */
+.player{background:linear-gradient(180deg,rgba(26,16,48,.72),rgba(12,8,24,.82));backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);border-top:1px solid rgba(255,255,255,.1)}
+
+/* ---------- полноэкранный плеер: размытая обложка вместо фона ---------- */
+.full{background:#0b0616}
+.full::before{content:"";position:absolute;inset:-12%;background:var(--art,none) center/cover no-repeat,radial-gradient(600px 500px at 50% 20%,#ff5ea8,transparent 60%),radial-gradient(700px 600px at 30% 60%,#6d28d9,transparent 65%);filter:blur(70px) saturate(150%) brightness(.75);transform:scale(1.15);pointer-events:none;position:fixed}
+.full::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(7,4,15,.25),rgba(7,4,15,.7));pointer-events:none}
+.full-in{position:relative;z-index:1}
+.full .art.xl{border-radius:30px;box-shadow:0 40px 80px -24px rgba(0,0,0,.75)}
+.full h2{font-size:28px;font-weight:800;letter-spacing:-.8px}
+.full .why span,.why .wb{background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.16)}
+
+/* ---------- бенто на главной ---------- */
+.bento3{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:16px;margin-top:16px}
+.bento3 .glass{min-height:168px;padding:18px 20px}
+.bt-h{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px}
+.bt-h .live{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--green)}
+.bt-h .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.bt-coin{display:grid;grid-template-columns:44px 64px 1fr auto;align-items:center;gap:10px;padding:7px 0;font-size:14px}
+.bt-coin b{font-weight:750}.bt-coin .pr{text-align:right;font-weight:750}.bt-coin .ch{font-size:12px;font-weight:700;text-align:right;min-width:58px}
+.bt-note li{list-style:none;display:flex;gap:9px;align-items:center;font-size:13.5px;padding:5px 0}
+.bt-note .ck{width:17px;height:17px;border-radius:6px;border:1.5px solid rgba(255,255,255,.4);flex:none;display:grid;place-items:center}
+.bt-note .ck.on{background:#fff;border-color:#fff;color:#1c0b3d}.bt-note li.done span{opacity:.5;text-decoration:line-through}
+.bt-cap{display:flex;align-items:center;gap:14px}.bt-cap img{width:70px;height:70px;object-fit:contain}
+.bt-cap .v{font-size:32px;font-weight:850;letter-spacing:-1px;line-height:1.05}.bt-cap .v small{font-size:14px;color:var(--v2);font-weight:700}
+.bt-lvl{height:7px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:10px}.bt-lvl i{display:block;height:100%;background:var(--acc);border-radius:9px}
+
+/* ---------- ПК, широкий экран: справа панель «Сейчас играет» ---------- */
+@media (min-width:1280px){
+  body:has(#player:not(.empty)) .app{margin-right:352px}
+  .player:not(.empty){left:auto;right:16px;top:16px;bottom:16px;width:320px;height:auto;border-radius:30px;border:1px solid rgba(255,255,255,.14);
+    background:linear-gradient(170deg,rgba(255,255,255,.12),rgba(255,255,255,.04));box-shadow:var(--hi),0 30px 60px -20px rgba(0,0,0,.7);
+    display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:20px;gap:16px;overflow:hidden}
+  .player:not(.empty)::before{content:"Сейчас играет";font-size:12px;font-weight:650;color:var(--muted);letter-spacing:.02em}
+  .player:not(.empty) .p-left{flex-direction:column;align-items:stretch;gap:14px;position:relative}
+  .player:not(.empty) .p-left .art{width:100%;height:auto;aspect-ratio:1;border-radius:24px;box-shadow:0 26px 50px -18px rgba(0,0,0,.7)}
+  .player:not(.empty) .p-left .art .i{width:60px;height:60px}
+  .player:not(.empty) .p-meta b{font-size:20px;font-weight:800;letter-spacing:-.4px;white-space:normal;line-height:1.2}
+  .player:not(.empty) .p-meta small{font-size:14px;margin-top:4px;white-space:normal}
+  .player:not(.empty) #pLike{position:absolute;right:0;bottom:4px}
+  .player:not(.empty) .p-center{order:2;gap:10px}
+  .player:not(.empty) .prow{order:-1;max-width:none}
+  .player:not(.empty) .pbtns{width:100%;justify-content:space-between}
+  .player:not(.empty) .pp{width:58px;height:58px}.player:not(.empty) .pp .i{width:24px;height:24px}
+  .player:not(.empty) .p-right{order:3;justify-content:space-between;margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+  .player:not(.empty) .p-right input{max-width:120px}
+  .player:not(.empty) .mprog{display:none}
+  body:has(#player:not(.empty)) .ytfloat{right:368px}
+  body:has(#player:not(.empty)) .toast{right:368px}
+}
+
+/* ---------- телефон: плавающее стеклянное меню и мини-плеер ---------- */
+@media (max-width:760px){
+  :root{--pl:62px;--r:24px}
+  .tabs{left:12px;right:12px;bottom:calc(10px + var(--safe));height:66px;padding:0 6px;border-radius:33px;
+    background:linear-gradient(160deg,rgba(255,255,255,.15),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.18);
+    box-shadow:var(--hi),0 20px 40px rgba(0,0,0,.55);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%)}
+  .tabs a{color:rgba(255,255,255,.62);padding:7px 4px;border-radius:24px;font-weight:600;gap:3px}
+  .tabs a.on{color:#fff;background:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+  .tabs a.on .i{color:#fff;filter:none}
+  .player{left:12px;right:12px;bottom:calc(84px + var(--safe));height:var(--pl);border-radius:31px;padding:0 8px;
+    background:linear-gradient(160deg,rgba(60,34,110,.82),rgba(26,14,50,.88));border:1px solid rgba(255,255,255,.16);
+    box-shadow:var(--hi),0 16px 34px rgba(0,0,0,.5);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px)}
+  .p-left .art{width:46px;height:46px;border-radius:23px}
+  .mprog{left:22px;right:22px;top:auto;bottom:0;height:2px;border-radius:2px}
+  .main{padding-bottom:calc(var(--pl) + 112px + var(--safe))}
+  body.noplay .main{padding-bottom:calc(100px + var(--safe))}
+  .toast{bottom:calc(var(--pl) + 104px + var(--safe))}
+  .composer{bottom:calc(84px + var(--safe) + var(--pl) + 10px)}
+  body.noplay .composer{bottom:calc(88px + var(--safe))}
+  .ytfloat{bottom:calc(84px + var(--safe) + var(--pl) + 14px)}
+  .logo .mk,.logo .mk img{width:30px;height:30px}
+  .big{font-size:36px}
+  .hero{border-radius:28px}
+  .bento3{grid-template-columns:1fr 1fr}
+  .bento3>:first-child{grid-column:1/-1}
+  .bento3 .glass{min-height:0;padding:16px}
+  .bt-cap{flex-direction:column;align-items:flex-start;gap:6px}.bt-cap img{width:52px;height:52px}.bt-cap .v{font-size:26px}
+  .sheet{border-radius:30px 30px 0 0}
+}
+@media (max-width:1100px) and (min-width:761px){.bento3{grid-template-columns:1fr 1fr}.bento3>:first-child{grid-column:1/-1}}
+
+/* слабые устройства и «меньше движения»: без тяжёлого размытия */
+@media (prefers-reduced-transparency:reduce){.tabs,.player,.sheet,.side,.toast{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+body.lowfx .tabs,body.lowfx .player,body.lowfx .sheet,body.lowfx .side,body.lowfx .toast{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.lowfx .tabs{background:rgba(30,18,58,.97)}body.lowfx .player{background:rgba(34,20,64,.98)}
+
+
+@media(min-width:1280px){body:has(#player:not(.empty)) .hero>img{height:210px;right:-18px;bottom:-10px;top:auto}
+body:has(#player:not(.empty)) .hero h1,body:has(#player:not(.empty)) .hero p{max-width:62%;}.hero .ctl,.hero h1,.hero p,.hero .tag{position:relative;z-index:1}body:has(#player:not(.empty)) .hero p{position:relative;z-index:1}}
+@media(min-width:761px) and (max-width:1100px){.hero>img{height:200px}.hero h1,.hero p{max-width:62%;position:relative;z-index:1}}
 </style>
 </head>
 <body>
@@ -670,7 +831,7 @@ a.act:hover{background:rgba(139,92,246,.2)}
 
 <div class="app">
   <aside class="side">
-    <a class="logo" href="#home"><span class="mk"><svg class="i"><use href="#i-wave"/></svg></span><span class="lt">TEMPO</span></a>
+    <a class="logo" href="#home"><span class="mk"><img src="/img/logo-mark.webp" alt=""></span><span class="lt">Mundora</span></a>
     <div class="sec">Музыка</div>
     <nav id="navM"></nav>
     <div class="sep"></div>
@@ -682,7 +843,7 @@ a.act:hover{background:rgba(139,92,246,.2)}
   </aside>
   <main class="main">
     <header class="top">
-      <a class="logo mlogo" href="#home"><span class="mk"><svg class="i"><use href="#i-wave"/></svg></span>TEMPO</a>
+      <a class="logo mlogo" href="#home"><span class="mk"><img src="/img/logo-mark.webp" alt=""></span>Mundora</a>
       <a class="search-pill" href="#search"><svg class="i s"><use href="#i-search"/></svg>Трек, артист, ремикс или жанр…</a>
       <button class="ava" data-act="profile"><span class="nm" id="uName">Профиль</span><span class="pic"><img alt="" id="avaImg"></span></button>
     </header>
@@ -826,7 +987,7 @@ S.taste.lang=S.taste.lang||{};S.ops=S.ops.filter(o=>!o.demo);
 let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>KEYS.forEach(k=>LS.set(k,S[k])),150)}
 
 /* ===================== music API (Audius) ===================== */
-const APP='TEMPO';
+const APP='Mundora';
 const GENRES=['Electronic','Hip-Hop/Rap','Pop','Alternative','R&B/Soul','Lo-Fi','House','Deep House','Techno','Trap','Dubstep','Drum & Bass','Ambient','Rock','Jazz','Downtempo','Future Bass','Hyperpop','Latin','Funk','Disco','Trance','Acoustic','Metal','Classical','Reggae','Soundtrack','Experimental'];
 const GENRE_RU={'Electronic':'Электроника','Hip-Hop/Rap':'Хип-хоп','Pop':'Поп','Alternative':'Альтернатива','R&B/Soul':'R&B / Соул','Lo-Fi':'Лоу-фай','House':'Хаус','Deep House':'Дип-хаус','Techno':'Техно','Trap':'Трэп','Dubstep':'Дабстеп','Drum & Bass':'Драм-н-бейс','Ambient':'Эмбиент','Rock':'Рок','Jazz':'Джаз','Downtempo':'Даунтемпо','Future Bass':'Фьюче-басс','Hyperpop':'Гиперпоп','Latin':'Латино','Funk':'Фанк','Disco':'Диско','Trance':'Транс','Acoustic':'Акустика','Metal':'Метал','Classical':'Классика','Reggae':'Регги','Soundtrack':'Саундтреки','Experimental':'Эксперимент'};
 const gRu=g=>GENRE_RU[g]||g;
@@ -906,7 +1067,7 @@ const MUS={cache:new Map(),
     if(AI.viaProxy){const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),10000);try{const r=await fetch(`/music/${src}/${path}${qs?'?'+qs:''}`,{signal:ctl.signal});d=await r.json();if(!r.ok)throw Object.assign(new Error((d&&d.error)||src+' '+r.status),{quota:!!(d&&d.quota),retryIn:d&&d.retryIn})}finally{clearTimeout(tm)}}
     else if(src==='deezer')d=await jsonp('https://api.deezer.com/'+path+'?'+new URLSearchParams({...params,output:'jsonp'}));
     else if(src==='itunes')d=await jsonp('https://itunes.apple.com/'+path+'?'+qs);
-    else throw new Error('нужен сервер TEMPO');
+    else throw new Error('нужен сервер Mundora');
     if(d&&d.error&&src==='deezer')throw new Error('Deezer: '+(d.error.message||d.error.type||'ошибка'));
     this.cache.set(key,{t:Date.now(),d});return d;
   }
@@ -1322,7 +1483,7 @@ const P={queue:[],idx:-1,ctx:'',ctxName:'',shuffle:false,repeat:false,refill:nul
     this.load();
   },
   prev(){if(audio.currentTime>4){audio.currentTime=0;return}this.idx=Math.max(0,this.idx-1);this.load()},
-  close(){audio.pause();audio.removeAttribute('src');try{audio.load()}catch(e){}this.queue=[];this.idx=-1;this.ctx='';this.ctxName='';this.refill=null;$('#player').classList.add('empty');document.body.classList.add('noplay');$('#full').classList.remove('open');document.title='TEMPO — музыка и финансы';UI.playState();UI.markRows();if('mediaSession'in navigator)try{navigator.mediaSession.metadata=null}catch(e){}}
+  close(){audio.pause();audio.removeAttribute('src');try{audio.load()}catch(e){}this.queue=[];this.idx=-1;this.ctx='';this.ctxName='';this.refill=null;$('#player').classList.add('empty');document.body.classList.add('noplay');$('#full').classList.remove('open');document.title='Mundora — музыка и финансы';UI.playState();UI.markRows();if('mediaSession'in navigator)try{navigator.mediaSession.metadata=null}catch(e){}}
 };
 audio.volume=(S.vol??80)/100;
 let errCount=0;
@@ -1431,15 +1592,16 @@ const UI={
     const t=P.cur;if(!t)return;markPlayed(t);
     $('#pArt').outerHTML=art(t,'','','pArt');
     $('#pTitle').textContent=t.title;$('#pArtist').textContent=t.artist+(P.ctxName?' · '+P.ctxName:'');
-    $('#fArt').outerHTML=art(t,'xl','','fArt');$('#player').classList.remove('empty');document.body.classList.remove('noplay');
+    $('#fArt').outerHTML=art(t,'xl','','fArt');$('#player').classList.remove('empty');
+    {const u=artUrls(t,'xl')[0];$('#full').style.setProperty('--art',u?`url("${String(u).replace(/"/g,'%22')}")`:'none')}document.body.classList.remove('noplay');
     $('#fTitle').textContent=t.title;$('#fArtist').textContent=t.artist+(t.genre?' · '+gRu(t.genre):'');
     $('#fCtx').textContent=P.ctxName||'Сейчас играет';
     this.why(t);
     $('#fExt').innerHTML=`<a href="${yaUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Яндекс</a><a href="${ytUrl(t)}" target="_blank" rel="noopener">${ico('ext')}YouTube</a><a href="${spUrl(t)}" target="_blank" rel="noopener">${ico('ext')}Spotify</a>`;
     this.likeState();this.markRows();
     const fq=$('#fQueue');if(fq&&route()==='flow')fq.innerHTML=trackList(P.queue.slice(P.idx,P.idx+25),'queue',{why:true});
-    if('mediaSession'in navigator&&window.MediaMetadata){try{navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:'TEMPO',artwork:(t.artL||t.art||t.ava)?[{src:t.artL||t.art||t.ava,sizes:'1000x1000',type:'image/jpeg'}]:[]})}catch(e){}}
-    document.title=`${t.title} — ${t.artist} · TEMPO`;
+    if('mediaSession'in navigator&&window.MediaMetadata){try{navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:'Mundora',artwork:(t.artL||t.art||t.ava)?[{src:t.artL||t.art||t.ava,sizes:'1000x1000',type:'image/jpeg'}]:[]})}catch(e){}}
+    document.title=`${t.title} — ${t.artist} · Mundora`;
   },
   why(t){const r=reasons(t).map(([i,x])=>`<span>${ico(i)}${esc(x)}</span>`);if(isPreview(t))r.unshift(t._yt&&ME.mode==='yt'?`<span>${ico('play','f')}Полная версия · YouTube</span>`:`<span>${ico('note')}Отрывок 30 с</span>`);$('#fWhy').innerHTML=r.join('')},
   likeState(){const on=!!(P.cur&&S.likes[P.cur.id]);$('#pLike').classList.toggle('on',on);$('#fLike').classList.toggle('on',on)},
@@ -1576,6 +1738,26 @@ addEventListener('hashchange',render);
 const pageHead=(title,sub,img,ctl='')=>`<div class="phead"><h1>${title}</h1><p>${sub}</p>${ctl?`<div class="ctl">${ctl}</div>`:''}<img src="${IMG[img]}" alt=""></div>`;
 const V={after:{}};
 
+// бенто-ряд на главной: крипта онлайн, заметка-список, капитализация
+function homeBento(){
+  const cs=(CR.fav.length?CR.fav.map(id=>CR.byId[id]).filter(Boolean):[]).concat(CR.coins).filter((c,i,a)=>c&&a.indexOf(c)===i).slice(0,3);
+  const n=[...NT.list].sort((a,b)=>(b.pinned-a.pinned)||((b.updated||0)-(a.updated||0))).find(x=>/- \[[ x]\]/.test(x.body||''))||NT.list[0];
+  const todo=n?String(n.body||'').split('\n').filter(l=>/^\s*- \[[ x]\]/.test(l)).slice(0,4).map(l=>({d:/\[x\]/.test(l),t:l.replace(/^\s*- \[[ x]\]\s*/,'')})):[];
+  const P0=USR&&PEOPLE.cache[USR.id],cap=P0&&P0.capital;
+  return `<section class="bento3">
+    <a class="glass" href="#crypto"><div class="bt-h">${ico('coin','s')}Крипта<span class="live">онлайн</span></div>
+      ${cs.length?cs.map(c=>`<div class="bt-coin"><b>${esc(c.sym)}</b>${sparkMini(c)}<span class="pr num">${fiat(c.price)}</span><span class="ch num ${(c.ch24||0)>=0?'up':'down'}" style="margin:0">${(c.ch24||0)>=0?'+':''}${fmt(c.ch24||0)}%</span></div>`).join(''):`<div class="k" id="btCoins">Загружаю курсы…</div>`}</a>
+    <a class="glass" href="${n?'#note-'+n.id:'#notes'}"><div class="bt-h">${ico('notes','s')}${n?esc(noteTitle(n)):'Заметки'}</div>
+      ${todo.length?`<ul class="bt-note">${todo.map(x=>`<li class="${x.d?'done':''}"><span class="ck ${x.d?'on':''}">${x.d?ico('check','s'):''}</span><span>${esc(x.t)}</span></li>`).join('')}</ul>`:`<div class="k">${n?esc(String(n.body||'').slice(0,120)):'Список дел, идеи, покупки — ИИ поможет разобрать'}</div>`}</a>
+    <a class="glass bt-capw" href="${USR?'#u-'+USR.id:'#home'}"><div class="bt-h">${ico('star','s')}Капитализация</div>
+      <div class="bt-cap"><img src="/img/money.webp" alt=""><div><div class="v num" id="btCap">${cap?cap.score.toLocaleString('ru-RU'):'—'} <small>TP</small></div><div class="k" id="btLvl">${cap?'ур. '+cap.level+' · '+esc(cap.title):'твой уровень в Mundora'}</div></div></div>
+      <div class="bt-lvl"><i id="btBar" style="width:${cap?Math.max(4,Math.round((cap.score-cap.from)/(cap.to-cap.from)*100)):4}%"></i></div></a>
+  </section>`;
+}
+const fiat=v=>v==null||!isFinite(v)?'—':(CR.cur==='rub'?'':'$')+(v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:v>=1000?0:2}):v.toPrecision(3))+(CR.cur==='rub'?' ₽':'');
+function sparkMini(c){const p=(c.spark||[]).filter(x=>isFinite(x));if(p.length<2)return '<span></span>';const pts=p.slice(-24),mx=Math.max(...pts),mn=Math.min(...pts),w=64,h=24;
+  const d=pts.map((v,i)=>`${i?'L':'M'}${(i/(pts.length-1)*w).toFixed(1)},${(h-3-(v-mn)/(mx-mn||1)*(h-6)).toFixed(1)}`).join(' ');
+  return `<svg width="64" height="24" viewBox="0 0 64 24"><path d="${d}" fill="none" stroke="${(c.ch24||0)>=0?'var(--green)':'var(--red)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
 V.home=()=>{
   const m=curMonth(),s=sumOps(opsOf(m)),pm=sumOps(opsOf(shiftMonth(m,-1)));
   const chg=pm.n?((s.n-pm.n)/Math.abs(pm.n)*100):0;
@@ -1604,6 +1786,7 @@ V.home=()=>{
       <img class="charimg" src="${IMG.chart}" alt="" style="right:-4px;bottom:6px;height:150px">
     </div>
   </section>
+  ${homeBento()}
   <section class="grid3">
     <div class="glass" style="min-height:196px">
       <div class="card-h">${ico('lists')}Мои плейлисты</div>
@@ -1634,6 +1817,8 @@ V.home=()=>{
 };
 let homeMix=null;
 V.after.home=async(id)=>{
+  if(!CR.coins.length)loadCoins().then(()=>{if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
+  if(USR&&!PEOPLE.cache[USR.id])peopleApi('id='+USR.id).then(j=>{PEOPLE.cache[USR.id]=j.profile;if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
   bindHomeMini();
   const rec=$('#hRec'),tr=$('#hTrend');
   if(!homeMix)homeMix=await waveBatch(12);
@@ -1932,7 +2117,7 @@ function finContext(){
 const FIN_RX=/расход|доход|бюджет|деньг|трат|зарплат|баланс|категор|операц|финанс|₽|руб|сэконом|копи|накоп|кредит|вклад|долг|потрат|сколько я|мои /i;
 function finRelevant(){return CH.msgs.filter(m=>m.role==='user').slice(-3).some(m=>FIN_RX.test(m.text||''))}
 function chatSystem(){
-  return `Ты — ИИ-помощник сайта TEMPO: музыка (поиск, «Волна», плейлисты, лайки), финансы (доходы и расходы, калькуляторы, проценты, спред, таблицы), заметки и криптовалюты. Отвечай на языке пользователя (по умолчанию по-русски), понятно и по делу.
+  return `Ты — ИИ-помощник сайта Mundora: музыка (поиск, «Волна», плейлисты, лайки), финансы (доходы и расходы, калькуляторы, проценты, спред, таблицы), заметки и криптовалюты. Отвечай на языке пользователя (по умолчанию по-русски), понятно и по делу.
 Ты умеешь: считать и проверять расчёты, разбирать бюджет, проценты, вклады и кредиты; советовать музыку; вести заметки и списки дел; читать документы, таблицы, код и любые присланные файлы; понимать изображения (скриншоты, фото чеков, графики). И главное — сам выполняешь действия на сайте.
 Это живой чат: отвечай сразу, как собеседник. На простые сообщения — 1–3 предложения. Подробно, со списками и таблицами — только когда задача этого требует или просят.
 Оформление — Markdown, когда помогает. Числа пиши с пробелами между разрядами, валюту — ₽, если не указано иное. Не придумывай данные: если чего-то не хватает — уточни.
@@ -2328,7 +2513,7 @@ async function noteAI(n,instr,mode){
   const paint=()=>{const b=$('#nAiOut');if(!b||NT.cur!==n)return;const {ans}=splitThink(st.text);b.innerHTML=`<div class="nai-out"><div class="k" style="margin-bottom:6px">${ico(st.busy?'loader':'spark',st.busy?'ldg s':'s')} ${st.busy?'ИИ пишет…':'Готово — что сделать с результатом?'}</div><div class="md">${ans?noteMd(ans,true):'<span class="dots"><i></i><i></i><i></i></span>'}</div>
     <div class="row">${st.busy?`<button class="btn ghost sm" data-act="n-ai-stop">${ico('stop')}Стоп</button>`:st.err?`<span class="r" style="font-size:13px">${esc(st.err)}</span><button class="btn ghost sm" data-act="n-ai-cancel">Закрыть</button>`:`<button class="btn sm" data-act="n-ai-apply" data-m="${mode==='append'?'append':'replace'}">${ico('check')}${mode==='append'?'Добавить в конец':mode==='create'?'Вставить в заметку':'Заменить заметку'}</button>${mode!=='append'?`<button class="btn ghost sm" data-act="n-ai-apply" data-m="append">Добавить в конец</button>`:''}<button class="btn ghost sm" data-act="n-ai-apply" data-m="new">В новую заметку</button><button class="btn ghost sm" data-act="n-ai-cancel">Отмена</button>`}</div></div>`};
   paint();
-  const sys='Ты — ИИ-помощник в заметках сайта TEMPO. Пиши на языке заметки или запроса. Возвращай ТОЛЬКО готовый текст в Markdown — без вступлений, пояснений и кавычек вокруг. Чек-листы оформляй как «- [ ] пункт». Работай быстро и по делу.';
+  const sys='Ты — ИИ-помощник в заметках сайта Mundora. Пиши на языке заметки или запроса. Возвращай ТОЛЬКО готовый текст в Markdown — без вступлений, пояснений и кавычек вокруг. Чек-листы оформляй как «- [ ] пункт». Работай быстро и по делу.';
   const user=mode==='create'?`Создай заметку по запросу: ${instr}\nПервой строкой — заголовок в формате «# Заголовок».`:`Заметка «${noteTitle(n)}»:\n\n${n.body}\n\nЗадача: ${instr}`;
   let raf=0;
   try{await aiStream([{role:'system',content:sys},{role:'user',content:user}],{effort:'fast',signal:st.ctl.signal,onDelta:c=>{if(c){st.text+=c;if(!raf)raf=requestAnimationFrame(()=>{raf=0;paint()})}}})}
@@ -2736,7 +2921,7 @@ function accBar(){
   const el=$('#accBar');if(!el)return;
   const st=USR&&USR.status;
   if(st!=='frozen'){el.hidden=true;return}
-  const sub=encodeURIComponent('TEMPO: аккаунт заморожен '+USR.email);
+  const sub=encodeURIComponent('Mundora: аккаунт заморожен '+USR.email);
   el.hidden=false;el.innerHTML=`<img src="/img/crystal.webp" alt=""><div><b>Аккаунт заморожен администратором</b><small>Можно смотреть, но изменения не сохраняются и не синхронизируются.</small></div><a class="btn sm ghost" href="mailto:${esc(USR.support||'mundoraaiapp@gmail.com')}?subject=${sub}">${ico('chat','s')}Поддержка</a>`;
 }
 async function accLogout(){
@@ -2981,7 +3166,7 @@ Object.assign(ACT,{
 const AVA_LIST=['planet','planet2','crystal','gem_orbit','asteroid','orbit','gift_planet','box_open','gamepad','chat','code','chart','folder','browser','money','gift_stack'];
 const avaSrc=k=>'/img/'+(AVA_LIST.includes(k)?k:'planet')+'.webp';
 // галочка: нажал — сверху подпись «Верифицированный аккаунт»
-const vBadge=(p,big)=>p&&p.verified?`<button class="vb${big?' big':''}" data-act="vb" data-tip="${p.owner?'Верифицированный аккаунт\nвладелец TEMPO':p.admin?'Верифицированный аккаунт\nадминистратор':'Верифицированный аккаунт'}" aria-label="Верифицированный аккаунт"><svg viewBox="0 0 24 24"><path class="vb-s" d="M12 1.8l2.4 1.9 3-.3 1 2.9 2.6 1.6-.6 3 1.4 2.7-2.2 2.1-.1 3.1-3 .6-1.8 2.5-2.8-1.2-2.9 1.2-1.7-2.5-3-.6-.2-3.1L1.8 13.6l1.4-2.7-.6-3 2.6-1.6 1-2.9 3 .3z"/><path class="vb-c" d="m7.8 12.2 2.9 2.9 5.5-5.6"/></svg></button>`:'';
+const vBadge=(p,big)=>p&&p.verified?`<button class="vb${big?' big':''}" data-act="vb" data-tip="${p.owner?'Верифицированный аккаунт\nвладелец Mundora':p.admin?'Верифицированный аккаунт\nадминистратор':'Верифицированный аккаунт'}" aria-label="Верифицированный аккаунт"><svg viewBox="0 0 24 24"><path class="vb-s" d="M12 1.8l2.4 1.9 3-.3 1 2.9 2.6 1.6-.6 3 1.4 2.7-2.2 2.1-.1 3.1-3 .6-1.8 2.5-2.8-1.2-2.9 1.2-1.7-2.5-3-.6-.2-3.1L1.8 13.6l1.4-2.7-.6-3 2.6-1.6 1-2.9 3 .3z"/><path class="vb-c" d="m7.8 12.2 2.9 2.9 5.5-5.6"/></svg></button>`:'';
 const PEOPLE={cache:{},search:null};
 const seenTxt=p=>p.online?'<span class="on-dot"></span>в сети':p.seen?'был(а) '+ago(p.seen):'';
 async function peopleApi(qs,body){
@@ -3022,7 +3207,7 @@ function pfHTML(p){
     <div class="pf-id">
       <h1>${esc(p.name)}${vBadge(p,true)}</h1>
       <div class="pf-meta"><span class="pill mono">ID ${p.id}</span>${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span class="k">${seenTxt(p)}</span></div>
-      <div class="k pf-mail">${ico('lock','s')}${esc(p.email)}${joined?' · в TEMPO с '+joined:''}</div>
+      <div class="k pf-mail">${ico('lock','s')}${esc(p.email)}${joined?' · в Mundora с '+joined:''}</div>
       ${p.bio?`<p class="pf-bio">${esc(p.bio)}</p>`:''}
       <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button></div>
     </div>
@@ -3037,7 +3222,7 @@ function pfHTML(p){
     <div class="glass"><img src="/img/gift_planet.webp" alt=""><b>${s.likes}</b><span class="k">лайков</span></div>
     <div class="glass"><img src="/img/folder.webp" alt=""><b>${s.playlists}</b><span class="k">плейлистов</span></div>
     <div class="glass"><img src="/img/orbit.webp" alt=""><b>${s.plays}</b><span class="k">прослушиваний</span></div>
-    <div class="glass"><img src="/img/planet.webp" alt=""><b>${s.days}</b><span class="k">дней в TEMPO</span></div>
+    <div class="glass"><img src="/img/planet.webp" alt=""><b>${s.days}</b><span class="k">дней в Mundora</span></div>
   </div>
   ${open?`
   ${p.genres.length||p.artists.length?`<div class="h3">${ico('spark')}Вкус</div><div class="row">${p.genres.map(g=>`<span class="chip dark">${esc(gRu(g))}</span>`).join('')}${p.artists.map(a=>`<span class="chip dark">${ico('user','s')}${esc(a)}</span>`).join('')}</div>`:''}
@@ -3093,6 +3278,7 @@ document.addEventListener('click',e=>{
 addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();$('#full').classList.remove('open')}if(e.code==='Space'&&!e.target.matches('input,textarea,button,select')&&route()!=='calc'){e.preventDefault();P.toggle()}});
 
 document.body.classList.add('noplay');
+if((navigator.deviceMemory&&navigator.deviceMemory<4)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<4))document.body.classList.add('lowfx');
 meHead();
 nameGate();
 accBar();

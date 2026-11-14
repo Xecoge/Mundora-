@@ -1,5 +1,5 @@
 /*
-  TEMPO — настройки сайта.
+  Mundora — настройки сайта.
 
   Настройки ИИ (ключ, адрес, модель) задаются ТОЛЬКО на сервере:
     • Vercel → Settings → Environment Variables:

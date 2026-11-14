@@ -1,4 +1,4 @@
-// TEMPO — аккаунты, сессии, код доступа. Работает и в Edge, и в Node (только Web Crypto + fetch).
+// Mundora — аккаунты, сессии, код доступа. Работает и в Edge, и в Node (только Web Crypto + fetch).
 import { kv, kvMulti, jget, jset, dbReady } from './_store.mjs';
 
 export const ENV = () => (typeof process !== 'undefined' && process.env) || {};

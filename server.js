@@ -1,4 +1,4 @@
-// TEMPO — локальный сервер (то же, что на Vercel). Запуск:  node server.js   (Node 20+)
+// Mundora — локальный сервер (то же, что на Vercel). Запуск:  node server.js   (Node 20+)
 // Переменные окружения — те же, что в Vercel: AI_API_KEY, AI_BASE_URL, AI_MODEL, YT_API_KEY,
 // ACCESS_CODE, ADMIN_EMAIL, SMTP_USER, SMTP_PASS, KV_REST_API_URL/KV_REST_API_TOKEN.
 // Без базы Upstash данные хранятся в data/db.json. Без почты коды для входа печатаются здесь, в консоли.
@@ -88,6 +88,6 @@ http.createServer(async (req, res) => {
   }
 }).listen(PORT, () => {
   const url = `http://localhost:${PORT}`;
-  console.log(`\n  TEMPO: ${url}\n  База: ${store.kvConfig() ? 'Upstash' : 'файл data/db.json'} · Почта: ${env.MAIL_DEV ? 'коды печатаются здесь' : 'настроена'} · ИИ: ${env.AI_API_KEY ? 'ключ задан' : 'нет ключа'}\n  Код доступа: ${env.ACCESS_CODE ? 'задан' : 'НЕ задан — запусти с ACCESS_CODE=2134'}\n  Остановить: Ctrl+C\n`);
+  console.log(`\n  Mundora: ${url}\n  База: ${store.kvConfig() ? 'Upstash' : 'файл data/db.json'} · Почта: ${env.MAIL_DEV ? 'коды печатаются здесь' : 'настроена'} · ИИ: ${env.AI_API_KEY ? 'ключ задан' : 'нет ключа'}\n  Код доступа: ${env.ACCESS_CODE ? 'задан' : 'НЕ задан — запусти с ACCESS_CODE=2134'}\n  Остановить: Ctrl+C\n`);
   if (!env.NO_OPEN) exec((process.platform === 'win32' ? 'start "" ' : process.platform === 'darwin' ? 'open ' : 'xdg-open ') + url, () => {});
 });

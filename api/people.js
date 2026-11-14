@@ -1,4 +1,4 @@
-// TEMPO — люди: публичные профили, поиск аккаунтов по ID и нику, «капитализация» (очки активности).
+// Mundora — люди: публичные профили, поиск аккаунтов по ID и нику, «капитализация» (очки активности).
 // GET  /api/people?id=100001   — профиль
 // GET  /api/people?q=…         — поиск (ID, ник; админы — ещё и по почте)
 // POST /api/people?a=me {name,bio,avatar,open} — изменить свой профиль
@@ -8,7 +8,7 @@ import { checkName, claimName } from './_names.mjs';
 export const config = { runtime: 'edge' };
 
 const parse = v => { try { return v == null ? null : JSON.parse(v); } catch (e) { return null; } };
-const TITLES = [[1, 'Новичок'], [3, 'Слушатель'], [5, 'Меломан'], [8, 'Знаток'], [12, 'Легенда'], [18, 'Икона TEMPO']];
+const TITLES = [[1, 'Новичок'], [3, 'Слушатель'], [5, 'Меломан'], [8, 'Знаток'], [12, 'Легенда'], [18, 'Икона Mundora']];
 const titleOf = l => TITLES.filter(([n]) => l >= n).pop()[1];
 const top = (o, n) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
 
@@ -19,7 +19,7 @@ function capital(u, d) {
   const events = (d.taste && d.taste.events) || 0, plays = Array.isArray(d.plays) ? d.plays.length : 0;
   const notes = Array.isArray(d.notes) ? d.notes.length : 0, ops = Array.isArray(d.ops) ? d.ops.length : 0;
   const days = Math.max(1, Math.ceil((Date.now() - (u.created || Date.now())) / 864e5));
-  const parts = [['Лайки', likes * 5], ['Плейлисты', pls.length * 20 + plTracks * 2], ['Прослушивания', Math.max(events, plays)], ['Заметки', notes * 8], ['Финансы', ops * 3], ['Дни в TEMPO', days * 10], ['Галочка', u.verified ? 500 : 0]];
+  const parts = [['Лайки', likes * 5], ['Плейлисты', pls.length * 20 + plTracks * 2], ['Прослушивания', Math.max(events, plays)], ['Заметки', notes * 8], ['Финансы', ops * 3], ['Дни в Mundora', days * 10], ['Галочка', u.verified ? 500 : 0]];
   const score = parts.reduce((n, p) => n + p[1], 0);
   const level = Math.floor(Math.sqrt(score / 50)) + 1;
   return { score, level, title: titleOf(level), from: 50 * (level - 1) ** 2, to: 50 * level ** 2, parts: parts.filter(p => p[1] > 0), stats: { likes, playlists: pls.length, plTracks, plays: Math.max(events, plays), notes, ops, days } };

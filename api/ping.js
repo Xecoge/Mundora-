@@ -1,4 +1,4 @@
-// Vercel: сайт проверяет, что рядом есть сервер TEMPO и настроен ли на нём ИИ.
+// Vercel: сайт проверяет, что рядом есть сервер Mundora и настроен ли на нём ИИ.
 export const config = { runtime: 'edge' };
 import { guard } from './_auth.mjs';
 export default async function handler(req) {

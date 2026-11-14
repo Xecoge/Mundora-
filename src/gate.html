@@ -3,12 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07050d">
+<meta name="theme-color" content="#07040f">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Mundora">
 <meta name="robots" content="noindex">
-<title>TEMPO — вход</title>
+<title>Mundora — вход</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..900&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/img/box_open.webp">
 <style>
 :root{--bg:#07050d;--line:rgba(255,255,255,.09);--muted:#8f88ab;--text:#f4f1ff;--v1:#c4b5fd;--v2:#a78bfa;--v3:#8b5cf6;--red:#f87171;--green:#4ade80}
@@ -78,12 +81,30 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,2
 .chipline span{font-size:12.5px;color:var(--v1);background:rgba(139,92,246,.16);border:1px solid rgba(167,139,250,.25);padding:5px 12px;border-radius:99px}
 @media (max-width:380px){.otp.n4{grid-template-columns:repeat(4,52px)}.card{padding:24px 18px 20px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+/* Mundora 2: стекло и свечение */
+:root{--bg:#07040f;--muted:#a59dc4;--text:#fbf9ff;--v1:#d6c4ff;--v2:#b98bff;--green:#c6ff4d;--red:#ff6b8b}
+body{font-optical-sizing:auto}
+.bg{background:radial-gradient(760px 560px at 12% -8%,rgba(150,80,255,.45),transparent 62%),radial-gradient(620px 520px at 105% 30%,rgba(255,80,170,.22),transparent 62%),radial-gradient(700px 520px at 40% 112%,rgba(50,110,255,.22),transparent 62%)}
+.brand{margin-bottom:0}.brand img{width:190px;height:auto;filter:drop-shadow(0 14px 30px rgba(150,80,255,.55))}
+.card{margin-top:58px!important;border-radius:32px;background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.04) 55%,rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 40px 90px -30px rgba(80,30,180,.75);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%)}
+h1{font-weight:800;letter-spacing:-.6px;font-size:25px}
+.btn{background:#fff;color:#1c0b3d;box-shadow:0 12px 30px -10px rgba(255,255,255,.5)}
+.btn .ld{border-color:rgba(28,11,61,.3);border-top-color:#1c0b3d}
+.btn.ghost{background:rgba(255,255,255,.08);color:var(--text);border-color:rgba(255,255,255,.16);box-shadow:none}
+.otp span{border-radius:20px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}
+.otp span.cur{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.18),0 0 24px rgba(185,139,255,.45)}
+.otp.good span{border-color:var(--green);box-shadow:0 0 18px rgba(198,255,77,.3)}
+.f input{border-radius:16px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.13)}
+.f input:focus{border-color:rgba(214,196,255,.7);box-shadow:0 0 0 3px rgba(185,139,255,.22)}
+.tabs{border-radius:18px;background:rgba(255,255,255,.06)}.tabs button.on{background:#fff;color:#1c0b3d;box-shadow:none}
+.msg.ok,.hint.ok{color:var(--green)}
+.links button,a{color:var(--v1)}
 </style>
 </head>
 <body>
 <div class="bg"></div><div class="stars"></div>
 <main class="wrap">
-  <div class="brand"><i></i>TEMPO</div>
+  <div class="brand"><img src="/img/logo.webp" alt="Mundora"></div>
   <div class="card" style="margin-top:64px">
 
     <section class="scr" id="s-load"><img class="hero" src="/img/orbit.webp" alt=""><h1>Загрузка…</h1><p class="sub">Проверяю вход</p></section>
@@ -91,7 +112,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,2
     <section class="scr" id="s-code">
       <img class="hero" src="/img/box_open.webp" alt="">
       <h1>Код доступа</h1>
-      <p class="sub">TEMPO открыт по приглашениям.<br>Введи 4 символа — он проверится сам.</p>
+      <p class="sub">Mundora открыт по приглашениям.<br>Введи 4 символа — он проверится сам.</p>
       <div class="otp n4" id="codeBox"><span></span><span></span><span></span><span></span>
         <input id="codeIn" maxlength="4" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Код доступа"></div>
       <div class="msg" id="codeMsg"></div>
@@ -139,7 +160,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,2
     <section class="scr" id="s-ban">
       <img class="hero" src="/img/asteroid.webp" alt="">
       <h1 id="banT">Аккаунт забанен</h1>
-      <p class="sub" id="banS">Доступ к TEMPO для этого аккаунта закрыт.</p>
+      <p class="sub" id="banS">Доступ к Mundora для этого аккаунта закрыт.</p>
       <div class="chipline"><span id="banEm"></span></div>
       <a class="btn" id="banMail" href="#"><img src="/img/chat.webp" alt="" style="width:30px;height:30px;margin:-4px 0">Написать в поддержку</a>
       <p class="note">Опиши ситуацию — администратор ответит на почту.</p>
@@ -188,7 +209,7 @@ const OTP=otp('#otpBox','#otpIn',6,digits,verify);
 async function checkGate(c){
   msg('#codeMsg','Проверяю…',true);CODE.inp.blur();
   const j=await api('gate',{code:c});
-  if(j.ok&&j.renewed){CODE.good();msg('#codeMsg','Доступ продлён'+(j.days?` на ${j.days} дн.`:' навсегда')+' — открываю TEMPO',true);return setTimeout(()=>location.replace('/'),700)}
+  if(j.ok&&j.renewed){CODE.good();msg('#codeMsg','Доступ продлён'+(j.days?` на ${j.days} дн.`:' навсегда')+' — открываю Mundora',true);return setTimeout(()=>location.replace('/'),700)}
   if(j.ok){CODE.good();msg('#codeMsg','Код принят',true);ST.gate=true;setTimeout(()=>auth('reg'),450)}
   else{CODE.bad();msg('#codeMsg',j.error)}
 }
@@ -231,7 +252,7 @@ async function verify(code){
   OTP.inp.blur();msg('#otpMsg','Проверяю…',true);
   if(ST.kind==='reset'){const j=await api('check',{email:ST.email,code});if(j.ok){OTP.good();ST.code=code;$('#rsEm').textContent=ST.email;msg('#otpMsg','');return setTimeout(()=>show('reset'),350)}OTP.bad();return msg('#otpMsg',j.error)}
   const j=await api('verify',{email:ST.email,code});
-  if(j.ok){OTP.good();msg('#otpMsg',j.admin?'Готово! Открываю TEMPO с админ-панелью…':'Готово! Открываю TEMPO…',true);return setTimeout(()=>location.replace('/'),500)}
+  if(j.ok){OTP.good();msg('#otpMsg',j.admin?'Готово! Открываю Mundora с админ-панелью…':'Готово! Открываю Mundora…',true);return setTimeout(()=>location.replace('/'),500)}
   if(j.banned||j.blocked)return banScreen(j.banned||j.blocked,!!j.banned,j.support);
   OTP.bad();msg('#otpMsg',j.error);
 }
@@ -244,9 +265,9 @@ $('#rsF').addEventListener('submit',async e=>{
 function banScreen(email,banned,support){
   support=support||ST.support;
   $('#banT').textContent=banned?'Аккаунт забанен':'Аккаунт заблокирован';
-  $('#banS').textContent=banned?'Доступ к TEMPO для этого аккаунта закрыт администратором.':'Администратор временно закрыл доступ к аккаунту.';
+  $('#banS').textContent=banned?'Доступ к Mundora для этого аккаунта закрыт администратором.':'Администратор временно закрыл доступ к аккаунту.';
   $('#banEm').textContent=email||'';
-  const sub=encodeURIComponent(`TEMPO: ${banned?'бан':'блокировка'} аккаунта ${email||''}`),body=encodeURIComponent(`Здравствуйте!\n\nМой аккаунт TEMPO: ${email||''}\nСтатус: ${banned?'забанен':'заблокирован'}\n\nОпишите, пожалуйста, ситуацию:\n`);
+  const sub=encodeURIComponent(`Mundora: ${banned?'бан':'блокировка'} аккаунта ${email||''}`),body=encodeURIComponent(`Здравствуйте!\n\nМой аккаунт Mundora: ${email||''}\nСтатус: ${banned?'забанен':'заблокирован'}\n\nОпишите, пожалуйста, ситуацию:\n`);
   $('#banMail').href=`mailto:${support}?subject=${sub}&body=${body}`;
   show('ban');
 }
