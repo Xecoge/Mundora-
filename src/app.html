@@ -1725,7 +1725,7 @@ function render(){
   const base=r.startsWith('u-')?'search':r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));
   $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
-  cryptoLeave(r);
+  cryptoLeave(r);if(r!=='home')homeLive(false);
   const v=$('#view');
   const fn=r.startsWith('u-')?()=>V.user(r.slice(2)):r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
   v.innerHTML=fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
@@ -1739,14 +1739,35 @@ const pageHead=(title,sub,img,ctl='')=>`<div class="phead"><h1>${title}</h1><p>$
 const V={after:{}};
 
 // бенто-ряд на главной: крипта онлайн, заметка-список, капитализация
+const homeCoins=()=>(CR.fav.length?CR.fav.map(id=>CR.byId[id]).filter(Boolean):[]).concat(CR.coins).filter((c,i,a)=>c&&a.indexOf(c)===i).slice(0,3);
+function coinTile(){const cs=homeCoins();const on=Date.now()-CR.lastTick<15000;
+  return `<div class="bt-h">${ico('coin','s')}Крипта<span class="live${on?' on':''}">онлайн</span></div>
+      ${cs.length?cs.map(c=>`<div class="bt-coin"><b>${esc(c.sym)}</b>${sparkMini(c)}<span class="pr num">${fiat(c.price)}</span><span class="ch num ${(c.ch24||0)>=0?'up':'down'}" style="margin:0">${(c.ch24||0)>=0?'+':''}${fmt(c.ch24||0)}%</span></div>`).join(''):`<div class="k" id="btCoins">${CR.err?'Курсы временно недоступны':'Загружаю курсы…'}</div>`}`}
+// живые курсы на главной: раз в 5 с цены трёх монет, раз в минуту — весь список и графики
+const HC={t:0,busy:false};
+function homeLive(on){clearInterval(HC.t);HC.t=0;if(!on)return;
+  const tick=async()=>{if(document.hidden||route()!=='home'||HC.busy||CR.active)return;HC.busy=true;
+    try{
+      if(CR.cur==='rub')loadRub();
+      if(!CR.coins.length||Date.now()-CR.loaded>60e3)await loadCoins(true);
+      const syms=homeCoins().map(c=>c.pair).filter(Boolean);
+      if(syms.length){let data;
+        try{data=(await srvGet('tickers',{symbols:syms.join(',')})).data}
+        catch(e){const d=await bnGet('/api/v3/ticker/24hr',{type:'MINI',symbols:JSON.stringify(syms)});data=d.map(t=>({s:t.symbol,c:t.lastPrice,o:t.openPrice,h:t.highPrice,l:t.lowPrice}))}
+        if(Array.isArray(data)){const now=Date.now();for(const t of data){const c=CR.byPair[t.s];const p=+t.c,o=+t.o;if(!c||!p)continue;c.price=p;if(o)c.ch24=(p-o)/o*100;liveDerive(c)}CR.lastTick=now}}
+      CR.err='';
+    }catch(e){CR.err=String(e.message||e)}
+    finally{HC.busy=false}
+    const b=$('.bento3 .bt-crypto');if(b&&route()==='home')b.innerHTML=coinTile();
+  };
+  tick();HC.t=setInterval(tick,5000);
+}
 function homeBento(){
-  const cs=(CR.fav.length?CR.fav.map(id=>CR.byId[id]).filter(Boolean):[]).concat(CR.coins).filter((c,i,a)=>c&&a.indexOf(c)===i).slice(0,3);
   const n=[...NT.list].sort((a,b)=>(b.pinned-a.pinned)||((b.updated||0)-(a.updated||0))).find(x=>/- \[[ x]\]/.test(x.body||''))||NT.list[0];
   const todo=n?String(n.body||'').split('\n').filter(l=>/^\s*- \[[ x]\]/.test(l)).slice(0,4).map(l=>({d:/\[x\]/.test(l),t:l.replace(/^\s*- \[[ x]\]\s*/,'')})):[];
   const P0=USR&&PEOPLE.cache[USR.id],cap=P0&&P0.capital;
   return `<section class="bento3">
-    <a class="glass" href="#crypto"><div class="bt-h">${ico('coin','s')}Крипта<span class="live">онлайн</span></div>
-      ${cs.length?cs.map(c=>`<div class="bt-coin"><b>${esc(c.sym)}</b>${sparkMini(c)}<span class="pr num">${fiat(c.price)}</span><span class="ch num ${(c.ch24||0)>=0?'up':'down'}" style="margin:0">${(c.ch24||0)>=0?'+':''}${fmt(c.ch24||0)}%</span></div>`).join(''):`<div class="k" id="btCoins">Загружаю курсы…</div>`}</a>
+    <a class="glass bt-crypto" href="#crypto">${coinTile()}</a>
     <a class="glass" href="${n?'#note-'+n.id:'#notes'}"><div class="bt-h">${ico('notes','s')}${n?esc(noteTitle(n)):'Заметки'}</div>
       ${todo.length?`<ul class="bt-note">${todo.map(x=>`<li class="${x.d?'done':''}"><span class="ck ${x.d?'on':''}">${x.d?ico('check','s'):''}</span><span>${esc(x.t)}</span></li>`).join('')}</ul>`:`<div class="k">${n?esc(String(n.body||'').slice(0,120)):'Список дел, идеи, покупки — ИИ поможет разобрать'}</div>`}</a>
     <a class="glass bt-capw" href="${USR?'#u-'+USR.id:'#home'}"><div class="bt-h">${ico('star','s')}Капитализация</div>
@@ -1754,8 +1775,8 @@ function homeBento(){
       <div class="bt-lvl"><i id="btBar" style="width:${cap?Math.max(4,Math.round((cap.score-cap.from)/(cap.to-cap.from)*100)):4}%"></i></div></a>
   </section>`;
 }
-const fiat=v=>v==null||!isFinite(v)?'—':(CR.cur==='rub'?'':'$')+(v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:v>=1000?0:2}):v.toPrecision(3))+(CR.cur==='rub'?' ₽':'');
-function sparkMini(c){const p=(c.spark||[]).filter(x=>isFinite(x));if(p.length<2)return '<span></span>';const pts=p.slice(-24),mx=Math.max(...pts),mn=Math.min(...pts),w=64,h=24;
+const fiat=v=>{if(v==null||!isFinite(v))return '—';const rub=CR.cur==='rub'&&CR.rub;v=v*(rub?CR.rub:1);return (rub?'':'$')+(v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:v>=1000?0:2}):v.toPrecision(3))+(rub?' ₽':'')};
+function sparkMini(c){const p=(c.spark||[]).filter(x=>isFinite(x));if(p.length&&isFinite(c.price))p.push(c.price);if(p.length<2)return '<span></span>';const pts=p.slice(-24),mx=Math.max(...pts),mn=Math.min(...pts),w=64,h=24;
   const d=pts.map((v,i)=>`${i?'L':'M'}${(i/(pts.length-1)*w).toFixed(1)},${(h-3-(v-mn)/(mx-mn||1)*(h-6)).toFixed(1)}`).join(' ');
   return `<svg width="64" height="24" viewBox="0 0 64 24"><path d="${d}" fill="none" stroke="${(c.ch24||0)>=0?'var(--green)':'var(--red)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
 V.home=()=>{
@@ -1817,7 +1838,7 @@ V.home=()=>{
 };
 let homeMix=null;
 V.after.home=async(id)=>{
-  if(!CR.coins.length)loadCoins().then(()=>{if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
+  homeLive(true);
   if(USR&&!PEOPLE.cache[USR.id])peopleApi('id='+USR.id).then(j=>{PEOPLE.cache[USR.id]=j.profile;if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
   bindHomeMini();
   const rec=$('#hRec'),tr=$('#hTrend');
