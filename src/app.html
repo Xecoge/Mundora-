@@ -897,6 +897,18 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 
 /* пометки «онлайн / в реальном времени / биржа закрыта» не показываем */
 .live{display:none!important}
+
+/* ===== мини-туториал ===== */
+#tour{position:fixed;inset:0;z-index:300;pointer-events:auto}
+#tour .tr-hole{position:fixed;box-shadow:0 0 0 9999px rgba(6,3,14,.74),0 0 0 2px rgba(255,255,255,.85),0 0 24px 4px rgba(185,139,255,.6);transition:left .35s cubic-bezier(.2,.85,.25,1),top .35s cubic-bezier(.2,.85,.25,1),width .35s,height .35s;pointer-events:none}
+#tour .tr-card{position:fixed;padding:14px 16px 12px;border-radius:20px;background:linear-gradient(170deg,rgba(40,24,72,.96),rgba(18,10,34,.97));border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 60px -16px rgba(0,0,0,.8);color:#fff;animation:trIn .3s cubic-bezier(.2,.85,.25,1) both;transition:top .35s cubic-bezier(.2,.85,.25,1),left .35s cubic-bezier(.2,.85,.25,1)}
+#tour .tr-n{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#b9a8e8;margin-bottom:4px}
+#tour .tr-card b{font-size:16px}
+#tour .tr-card p{margin:6px 0 12px;font-size:13.5px;line-height:1.45;color:#d6cfee}
+#tour .tr-b{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#tour .tr-skip{background:none;border:0;color:#a49dc0;font-size:13px;cursor:pointer;padding:6px 2px}
+#tour .tr-skip:hover{color:#fff}
+@keyframes trIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -1597,7 +1609,7 @@ const AUD=new Audio();AUD.preload='auto';AUD.setAttribute('playsinline','');
 const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
   load(){if(this.ready)return this.ready;this.ready=new Promise((res,rej)=>{if(window.YT&&YT.Player)return res();const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{prev&&prev();res()};const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';sc.onerror=()=>{this.ready=null;rej(new Error('YouTube недоступен'))};document.head.appendChild(sc);setTimeout(()=>{if(!(window.YT&&YT.Player)){this.ready=null;rej(new Error('YouTube не загрузился'))}},12000)});return this.ready},
   async play(id){
-    await this.load();$('#ytBox').hidden=false;this.cur=id;
+    await this.load();$('#ytBox').hidden=false;this.cur=id;setTimeout(tourVideo,1800);
     if(!this.p){await new Promise((res,rej)=>{this.p=new YT.Player('ytPlayer',{videoId:id,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{try{this.p.setVolume(AUD.volume*100);if(AUD.muted)this.p.mute();this.p.playVideo()}catch(e){}res()},onStateChange:e=>this.onState(e.data),onError:()=>this.onErr()}});setTimeout(res,8000)})}
     else this.p.loadVideoById(id);
   },
@@ -1796,7 +1808,7 @@ function setRange(el,v){el.value=v;el.style.setProperty('--p',(v/el.max*100)+'%'
 
 const UI={
   nowPlaying(){
-    const t=P.cur;if(!t)return;markPlayed(t);
+    const t=P.cur;if(!t)return;markPlayed(t);setTimeout(tourMusic,1400);
     $('#pArt').outerHTML=art(t,'','','pArt');
     $('#pTitle').textContent=t.title;$('#pArtist').textContent=t.artist+(P.ctxName?' · '+P.ctxName:'');
     $('#fArt').outerHTML=art(t,'xl','','fArt');$('#player').classList.remove('empty');
@@ -2768,6 +2780,65 @@ function noteApply(m){
 
 /* ---------- finance views ---------- */
 
+
+/* ===================== мини-туториал: плеер и видео (один раз на аккаунт) ===================== */
+const TOUR={on:false,list:[],i:0,k:''};
+const tourDone=k=>!!((S.prefs&&S.prefs.tours&&S.prefs.tours[k])||LS.get('tour_'+k,false));
+function tourMark(k){S.prefs=S.prefs||{};S.prefs.tours={...(S.prefs.tours||{}),[k]:Date.now()};LS.set('tour_'+k,1);try{save()}catch(e){}}
+function tourVis(el){if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return r.width>4&&r.height>4&&cs.visibility!=='hidden'&&cs.display!=='none'&&+cs.opacity>.2&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth}
+const isPhone=()=>innerWidth<=760;
+function tourStart(k,steps){
+  if(TOUR.on||tourDone(k)||$('#full.open')||$('#sheet.open')||!document.body.contains($('#player')))return false;
+  const list=steps.map(x=>({...x,el:$(x.el)})).filter(x=>tourVis(x.el));
+  if(list.length<2)return false;
+  TOUR.on=true;TOUR.k=k;TOUR.list=list;TOUR.i=0;tourMark(k);
+  let o=$('#tour');if(!o){o=document.createElement('div');o.id='tour';document.body.appendChild(o)}
+  o.innerHTML='<div class="tr-hole"></div><div class="tr-card"></div>';o.hidden=false;tourPaint();return true}
+function tourPaint(){
+  const o=$('#tour'),x=TOUR.list[TOUR.i];if(!o||!x)return tourEnd();
+  if(!tourVis(x.el)){TOUR.list.splice(TOUR.i,1);return tourPaint()}
+  const r=x.el.getBoundingClientRect(),pad=6,h=o.querySelector('.tr-hole'),c=o.querySelector('.tr-card');
+  Object.assign(h.style,{left:r.left-pad+'px',top:r.top-pad+'px',width:r.width+pad*2+'px',height:r.height+pad*2+'px',borderRadius:Math.min(22,(r.height+pad*2)/2)+'px'});
+  const last=TOUR.i===TOUR.list.length-1;
+  c.innerHTML=`<div class="tr-n">${TOUR.k==='video'?'Видеоплеер':'Плеер'} · ${TOUR.i+1} из ${TOUR.list.length}</div><b>${x.t}</b><p>${x.d}</p><div class="tr-b"><button class="tr-skip" data-tr="skip">Пропустить</button><button class="btn sm" data-tr="next">${last?'Понятно':'Дальше'}</button></div>`;
+  const W=Math.min(300,innerWidth-24);c.style.width=W+'px';
+  const ch=c.offsetHeight||150,below=r.bottom+pad+14+ch<innerHeight-8;
+  c.style.top=(below?r.bottom+pad+12:Math.max(8,r.top-pad-12-ch))+'px';
+  c.style.left=Math.max(12,Math.min(innerWidth-W-12,r.left+r.width/2-W/2))+'px';
+  c.dataset.pos=below?'b':'t';
+}
+function tourEnd(){const o=$('#tour');if(o){o.hidden=true;o.innerHTML=''}const was=TOUR.k;TOUR.on=false;TOUR.list=[];
+  if(was==='music')setTimeout(tourVideo,500)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-tr]');if(!b){if(TOUR.on&&e.target.closest('#tour')){e.stopPropagation();e.preventDefault()}return}
+  e.stopPropagation();e.preventDefault();if(b.dataset.tr==='skip')return tourEnd();TOUR.i++;if(TOUR.i>=TOUR.list.length)return tourEnd();tourPaint()},true);
+addEventListener('resize',()=>{if(TOUR.on)tourPaint()});
+addEventListener('keydown',e=>{if(TOUR.on&&e.key==='Escape')tourEnd()});
+function tourMusic(){
+  const ph=isPhone();
+  tourStart('music',[
+    {el:'#player .p-left .art',t:'Обложка и название',d:ph?'Нажми сюда — откроется полный плеер: большая обложка, перемотка, лайк, «не нравится», ссылки на Яндекс, YouTube и Spotify.':'Нажми — откроется полный плеер: большая обложка, «не нравится», ссылки на Яндекс, YouTube и Spotify.'},
+    {el:'#pLike',t:'Лайк',d:'Сохраняет трек в «Любимое». Подборки «Для тебя» и «Волна» начинают подстраиваться под твой вкус.'},
+    {el:'#bShuffle',t:'Перемешать',d:'Треки из очереди будут играть в случайном порядке.'},
+    {el:'#player [data-act=prev]',t:'Назад',d:'Предыдущий трек. Если трек играет дольше пары секунд — начнёт его сначала.'},
+    {el:'#bPlay',t:'Играть / пауза',d:ph?'Ставит музыку на паузу и продолжает.':'Ставит музыку на паузу и продолжает. На ПК то же самое делает клавиша «пробел».'},
+    {el:'#player [data-act=next]',t:'Дальше',d:'Следующий трек. Если пропустить в первые 30 секунд, похожая музыка будет попадаться реже.'},
+    {el:'#bRepeat',t:'Повтор',d:'Включает повтор текущего трека.'},
+    {el:'#player .prow',t:'Перемотка',d:'Тяни ползунок, чтобы перемотать трек. Слева — сколько прошло, справа — длина.'},
+    {el:'#player [data-act=add-cur]',t:'В плейлист',d:'Добавляет трек в твой плейлист или создаёт новый.'},
+    {el:'#player [data-act=queue]',t:'Очередь',d:'Показывает, что заиграет дальше.'},
+    {el:'#vol',t:'Громкость',d:'Тяни ползунок. Значок динамика рядом включает и выключает звук.'},
+    {el:ph?'#player .pbtns [data-act=close-player]':'#player .p-right [data-act=close-player]',t:'Закрыть плеер',d:'Останавливает музыку и убирает плеер.'},
+  ]);
+}
+function tourVideo(){
+  if($('#ytBox').hidden)return;
+  tourStart('video',[
+    {el:'#ytBox .ytin',t:'Видео',d:'Полные версии треков играют через YouTube в этом маленьком окошке. Звук идёт отсюда, управлять можно обычным плеером.'},
+    {el:'#ytBox .ygrip',t:'Перетащить',d:'Зажми эту кнопку и перетащи окошко в любое удобное место экрана.'},
+    {el:'#ytBox [data-act=yt-expand]',t:'Развернуть',d:'Открывает полный плеер — видео будет внутри, большое.'},
+    {el:'#ytBox [data-act=close-player]',t:'Закрыть',d:'Останавливает музыку и закрывает видео.'},
+  ]);
+}
 /* ===================== курсы ценностей: золото, серебро, платина, палладий ===================== */
 IMG.metals='/img/met_gold.webp';
 const MET=[{s:'XAU',n:'Золото',img:'/img/met_gold.webp',c:'#ffd45a',d:'#b7860c'},{s:'XAG',n:'Серебро',img:'/img/met_silver.webp',c:'#eef2f8',d:'#8b95a8'},{s:'XPT',n:'Платина',img:'/img/met_platinum.webp',c:'#dfe5fb',d:'#7d89b6'},{s:'XPD',n:'Палладий',img:'/img/met_palladium.webp',c:'#e4d6ff',d:'#8a6fca'}];
