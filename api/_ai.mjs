@@ -263,7 +263,7 @@ export async function handleAI(req, env) {
           try {
             if (stream) {
               let s;
-              if (p === 0 && rr === 0) {
+              if (rr === 0) {
                 // основная модель + запасная «на подхвате»
                 const pickAlt = async () => { if (ST.active && ST.active !== m && !isBad(ST.active)) return ST.active; const r = rankList(await listModels(base, auth), env).filter(x => x !== m && !tried.has(x) && !isBad(x)); return r[0] || ''; };
                 try { const w = await raceFirst(target, headers, body, m, pickAlt); s = w.s; if (w.m !== m) { tried.add(w.m); ST.bad[m] = now(); m = w.m; markGood(m); } } // основная тормозит — 5 минут сразу отвечает запасная

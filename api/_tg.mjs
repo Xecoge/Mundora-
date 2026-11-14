@@ -47,13 +47,37 @@ ${await knowledge()}`;
 }
 
 // ---------- ИИ ----------
-export async function ai(messages, ms = 40000) {
+// ИИ для бота — как на сайте: потоковый ответ (сервер сам подхватывает запасную модель, если основная молчит),
+// минимум «размышлений», чтобы отвечал быстро. Какой уровень рассуждений принимает модель — запоминаем.
+async function aiOnce(env, messages, eff) {
+  const body = { model: 'auto', stream: true, messages, ...(eff ? { reasoning_effort: eff } : { temperature: 0.7 }) };
+  const r = await handleAI(new Request('http://local/api/proxy?path=chat/completions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }), env);
+  const raw = await r.text();
+  if (!r.ok) { const e = new Error(raw.slice(0, 300)); e.status = r.status; throw e; }
+  let out = '', err = '';
+  for (const line of raw.split('\n')) {
+    const l = line.trim(); if (!l.startsWith('data:')) continue;
+    const d = l.slice(5).trim(); if (!d || d === '[DONE]') continue;
+    try { const j = JSON.parse(d); if (j.error) { err = j.error.message || String(j.error); continue; } const c = j.choices && j.choices[0]; const t = c && ((c.delta && c.delta.content) || (c.message && c.message.content)); if (t) out += Array.isArray(t) ? t.map(x => x.text || '').join('') : t; } catch (e) {}
+  }
+  if (!out && raw.trim().startsWith('{')) { try { const j = JSON.parse(raw); const c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content; if (c) out = String(c); } catch (e) {} }
+  out = out.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  if (!out) { const e = new Error(err || 'пустой ответ'); e.status = 502; throw e; }
+  return out;
+}
+export async function ai(messages, ms = 30000) {
   const env = ENV(); if (!env.AI_API_KEY) return '';
-  const req = new Request('http://local/api/proxy?path=chat/completions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ model: 'auto', stream: false, temperature: 0.7, messages }) });
+  const t0 = Date.now();
   const run = (async () => {
-    const r = await handleAI(req, env); const j = JSON.parse((await r.text()).trim());
-    const c = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
-    return String(Array.isArray(c) ? c.map(x => x.text || '').join('') : c).replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    let known = ''; try { known = (await kv('GET', 'ai:botEffort')) || ''; } catch (e) {}
+    const ladder = known === 'off' ? [null] : known ? [known] : ['none', 'minimal', 'low', null];
+    for (const eff of ladder) {
+      try { const t = await aiOnce(env, messages, eff); if (known !== (eff || 'off')) kv('SET', 'ai:botEffort', eff || 'off', 'EX', 86400).catch(() => {}); return t; }
+      catch (e) { const badParam = e.status === 400 && /reason|effort|unsupported|unknown|param|invalid/i.test(e.message); if (eff && badParam) continue; if (known) { kv('DEL', 'ai:botEffort').catch(() => {}); } break; }
+    }
+    // не получилось — ещё одна попытка без параметров (сервер к этому времени уже знает, какая модель тормозит)
+    if (Date.now() - t0 < ms - 9000) { try { return await aiOnce(env, messages, null); } catch (e) {} }
+    return '';
   })().catch(() => '');
   return Promise.race([run, new Promise(r => setTimeout(() => r(''), ms))]);
 }
