@@ -1216,6 +1216,20 @@ function pickSeeds(opts={}){
   shuffle(liked.slice(1,15)).slice(0,2).forEach(t=>add(t,.7));
   return out.slice(0,opts.anchor?2:3);
 }
+// «Для тебя»: зёрна из лайков и того, что реально слушаешь (по разу на артиста)
+function homeSeeds(){
+  const liked=Object.values(S.likes).sort((a,b)=>b.ts-a.ts),played=(S.plays||[]).map(p=>p.t).filter(Boolean);
+  const out=[],seen=new Set(),seenA=new Set(),add=(t,w)=>{if(!t||seen.has(t.id)||S.banned[t.id])return;if(t.artistId&&seenA.has(t.artistId))return;seen.add(t.id);if(t.artistId)seenA.add(t.artistId);out.push({t,w})};
+  liked.slice(0,2).forEach(t=>add(t,1));
+  played.slice(0,6).forEach(t=>add(t,.85));
+  shuffle(liked.slice(2,40)).forEach(t=>add(t,.8));
+  shuffle(played.slice(6,60)).forEach(t=>add(t,.6));
+  return out.slice(0,4);
+}
+// какие языки ты слушаешь: лайки весят вдвое больше прослушиваний
+function langPref(){const c={};let n=0;const add=(t,w)=>{const l=t&&langOf(t);if(!l)return;c[l]=(c[l]||0)+w;n+=w};Object.values(S.likes).forEach(t=>add(t,2));(S.plays||[]).slice(0,80).forEach(p=>add(p.t,1));return n>=4?{c,n}:null}
+// твои артисты: из лайков и истории прослушиваний
+function myArtists(){const a=new Set();Object.values(S.likes).forEach(t=>t.artistId&&a.add(t.artistId));(S.plays||[]).slice(0,80).forEach(p=>p.t&&p.t.artistId&&a.add(p.t.artistId));return a}
 const SC=new Map();
 function seedCands(seed){
   const c=SC.get(seed.id);if(c&&Date.now()-c.t<15*60e3)return c.p;
@@ -1288,7 +1302,8 @@ async function poolCands(w){
   return (await settleWithin(reqs.map(p=>p.catch(()=>[])),8000)).flat();
 }
 async function waveBatch(n=20,opts={}){
-  const w=W8(),T=S.taste,seeds=pickSeeds(opts);
+  const w=W8(),T=S.taste,hs=opts.home?homeSeeds():[],seeds=hs.length?hs:pickSeeds(opts);
+  const lp=langPref(),mine=myArtists(),personal=opts.home&&hs.length>0;
   const pool=(opts.anchor||opts.seeds)?Promise.resolve([]):poolCands(w).catch(()=>[]);
   const [pl,sr]=await Promise.all([pool,settleWithin(seeds.map(sd=>seedCands(sd.t).then(r=>({sd,r})).catch(()=>null)),10000)]);
   const M=new Map(),ent=t=>{let e=M.get(t.id);if(!e){e={t,sim:0,cf:0,src:0,seed:null,why:''};M.set(t.id,e)}return e};
@@ -1311,6 +1326,9 @@ async function waveBatch(n=20,opts={}){
     const L=langOf(t);
     if(w.lang==='ru')s+=L==='cyr'?3:-2;else if(w.lang==='foreign')s+=L==='cyr'?-4:.4;else if(w.lang==='instr')s+=isInstr(t)?3:-2.5;
     if(skA.has(t.artistId))s-=3;if(skG[t.genre])s-=.7*skG[t.genre];if(skInstr>=2&&isInstr(t))s-=1.5;
+    // язык как у того, что ты слушаешь (если сам не выбрал язык в настройках волны)
+    if(lp&&w.lang==='any'&&L&&!mine.has(t.artistId)){const sh=(lp.c[L]||0)/lp.n;s+=(sh-.5)*(e.src>=1.6||e.sim>2?2:4.5)}
+    if(personal){if(mine.has(t.artistId))s+=1.2;if(!e.seed&&!e.src&&!known(t.artistId))s-=1.8}
     if(recent.has(t.id))s-=7;
     s+=Math.random()*.7;
     out.push({...t,_s:s,_like:e.seed&&e.sim>2?e.seed.title:'',_cf:e.cf>0,_why:e.why||''});
@@ -1836,13 +1854,15 @@ V.home=()=>{
   <div class="h3">${ico('disc')}Независимые артисты · в тренде<a class="more" href="#search">Все жанры</a></div>
   <div id="hTrend">${skelCards(6)}</div>`;
 };
-let homeMix=null;
+let homeMix=null,homeMixKey='',homeMixAt=0;
+const tasteKey=()=>(S.taste.events||0)+':'+Object.keys(S.likes).length+':'+((S.plays||[])[0]?.t?.id||'');
 V.after.home=async(id)=>{
   homeLive(true);
   if(USR&&!PEOPLE.cache[USR.id])peopleApi('id='+USR.id).then(j=>{PEOPLE.cache[USR.id]=j.profile;if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
   bindHomeMini();
   const rec=$('#hRec'),tr=$('#hTrend');
-  if(!homeMix)homeMix=await waveBatch(12);
+  if(homeMix&&homeMixKey!==tasteKey()&&Date.now()-homeMixAt>3*60e3)homeMix=null;
+  if(!homeMix){homeMixKey=tasteKey();homeMixAt=Date.now();homeMix=await waveBatch(12,{home:true})}
   if(id!==renderId)return;
   if(!homeMix.length){homeMix=null;rec.innerHTML=`<div class="notice">${ico('x')}<div style="flex:1">Музыкальный каталог не отвечает. Проверь интернет.</div><button class="btn sm" data-act="remix-home">${ico('refresh')}Ещё раз</button></div>`}
   else rec.innerHTML=trackList(homeMix.slice(0,8),'home-rec',{why:true});
