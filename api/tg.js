@@ -258,10 +258,15 @@ async function onGroup(m) {
   const where = thread ? { message_thread_id: thread } : {};
   if (await guardReadonly(m, topicName)) return;
   if (m.new_chat_members) {
+    // приветствие новичков: в тему «Общий чат», тегаем только тех, кто только что вошёл
     const ppl = m.new_chat_members.filter(u => !u.is_bot); if (!ppl.length) return;
-    const me = await ME();
-    return say(chat, `👋 ${ppl.map(userLink).join(', ')}, добро пожаловать в <b>Mundora</b>!\nЗагляни в «Доступ к сайту», а вопросы задавай в «Вопросы, баги, предложения».`, { reply_markup: { inline_keyboard: [[{ text: '💳 Купить доступ', url: `https://t.me/${me.username}?start=buy` }]] } }).catch(() => {});
+    const map = await kv('HGETALL', 'tg:topics:' + chat); let ct = 0;
+    for (let i = 0; i < map.length; i += 2) if (kindOf(map[i]) === 'chat') ct = +map[i + 1];
+    const tag = u => u.username ? '@' + tgHtml(u.username) : userLink(u);
+    const text = `${ppl.map(tag).join(', ')} Посмотри пожалуйста https://t.me/c/3929724135/2. Если есть вопросы задавай в https://t.me/c/3929724135/27/38 быстро ответим.`;
+    return say(chat, text, ct ? { message_thread_id: ct } : {}).catch(() => {});
   }
+
   const c = anyCmd(text);
   const me = await ME();
   if (c && (!c.at || c.at.toLowerCase() === String(me.username).toLowerCase())) {
