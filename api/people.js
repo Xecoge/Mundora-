@@ -2,12 +2,31 @@
 // GET  /api/people?id=100001   — профиль
 // GET  /api/people?q=…         — поиск (ID, ник; админы — ещё и по почте)
 // POST /api/people?a=me {name,bio,avatar,open} — изменить свой профиль
-import { kv, kvMulti, pairs } from './_store.mjs';
-import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser } from './_auth.mjs';
+// POST /api/people?a=avatar {data}        — своя аватарка из галереи (видят все)
+// POST /api/people?a=cover {id,data|null} — обложка профиля (только админы)
+// POST /api/people?a=avatar-reset {id}    — админ убирает чужую загруженную аватарку
+// GET  /api/people?img=ava|cov&id=…       — сама картинка
+import { kv, kvMulti, pairs, jget, jset } from './_store.mjs';
+import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser, avatarOf, coverOf } from './_auth.mjs';
 import { checkName, claimName } from './_names.mjs';
 export const config = { runtime: 'edge' };
 
 const parse = v => { try { return v == null ? null : JSON.parse(v); } catch (e) { return null; } };
+// картинки приходят уже сжатыми с телефона/ПК: data:image/…;base64
+const IMG_RE = /^data:image\/(jpeg|webp|png);base64,[A-Za-z0-9+/=]+$/;
+const LIMIT = { ava: 260e3, cov: 700e3 };
+function checkImg(d, kind) { d = String(d || ''); if (!IMG_RE.test(d)) return 'Нужна картинка JPG, PNG или WebP'; if (d.length > LIMIT[kind]) return 'Картинка слишком большая'; return ''; }
+function imgResponse(d) {
+  const m = /^data:(image\/[a-z]+);base64,(.*)$/.exec(d || ''); if (!m) return new Response('Not found', { status: 404 });
+  const bin = atob(m[2]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Response(u8, { headers: { 'content-type': m[1], 'cache-control': 'private, max-age=31536000, immutable' } });
+}
+const SH0 = () => ({ st: {}, ver: {}, del: [], note: {}, until: {}, codes: [] });
+async function shLog(by, act, target) {
+  const log = (await jget('shlog')) || [];
+  log.unshift({ t: Date.now(), by: by.id, byName: displayName(by), act, id: target ? target.id : null, name: target ? displayName(target) : '' });
+  await jset('shlog', log.slice(0, 150));
+}
 const TITLES = [[1, 'Новичок'], [3, 'Слушатель'], [5, 'Меломан'], [8, 'Знаток'], [12, 'Легенда'], [18, 'Икона Mundora']];
 const titleOf = l => TITLES.filter(([n]) => l >= n).pop()[1];
 const top = (o, n) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
@@ -26,17 +45,20 @@ function capital(u, d) {
 }
 
 async function card(email, viewer, full) {
+  const L = viewer.shadow ? ((await jget('sh:' + viewer.email)) || {}) : null;
   const [uj, adm0, sh] = await kvMulti([['GET', 'u:' + email], ['SISMEMBER', 'admins', email], ['SISMEMBER', 'shadow_admins', email]]);
   const u = parse(uj); if (!u) return null;
   await ensureId(u);
   const owner = email === ADMIN(), self = viewer.email === email;
   const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
-    id: u.id, name: displayName(u), bio: u.bio || '', avatar: AVATARS.includes(u.avatar) ? u.avatar : (owner ? 'gem_orbit' : 'planet'),
+    id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u),
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false
   };
+  // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
+  if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
   if (!full) return base;
   const keys = ['likes', 'playlists', 'plays', 'taste', 'cryptoFav', 'notes', 'ops'];
   const vals = await kv('HMGET', 'd:' + email, ...keys);
@@ -73,6 +95,43 @@ export default async function handler(req) {
       if (b.open != null) u.open = !!b.open;
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
+    }
+    const img = url.searchParams.get('img');
+    if (img === 'ava' || img === 'cov') {
+      const id0 = url.searchParams.get('id'), em = /^\d{1,12}$/.test(id0 || '') ? await kv('GET', 'id:' + id0) : null;
+      if (!em) return new Response('Not found', { status: 404 });
+      const key = img === 'cov' && url.searchParams.get('sh') && me.shadow ? 'img:cov:sh:' + me.email + ':' + id0 : 'img:' + img + ':' + em;
+      return imgResponse(await kv('GET', key));
+    }
+    if (req.method === 'POST' && a === 'avatar') {
+      if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
+      const b = await req.json().catch(() => ({})), bad = checkImg(b.data, 'ava'); if (bad) return json({ error: bad }, 400);
+      const u = await getUser(me.email); await ensureId(u);
+      u.avatar = 'up:' + Date.now().toString(36);
+      await kv('SET', 'img:ava:' + me.email, b.data); await putUser(u);
+      return json({ ok: true, profile: await card(me.email, me, true) });
+    }
+    if (req.method === 'POST' && (a === 'cover' || a === 'avatar-reset')) {
+      if (!me.admin && !me.shadow) return json({ error: 'Это могут только администраторы' }, 403);
+      const b = await req.json().catch(() => ({})), tid = String(b.id ?? '');
+      const em = /^\d{1,12}$/.test(tid) ? await kv('GET', 'id:' + tid) : null; if (!em) return json({ error: 'Аккаунт не найден' }, 404);
+      const t = await getUser(em); if (!t) return json({ error: 'Аккаунт не найден' }, 404);
+      const self = em === me.email, tOwner = em === ADMIN();
+      if (tOwner && !me.owner) return json({ error: 'Профиль владельца менять нельзя' }, 403);
+      if (a === 'cover' && b.data) { const bad = checkImg(b.data, 'cov'); if (bad) return json({ error: bad }, 400); }
+      if (me.shadow && !self) { // визуальный админ: меняется только его личный слой
+        const L = { ...SH0(), ...((await jget('sh:' + me.email)) || {}) };
+        if (a === 'cover') { L.cov = L.cov || {}; if (b.data) { const v = Date.now().toString(36); await kv('SET', 'img:cov:sh:' + me.email + ':' + tid, b.data); L.cov[tid] = v; } else L.cov[tid] = ''; }
+        else { L.ava = L.ava || {}; L.ava[tid] = 1; }
+        await jset('sh:' + me.email, L); await shLog(me, a === 'cover' ? (b.data ? 'cover' : 'cover-del') : 'avatar-reset', t);
+        return json({ ok: true, profile: await card(em, me, true) });
+      }
+      if (a === 'cover') {
+        if (b.data) { t.cover = 'up:' + Date.now().toString(36); await kv('SET', 'img:cov:' + em, b.data); }
+        else { delete t.cover; await kv('DEL', 'img:cov:' + em); }
+      } else if (typeof t.avatar === 'string' && t.avatar.startsWith('up:')) { t.avatar = tOwner ? 'gem_orbit' : 'planet'; await kv('DEL', 'img:ava:' + em); }
+      await putUser(t);
+      return json({ ok: true, profile: await card(em, me, true) });
     }
     const id = url.searchParams.get('id');
     if (id) {

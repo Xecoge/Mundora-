@@ -109,6 +109,9 @@ export const displayName = u => (u.name && u.name.trim()) || ('Пользова�
 // Доступ по коду кончился? (владелец и админы — без срока)
 export const accessExpired = u => !!(u && !u.admin && u.accessUntil && Date.now() > u.accessUntil);
 export const AVATARS = ['planet', 'planet2', 'crystal', 'gem_orbit', 'asteroid', 'orbit', 'gift_planet', 'box_open', 'gamepad', 'chat', 'code', 'chart', 'folder', 'browser', 'money', 'gift_stack'];
+// загруженная своя аватарка хранится как 'up:<версия>' — отдаём ссылку на картинку
+export const avatarOf = u => (u && typeof u.avatar === 'string' && u.avatar.startsWith('up:') && u.id != null) ? `/api/people?img=ava&id=${u.id}&v=${u.avatar.slice(3)}` : (u && AVATARS.includes(u.avatar) ? u.avatar : (u && u.email === ADMIN() ? 'gem_orbit' : 'planet'));
+export const coverOf = u => (u && typeof u.cover === 'string' && u.cover.startsWith('up:') && u.id != null) ? `/api/people?img=cov&id=${u.id}&v=${u.cover.slice(3)}` : '';
 export async function dropSessions(email) {
   const sids = await kv('SMEMBERS', 'us:' + email);
   await kvMulti([...sids.map(s => ['DEL', 's:' + s]), ['DEL', 'us:' + email]]);

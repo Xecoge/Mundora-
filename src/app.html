@@ -833,6 +833,17 @@ body.side-pin .player{left:calc(var(--railX) + 36px)!important}
 @keyframes plIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 body.lowfx .player{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 body.lowfx .player::after{display:none}
+
+/* ===== свои аватарки и обложки профиля ===== */
+img[src*="img=ava"]{border-radius:50%!important;object-fit:cover!important;padding:0!important}
+.pf-ava[src*="img=ava"]{width:132px;height:132px;box-shadow:0 0 0 3px rgba(255,255,255,.14),0 18px 40px -10px rgba(124,58,237,.7);filter:none}
+.pf-hero.has-cov{background:linear-gradient(90deg,rgba(9,5,20,.82) 0%,rgba(9,5,20,.5) 55%,rgba(9,5,20,.15)),var(--cov) center/cover no-repeat!important;min-height:200px}
+.pf-covbtn{position:absolute;top:14px;right:14px;z-index:2;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;font-size:12.5px;font-weight:650;color:#fff;background:rgba(10,6,22,.45);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .2s}
+.pf-covbtn:hover{background:rgba(10,6,22,.7)}
+.pf-covprev{aspect-ratio:3/1;border-radius:16px;background:linear-gradient(125deg,rgba(76,29,149,.8),rgba(124,58,237,.35)) center/cover;border:1px solid rgba(255,255,255,.12);display:grid;place-items:center}
+.ava-grid .ava-up{border-style:dashed!important;color:#cbbdf5}.ava-grid .ava-up.busy{opacity:.5;pointer-events:none}
+.ava-grid button img[src*="img=ava"]{width:100%;height:100%}
+@media(max-width:760px){.pf-hero.has-cov{background:linear-gradient(180deg,rgba(9,5,20,.2),rgba(9,5,20,.85) 60%),var(--cov) center top/cover no-repeat!important}.pf-covbtn span{display:none}.pf-ava[src*="img=ava"]{width:112px;height:112px}}
 </style>
 </head>
 <body>
@@ -3294,7 +3305,21 @@ Object.assign(ACT,{
 
 /* ===================== люди: ID, галочки, профили ===================== */
 const AVA_LIST=['planet','planet2','crystal','gem_orbit','asteroid','orbit','gift_planet','box_open','gamepad','chat','code','chart','folder','browser','money','gift_stack'];
-const avaSrc=k=>'/img/'+(AVA_LIST.includes(k)?k:'planet')+'.webp';
+const avaSrc=k=>typeof k==='string'&&k.startsWith('/')?k:'/img/'+(AVA_LIST.includes(k)?k:'planet')+'.webp';
+// сжать картинку из галереи: обрезка по центру под w×h, JPEG; уменьшаем качество, пока не влезет в лимит
+async function imgPrep(file,w,h,limit){
+  if(!file||!/^image\//.test(file.type||'image/'))throw new Error('Выбери картинку');
+  const url=URL.createObjectURL(file);
+  try{
+    const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error('Не удалось открыть картинку'));i.src=url});
+    const sc=Math.max(w/im.naturalWidth,h/im.naturalHeight),sw=w/sc,sh=h/sc;
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');x.imageSmoothingQuality='high';
+    x.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,w,h);
+    for(const q of [.86,.78,.68,.56,.45]){const d=cv.toDataURL('image/jpeg',q);if(d.length<=limit)return d}
+    throw new Error('Картинка слишком большая');
+  }finally{URL.revokeObjectURL(url)}
+}
+const pickImg=()=>new Promise(ok=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>ok(i.files&&i.files[0]);i.click()});
 // галочка: нажал — сверху подпись «Верифицированный аккаунт»
 const vBadge=(p,big)=>p&&p.verified?`<button class="vb${big?' big':''}" data-act="vb" data-tip="${p.owner?'Верифицированный аккаунт\nвладелец Mundora':p.admin?'Верифицированный аккаунт\nадминистратор':'Верифицированный аккаунт'}" aria-label="Верифицированный аккаунт"><svg viewBox="0 0 24 24"><path class="vb-s" d="M12 1.8l2.4 1.9 3-.3 1 2.9 2.6 1.6-.6 3 1.4 2.7-2.2 2.1-.1 3.1-3 .6-1.8 2.5-2.8-1.2-2.9 1.2-1.7-2.5-3-.6-.2-3.1L1.8 13.6l1.4-2.7-.6-3 2.6-1.6 1-2.9 3 .3z"/><path class="vb-c" d="m7.8 12.2 2.9 2.9 5.5-5.6"/></svg></button>`:'';
 const PEOPLE={cache:{},search:null};
@@ -3341,7 +3366,9 @@ function pfHTML(p){
   const joined=p.joined?new Date(p.joined).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}).replace(/\s*г\.$/,''):'';
   const open=p.genres!==undefined;
   const s=c.stats;
-  return `<div class="pf-hero">
+  const canCov=USR&&USR.admin&&(p.self||!p.owner||USR.owner);
+  return `<div class="pf-hero${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
+    ${canCov?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
     <img class="pf-ava" src="${avaSrc(p.avatar)}" alt="">
     <div class="pf-id">
       <h1>${esc(p.name)}${vBadge(p,true)}</h1>
@@ -3370,11 +3397,12 @@ function pfHTML(p){
   ${p.crypto.length?`<div class="h3">${ico('coin')}Следит за криптой</div><div class="row">${p.crypto.map(id=>{const c=CR.byId[id];return `<a class="chip dark" href="#coin-${esc(id)}">${c&&c.img?`<img src="${esc(c.img)}" alt="" style="width:16px;height:16px;border-radius:50%">`:''}${esc(c?c.sym:id)}</a>`}).join('')}</div>`:''}
   `:`<div class="notice" style="margin-top:16px">${ico('lock')}<div>Пользователь скрыл музыку и подборки в своём профиле. Видна только капитализация.</div></div>`}`;
 }
+function pfApply(p){PEOPLE.cache[p.id]=p;if(p.self){USR.avatar=p.avatar;meHead()}if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p)}
 function pfEdit(){
   let av=USR.avatar;
   openSheet(`<h3>${ico('edit')}Мой профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
   <div class="k" style="margin-bottom:6px">Аватар</div>
-  <div class="ava-grid">${AVA_LIST.map(k=>`<button class="${k===av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
+  <div class="ava-grid"><button class="ava-up" data-act="pf-ava-up" title="Загрузить из галереи">${ico('plus')}</button>${String(av).startsWith('/')?`<button class="on" data-act="pf-ava" data-k="${esc(av)}"><img src="${esc(av)}" alt=""></button>`:''}${AVA_LIST.map(k=>`<button class="${k===av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
   <label class="k" style="display:block;margin:14px 0 6px">Имя (проверяет нейросеть)</label><input class="in" id="pfName" maxlength="24" value="${esc(USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'')}" placeholder="Как тебя показывать">
   <label class="k" style="display:block;margin:12px 0 6px">О себе</label><textarea class="in" id="pfBio" maxlength="160" rows="3" style="height:auto;padding:10px 14px;resize:none" placeholder="Пара слов — видят все">${esc(USR.bio||'')}</textarea>
   <label class="pf-tg"><input type="checkbox" id="pfOpen" ${USR.open!==false?'checked':''}><span><b>Открытый профиль</b><small class="k">Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
@@ -3393,6 +3421,25 @@ Object.assign(ACT,{
   'pf-edit'(){closeSheet();pfEdit()},
   'pf-me'(){closeSheet();location.hash='#u-'+USR.id},
   'pf-ava'(el){pfEdit.av=el.dataset.k;$$('.ava-grid button').forEach(b=>b.classList.toggle('on',b===el))},
+  async 'pf-ava-up'(el){
+    const f=await pickImg();if(!f)return;el.classList.add('busy');
+    try{const data=await imgPrep(f,360,360,250e3);const j=await peopleApi('a=avatar',{data});const p=j.profile;
+      USR.avatar=p.avatar;PEOPLE.cache[p.id]=p;pfEdit.av=p.avatar;meHead();
+      const g=$('.ava-grid');if(g){g.querySelectorAll('button[data-k^="/"]').forEach(b=>b.remove());$$('.ava-grid button').forEach(b=>b.classList.remove('on'));el.insertAdjacentHTML('afterend',`<button class="on" data-act="pf-ava" data-k="${esc(p.avatar)}"><img src="${esc(p.avatar)}" alt=""></button>`)}
+      if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p)}
+    catch(e){toast(e.message,'x')}finally{el.classList.remove('busy')}
+  },
+  'pf-cover'(el){const p=PEOPLE.cache[el.dataset.id];if(!p)return;
+    openSheet(`<h3>${ico('edit')}Обложка профиля<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    <div class="pf-covprev"${p.cover?` style="background-image:url('${esc(p.cover)}')"`:''}>${p.cover?'':'<span class="k">Сейчас стандартная фиолетовая</span>'}</div>
+    <div class="k" style="margin:10px 0 12px">Обложку видят все, кто открывает профиль ${esc(p.name)}. Лучше горизонтальная картинка — она обрежется под 3:1.</div>
+    <button class="btn" style="width:100%;justify-content:center" data-act="pf-cover-up" data-id="${p.id}">${ico('plus','s')}Загрузить из галереи</button>
+    ${p.cover?`<button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="pf-cover-del" data-id="${p.id}">${ico('trash','s')}Убрать обложку</button>`:''}
+    ${!p.self&&String(p.avatar).startsWith('/')?`<button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="pf-ava-reset" data-id="${p.id}">${ico('x','s')}Убрать его аватарку</button>`:''}`)},
+  async 'pf-cover-up'(el){const f=await pickImg();if(!f)return;el.disabled=true;
+    try{const data=await imgPrep(f,1500,500,650e3);pfApply((await peopleApi('a=cover',{id:el.dataset.id,data})).profile);closeSheet()}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'pf-cover-del'(el){el.disabled=true;try{pfApply((await peopleApi('a=cover',{id:el.dataset.id,data:null})).profile);closeSheet()}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'pf-ava-reset'(el){el.disabled=true;try{pfApply((await peopleApi('a=avatar-reset',{id:el.dataset.id})).profile);closeSheet()}catch(e){toast(e.message,'x');el.disabled=false}},
   async 'pf-save'(el){
     el.disabled=true;toast('Сохраняю — нейросеть проверяет имя…','loader');
     try{const j=await peopleApi('a=me',{name:$('#pfName').value,bio:$('#pfBio').value,avatar:pfEdit.av,open:$('#pfOpen').checked});

@@ -1,6 +1,6 @@
 // Mundora — админ-панель (только для ADMIN_EMAIL): коды доступа и аккаунты.
 import { kv, kvMulti, jget, jset, pairs } from './_store.mjs';
-import { guard, json, getUser, putUser, dropSessions, ADMIN, ensureId, displayName, normEmail, maskEmail } from './_auth.mjs';
+import { guard, json, getUser, putUser, dropSessions, ADMIN, ensureId, displayName, normEmail, maskEmail, avatarOf } from './_auth.mjs';
 export const config = { runtime: 'edge' };
 
 const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -30,7 +30,7 @@ export default async function handler(req) {
       const n = emails.length;
       const raw = emails.map((e, i) => res[i] ? JSON.parse(res[i]) : { email: e });
       for (const u of raw) if (u.id == null && u.salt) await ensureId(u); // старые аккаунты получают ID
-      const users = raw.map((u, i) => { const e = emails[i]; return { email: e, id: u.id ?? null, until: u.accessUntil || 0, name: displayName(u), avatar: u.avatar || '', verified: !!u.verified || e === ADMIN() || adm.has(e), status: u.status || 'active', created: u.created, seen: u.seen, note: u.note || '', devices: res[n + i] || 0, keys: res[2 * n + i] || 0, admin: e === ADMIN() || adm.has(e), owner: e === ADMIN() }; })
+      const users = raw.map((u, i) => { const e = emails[i]; return { email: e, id: u.id ?? null, until: u.accessUntil || 0, name: displayName(u), avatar: avatarOf({ ...u, email: e }), verified: !!u.verified || e === ADMIN() || adm.has(e), status: u.status || 'active', created: u.created, seen: u.seen, note: u.note || '', devices: res[n + i] || 0, keys: res[2 * n + i] || 0, admin: e === ADMIN() || adm.has(e), owner: e === ADMIN() }; })
         .sort((x, y) => (y.seen || 0) - (x.seen || 0));
       const cl = codes.map((c, i) => { const r = res[3 * n + i]; return r ? { code: c, ...JSON.parse(r) } : null; }).filter(Boolean).sort((x, y) => y.created - x.created);
       const envUsed = await kv('GET', 'gate:env:' + normCode((typeof process !== 'undefined' && process.env.ACCESS_CODE) || ''));
