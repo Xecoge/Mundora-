@@ -149,6 +149,28 @@ async function canAdmin(chat, uid) {
   if (await isTgAdmin(uid)) return true;
   try { const cm = await tg('getChatMember', { chat_id: chat, user_id: uid }); return cm.status === 'creator' || cm.status === 'administrator'; } catch (e) { return false; }
 }
+// Админы группы — те, у кого в группе статус администратора (с префиксом/должностью) или создатель. Список кешируем на 5 минут.
+async function groupAdmins(chat) {
+  const c = await kv('GET', 'tg:gadm:' + chat); if (c) { try { return JSON.parse(c); } catch (e) {} }
+  const list = await tg('getChatAdministrators', { chat_id: chat }).catch(() => null);
+  if (!list) return null;
+  const ids = list.map(a => a.user && a.user.id).filter(Boolean);
+  await kv('SET', 'tg:gadm:' + chat, JSON.stringify(ids), 'EX', 300); return ids;
+}
+// Темы только для чтения: писать могут лишь админы группы, остальное бот удаляет
+const READONLY = ['access', 'trusted', 'news'];
+async function guardReadonly(m, topicName) {
+  if (!m.is_topic_message || !m.message_thread_id || !READONLY.includes(kindOf(topicName))) return false;
+  if (m.forum_topic_created || m.forum_topic_edited || m.pinned_message || m.is_automatic_forward) return false; // служебные сообщения
+  const chat = m.chat.id, from = m.from || {};
+  if (m.sender_chat && m.sender_chat.id === chat) return false; // анонимный админ
+  const me = await ME(); if (from.id === me.id) return false;
+  const admins = await groupAdmins(chat);
+  if (!admins || admins.includes(from.id)) return false; // не смогли узнать админов — ничего не удаляем
+  try { await tg('deleteMessage', { chat_id: chat, message_id: m.message_id }); }
+  catch (e) { if (await limit('tg:delwarn:' + chat, 1, 6 * 3600)) await notifyAdmins(`⚠️ Не могу удалить сообщение ${userLink(from)} в теме «${tgHtml(topicName)}» — дай боту в группе право «Удаление сообщений».`); }
+  return true;
+}
 // Telegram не даёт ботам список тем. Ищем сами: тема = номер сообщения, которым её создали.
 // Шлём «⏳» в тему N ответом на её первое сообщение — в ответе Telegram видно название темы; потом меняем «⏳» на готовый пост.
 async function discoverTopics(chat) {
@@ -217,6 +239,7 @@ async function onGroup(m) {
   let topicName = (m.reply_to_message && m.reply_to_message.forum_topic_created && m.reply_to_message.forum_topic_created.name) || '';
   if (!topicName && thread) { const mp = await kv('HGETALL', 'tg:topics:' + chat); for (let i = 0; i < mp.length; i += 2) if (+mp[i + 1] === thread) topicName = mp[i]; }
   const where = thread ? { message_thread_id: thread } : {};
+  if (await guardReadonly(m, topicName)) return;
   if (m.new_chat_members) {
     const ppl = m.new_chat_members.filter(u => !u.is_bot); if (!ppl.length) return;
     const me = await ME();
@@ -316,6 +339,7 @@ export async function handler(req) {
     if (u.my_chat_member) {
       const mc = u.my_chat_member, ch = mc.chat, now = mc.new_chat_member && mc.new_chat_member.status;
       if (ch.type === 'supergroup' && (now === 'administrator')) {
+        await kv('DEL', 'tg:gadm:' + ch.id);
         await kv('SET', 'tg:group', String(ch.id));
         const admins = await tgAdmins();
         if (ch.is_forum && (await kv('SET', 'tg:filled:' + ch.id, 'auto', 'NX')) === 'OK') await runFill(ch.id, admins[0] || mc.from.id).catch(() => {});
