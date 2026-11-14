@@ -111,7 +111,8 @@ async function onPrivate(m) {
   const hist = ((await jget('tg:h:' + chat)) || []).slice(-8);
   const ans = await ai([{ role: 'system', content: await persona() + '\n\nЕсли человек хочет купить доступ — скажи нажать /buy. Если пишет жалобу или баг — поблагодари и скажи, что передал администрации (добавь в самом конце скрытую метку [[ADMIN]]).' }, ...hist, { role: 'user', content: text }]);
   const flag = /\[\[ADMIN\]\]/.test(ans), out = ans.replace(/\[\[ADMIN\]\]/g, '').trim() || 'Сейчас не могу ответить — передал вопрос администрации. Почта поддержки: mundoraaiapp@gmail.com';
-  if (flag || !ans) await notifyAdmins(`📩 <b>Сообщение боту</b> от ${userLink(from)}:\n\n${tgHtml(text).slice(0, 1500)}`);
+  // администрации — вместе с контекстом: короткое «передай» без вопроса бесполезно
+  if (flag || !ans) { const prevQ = hist.filter(h => h.role === 'user').slice(-3).map(h => h.content); const ctxTxt = [...prevQ, text].map(x => '• ' + tgHtml(String(x)).slice(0, 600)).join('\n'); await notifyAdmins(`📩 <b>Вопрос от</b> ${userLink(from)}:\n\n${ctxTxt}`); }
   await jset('tg:h:' + chat, [...hist, { role: 'user', content: text.slice(0, 1500) }, { role: 'assistant', content: out.slice(0, 1500) }], 86400);
   return say(chat, out, /купить|доступ|\/buy/i.test(out) ? { reply_markup: { inline_keyboard: [[{ text: '💳 Купить доступ', callback_data: 'buy' }]] } } : {});
 }
