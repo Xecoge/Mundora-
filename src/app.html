@@ -1298,7 +1298,7 @@ async function srcFor(t){
   if(t.src==='it')return t.preview||'';
   return API.stream(t.id);
 }
-const YTM=LS.get('ytmap2',{});
+const YTM=LS.get('ytmap3',{});
 const YTQ=new Map();
 // видео, которые правообладатель запретил показывать на других сайтах
 const YTB=new Set(LS.get('ytblk',[]));
@@ -1319,6 +1319,8 @@ function ytSame(t,it){const T0=cleanTitle(t.title)||t.title,A0=String(t.artist||
   if(!ytNz(T0)||!ytHas(it.title,T0))return false;
   // длительность как у оригинала (±10 с или 7%): отсекает сокращённые, расширенные и чужие версии
   const D=+t.duration||0;if(D>60&&it.dur&&Math.abs(it.dur-D)>Math.max(10,D*.07))return false;
+  // Shorts и обрезки: ролик короче минуты не берём (если только сам трек не такой короткий)
+  if(it.dur&&it.dur<60&&!(D>0&&D<60&&D!==30))return false;
   if(ytNz(A0)&&!ytHas(it.title,A0)&&!ytHas(it.channel,A0))return false;
   const bad=String(it.title||'').match(YT_BADV);if(bad&&!new RegExp(bad[1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(t.title))return false;return true}
 function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
@@ -1341,7 +1343,7 @@ async function ytAlt(t){
   const pick=items=>(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id)&&ytSame(t,it))[0];
   let it=pick((await MUS.get('yt','search',{q:q1}).catch(()=>({}))).items);
   if(!it&&!t._ytAlt2){t._ytAlt2=1;it=pick((await MUS.get('yt','search',{q:`${t.artist} ${cleanTitle(t.title)||t.title} audio`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);return {}})).items)}
-  if(!it)return '';YTM[t.id]=it.id;LS.set('ytmap2',YTM);return it.id;
+  if(!it)return '';YTM[t.id]=it.id;LS.set('ytmap3',YTM);return it.id;
 }
 async function ytFind(t){
   if(YTM[t.id]&&!YTB.has(YTM[t.id]))return YTM[t.id];
@@ -1351,7 +1353,7 @@ async function ytFind(t){
     // только ЭТОТ трек: другие песни того же артиста не подставляем
     let it=ytPick(t,(d.items||[]).filter(x=>ytSame(t,x)));
     if(!it){const d2=await MUS.get('yt','search',{q:`${t.artist} ${cleanTitle(t.title)||t.title} audio`}).catch(e=>{if(e.quota)ytQuota(e.retryIn);return {}});it=ytPick(t,(d2.items||[]).filter(x=>ytSame(t,x)))}
-    if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap2',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
+    if(!it)return '';YTM[t.id]=it.id;const ks=Object.keys(YTM);if(ks.length>800)delete YTM[ks[0]];LS.set('ytmap3',YTM);return it.id}).finally(()=>YTQ.delete(t.id));
   YTQ.set(t.id,p);return p;
 }
 const LITE=['id','title','artist','artistId','handle','genre','mood','tags','duration','plays','favs','art','artS','artL','ava','mir','lang','bpm','key','permalink','src','dz','dzArtist','preview','album','explicit'];
@@ -1645,7 +1647,7 @@ const YTP={p:null,ready:null,state:-1,timer:0,cur:'',
   },
   // видео запрещено показывать на сайтах — ищем ЭТОТ ЖЕ трек, загруженный другим каналом (без slowed/sped up/ремиксов);
   // не нашли — играет отрывок этого трека
-  onErr(){const t=P.cur,bad=this.cur;ytBlock(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap2',YTM)}
+  onErr(){const t=P.cur,bad=this.cur;ytBlock(bad);if(t&&YTM[t.id]===bad){delete YTM[t.id];LS.set('ytmap3',YTM)}
     const fb=()=>{if(P.cur!==t)return;ME.toAudio();if(t&&isPreview(t))srcFor(t).then(u=>{if(P.cur!==t)return;if(u){AUD.src=u;AUD.play().catch(()=>{})}else ME.emit('error',true)});else ME.emit('error',true)};
     if(!t||!isPreview(t)||(t._ytTry=(t._ytTry||0)+1)>4)return fb();
     ytAlt(t).then(v=>{if(P.cur!==t)return;if(v&&v!==bad)ME.playYT(v).then(()=>{t._yt=v;UI.why(t)}).catch(fb);else fb()}).catch(fb)},
