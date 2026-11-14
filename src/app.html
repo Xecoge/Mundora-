@@ -1092,6 +1092,14 @@ const IT={
 };
 const DZG={'Pop':132,'Hip-Hop/Rap':116,'Rock':152,'Electronic':106,'House':113,'Deep House':113,'Techno':106,'Alternative':85,'R&B/Soul':165,'Jazz':129,'Classical':98,'Reggae':144,'Latin':197,'Metal':464,'Soundtrack':173,'Trap':116,'Dubstep':106,'Drum & Bass':106,'Disco':113,'Funk':169};
 const MOOD_DZ={energy:[113,106,116],happy:[132,113,197],calm:[129,98,85],sad:[165,85,116]};
+// запасной «Топ России»: российский каталог iTunes, только русскоязычное и «Русский поп/рэп»
+async function ruHits(n=50){
+  const qs=['русский рэп','русский поп','хиты','рэп','поп','танцы'],ru=t=>t.lang==='cyr'||(t.tags||[]).some(g=>/русск/.test(g));
+  const r=await Promise.allSettled(qs.map(q=>IT.search(q,50)));
+  let l=dedupe(r.flatMap(x=>x.status==='fulfilled'?x.value:[])).filter(ru);
+  if(l.length<20){const d=await Promise.allSettled(qs.slice(0,3).map(q=>DZ.search(q,40)));l=dedupe(l.concat(d.flatMap(x=>x.status==='fulfilled'?x.value:[]).filter(ru)))}
+  return l.slice(0,n);
+}
 async function hitsSearch(q,limit=40){try{const r=await DZ.search(q,limit);if(r.length)return r}catch(e){}try{return await IT.search(q,Math.min(limit,50))}catch(e){return[]}}
 const DZA=new Map();
 async function dzArtistId(t){
@@ -1849,7 +1857,7 @@ V.home=()=>{
   </section>
   <div class="h3">${ico('spark')}Для тебя<button class="more" data-act="remix-home">${ico('refresh','s')}</button></div>
   <div id="hRec">${skelRows(6)}</div>
-  <div class="h3">${ico('trend')}Чарт · Топ России${fullOn()?'<span class="pv" style="margin-left:4px">целиком · YouTube</span>':''}<button class="more" data-act="play-list" data-list="home-chart">${ico('play','f')} Слушать</button></div>
+  <div class="h3">${ico('trend')}Чарт · Топ России<small class="k" id="hChartSrc" style="margin-left:6px;font-weight:500"></small>${fullOn()?'<span class="pv" style="margin-left:4px">целиком · YouTube</span>':''}<button class="more" data-act="play-list" data-list="home-chart">${ico('play','f')} Слушать</button></div>
   <div id="hChart">${skelCards(6)}</div>
   <div class="h3">${ico('disc')}Независимые артисты · в тренде<a class="more" href="#search">Все жанры</a></div>
   <div id="hTrend">${skelCards(6)}</div>`;
@@ -1866,7 +1874,7 @@ V.after.home=async(id)=>{
   if(id!==renderId)return;
   if(!homeMix.length){homeMix=null;rec.innerHTML=`<div class="notice">${ico('x')}<div style="flex:1">Музыкальный каталог не отвечает. Проверь интернет.</div><button class="btn sm" data-act="remix-home">${ico('refresh')}Ещё раз</button></div>`}
   else rec.innerHTML=trackList(homeMix.slice(0,8),'home-rec',{why:true});
-  (async()=>{let c=[];try{c=await IT.topRU(50)}catch(e){}if(!c.length)try{c=await DZ.chart(0,50)}catch(e){}if(id!==renderId)return;const hc=$('#hChart');if(hc)hc.innerHTML=c.length?trackCards(c,'home-chart'):'<div class="empty">Чарт недоступен</div>'})();
+  (async()=>{let c=[],alt=false;try{c=await IT.topRU(50)}catch(e){}if(!c.length){alt=true;try{c=await ruHits(50)}catch(e){}}if(id!==renderId)return;const hs=$('#hChartSrc');if(hs)hs.textContent=c.length?(alt?'русские хиты':'Apple Music'):'';const hc=$('#hChart');if(hc)hc.innerHTML=c.length?trackCards(c,'home-chart'):'<div class="empty">Чарт недоступен</div>'})();
   try{const t=await API.trending('','week');if(id!==renderId)return;tr.innerHTML=trackCards(t.slice(0,16),'home-trend')}catch(e){if(id===renderId)tr.innerHTML='<div class="empty">Нет связи с каталогом</div>'}
 };
 function bindHomeMini(){
