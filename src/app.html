@@ -856,7 +856,7 @@ img[src*="img=ava"]{border-radius:50%!important;object-fit:cover!important;paddi
 @media(max-width:760px){.pf-tglink{margin-left:auto;margin-right:auto}}
 
 /* ===== курсы ценностей ===== */
-.mbar{width:30px;height:18px;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+.mbar{width:30px;height:30px;object-fit:contain;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}.mtop .mbar{width:40px;height:40px;margin:-6px 0 -6px -4px}
 .bt-coin:not(.bt-mrow){grid-template-columns:54px 64px 1fr auto}.bt-mrow{grid-template-columns:28px minmax(0,1fr) 46px auto auto!important;gap:8px!important}.bt-mrow .ch{min-width:52px!important}
 .bt-mrow b{font-size:13.5px}
 .mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
@@ -909,6 +909,9 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 #tour .tr-skip{background:none;border:0;color:#a49dc0;font-size:13px;cursor:pointer;padding:6px 2px}
 #tour .tr-skip:hover{color:#fff}
 @keyframes trIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+
+/* без «плавающих» анимаций у аватарок, персонажей и логотипа */
+.pf-ava,.mcard .mimg,.side .logo .mk img,.phead img,.hero img,.tile img,img.mascot{animation:none!important}
 </style>
 </head>
 <body>
@@ -2791,7 +2794,7 @@ function tourStart(k,steps){
   if(TOUR.on||tourDone(k)||$('#full.open')||$('#sheet.open')||!document.body.contains($('#player')))return false;
   const list=steps.map(x=>({...x,el:$(x.el)})).filter(x=>tourVis(x.el));
   if(list.length<2)return false;
-  TOUR.on=true;TOUR.k=k;TOUR.list=list;TOUR.i=0;tourMark(k);
+  TOUR.on=true;TOUR.k=k;TOUR.list=list;TOUR.i=0;tourMark(k);if(list.some(x=>x.el&&x.el.closest&&x.el.closest('#ytBox')))tourMark('video');
   let o=$('#tour');if(!o){o=document.createElement('div');o.id='tour';document.body.appendChild(o)}
   o.innerHTML='<div class="tr-hole"></div><div class="tr-card"></div>';o.hidden=false;tourPaint();return true}
 function tourPaint(){
@@ -2821,30 +2824,34 @@ function tourMusic(){
     {el:'#bShuffle',t:'Перемешать',d:'Треки из очереди будут играть в случайном порядке.'},
     {el:'#player [data-act=prev]',t:'Назад',d:'Предыдущий трек. Если трек играет дольше пары секунд — начнёт его сначала.'},
     {el:'#bPlay',t:'Играть / пауза',d:ph?'Ставит музыку на паузу и продолжает.':'Ставит музыку на паузу и продолжает. На ПК то же самое делает клавиша «пробел».'},
-    {el:'#player [data-act=next]',t:'Дальше',d:'Следующий трек. Если пропустить в первые 30 секунд, похожая музыка будет попадаться реже.'},
+    {el:'#player [data-act=next]',t:'Дальше',d:ph?'Следующий трек. Кнопка «назад», перемешать, повтор и перемотка — в полном плеере (нажми на обложку).':'Следующий трек. Если пропустить в первые 30 секунд, похожая музыка будет попадаться реже.'},
     {el:'#bRepeat',t:'Повтор',d:'Включает повтор текущего трека.'},
     {el:'#player .prow',t:'Перемотка',d:'Тяни ползунок, чтобы перемотать трек. Слева — сколько прошло, справа — длина.'},
     {el:'#player [data-act=add-cur]',t:'В плейлист',d:'Добавляет трек в твой плейлист или создаёт новый.'},
     {el:'#player [data-act=queue]',t:'Очередь',d:'Показывает, что заиграет дальше.'},
     {el:'#vol',t:'Громкость',d:'Тяни ползунок. Значок динамика рядом включает и выключает звук.'},
     {el:ph?'#player .pbtns [data-act=close-player]':'#player .p-right [data-act=close-player]',t:'Закрыть плеер',d:'Останавливает музыку и убирает плеер.'},
+    ...videoSteps(ph),
   ]);
 }
+// кнопки окошка с видео (рядом с плеером): видео, перетащить, развернуть, закрыть — на ПК и на телефоне
+const videoSteps=ph=>[
+  {el:'#ytBox .ytin',t:'Окошко с видео',d:'Полные версии треков играют через YouTube в этом окошке. Звук идёт отсюда, а управлять можно обычным плеером.'},
+  {el:'#ytBox .ygrip',t:'Передвинуть окошко',d:ph?'Зажми эту кнопку пальцем и перетащи окошко в любое место экрана, чтобы оно не мешало.':'Зажми эту кнопку мышкой и перетащи окошко в любое место экрана, чтобы оно не мешало.'},
+  {el:'#ytBox [data-act=yt-expand]',t:'Развернуть видео',d:'Открывает полный плеер — видео будет внутри, большое. Свернуть обратно — стрелкой вниз сверху.'},
+  {el:'#ytBox [data-act=close-player]',t:'Закрыть',d:'Останавливает музыку и закрывает окошко с видео.'},
+];
 function tourVideo(){
   if($('#ytBox').hidden)return;
-  tourStart('video',[
-    {el:'#ytBox .ytin',t:'Видео',d:'Полные версии треков играют через YouTube в этом маленьком окошке. Звук идёт отсюда, управлять можно обычным плеером.'},
-    {el:'#ytBox .ygrip',t:'Перетащить',d:'Зажми эту кнопку и перетащи окошко в любое удобное место экрана.'},
-    {el:'#ytBox [data-act=yt-expand]',t:'Развернуть',d:'Открывает полный плеер — видео будет внутри, большое.'},
-    {el:'#ytBox [data-act=close-player]',t:'Закрыть',d:'Останавливает музыку и закрывает видео.'},
-  ]);
+  tourStart('video',videoSteps(isPhone()));
 }
 /* ===================== курсы ценностей: золото, серебро, платина, палладий ===================== */
 IMG.metals='/img/met_gold.webp';
 const MET=[{s:'XAU',n:'Золото',img:'/img/met_gold.webp',c:'#ffd45a',d:'#b7860c'},{s:'XAG',n:'Серебро',img:'/img/met_silver.webp',c:'#eef2f8',d:'#8b95a8'},{s:'XPT',n:'Платина',img:'/img/met_platinum.webp',c:'#dfe5fb',d:'#7d89b6'},{s:'XPD',n:'Палладий',img:'/img/met_palladium.webp',c:'#e4d6ff',d:'#8a6fca'}];
 const MT={by:{},t:0,err:'',timer:0,busy:false,built:false};
 const OZ=31.1034768;
-const barIco=m=>`<svg class="mbar" viewBox="0 0 34 20" aria-hidden="true"><defs><linearGradient id="mg${m.s}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".38" stop-color="${m.c}"/><stop offset="1" stop-color="${m.d}"/></linearGradient></defs><path d="M8 2.5h18l6 15H2z" fill="url(#mg${m.s})"/><path d="M8 2.5h18l-2.2 5.2H10.2z" fill="#fff" opacity=".45"/></svg>`;
+const MBAR={XAU:'gold',XAG:'silver',XPT:'platinum',XPD:'palladium'};
+const barIco=m=>`<img class="mbar" src="/img/bar_${MBAR[m.s]}.webp" alt="">`;
 async function metLoad(){const d=await srvGet('metals');const now=Date.now();(d.data||[]).forEach(x=>{const o=MT.by[x.s];x.fl=o&&o.price!==x.price?(x.price>o.price?1:-1):0;MT.by[x.s]=x});MT.t=now;MT.err=''}
 function metLive(on,paint){clearInterval(MT.timer);MT.timer=0;if(!on)return;
   const tick=async()=>{if(document.hidden||MT.busy)return;MT.busy=true;try{if(CR.cur==='rub')loadRub();await metLoad()}catch(e){MT.err=String(e.message||e)}finally{MT.busy=false}try{paint()}catch(e){}};
