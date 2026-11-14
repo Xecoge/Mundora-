@@ -19,6 +19,12 @@ function secToPacificMidnight() {
   const passed = (+p.hour % 24) * 3600 + +p.minute * 60 + +p.second;
   return Math.max(300, 86400 - passed + 120);
 }
+// длительность ролика: ISO 8601 «PT3M25S» → секунды
+const isoDur = v => { const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(v || ''); return m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0; };
+async function ytDurations(items, key) {
+  const ids = items.map(x => x.id).filter(Boolean).slice(0, 50); if (!ids.length) return items;
+  try { const r = await fetch('https://www.googleapis.com/youtube/v3/videos?' + new URLSearchParams({ part: 'contentDetails', id: ids.join(','), key })); const j = await r.json(); const d = {}; (j.items || []).forEach(v => { d[v.id] = isoDur(v.contentDetails && v.contentDetails.duration); }); return items.map(x => ({ ...x, dur: d[x.id] || 0 })); } catch (e) { return items; }
+}
 const ytNorm = q => String(q).toLowerCase().replace(/[«»"'`]/g, '').replace(/\s+/g, ' ').trim().slice(0, 200);
 export default async function handler(req) {
   { const g = await guard(req); if (g.res) return g.res; }
@@ -38,7 +44,12 @@ export default async function handler(req) {
       if (dbReady()) {
         try {
           const [hit, quota] = await kvMulti([['GET', ck], ['TTL', 'yt:quota']]);
-          if (hit) return out({ items: JSON.parse(hit), cached: true }, 200, 'public, s-maxage=86400, max-age=3600');
+          if (hit) {
+            let items = JSON.parse(hit);
+            // старый кэш без длительности — дозапрашиваем (1 единица лимита) и обновляем
+            if (items.length && !items.some(x => 'dur' in x) && !(quota > 0)) { items = await ytDurations(items, key); kv('SET', ck, JSON.stringify(items), 'EX', 30 * 86400).catch(() => {}); }
+            return out({ items, cached: true }, 200, 'public, s-maxage=86400, max-age=3600');
+          }
           if (quota > 0) return out({ error: 'Дневной лимит YouTube API исчерпан', quota: true, retryIn: quota }, 429);
         } catch (e) {}
       }
@@ -50,7 +61,7 @@ export default async function handler(req) {
         if (dbReady()) { try { await kvMulti([['SET', 'yt:lasterr', JSON.stringify({ t: Date.now(), status: r.status, reason, msg: msg.replace(/<[^>]+>/g, '').slice(0, 300) })], ...(quota ? [['SET', 'yt:quota', '1', 'EX', secToPacificMidnight()]] : [])]); } catch (e) {} }
         return out({ error: quota ? 'Дневной лимит YouTube API исчерпан' : msg.replace(/<[^>]+>/g, ''), quota, reason }, quota ? 429 : r.status);
       }
-      const items = (j.items || []).map(x => ({ id: x.id && x.id.videoId, title: x.snippet && x.snippet.title, channel: x.snippet && x.snippet.channelTitle })).filter(x => x.id);
+      const items = await ytDurations((j.items || []).map(x => ({ id: x.id && x.id.videoId, title: x.snippet && x.snippet.title, channel: x.snippet && x.snippet.channelTitle })).filter(x => x.id), key);
       if (dbReady()) { try { await kvMulti([['SET', ck, JSON.stringify(items), 'EX', 30 * 86400], ['SET', 'yt:ok', String(Date.now())], ['INCR', 'yt:calls:' + new Date().toISOString().slice(0, 10)]]); } catch (e) {} }
       return out({ items }, 200, 'public, s-maxage=86400, max-age=3600');
     }

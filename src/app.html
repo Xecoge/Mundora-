@@ -1317,6 +1317,8 @@ const YT_BADV=/(slowed|sped ?up|speed ?up|nightcore|8d|reverb|bass ?boost|remix|
 // тот же самый трек: название и артист совпадают, без slowed/sped up/ремиксов/каверов (если их нет в оригинале)
 function ytSame(t,it){const T0=cleanTitle(t.title)||t.title,A0=String(t.artist||'').split(/,|&|feat\.?|ft\.?| x | и /i)[0];
   if(!ytNz(T0)||!ytHas(it.title,T0))return false;
+  // длительность как у оригинала (±10 с или 7%): отсекает сокращённые, расширенные и чужие версии
+  const D=+t.duration||0;if(D>60&&it.dur&&Math.abs(it.dur-D)>Math.max(10,D*.07))return false;
   if(ytNz(A0)&&!ytHas(it.title,A0)&&!ytHas(it.channel,A0))return false;
   const bad=String(it.title||'').match(YT_BADV);if(bad&&!new RegExp(bad[1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(t.title))return false;return true}
 function ytPick(t,items){items=(items||[]).filter(it=>it&&it.id&&!YTB.has(it.id));
@@ -2880,7 +2882,7 @@ function tourVideo(){
   tourStart('video',videoSteps(isPhone()));
 }
 /* ===================== курсы ценностей: золото, серебро, платина, палладий ===================== */
-IMG.metals='/img/met_gold.webp';
+IMG.metals='/img/met_gold.webp';IMG.exch='/img/exch.webp';
 const MET=[{s:'XAU',n:'Золото',img:'/img/met_gold.webp',c:'#ffd45a',d:'#b7860c'},{s:'XAG',n:'Серебро',img:'/img/met_silver.webp',c:'#eef2f8',d:'#8b95a8'},{s:'XPT',n:'Платина',img:'/img/met_platinum.webp',c:'#dfe5fb',d:'#7d89b6'},{s:'XPD',n:'Палладий',img:'/img/met_palladium.webp',c:'#e4d6ff',d:'#8a6fca'}];
 const MT={by:{},t:0,err:'',timer:0,busy:false,built:false};
 const OZ=31.1034768;
@@ -2943,9 +2945,9 @@ function exCard(x){const adm=USR&&USR.admin;
   </div>`}
 function exFiltered(){const q=EX.q.trim().toLowerCase();return (EX.list||[]).filter(x=>(!EX.cur||(x.pairs||[]).some(r=>r.fiat===EX.cur||r.asset===EX.cur))&&(!q||(x.name+' '+x.countries+' '+x.methods+' '+x.tg).toLowerCase().includes(q)))}
 function exListHTML(){if(EX.list==null)return '<div class="glass skel" style="height:180px"></div>'.repeat(3);const L=exFiltered();
-  if(!L.length)return `<div class="glass" style="padding:28px;text-align:center"><img src="${IMG.bidask}" alt="" style="height:110px"><p class="k" style="margin-top:10px">${(EX.list||[]).length?'По этому фильтру обменников нет.':'Пока обменников нет — администрация скоро добавит проверенные.'}</p></div>`;
+  if(!L.length)return `<div class="glass" style="padding:28px;text-align:center"><img src="/img/exch.webp" alt="" style="height:130px"><p class="k" style="margin-top:10px">${(EX.list||[]).length?'По этому фильтру обменников нет.':'Пока обменников нет — администрация скоро добавит проверенные.'}</p></div>`;
   return L.map(exCard).join('')}
-V.exch=()=>`<div class="phead"><h1>Обменники</h1><p>Курсы покупки и продажи у обменников для P2P и трейда: что принимают, лимиты, резерв. Рядом — разница с биржевым курсом. Нажми «Написать», чтобы перейти к обменнику в Telegram.</p><div class="ctl">${curSeg()}</div><img src="${IMG.bidask}" alt=""></div>
+V.exch=()=>`<div class="phead"><h1>Обменники</h1><p>Курсы покупки и продажи у обменников для P2P и трейда: что принимают, лимиты, резерв. Рядом — разница с биржевым курсом. Нажми «Написать», чтобы перейти к обменнику в Telegram.</p><div class="ctl">${curSeg()}</div><img src="/img/exch.webp" alt=""></div>
   <div class="row exf"><div class="sbox" style="flex:1;min-width:200px">${ico('search','s')}<input id="exQ" placeholder="Название, страна, банк…" value="${esc(EX.q)}"></div>
   <div class="chips">${['',...EX_CUR,'USDT','BTC'].map(c=>`<button class="chip${EX.cur===c?' on':''}" data-act="ex-cur" data-c="${c}">${c||'Все'}</button>`).join('')}</div>
   ${USR&&USR.admin?`<button class="btn" data-act="ex-edit">${ico('plus','s')}Добавить</button>`:''}</div>
@@ -2975,7 +2977,7 @@ const EX_ACT={
 };
 
 V.finance=()=>pageHead('Финансы','ИИ-помощник, крипта, заметки, калькулятор, доходы и расходы, таблицы, спред, проценты и история — всё под рукой.','chart')+
-  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['exch','bidask','Обменники','Курсы покупки и продажи, Telegram'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
+  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['exch','exch','Обменники','Курсы покупки и продажи, Telegram'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
 
 V.calc=()=>{
   const keys=['AC','(',')','÷','7','8','9','×','4','5','6','−','1','2','3','+','%','0',',','='];
