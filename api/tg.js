@@ -19,6 +19,18 @@ async function notifyAdmins(text, extra = {}) {
   for (const id of ids) { try { await say(id, text, extra); n++; } catch (e) {} }
   return n;
 }
+// Заявки на покупку уходят продавцу — аккаунту @qlidw (можно сменить в Vercel: TG_SALES=ник).
+// Боту Telegram нужен числовой id: он появляется, когда продавец хоть раз нажмёт «Старт» у бота.
+const SALES = () => String((typeof process !== 'undefined' && process.env && process.env.TG_SALES) || 'qlidw').replace(/^@/, '').toLowerCase();
+const salesId = async () => +(await kv('GET', 'tg:un:' + SALES())) || 0;
+const isSales = async id => id && id === await salesId();
+async function notifySales(text, extra = {}) {
+  const id = await salesId();
+  if (id) { try { await say(id, text, extra); return [id]; } catch (e) {} }
+  // продавец ещё не запускал бота — отправим админам и напомним
+  await notifyAdmins(text + `\n\n<i>⚠️ @${SALES()} ещё не нажал «Старт» у бота — заявки пока приходят сюда.</i>`, extra);
+  return await tgAdmins();
+}
 const mainKb = async () => { const c = await cfg(); return { inline_keyboard: [[{ text: `💳 Купить доступ — ${c.price} ₽ / ${c.days} дн.`, callback_data: 'buy' }], [{ text: '🌐 Открыть сайт', url: SITE() }, { text: '✨ Что умеет Mundora', callback_data: 'about' }], [{ text: '🆘 Поддержка', callback_data: 'support' }]] }; };
 
 // ---------- покупка ----------
@@ -46,6 +58,11 @@ async function issueCode(buyerChat, buyer, by) {
 async function onPrivate(m) {
   const chat = m.chat.id, from = m.from, text = m.text || m.caption || '';
   const st = await jget('tg:st:' + chat);
+  // запоминаем id продавца (@qlidw), чтобы слать ему заявки
+  if (from.username && from.username.toLowerCase() === SALES()) {
+    const was = await kv('GET', 'tg:un:' + SALES());
+    if (+was !== from.id) { await kv('SET', 'tg:un:' + SALES(), String(from.id)); await say(chat, '✅ Готово: заявки на покупку доступа теперь будут приходить тебе сюда — с кнопками «Выдать код» и «Отклонить».'); }
+  }
   // ник в Telegram поменялся — обновим в профиле Mundora
   try { const em = await kv('GET', 'tg:uid:' + from.id); if (em) { const u = await getUser(em); if (u && u.tg && ((u.tg.username || '') !== (from.username || '') || (u.tg.name || '') !== (from.first_name || ''))) await linkTg(em, from); } } catch (e) {}
   const start = cmd(text, 'start');
@@ -82,8 +99,8 @@ async function onPrivate(m) {
   }
   // ждём подтверждение оплаты
   if (st && st.s === 'proof') {
-    const n = await notifyAdmins(`💳 <b>Заявка на доступ</b>\nОт: ${userLink(from)} (id <code>${from.id}</code>)\nСумма: ${(await cfg()).price} ₽\n\nПодтверждение ниже 👇`);
-    for (const id of await tgAdmins()) { try { await tg('copyMessage', { chat_id: id, from_chat_id: chat, message_id: m.message_id, reply_markup: { inline_keyboard: [[{ text: '✅ Выдать код', callback_data: 'ok:' + chat }, { text: '❌ Отклонить', callback_data: 'no:' + chat }]] } }); } catch (e) {} }
+    const to = await notifySales(`💳 <b>Заявка на доступ</b>\nОт: ${userLink(from)} (id <code>${from.id}</code>)\nСумма: ${(await cfg()).price} ₽\n\nПодтверждение ниже 👇`), n = to.length;
+    for (const id of to) { try { await tg('copyMessage', { chat_id: id, from_chat_id: chat, message_id: m.message_id, reply_markup: { inline_keyboard: [[{ text: '✅ Выдать код', callback_data: 'ok:' + chat }, { text: '❌ Отклонить', callback_data: 'no:' + chat }]] } }); } catch (e) {} }
     await jset('tg:st:' + chat, { s: 'wait', from: { id: from.id, username: from.username, first_name: from.first_name } }, 86400 * 3);
     return say(chat, n ? '📨 Отправил администратору. Как только он подтвердит — сразу пришлю код сюда.' : '📨 Заявку сохранил, администратор скоро ответит.');
   }
@@ -110,7 +127,7 @@ async function onCallback(q) {
   if (d === 'paid') { await jset('tg:st:' + chat, { s: 'proof' }, 3600); await ack(); return say(chat, '📸 Пришли скриншот перевода или чек (можно текстом: время, сумма, последние цифры карты).'); }
   if (d === 'want') {
     await ack();
-    const n = await notifyAdmins(`🙋 <b>Хочет купить доступ</b>: ${userLink(from)} (id <code>${from.id}</code>)\nНапиши ему реквизиты. Когда оплатит — нажми «Выдать код».`, { reply_markup: { inline_keyboard: [[{ text: '✅ Выдать код', callback_data: 'ok:' + chat }, { text: '❌ Отклонить', callback_data: 'no:' + chat }]] } });
+    const n = (await notifySales(`🙋 <b>Хочет купить доступ</b>: ${userLink(from)} (id <code>${from.id}</code>)\nНапиши ему реквизиты. Когда оплатит — нажми «Выдать код».`, { reply_markup: { inline_keyboard: [[{ text: '✅ Выдать код', callback_data: 'ok:' + chat }, { text: '❌ Отклонить', callback_data: 'no:' + chat }]] } })).length;
     await jset('tg:st:' + chat, { s: 'wait', from: { id: from.id, username: from.username, first_name: from.first_name } }, 86400 * 3);
     return say(chat, n ? '👌 Передал администратору — он скоро напишет тебе реквизиты. После оплаты код придёт сюда.' : '👌 Заявку сохранил — администратор скоро свяжется.');
   }
@@ -120,7 +137,7 @@ async function onCallback(q) {
   }
   const mm = d.match(/^(ok|no):(-?\d+)$/);
   if (mm) {
-    if (!(await isTgAdmin(from.id))) return ack('Только для администрации', true);
+    if (!(await isTgAdmin(from.id)) && !(await isSales(from.id))) return ack('Только для администрации', true);
     const buyer = +mm[2], st = await jget('tg:st:' + buyer);
     if (!st || st.s !== 'wait') { await ack('Заявка уже обработана', true); return; }
     const by = uname(from);
