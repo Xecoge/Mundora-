@@ -937,6 +937,56 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fgrid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .fgrid input,#exP,#exNo{width:100%;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;font:inherit;font-size:14px;margin-top:4px}
 @media(max-width:760px){.exlist{grid-template-columns:minmax(0,1fr)}.fgrid{grid-template-columns:1fr}.exf .chips{overflow-x:auto;flex-wrap:nowrap;width:100%}}
+
+/* ===== вкладка «Музыка»: подменю ===== */
+.mnav{display:flex;gap:6px;margin:0 0 18px;padding:5px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);overflow-x:auto;scrollbar-width:none;width:max-content;max-width:100%}
+.mnav::-webkit-scrollbar{display:none}
+.mnav a{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:15px;color:#a49dc0;font-weight:600;font-size:14px;white-space:nowrap;transition:background .2s,color .2s}
+.mnav a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.mnav a.on{color:#fff;background:linear-gradient(120deg,rgba(185,139,255,.32),rgba(255,110,199,.18));box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+@media(max-width:760px){.mnav{width:auto;margin:0 -2px 14px;border-radius:18px}.mnav a{padding:8px 13px;font-size:13px}}
+/* ===== главная: финансы ===== */
+.grid2.hfin{grid-template-columns:1.15fr 1fr}
+.hex{min-height:236px;position:relative;overflow:hidden}
+.hex .card-h .more{margin-left:auto}
+.hexrow{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n p" "r p";gap:2px 10px;width:68%;text-align:left;padding:9px 12px;margin-top:8px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#fff;font-weight:650;font-size:14px;cursor:pointer;position:relative;z-index:1;transition:background .2s}
+.hexrow:hover{background:rgba(255,255,255,.08)}.hexrow .k{grid-area:r;font-weight:500;font-size:12px;display:flex;align-items:center;gap:5px}.hexrow .pr{grid-area:p;align-self:center;font-size:12.5px;color:#d6cfee}
+.hai{position:relative;overflow:hidden;min-height:196px;color:inherit;display:block}
+@media(max-width:760px){.grid2.hfin{grid-template-columns:1fr}.hexrow{width:72%}}
+/* ===== звёзды и отзывы ===== */
+.stars{position:relative;display:inline-block;font-size:var(--sz);line-height:1;letter-spacing:1px;vertical-align:-1px}
+.stars .st-bg{color:rgba(255,255,255,.18)}.stars .st-fg{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#ffc94d;text-shadow:0 0 8px rgba(255,201,77,.35)}
+.exr{display:inline-flex;align-items:center;gap:5px;font-size:13px;margin-right:4px}.exr b{font-size:13px}
+.rvh4{display:flex;align-items:center;gap:8px;margin:18px 0 10px;font-size:16px}
+.rvbox{display:flex;flex-direction:column;gap:14px}
+.rvsum{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.rvavg{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:110px}.rvavg b{font-size:42px;font-weight:850;letter-spacing:-1px;line-height:1}
+.rvdist div{display:grid;grid-template-columns:14px 1fr 28px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.rvdist i{height:7px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}.rvdist i b{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#ffc94d,#ff9f43)}
+.rvform{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+.rvpick{display:flex;gap:4px}.rvpick button{font-size:30px;line-height:1;background:none;border:0;color:rgba(255,255,255,.2);cursor:pointer;transition:transform .15s,color .15s;padding:0 2px}
+.rvpick button:hover{transform:scale(1.15)}.rvpick button.on{color:#ffc94d;text-shadow:0 0 12px rgba(255,201,77,.5)}
+.rvtext{width:100%;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;font:inherit;font-size:14px;resize:vertical}
+.rvlist{display:flex;flex-direction:column;gap:2px}
+.rvi{display:flex;gap:12px;padding:12px 6px;border-top:1px solid rgba(255,255,255,.06)}.rvi .pav{width:38px;height:38px;border-radius:50%;flex:none;object-fit:cover}
+.rvb{flex:1;min-width:0}.rvh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.rvh b{font-size:14px}.rvh .k{font-size:12px}.rvh .ib{margin-left:auto}
+.rvb p{margin:6px 0 0;font-size:14px;line-height:1.5;color:#e6e0f7;white-space:pre-wrap;word-break:break-word}
+@media(max-width:760px){.rvsum{grid-template-columns:1fr;gap:12px}.rvavg{flex-direction:row;justify-content:center}}
+/* ===== списки треков: красивее ===== */
+.tl{gap:4px;padding:6px;border-radius:22px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06)}
+.tr{border-radius:16px;padding:8px 10px;position:relative;transition:background .2s,transform .2s}
+.tr:hover{background:linear-gradient(90deg,rgba(185,139,255,.12),rgba(255,255,255,.03))}
+.tr .art{border-radius:12px!important;box-shadow:0 8px 18px -8px rgba(0,0,0,.7);position:relative;overflow:hidden}
+.tr .art::after{content:'';position:absolute;inset:0;background:rgba(10,5,22,.45) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M8 5.5v13l11-6.5z'/%3E%3C/svg%3E") center/22px no-repeat;opacity:0;transition:opacity .2s}
+@media(hover:hover){.tr:not(.playing):hover .art::after{opacity:1}}
+.tr.playing{background:linear-gradient(90deg,rgba(185,139,255,.22),rgba(255,110,199,.06))}
+.tr.playing::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:linear-gradient(#b98bff,#ff6ec7);box-shadow:0 0 10px #ff6ec7}
+.tr .tm b{font-size:15px;font-weight:650}.tr .tm small{color:#a49dc0}
+.tr .tg{font-size:11.5px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.06);color:#cbbdf5;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+.tr .tg:empty{display:none}
+.tr .td{font-variant-numeric:tabular-nums;color:#8f88ad;font-size:13px}
+.tr .ib{opacity:.55;transition:opacity .2s}.tr:hover .ib,.tr .ib.on{opacity:1}.tr .ib.on{color:#ff6ec7}
+@media(max-width:760px){.mhub>*{min-height:0!important}.tl{padding:4px;border-radius:18px}.tr{padding:7px 6px}}
 </style>
 </head>
 <body>
@@ -1961,27 +2011,31 @@ const SP={bid:'',ask:'',vol:'',pip:''};
 const pcMini=()=>{const v=pnum(PS.b)*pnum(PS.a)/100;return isFinite(v)?money(v):'—'};
 
 /* ===================== navigation ===================== */
-const NAV_M=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Плейлисты'],['remixes','disc','Ремиксы'],['library','lib','Медиатека']];
+const NAV_M=[['home','home','Главная'],['music','note','Музыка']];
+// все музыкальные разделы живут внутри одной вкладки «Музыка»
+const MUSIC_R=['music','flow','search','playlists','remixes','library'];
+const isMusicR=r=>MUSIC_R.includes(r)||/^(artist|pl)-/.test(r);
 const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['metals','gem','Курсы ценностей'],['exch','spread','Обменники'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n],k)=>`<a class="it" href="#${v}" data-v="${v}" title="${n}" style="--k:${k}">${ico(i)}<span class="lt">${n}</span></a>`;
-$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
-$('#tabs').innerHTML=[['home','home','Главная'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Моё'],['finance','wallet','Финансы']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
-const FIN=['finance','ai','crypto','metals','exch','notes','calc','budget','tables','spread','percent','history'];
+$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],['reviews','star','Отзывы'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
+$('#tabs').innerHTML=[['home','home','Главная'],['music','note','Музыка'],['crypto','coin','Крипта'],['finance','wallet','Финансы'],['ai','chat','ИИ']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
+const FIN=['finance','ai','crypto','metals','exch','reviews','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
 
 function route(){return (location.hash||'#home').slice(1)||'home'}
 let renderId=0;
 function render(){
   const r=route(),id=++renderId;
-  const base=r.startsWith('u-')?'search':r.startsWith('pl-')?'playlists':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r.startsWith('artist-')?'search':r;
+  const base0=r.startsWith('u-')?'user':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r;
+  const base=isMusicR(r)?'music':base0;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));sideHL();
-  $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base))||(a.dataset.v==='playlists'&&MUSICLIB.includes(base))));
+  $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base)&&base!=='crypto'&&base!=='ai')));
   // большой плеер «Сейчас играет» — только в музыкальных разделах; в остальных — компактная плашка
-  document.body.classList.toggle('mroute',['home','flow','search','playlists','remixes','library'].includes(r)||/^(artist|pl)-/.test(r));
+  document.body.classList.toggle('mroute',isMusicR(r));
   cryptoLeave(r);if(r!=='home')homeLive(false);if(r!=='home'&&r!=='metals')metLive(false);
   const v=$('#view');
   const fn=r.startsWith('u-')?()=>V.user(r.slice(2)):r.startsWith('artist-')?V.artist:r.startsWith('pl-')?()=>V.playlist(r.slice(3)):r.startsWith('coin-')?()=>V.coin(r.slice(5)):r.startsWith('note-')?()=>V.notes(r.slice(5)):(V[r]||V.home);
-  v.innerHTML=fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
+  v.innerHTML=(isMusicR(r)?musicNav(r):'')+fn(id);v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');
   V.after[r.startsWith('u-')?'user':r.startsWith('artist-')?'artist':r.startsWith('pl-')?'playlist':r.startsWith('coin-')?'coin':r.startsWith('note-')?'notes':r]?.(id,r);
   window.scrollTo({top:0,behavior:'instant'});
 }
@@ -2041,15 +2095,7 @@ V.home=()=>{
   const sp=spreadCalc(pnum(SP.bid),pnum(SP.ask));
   const pl=S.playlists.slice(0,3);
   return `
-  <section class="grid2">
-    <div class="hero">
-      <div class="tag">${ico('spark','s')}${isCold()?'Первый запуск · случайный микс':'Подобрано для тебя'}</div>
-      <h1>Твоя волна</h1>
-      <p>${isCold()?'Слушай, лайкай и добавляй в плейлисты — подбор подстроится под твой вкус.':'Под твой вкус: '+esc(top.join(', ')||'твои любимые артисты')+'. Каждый лайк уточняет подбор.'}</p>
-      <div class="ctl"><button class="bigplay" id="heroPlay" data-act="flow-toggle" aria-label="Играть поток">${ico(!audio.paused&&P.ctx==='flow'?'pause':'play','f')}</button>
-      ${Object.entries(MOOD_GROUPS).map(([k,g])=>`<button class="chip${W8().mood===k?' on':''}" data-act="mood" data-m="${k}">${ico(g.icon)}${g.name}</button>`).join('')}</div>
-      <img src="${IMG.headphones}" alt="">
-    </div>
+  <section class="grid2 hfin">
     <div class="glass">
       <a class="card-link" href="#budget" aria-label="Доходы и расходы"></a>
       <div class="k">Баланс · ${MONTHS_F[+m.slice(5)-1].toLowerCase()}</div>
@@ -2059,14 +2105,15 @@ V.home=()=>{
       <div class="io"><div>Доходы<b class="num">${money(s.i)}</b></div><div>Расходы<b class="num">${money(s.o)}</b></div></div>
       <img class="charimg" src="${IMG.chart}" alt="" style="right:-4px;bottom:6px;height:150px">
     </div>
+    <div class="glass hex">
+      <div class="card-h">${ico('spread')}Обменники · лучшие<a class="more" href="#exch">Все</a></div>
+      <div id="hEx">${exTopHTML()}</div>
+      <img class="charimg" src="/img/exch.webp" alt="" style="right:-6px;bottom:-4px;height:150px">
+    </div>
   </section>
   ${homeBento()}
   <section class="grid3">
-    <div class="glass" style="min-height:196px">
-      <div class="card-h">${ico('lists')}Мои плейлисты</div>
-      ${pl.length?pl.map(p=>`<a class="mini-pl" href="#pl-${p.id}">${mosaic(p.tracks)}<div>${esc(p.name)}<small>${p.tracks.length} тр.</small></div></a>`).join(''):`<div class="k" style="margin:12px 0;max-width:60%;position:relative;z-index:1">Собери свой первый плейлист — по нему тоже будет подбор</div><button class="btn sm" data-act="pl-new" style="position:relative;z-index:1">${ico('plus')}Создать</button>`}
-      <img class="charimg" src="${IMG.playlist}" alt="" style="right:2px;top:-26px;height:108px">
-    </div>
+    <a class="glass hai" href="#ai"><div class="card-h">${ico('chat')}ИИ-помощник</div><div class="k" style="max-width:62%;position:relative;z-index:1">Спроси про курс, посчитай спред, запиши расход — «запиши 450 ₽ на кофе».</div><span class="btn sm" style="margin-top:14px;position:relative;z-index:1">${ico('spark','s')}Спросить</span><img class="charimg" src="${IMG.thumbs}" alt="" style="right:4px;top:-20px;height:110px"></a>
     <div class="glass" style="min-height:196px">
       <div class="card-h">${ico('spread')}Спред</div>
       <div class="kv">Bid <input class="mini-in num" data-sp="bid" value="${esc(SP.bid)}" placeholder="0" inputmode="decimal"></div>
@@ -2082,6 +2129,25 @@ V.home=()=>{
       <img class="charimg" src="${IMG.percent}" alt="" style="right:4px;top:-26px;height:104px">
     </div>
   </section>
+`;
+};
+V.music=()=>{
+  const top=topOf(S.taste.genre,3).map(x=>gRu(x[0]));const pl=S.playlists.slice(0,3);
+  return `<section class="grid2 mhub">
+    <div class="hero">
+      <div class="tag">${ico('spark','s')}${isCold()?'Первый запуск · случайный микс':'Подобрано для тебя'}</div>
+      <h1>Твоя волна</h1>
+      <p>${isCold()?'Слушай, лайкай и добавляй в плейлисты — подбор подстроится под твой вкус.':'Под твой вкус: '+esc(top.join(', ')||'твои любимые артисты')+'. Каждый лайк уточняет подбор.'}</p>
+      <div class="ctl"><button class="bigplay" id="heroPlay" data-act="flow-toggle" aria-label="Играть поток">${ico(!audio.paused&&P.ctx==='flow'?'pause':'play','f')}</button>
+      ${Object.entries(MOOD_GROUPS).map(([k,g])=>`<button class="chip${W8().mood===k?' on':''}" data-act="mood" data-m="${k}">${ico(g.icon)}${g.name}</button>`).join('')}</div>
+      <img src="${IMG.headphones}" alt="">
+    </div>
+    <div class="glass" style="min-height:236px">
+      <div class="card-h">${ico('lists')}Мои плейлисты</div>
+      ${pl.length?pl.map(p=>`<a class="mini-pl" href="#pl-${p.id}">${mosaic(p.tracks)}<div>${esc(p.name)}<small>${p.tracks.length} тр.</small></div></a>`).join(''):`<div class="k" style="margin:12px 0;max-width:60%;position:relative;z-index:1">Собери свой первый плейлист — по нему тоже будет подбор</div><button class="btn sm" data-act="pl-new" style="position:relative;z-index:1">${ico('plus')}Создать</button>`}
+      <img class="charimg" src="${IMG.playlist}" alt="" style="right:2px;top:-26px;height:108px">
+    </div>
+  </section>
   <div class="h3">${ico('spark')}Для тебя<button class="more" data-act="remix-home">${ico('refresh','s')}</button></div>
   <div id="hRec">${skelRows(6)}</div>
   <div class="h3">${ico('trend')}Чарт · Топ России<small class="k" id="hChartSrc" style="margin-left:6px;font-weight:500"></small>${fullOn()?'<span class="pv" style="margin-left:4px">целиком · YouTube</span>':''}<button class="more" data-act="play-list" data-list="home-chart">${ico('play','f')} Слушать</button></div>
@@ -2093,8 +2159,11 @@ let homeMix=null,homeMixKey='',homeMixAt=0;
 const tasteKey=()=>(S.taste.events||0)+':'+Object.keys(S.likes).length+':'+((S.plays||[])[0]?.t?.id||'');
 V.after.home=async(id)=>{
   homeLive(true);metLive(true,()=>{const b=$('.bento3 .bt-met');if(b&&route()==='home')b.innerHTML=metTile()});
-  if(USR&&!PEOPLE.cache[USR.id])peopleApi('id='+USR.id).then(j=>{PEOPLE.cache[USR.id]=j.profile;sideMe();if(route()==='home'){const b=$('.bento3');if(b)b.outerHTML=homeBento()}}).catch(()=>{});
+  if(USR&&!PEOPLE.cache[USR.id])peopleApi('id='+USR.id).then(j=>{PEOPLE.cache[USR.id]=j.profile;sideMe()}).catch(()=>{});
   bindHomeMini();
+  exLoad().then(()=>{const b=$('#hEx');if(b&&route()==='home')b.innerHTML=exTopHTML()});
+};
+V.after.music=async(id)=>{
   const rec=$('#hRec'),tr=$('#hTrend');
   if(homeMix&&homeMixKey!==tasteKey()&&Date.now()-homeMixAt>3*60e3)homeMix=null;
   if(!homeMix){homeMixKey=tasteKey();homeMixAt=Date.now();homeMix=await waveBatch(12,{home:true})}
@@ -2926,6 +2995,41 @@ V.metals=()=>{MT.built=false;const on=metOn();
 V.after.metals=()=>{loadRub();metLive(true,metPaint)};
 
 
+
+/* ===================== вкладка «Музыка»: подменю ===================== */
+const MNAV=[['music','spark','Обзор'],['flow','flow','Волна'],['search','search','Поиск'],['playlists','lists','Плейлисты'],['remixes','disc','Ремиксы'],['library','lib','Медиатека']];
+function musicNav(r){const b=/^pl-/.test(r)?'playlists':/^artist-/.test(r)?'search':r;
+  return `<nav class="mnav">${MNAV.map(([v,i,n])=>`<a href="#${v}" class="${b===v?'on':''}">${ico(i,'s')}<span>${n}</span></a>`).join('')}</nav>`}
+/* ===================== Отзывы и рейтинг ===================== */
+const RV={},RVF={};
+function starsHTML(avg,sz=14){const p=Math.max(0,Math.min(100,(+avg||0)/5*100));return `<span class="stars" style="--sz:${sz}px" aria-label="${fmt(+avg||0)} из 5"><span class="st-bg">★★★★★</span><span class="st-fg" style="width:${p}%">★★★★★</span></span>`}
+const rvWord=n=>{const a=n%10,b=n%100;return a===1&&b!==11?'отзыв':a>=2&&a<=4&&(b<10||b>=20)?'отзыва':'отзывов'};
+async function rvLoad(target){try{RV[target]=await peopleApi('a=reviews&target='+encodeURIComponent(target))}catch(e){RV[target]={err:e.message,list:[],n:0,avg:0,dist:[0,0,0,0,0]}}rvPaint(target)}
+function rvPaint(target){$$(`.rvbox[data-target="${target}"]`).forEach(b=>b.innerHTML=rvInner(target))}
+const rvBlock=target=>`<div class="rvbox" data-target="${esc(target)}">${rvInner(target)}</div>`;
+function rvInner(target){const d=RV[target];if(!d)return '<div class="skel" style="height:120px;border-radius:16px"></div>';
+  const f=RVF[target]||(RVF[target]={s:0,x:''});const mine=d.list.find(r=>r.mine);if(mine&&!f.touched){f.s=mine.stars;f.x=mine.text}
+  const mx=Math.max(1,...d.dist);
+  return `<div class="rvsum"><div class="rvavg"><b class="num">${d.n?fmt(d.avg):'—'}</b>${starsHTML(d.avg,18)}<span class="k">${d.n} ${rvWord(d.n)}</span></div>
+    <div class="rvdist">${[5,4,3,2,1].map((k,i)=>`<div><span>${k}</span><i><b style="width:${d.dist[i]/mx*100}%"></b></i><span class="k">${d.dist[i]}</span></div>`).join('')}</div></div>
+  ${USR?`<div class="rvform"><div class="k">${mine?'Твой отзыв — можно изменить':'Оцени и напиши отзыв'}</div><div class="rvpick">${[1,2,3,4,5].map(k=>`<button class="${k<=f.s?'on':''}" data-act="rv-star" data-t="${esc(target)}" data-s="${k}" aria-label="${k} из 5">★</button>`).join('')}</div>
+    <textarea class="rvtext" data-t="${esc(target)}" rows="3" maxlength="800" placeholder="Что понравилось, что нет — коротко и по делу">${esc(f.x)}</textarea>
+    <div class="row" style="gap:8px;align-items:center"><button class="btn sm" data-act="rv-send" data-t="${esc(target)}">${ico('send','s')}${mine?'Обновить':'Отправить'}</button><span class="r rverr" style="font-size:13px"></span></div></div>`:''}
+  <div class="rvlist">${d.list.length?d.list.map(r=>`<div class="rvi"><img class="pav" src="${esc(avaSrc(r.avatar))}" alt=""><div class="rvb"><div class="rvh"><b>${esc(r.name||'Пользователь')}</b>${starsHTML(r.stars,12)}<span class="k">${new Date(r.t).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}</span>${r.mine||(USR&&USR.admin)?`<button class="ib sm" data-act="rv-del" data-t="${esc(target)}" data-u="${r.uid}" title="Удалить">${ico('trash','s')}</button>`:''}</div>${r.text?`<p>${esc(r.text)}</p>`:''}</div></div>`).join(''):`<div class="k" style="padding:10px 0">Пока отзывов нет — будь первым.</div>`}</div>`}
+const RV_ACT={
+  'rv-star'(el){const t=el.dataset.t,f=RVF[t]||(RVF[t]={s:0,x:''});const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;f.s=+el.dataset.s;f.touched=true;rvPaint(t)},
+  async 'rv-send'(el){const t=el.dataset.t,f=RVF[t]||{s:0,x:''};const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;const er=el.parentElement.querySelector('.rverr');
+    if(!f.s){if(er)er.textContent='Поставь оценку звёздами';return}el.disabled=true;
+    try{RV[t]=await peopleApi('a=review',{target:t,stars:f.s,text:f.x});f.touched=false;rvPaint(t);if(t.startsWith('ex:'))exLoad().then(()=>{const b=$('#exList');if(b)b.innerHTML=exListHTML()})}catch(e){if(er)er.textContent=e.message;el.disabled=false}},
+  async 'rv-del'(el){const t=el.dataset.t;try{RV[t]=await peopleApi('a=review-del',{target:t,uid:+el.dataset.u});RVF[t]={s:0,x:''};rvPaint(t)}catch(e){toast(e.message,'x')}},
+};
+V.reviews=()=>`<div class="phead"><h1>Отзывы о Mundora</h1><p>Оцени сайт и расскажи, что нравится и чего не хватает. Отзывы видят все — мы читаем каждый.</p><img src="${IMG.thumbs}" alt=""></div>${rvBlock('site')}`;
+V.after.reviews=()=>rvLoad('site');
+// главная: три лучших обменника по рейтингу
+function exTopHTML(){if(EX.list==null)return '<div class="skel" style="height:110px;border-radius:14px"></div>';
+  const L=[...EX.list].sort((a,b)=>((b.rating?b.rating.avg:0)-(a.rating?a.rating.avg:0))||((b.rating?b.rating.n:0)-(a.rating?a.rating.n:0))).slice(0,3);
+  if(!L.length)return `<div class="k" style="max-width:60%;position:relative;z-index:1;margin-top:8px">Скоро здесь появятся проверенные обменники с курсами и отзывами.</div>`;
+  return L.map(x=>{const p=(x.pairs||[])[0];return `<button class="hexrow" data-act="go" data-h="#exch">${esc(x.name)}${x.verified?ico('check','s'):''}<span class="k">${x.rating?starsHTML(x.rating.avg,11)+' '+fmt(x.rating.avg):'нет оценок'}</span>${p?`<span class="num pr">${esc(p.asset)}→${esc(p.fiat)} ${exNum(p.sell||p.buy)}</span>`:''}</button>`}).join('')}
 /* ===================== Обменники: справочник с курсами покупки/продажи ===================== */
 const EX={list:null,q:'',cur:'',err:'',edit:null};
 const EX_CUR=['RUB','USD','EUR','KZT','UAH','BYN','UZS','TRY','AED','GEL'];
@@ -2939,7 +3043,7 @@ function exPairRow(r){const m=exMarket(r),db=exDiff(r.buy,m),ds=exDiff(r.sell,m)
 function exCard(x){const adm=USR&&USR.admin;
   return `<div class="glass excard" data-act="ex-open" data-id="${esc(x.id)}" role="button" tabindex="0">
     <div class="exh"><div><b>${esc(x.name)}</b>${x.verified?`<span class="exv">${ico('check','s')}проверен</span>`:''}<div class="k">${esc(x.countries||'')}</div></div>
-      <div class="row" style="gap:6px">${adm?`<button class="ib" data-act="ex-edit" data-id="${esc(x.id)}" title="Изменить">${ico('edit')}</button>`:''}<button class="btn sm" data-act="tg-go" data-u="${esc(x.tg)}">${TGI}Написать</button></div></div>
+      <div class="row" style="gap:6px"><span class="exr">${x.rating?starsHTML(x.rating.avg,13)+`<b class="num">${fmt(x.rating.avg)}</b><span class="k">${x.rating.n}</span>`:'<span class="k">нет отзывов</span>'}</span>${adm?`<button class="ib" data-act="ex-edit" data-id="${esc(x.id)}" title="Изменить">${ico('edit')}</button>`:''}<button class="btn sm" data-act="tg-go" data-u="${esc(x.tg)}">${TGI}Написать</button></div></div>
     ${x.pairs&&x.pairs.length?`<div class="extbl"><table><thead><tr><th>Пара</th><th>Покупает у вас</th><th>Продаёт вам</th><th>Мин – макс</th><th>Резерв</th></tr></thead><tbody>${x.pairs.map(exPairRow).join('')}</tbody></table></div>`:''}
     ${x.methods?`<div class="exm">${ico('wallet','s')}${esc(x.methods)}</div>`:''}
     ${x.note?`<div class="k exn">${esc(x.note)}</div>`:''}
@@ -2955,8 +3059,9 @@ function exDetail(x){const adm=USR&&USR.admin;
   ${x.note?`<div class="k" style="margin:12px 0 4px">Подробнее</div><div class="exn" style="font-size:14px;color:#e6e0f7">${esc(x.note)}</div>`:''}
   <div class="k exu" style="margin-top:10px">обновлено ${new Date(x.updated).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}</div>
   <div class="row" style="margin-top:14px;gap:8px"><button class="btn" style="flex:1;justify-content:center" data-act="tg-go" data-u="${esc(x.tg)}">${TGI}Написать в Telegram</button>${adm?`<button class="btn ghost" data-act="ex-edit" data-id="${esc(x.id)}">${ico('edit','s')}Изменить</button>`:''}</div>
-  <div class="k" style="margin-top:10px;font-size:12px">Mundora не проводит обмены и не отвечает за сделки. Уточняйте курс и условия перед обменом.</div>`)}
-function exFiltered(){const q=EX.q.trim().toLowerCase();return (EX.list||[]).filter(x=>(!EX.cur||(x.pairs||[]).some(r=>r.fiat===EX.cur||r.asset===EX.cur))&&(!q||(x.name+' '+x.countries+' '+x.methods+' '+x.tg).toLowerCase().includes(q)))}
+  <div class="k" style="margin-top:10px;font-size:12px">Mundora не проводит обмены и не отвечает за сделки. Уточняйте курс и условия перед обменом.</div>
+  <h4 class="rvh4">${ico('star','s')}Отзывы и рейтинг</h4>${rvBlock('ex:'+x.id)}`);rvLoad('ex:'+x.id)}
+function exFiltered(){const q=EX.q.trim().toLowerCase();return [...(EX.list||[])].sort((a,b)=>(b.verified-a.verified)||((b.rating?b.rating.avg:0)-(a.rating?a.rating.avg:0))).filter(x=>(!EX.cur||(x.pairs||[]).some(r=>r.fiat===EX.cur||r.asset===EX.cur))&&(!q||(x.name+' '+x.countries+' '+x.methods+' '+x.tg).toLowerCase().includes(q)))}
 function exListHTML(){if(EX.list==null)return '<div class="glass skel" style="height:180px"></div>'.repeat(3);const L=exFiltered();
   if(!L.length)return `<div class="glass" style="padding:28px;text-align:center"><img src="/img/exch.webp" alt="" style="height:130px"><p class="k" style="margin-top:10px">${(EX.list||[]).length?'По этому фильтру обменников нет.':'Пока обменников нет — администрация скоро добавит проверенные.'}</p></div>`;
   return L.map(exCard).join('')}
@@ -2991,7 +3096,7 @@ const EX_ACT={
 };
 
 V.finance=()=>pageHead('Финансы','ИИ-помощник, крипта, заметки, калькулятор, доходы и расходы, таблицы, спред, проценты и история — всё под рукой.','chart')+
-  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['exch','exch','Обменники','Курсы покупки и продажи, Telegram'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
+  `<div class="hub">${[['ai','thumbs','ИИ-помощник','Чат, файлы, фото, рассуждения'],['crypto','bidask','Крипта','Живые курсы и графики'],['metals','metals','Курсы ценностей','Золото, серебро, платина, палладий'],['exch','exch','Обменники','Курсы, рейтинг и отзывы'],['reviews','thumbs','Отзывы о Mundora','Оцени сайт и напиши, чего не хватает'],['notes','clock','Заметки','С ИИ-помощником'],['calc','calculator','Калькулятор','Быстрые расчёты с историей'],['budget','chart','Доходы и расходы','Баланс, категории, графики'],['tables','excel','Таблицы','Сводная, сортировка, экспорт в Excel'],['spread','bidask','Спред','Bid / Ask, пункты, стоимость'],['percent','percent','Проценты','6 режимов, сложный процент'],['history','clock','История','Все расчёты и операции']].map(([h,img,n,d])=>`<a href="#${h}"><b>${n}</b><small>${d}</small><img src="${IMG[img]}" alt=""></a>`).join('')}</div>`;
 
 V.calc=()=>{
   const keys=['AC','(',')','÷','7','8','9','×','4','5','6','−','1','2','3','+','%','0',',','='];
@@ -3163,6 +3268,7 @@ const ACT={
   mood(el){const w=W8(),k=el.dataset.m;w.mood=w.mood===k?'':k;save();$$('[data-act=mood]').forEach(b=>b.classList.toggle('on',b.dataset.m===w.mood));startFlow()},
   'wave-set'(el){const w=W8();w[el.dataset.k]=el.dataset.v;save();homeMix=null;$$(`[data-act=wave-set][data-k="${el.dataset.k}"]`).forEach(b=>b.classList.toggle('on',b===el));if(P.ctx==='flow'&&P.cur)rebuildWave();else toast('Настройка сохранена — включи волну','flow')},
   'remix-home'(){homeMix=null;render()},
+  'go'(el){location.hash=el.dataset.h},
   'side-pin'(){const on=document.body.classList.toggle('side-pin');try{LS.set('sidePin',on)}catch(e){}requestAnimationFrame(sideHL);toast(on?'Меню закреплено':'Меню снова сворачивается','pin')},
   'remix-g'(el){$$('[data-act=remix-g]').forEach(b=>b.classList.toggle('on',b===el));$('#rxList').innerHTML=skelRows(10);V.after.remixes(renderId,'remixes',el.dataset.g)},
   toggle(){P.toggle()},next(){P.next(true)},prev(){P.prev()},
@@ -3497,7 +3603,7 @@ const SH_ACT={ban:'забанил',block:'заблокировал',freeze:'за
 const ADM_DONE={'shadow-on':'Визуальная админка включена','shadow-off':'Визуальная админка выключена',extend:'Доступ продлён на 30 дней',forever:'Доступ теперь бессрочный',verify:'Галочка выдана',unverify:'Галочка снята','admin-add':'Теперь это админ','admin-del':'Больше не админ',activate:'Аккаунт снова активен',freeze:'Аккаунт заморожен',block:'Аккаунт заблокирован',ban:'Аккаунт забанен',logout:'Сессии завершены',note:'Заметка сохранена',delete:'Аккаунт удалён'};
 
 /* ===================== ИИ управляет сайтом ===================== */
-const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',metals:'Курсы ценностей',exch:'Обменники',admin:'Админ-панель'};
+const AI_PAGES={home:'Главная',flow:'Волна',search:'Поиск',playlists:'Плейлисты',remixes:'Ремиксы',library:'Медиатека',finance:'Финансы',ai:'ИИ-помощник',crypto:'Крипта',calc:'Калькулятор',budget:'Доходы и расходы',tables:'Таблицы',spread:'Спред',percent:'Проценты',history:'История',notes:'Заметки',metals:'Курсы ценностей',exch:'Обменники',music:'Музыка',reviews:'Отзывы о Mundora',admin:'Админ-панель'};
 const usd=v=>v==null||!isFinite(v)?'—':v>=1?v.toLocaleString('ru-RU',{maximumFractionDigits:2}):v.toPrecision(3);
 function siteContext(){
   const L=[];
@@ -3629,7 +3735,7 @@ async function aiRunActions(am,list){
 }
 const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
 
-Object.assign(ACT,EX_ACT);
+Object.assign(ACT,EX_ACT,RV_ACT);
 Object.assign(ACT,{
   async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
   async 'tg-fill'(el){el.disabled=true;toast('Бот ищет темы и пишет посты — до минуты…','loader');try{const r=await tgApi('fill',{});toast('Заполнено: '+r.topics.length+' тем','check')}catch(e){toast(e.message,'x')}el.disabled=false},

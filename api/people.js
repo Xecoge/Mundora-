@@ -103,7 +103,40 @@ export default async function handler(req) {
       return imgResponse(await kv('GET', key));
     }
     // ---------- Обменники: справочник, ведут админы ----------
-    if (a === 'exch' && req.method === 'GET') return json({ list: (await jget('exch:list')) || [] });
+    if (a === 'exch' && req.method === 'GET') {
+      const list = (await jget('exch:list')) || [];
+      // рейтинг каждого обменника из отзывов
+      if (list.length) { const r = await kvMulti(list.map(x => ['GET', 'rvs:ex:' + x.id])); list.forEach((x, i) => { const v = parse(r[i]); x.rating = v && v.n ? { n: v.n, avg: Math.round(v.sum / v.n * 10) / 10 } : null; }); }
+      return json({ list });
+    }
+    // ---------- Отзывы и рейтинг: о сайте (target=site) и об обменниках (target=ex:<id>) ----------
+    if (a === 'reviews' || a === 'review' || a === 'review-del') {
+      const b = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+      const target = String(b.target || url.searchParams.get('target') || '');
+      if (!/^(site|ex:[a-z0-9]{1,20})$/.test(target)) return json({ error: 'Неизвестно, к чему отзыв' }, 400);
+      if (target.startsWith('ex:') && !((await jget('exch:list')) || []).some(x => 'ex:' + x.id === target)) return json({ error: 'Обменник не найден' }, 404);
+      let list = (await jget('rv:' + target)) || [];
+      const summary = L => { const n = L.length, sum = L.reduce((q, r) => q + r.s, 0); return { n, sum }; };
+      const outList = L => ({ list: L.slice(0, 200).map(r => ({ uid: r.u, name: r.name, avatar: r.ava, stars: r.s, text: r.x, t: r.t, mine: r.u === me.id })), n: L.length, avg: L.length ? Math.round(summary(L).sum / L.length * 10) / 10 : 0, dist: [5, 4, 3, 2, 1].map(k => L.filter(r => r.s === k).length) });
+      const save = async L => { await jset('rv:' + target, L.slice(0, 1000)); await kv('SET', 'rvs:' + target, JSON.stringify(summary(L))); };
+      if (a === 'reviews') return json(outList(list));
+      if (a === 'review') {
+        if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — отзывы недоступны' }, 423);
+        const st = Math.round(+b.stars); if (!(st >= 1 && st <= 5)) return json({ error: 'Поставь оценку от 1 до 5 звёзд' }, 400);
+        const text = String(b.text || '').replace(/\s+\n/g, '\n').trim().slice(0, 800);
+        const u = await getUser(me.email); await ensureId(u);
+        const r = { u: u.id, name: displayName(u), ava: avatarOf(u), s: st, x: text, t: Date.now() };
+        list = [r, ...list.filter(x => x.u !== u.id)];
+        await save(list);
+        return json(outList(list));
+      }
+      // удалить: свой отзыв — любой, чужой — только админ
+      const uid = +b.uid; const own = uid === me.id;
+      if (!own && !me.admin && !me.shadow) return json({ error: 'Удалять чужие отзывы могут только администраторы' }, 403);
+      list = list.filter(x => x.u !== uid);
+      if (own || me.admin) await save(list);
+      return json(outList(list));
+    }
     if (req.method === 'POST' && (a === 'exch-save' || a === 'exch-del')) {
       if (!me.admin && !me.shadow) return json({ error: 'Это могут только администраторы' }, 403);
       const b = await req.json().catch(() => ({}));
