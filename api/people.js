@@ -26,7 +26,9 @@ async function shLog(by, act, target) {
   log.unshift({ t: Date.now(), by: by.id, byName: displayName(by), act, id: target ? target.id : null, name: target ? displayName(target) : '' });
   await jset('shlog', log.slice(0, 150));
 }
-const TITLES = [[1, 'Новичок'], [3, 'Слушатель'], [5, 'Меломан'], [8, 'Знаток'], [12, 'Легенда'], [18, 'Икона Mundora']];
+// уровни по очкам опыта: 1 ур. 0–1000, 2 ур. 1000–2500, 3 ур. 2500–5000 … 10 ур. — максимум
+const LV = [0, 1000, 2500, 5000, 8500, 13000, 19000, 27000, 37000, 50000];
+const TITLES = [[1, 'Новичок'], [2, 'Слушатель'], [4, 'Меломан'], [6, 'Знаток'], [8, 'Легенда'], [10, 'Икона Mundora']];
 const titleOf = l => TITLES.filter(([n]) => l >= n).pop()[1];
 const top = (o, n) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
 
@@ -39,8 +41,8 @@ function capital(u, d) {
   const days = Math.max(1, Math.ceil((Date.now() - (u.created || Date.now())) / 864e5));
   const parts = [['Лайки', likes * 5], ['Плейлисты', pls.length * 20 + plTracks * 2], ['Прослушивания', Math.max(events, plays)], ['Заметки', notes * 8], ['Финансы', ops * 3], ['Дни в Mundora', days * 10], ['Галочка', u.verified ? 500 : 0]];
   const score = parts.reduce((n, p) => n + p[1], 0);
-  const level = Math.floor(Math.sqrt(score / 50)) + 1;
-  return { score, level, title: titleOf(level), from: 50 * (level - 1) ** 2, to: 50 * level ** 2, parts: parts.filter(p => p[1] > 0), stats: { likes, playlists: pls.length, plTracks, plays: Math.max(events, plays), notes, ops, days } };
+  const level = LV.filter(x => score >= x).length;
+  return { score, level, max: LV.length, title: titleOf(level), from: LV[level - 1], to: LV[level] ?? null, ladder: LV, parts: parts.filter(p => p[1] > 0), stats: { likes, playlists: pls.length, plTracks, plays: Math.max(events, plays), notes, ops, days } };
 }
 
 async function card(email, viewer, full) {

@@ -1007,6 +1007,13 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
   .hai .k{max-width:66%!important}
   .grid3 .kv{margin:6px 0}
 }
+
+.pf-ladder{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
+.pf-ladder span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#8f88ad}
+.pf-ladder b{font-size:15px;color:#cbbdf5}.pf-ladder small{font-size:10.5px;white-space:nowrap}
+.pf-ladder .done{background:rgba(139,92,246,.14)}.pf-ladder .done b{color:#fff}
+.pf-ladder .on{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:transparent;color:#efe9ff;box-shadow:0 6px 18px rgba(124,58,237,.45)}.pf-ladder .on b{color:#fff}
+
 </style>
 </head>
 <body>
@@ -3041,7 +3048,14 @@ function rvInner(target){const d=RV[target];if(!d)return '<div class="skel" styl
     <textarea class="rvtext" data-t="${esc(target)}" rows="3" maxlength="800" placeholder="Что понравилось, что нет — коротко и по делу">${esc(f.x)}</textarea>
     <div class="row" style="gap:8px;align-items:center"><button class="btn sm" data-act="rv-send" data-t="${esc(target)}">${ico('send','s')}${mine?'Обновить':'Отправить'}</button><span class="r rverr" style="font-size:13px"></span></div></div>`:''}
   <div class="rvlist">${d.list.length?d.list.map(r=>`<div class="rvi"><img class="pav" src="${esc(avaSrc(r.avatar))}" alt=""><div class="rvb"><div class="rvh"><b>${esc(r.name||'Пользователь')}</b>${starsHTML(r.stars,12)}<span class="k">${new Date(r.t).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}</span>${r.mine||(USR&&USR.admin)?`<button class="ib sm" data-act="rv-del" data-t="${esc(target)}" data-u="${r.uid}" title="Удалить">${ico('trash','s')}</button>`:''}</div>${r.text?`<p>${esc(r.text)}</p>`:''}</div></div>`).join(''):`<div class="k" style="padding:10px 0">Пока отзывов нет — будь первым.</div>`}</div>`}
+const IS_APP=/MundoraApp/.test(navigator.userAgent);
+const APP_DL='https://github.com/Xecoge/Mundora-/releases/latest/download/';
 const RV_ACT={
+  'app-get'(){const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    const and=`<div class="glass" style="padding:14px 16px;margin-bottom:10px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`;
+    const io=`<div class="glass" style="padding:14px 16px;margin-bottom:10px"><b>iPhone</b><div class="k" style="margin:4px 0 10px">Без App Store iPhone ставит приложение только с подписью Apple. Файл подписывается твоим Apple ID через Sideloadly или AltStore на компьютере.</div><a class="btn ghost sm" href="${APP_DL}Mundora-iOS.ipa">${ico('down','s')}Скачать .ipa</a>
+      <div class="k" style="margin-top:12px">Быстрый вариант без компьютера: открой сайт в Safari → «Поделиться» → «На экран Домой». Mundora откроется на весь экран со своей иконкой.</div></div>`;
+    openSheet(`<h3>${ico('down')}Приложение Mundora</h3>${ios?io+and:and+io}`)},
   'rv-star'(el){const t=el.dataset.t,f=RVF[t]||(RVF[t]={s:0,x:''});const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;f.s=+el.dataset.s;f.touched=true;rvPaint(t)},
   async 'rv-send'(el){const t=el.dataset.t,f=RVF[t]||{s:0,x:''};const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;const er=el.parentElement.querySelector('.rverr');
     if(!f.s){if(er)er.textContent='Поставь оценку звёздами';return}el.disabled=true;
@@ -3824,7 +3838,7 @@ function nameGate(){
 function meHead(){if(!USR)return;$('#uName').textContent=USR.name||'Профиль';const im=$('#avaImg');if(im){im.src=avaSrc(USR.avatar);im.classList.add('own')}sideMe()}
 // карточка профиля внизу левого меню
 function sideMe(){if(!USR)return;const n=$('#sideName'),a=$('#sideAva'),sb=$('#sideSub');if(!n)return;n.textContent=USR.name||'Профиль';if(a)a.src=avaSrc(USR.avatar);
-  const c=PEOPLE.cache[USR.id]&&PEOPLE.cache[USR.id].capital;if(sb)sb.textContent=(USR.id!=null?'ID '+USR.id:'Mundora')+(c?' · '+c.score.toLocaleString('ru-RU')+' TP':'')}
+  const c=PEOPLE.cache[USR.id]&&PEOPLE.cache[USR.id].capital;if(sb)sb.textContent=(USR.id!=null?'ID '+USR.id:'Mundora')+(c?' · '+c.level+' ур. · '+c.score.toLocaleString('ru-RU')+' XP':'')}
 // подсветка выбранного пункта плавно переезжает (как «остров»)
 let sideHLfirst=true;
 function sideHL(){const h=$('.side .hl'),a=$('.side .it.on');if(!h)return;if(!a){h.style.opacity=0;return}
@@ -3841,8 +3855,9 @@ V.after.user=async(rid,r)=>{
   try{const j=await peopleApi('id='+encodeURIComponent(id));PEOPLE.cache[id]=j.profile;if(route()===r){$('#pfBox').innerHTML=pfHTML(j.profile)}}
   catch(e){if(route()===r)$('#pfBox').innerHTML=`<div class="pf-miss"><img src="/img/asteroid.webp" alt=""><h2>Профиль не найден</h2><p class="k">${esc(e.message)}</p><a class="btn ghost" href="#search">${ico('search','s')}Искать людей</a></div>`}
 };
+const kXP=n=>n<1000?String(n):String(n/1000).replace('.',',')+'к';
 function pfHTML(p){
-  const c=p.capital,pct=Math.max(3,Math.min(100,Math.round((c.score-c.from)/(c.to-c.from)*100)));
+  const c=p.capital,pct=c.to==null?100:Math.max(3,Math.min(100,Math.round((c.score-c.from)/(c.to-c.from)*100)));
   const joined=p.joined?new Date(p.joined).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}).replace(/\s*г\.$/,''):'';
   const open=p.genres!==undefined;
   const s=c.stats;
@@ -3856,13 +3871,14 @@ function pfHTML(p){
       ${p.tg?`<button class="pf-tglink" data-act="tg-go" data-u="${esc(p.tg.username||'')}" title="Telegram">${TGI}<span>${esc(tgLabel(p.tg))}</span></button>`:''}
       <div class="k pf-mail">${ico('lock','s')}${esc(p.email)}${joined?' · в Mundora с '+joined:''}</div>
       ${p.bio?`<p class="pf-bio">${esc(p.bio)}</p>`:''}
-      <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button></div>
+      <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button>${p.self&&!IS_APP?`<button class="btn ghost sm" data-act="app-get">${ico('down','s')}Приложение</button>`:''}</div>
     </div>
   </div>
   <div class="glass pf-cap">
-    <div class="pf-cap-top"><img src="/img/money.webp" alt=""><div style="flex:1;min-width:0"><span class="k">Капитализация</span><b class="num">${c.score.toLocaleString('ru-RU')} <small>TP</small></b></div><div class="pf-lvl"><b>${c.level}</b><span>ур.</span></div></div>
+    <div class="pf-cap-top"><img src="/img/money.webp" alt=""><div style="flex:1;min-width:0"><span class="k">Очки опыта · рейтинг</span><b class="num">${c.score.toLocaleString('ru-RU')} <small>XP</small></b></div><div class="pf-lvl"><b>${c.level}</b><span>ур.</span></div></div>
     <div class="pf-bar"><i style="width:${pct}%"></i></div>
-    <div class="k" style="display:flex;justify-content:space-between;margin-top:6px"><span>${esc(c.title)}</span><span>до ур. ${c.level+1}: ${(c.to-c.score).toLocaleString('ru-RU')} TP</span></div>
+    <div class="k" style="display:flex;justify-content:space-between;margin-top:6px"><span>${esc(c.title)}</span><span>${c.to==null?'максимальный уровень':`до ${c.level+1} ур.: ${(c.to-c.score).toLocaleString('ru-RU')} XP`}</span></div>
+    ${c.ladder?`<div class="pf-ladder">${c.ladder.map((f,i)=>`<span class="${i+1<c.level?'done':i+1===c.level?'on':''}"><b>${i+1}</b><small>${i+1===c.ladder.length?kXP(f)+'+':kXP(f)+'–'+kXP(c.ladder[i+1])}</small></span>`).join('')}</div>`:''}
     <div class="pf-parts">${c.parts.map(([n,v])=>`<span>${esc(n)} <b>+${v.toLocaleString('ru-RU')}</b></span>`).join('')}</div>
   </div>
   <div class="pf-stats">

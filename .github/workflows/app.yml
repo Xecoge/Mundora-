@@ -1,0 +1,105 @@
+name: Mundora app (Android + iOS)
+on:
+  push:
+    branches: [main]
+    paths: ['mobile/**', '.github/workflows/app.yml']
+permissions:
+  contents: write
+concurrency:
+  group: mundora-app
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - uses: android-actions/setup-android@v3
+      - name: Build APK
+        working-directory: mobile
+        env:
+          KP: ${{ secrets.ANDROID_KEY_PASS }}
+        run: |
+          set -o pipefail
+          {
+            python3 -m pip install --quiet pillow
+            npm install --no-audit --no-fund
+            npx cap add android
+            python3 brand.py android
+            npx cap sync android
+            cd android && chmod +x gradlew && ./gradlew assembleRelease --no-daemon -q && cd ..
+            if [ -n "$KP" ]; then
+              openssl enc -d -aes-256-cbc -pbkdf2 -in keys/release.jks.enc -out ks.jks -pass env:KP; PASS="$KP"; echo "Подпись: основной ключ"
+            else
+              cp keys/test.jks ks.jks; PASS=mundora-test; echo "Подпись: тестовый ключ (секрет ANDROID_KEY_PASS не задан)"
+            fi
+            BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+            "$BT/zipalign" -f -p 4 android/app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+            "$BT/apksigner" sign --ks ks.jks --ks-key-alias mundora --ks-pass pass:"$PASS" --key-pass pass:"$PASS" --out ../Mundora.apk aligned.apk
+            "$BT/apksigner" verify ../Mundora.apk && rm -f ks.jks
+          } 2>&1 | tee ../android.log
+      - name: Report error
+        if: failure()
+        run: echo "::error title=android::$(tail -c 3500 android.log | perl -pe 's/%/%25/g; s/\r//g; s/\n/%0A/g')"
+      - uses: actions/upload-artifact@v4
+        with: { name: apk, path: Mundora.apk }
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Build IPA (без подписи)
+        working-directory: mobile
+        run: |
+          set -o pipefail
+          {
+            python3 -m pip install --quiet --break-system-packages pillow || python3 -m pip install --quiet --user pillow
+            npm install --no-audit --no-fund
+            npx cap add ios
+            python3 brand.py ios
+            npx cap sync ios
+            PL=ios/App/App/Info.plist
+            /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" $PL || true
+            /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" $PL || true
+            /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" $PL || true
+            /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.$GITHUB_RUN_NUMBER" $PL || true
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" $PL || true
+            cd ios/App
+            if [ -d App.xcworkspace ]; then SRC="-workspace App.xcworkspace"; else SRC="-project App.xcodeproj"; fi
+            xcodebuild $SRC -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+              -archivePath "$PWD/build/App.xcarchive" archive \
+              CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -quiet
+            mkdir -p Payload && cp -R build/App.xcarchive/Products/Applications/App.app Payload/
+            zip -qry "$GITHUB_WORKSPACE/Mundora-iOS.ipa" Payload
+          } 2>&1 | tee ../ios.log
+      - name: Report error
+        if: failure()
+        run: echo "::error title=ios::$(tail -c 3500 ios.log | perl -pe 's/%/%25/g; s/\r//g; s/\n/%0A/g')"
+      - uses: actions/upload-artifact@v4
+        with: { name: ipa, path: Mundora-iOS.ipa }
+
+  release:
+    needs: [android, ios]
+    if: ${{ always() && needs.android.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-${{ github.run_number }}
+          name: Mundora ${{ github.run_number }}
+          make_latest: true
+          fail_on_unmatched_files: false
+          files: |
+            out/Mundora.apk
+            out/Mundora-iOS.ipa
+          body: |
+            **Android:** скачай `Mundora.apk` и установи (разреши установку из этого источника).
+            **iPhone:** `Mundora-iOS.ipa` без подписи — установка через Sideloadly/AltStore со своим Apple ID или подпись своим сертификатом разработчика.

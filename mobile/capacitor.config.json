@@ -1,0 +1,21 @@
+{
+  "appId": "app.mundora",
+  "appName": "Mundora",
+  "webDir": "www",
+  "backgroundColor": "#0e0a18",
+  "appendUserAgent": "MundoraApp",
+  "server": {
+    "url": "https://mundorai.vercel.app",
+    "cleartext": false,
+    "allowNavigation": ["mundorai.vercel.app"]
+  },
+  "android": {
+    "backgroundColor": "#0e0a18",
+    "adjustMarginsForEdgeToEdge": "auto"
+  },
+  "ios": {
+    "backgroundColor": "#0e0a18",
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
