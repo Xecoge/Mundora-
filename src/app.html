@@ -1358,6 +1358,75 @@ body.ms-open .tabs,body.ms-open .tab-all{display:none!important}
 
 .all-it.lq{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.06)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important}
 @media(max-width:760px){button.ava[data-act=profile]{display:none!important}}
+/* ===== мессенджер v2 ===== */
+.msgr.on{animation:none}.msgr.enter{animation:msIn .28s cubic-bezier(.2,.9,.25,1)}
+.msgr{top:0;bottom:auto;height:100dvh;will-change:transform}
+.ms-side{padding-bottom:96px}
+/* нижнее меню как в Telegram iOS */
+.ms-tabs{position:absolute;left:12px;bottom:calc(10px + env(safe-area-inset-bottom));width:calc(min(380px,100vw) - 24px);height:64px;border-radius:32px;display:flex;align-items:center;padding:5px;gap:2px;z-index:6;
+  background:linear-gradient(170deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),rgba(14,9,26,.72);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 18px 40px -12px rgba(0,0,0,.8);backdrop-filter:blur(26px) saturate(1.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);transition:transform .3s cubic-bezier(.2,.9,.25,1),opacity .2s}
+.ms-tabs button{flex:1;height:100%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:#fff;font:inherit;font-size:11.5px;font-weight:600;border-radius:27px;cursor:pointer;transition:background .2s,color .2s}
+.ms-tabs button .i{width:25px;height:25px}.ms-tabs button img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.ms-tabs button.on{background:rgba(0,0,0,.42);color:#b79cff}.ms-tabs button.on img{box-shadow:0 0 0 2px #b79cff}
+.ms-tabs .ms-badge{top:3px;right:calc(50% - 30px)}
+/* шапка чата: три стеклянных элемента */
+.ms-ch{background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0;gap:8px;left:10px;right:10px}
+.ms-back{width:48px;height:48px;border-radius:50%;flex:none;color:#fff;display:grid;place-items:center;border:0;position:relative}
+.ms-cht{flex:1;min-width:0;max-width:62%;margin:0 auto;padding:6px 16px;border-radius:24px;text-align:center;color:#fff}
+.ms-chava{flex:none}.ms-chava .ms-ava{width:48px;height:48px;box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+.ms-pfh{background:linear-gradient(170deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),rgba(18,10,36,.6)!important;border:1px solid rgba(255,255,255,.13)!important;backdrop-filter:blur(24px)!important;-webkit-backdrop-filter:blur(24px)!important;padding:6px 8px!important;border-radius:24px}
+.ms-pfh .ms-cht{background:none;max-width:none}
+.ms-pfs{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(72px + env(safe-area-inset-top)) 12px 110px;position:relative;z-index:1}
+/* список */
+.ms-avw{position:relative;flex:none}.ms-dot{position:absolute;right:1px;bottom:2px;width:13px;height:13px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 2.5px #0d0819}
+.ms-fav{display:grid!important;place-items:center;background:linear-gradient(135deg,#8b5cf6,#6d28d9)!important;color:#fff}.ms-fav .i{width:24px;height:24px}
+/* поле ввода как в Telegram iOS 26 */
+.ms-comp{align-items:flex-end;background:none;padding:6px 10px calc(10px + env(safe-area-inset-bottom))}
+.ms-comp::before{content:'';position:absolute;inset:-30px 0 0;background:linear-gradient(to top,rgba(11,7,22,.9),rgba(11,7,22,0));pointer-events:none;z-index:-1}
+.ms-att,.ms-mic,.ms-send{width:48px;height:48px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;border:0;cursor:pointer}
+.ms-att .i,.ms-mic .i{width:24px;height:24px}
+.ms-inp{min-height:48px;border-radius:24px;padding:0 4px 0 16px;align-items:flex-end}
+.ms-inp textarea{font-size:17px;padding:13px 0}
+.ms-emob{width:40px;height:48px;flex:none;border:0;background:none;color:rgba(255,255,255,.7);display:grid;place-items:center;cursor:pointer}.ms-emob .i{width:26px;height:26px}
+.ms-send{background:linear-gradient(140deg,#a78bfa,#7c3aed)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px -6px rgba(124,58,237,.9)!important;transform:none;opacity:1;width:48px;margin:0;display:none}
+.ms-comp.has .ms-send{display:grid;animation:pop .22s cubic-bezier(.3,1.5,.5,1)}.ms-comp.has .ms-mic{display:none}
+@keyframes pop{from{transform:scale(.4)}to{transform:none}}
+.ms-comp.rec .ms-att,.ms-comp.rec .ms-inp,.ms-comp.rec .ms-mic{display:none}.ms-comp.rec .ms-send{display:grid}
+.ms-recbar{flex:1;min-width:0;height:48px;border-radius:24px;display:flex;align-items:center;gap:10px;padding:0 6px 0 16px}
+.ms-recbar[hidden]{display:none}.ms-recdot{width:10px;height:10px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite;flex:none}
+.ms-recbar span{font-variant-numeric:tabular-nums;font-weight:650;min-width:38px}.ms-recbar canvas{flex:1;min-width:0;height:28px}
+.ms-reccan{border:0;background:none;color:#fca5a5;font:inherit;font-weight:650;padding:0 10px;cursor:pointer}
+.ms-emo{position:absolute;left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:5;display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:2px;max-height:240px;overflow-y:auto;padding:8px;border-radius:22px;background:rgba(22,14,42,.96);border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 40px rgba(0,0,0,.6)}
+.ms-emo[hidden]{display:none}.ms-emo button{font-size:26px;height:44px;border:0;background:none;border-radius:12px;cursor:pointer}.ms-emo button:active{background:rgba(255,255,255,.1)}
+/* голосовые */
+.mb.vo{min-width:230px}.ms-voice{display:flex;align-items:center;gap:10px;padding:2px 0 0}
+.ms-vplay{width:44px;height:44px;border-radius:50%;flex:none;border:0;display:grid;place-items:center;cursor:pointer;background:#fff;color:#6d28d9}.mb.th .ms-vplay{background:#8b5cf6;color:#fff}.ms-vplay .i{width:20px;height:20px}
+.ms-vw{flex:1;min-width:0}.ms-bars{display:flex;align-items:center;gap:2px;height:30px}.ms-bars i{width:3px;border-radius:2px;background:rgba(255,255,255,.4);transition:background .1s}.ms-bars i.on{background:#fff}
+.mb.th .ms-bars i{background:rgba(196,181,253,.35)}.mb.th .ms-bars i.on{background:#c4b5fd}.ms-vw small{font-size:12px;opacity:.75;font-variant-numeric:tabular-nums}
+/* фото с подписью: фото большое, текст под ним */
+.mb.cap{padding:3px 3px 6px}.mb.cap .ms-img,.mb.cap .ms-vid{margin:0 0 6px;width:min(320px,70vw);border-radius:16px}.mb.cap .ms-tx,.mb.cap .ms-mt{margin-left:9px;margin-right:9px}.mb.cap .ms-tx{font-size:15px}
+.ms-save{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;border:0;cursor:pointer;z-index:2}
+.ms-fl{border:0;background:none;font:inherit;text-align:left;cursor:pointer}
+/* просмотр фото: большие стеклянные кнопки */
+.ms-vtop{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top));display:flex;justify-content:space-between;z-index:2}
+.ms-gbtn{display:flex;align-items:center;gap:8px;height:52px;padding:0 20px 0 16px;border-radius:26px;color:#fff;font:inherit;font-size:16px;font-weight:650;border:0;cursor:pointer}.ms-gbtn .i{width:24px;height:24px}
+.ms-gbtn.on{background:linear-gradient(140deg,rgba(167,139,250,.75),rgba(124,58,237,.6))!important}
+.ms-vcap{position:absolute;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));padding:12px 16px;border-radius:18px;background:rgba(0,0,0,.55);font-size:15px;text-align:center}
+/* фото перед отправкой */
+.ms-cmp{display:flex;flex-direction:column;align-items:stretch;justify-content:center;background:#05030a}
+.ms-cvw{flex:1;min-height:0;display:grid;place-items:center;padding:80px 10px 10px}.ms-cvw canvas{max-width:100%;max-height:100%;border-radius:12px;touch-action:none}.ms-cvw canvas.pen{cursor:crosshair;box-shadow:0 0 0 2px rgba(167,139,250,.7)}
+.ms-pens{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px}.ms-pens[hidden]{display:none}
+.ms-pens button[data-c]{width:30px;height:30px;border-radius:50%;background:var(--c);border:2px solid rgba(255,255,255,.35);cursor:pointer}.ms-pens button.on{border-color:#fff;transform:scale(1.15)}
+.ms-pens input{width:90px;accent-color:#a78bfa}.ms-undo{width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer}
+.ms-cbar{display:flex;align-items:flex-end;gap:8px;padding:8px 10px calc(12px + env(safe-area-inset-bottom))}.ms-cbar .ms-inp{flex:1}.ms-cbar .ms-send{display:grid}
+@media(max-width:760px){
+  .ms-tabs{right:12px;width:auto}
+  .msgr[data-pane=chat] .ms-tabs,.msgr[data-pane=prof]:not([data-own="1"]) .ms-tabs{transform:translateY(140%);opacity:0;pointer-events:none}
+  .msgr[data-pane=prof] .ms-side{transform:translateX(-28%)}
+  .msgr[data-pane=prof] .ms-main{transform:none}
+  .ms-cht{max-width:none}
+}
+@media(min-width:761px){.ms-back{display:none}.ms-tabs{left:12px}}
 </style>
 </head>
 <body>
@@ -2168,6 +2237,10 @@ audio.addEventListener('timeupdate',()=>{
 });
 audio.addEventListener('loadedmetadata',()=>UI.progress(0,audio.duration));
 function markPlayed(t){S.recent=[t.id,...S.recent.filter(x=>x!==t.id)].slice(0,80);S.plays=[{t:lite(t),ts:Date.now()},...S.plays.filter(p=>p.t.id!==t.id)].slice(0,150);save()}
+// музыка не должна обрываться, когда сворачиваешь браузер: запоминаем, что играло, и продолжаем при возврате; статус для экрана блокировки
+const BGP={was:false};
+document.addEventListener('visibilitychange',()=>{try{if(document.hidden){BGP.was=!!(P.cur&&!audio.paused)}else if(BGP.was&&P.cur&&audio.paused){audio.play().catch(()=>{})}}catch(e){}});
+addEventListener('pageshow',()=>{try{if(BGP.was&&P.cur&&audio.paused)audio.play().catch(()=>{})}catch(e){}});
 if('mediaSession'in navigator){
   const ms=navigator.mediaSession;
   try{ms.setActionHandler('play',()=>audio.play());ms.setActionHandler('pause',()=>audio.pause());ms.setActionHandler('nexttrack',()=>P.next(true));ms.setActionHandler('previoustrack',()=>P.prev());ms.setActionHandler('seekto',e=>{audio.currentTime=e.seekTime})}catch(e){}
@@ -2411,7 +2484,7 @@ function route(){return (location.hash||'#home').slice(1)||'home'}
 let renderId=0;
 function render(){
   const r=route(),id=++renderId;
-  if(/^msg(-\d+)?$/.test(r)){tabsHL();msShow(r);return}else if(MS.on)msHide();
+  if(/^msg(c|-\d+|p-\d+)?$/.test(r)){tabsHL();msShow(r);return}else if(MS.on)msHide();
   const base0=r.startsWith('u-')?'user':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r;
   const base=isMusicR(r)?'music':base0;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));sideHL();
@@ -2427,134 +2500,156 @@ function render(){
 }
 addEventListener('hashchange',render);
 /* ===================== Мессенджер (как Telegram) ===================== */
-const MS={on:false,tk:'',me:null,v:'0',chats:[],peers:{},c:null,peer:null,msgs:{},from:{},read:{},typing:false,timer:0,bg:0,busy:false,pane:'list',q:'',tab:'chats',ty:0,lastTy:0,ok:false};
+const MS={on:false,tk:'',me:null,v:'0',chats:[],peers:{},c:null,peer:null,msgs:{},from:{},read:{},typing:false,timer:0,busy:false,pane:'list',q:'',tab:'chats',lastTy:0,ok:false,prof:null,n:0,on2:{}};
 const TK1='<svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',TK2='<svg class="i" viewBox="0 0 28 24"><path d="M3 12.5l4.2 4.2L17 7M11.5 16.2l.5.5L22 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const MIC='<svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const SMILE='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.2 14.2a4.5 4.5 0 0 0 7.6 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const PEN='<svg class="i" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M14.5 6.5l3 3" stroke="currentColor" stroke-width="1.9"/></svg>';
+const PLAYI='<svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>',PAUSEI='<svg class="i" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>';
 const msCid=p=>[String(MS.me),String(p)].sort((a,b)=>+a-+b).join('_');
-const msPeerOf=c=>c.split('_').find(x=>x!==String(MS.me))??String(MS.me);
 const msFile=(id,dl)=>`/api/msg?a=file&id=${encodeURIComponent(id)}&tk=${encodeURIComponent(MS.tk)}${dl?'&dl=1':''}`;
 async function msApi(a,body,qs=''){const r=await fetch('/api/msg?a='+a+qs+(body?'':'&tk='+encodeURIComponent(MS.tk)),body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,tk:MS.tk})}:{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j}
 async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers()}
-async function msPeers(extra=[]){const ids=[...new Set([...MS.chats.map(c=>c.p),...extra].map(String))].filter(id=>!MS.peers[id]);if(!ids.length)return;
+async function msPeers(extra=[],force){const ids=[...new Set([...MS.chats.map(c=>c.p),...extra].map(String))].filter(id=>force||!MS.peers[id]);if(!ids.length)return;
   try{const j=await msApi('peers',null,'&ids='+ids.join(','));j.peers.forEach(p=>MS.peers[p.id]=p)}catch(e){}}
 const msUnread=()=>MS.chats.reduce((n,c)=>n+(c.u||0),0);
 function msBadge(){const n=msUnread();$$('.ms-badge').forEach(b=>{b.textContent=n>99?'99+':n;b.hidden=!n});const t=$('#tabAll');if(t)t.classList.toggle('dot',n>0)}
 const msTime=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-function msWhen(t){const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return msTime(t);const y=new Date(n-864e5);if(d.toDateString()===y.toDateString())return 'вчера';return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}).replace('.','')}
+function msWhen(t){const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return msTime(t);if(d.toDateString()===new Date(n-864e5).toDateString())return 'вчера';return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}).replace('.','')}
 function msDay(t){const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return 'Сегодня';if(d.toDateString()===new Date(n-864e5).toDateString())return 'Вчера';return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',...(d.getFullYear()!==n.getFullYear()?{year:'numeric'}:{})})}
-function msStatus(p){if(!p)return '';if(MS.typing)return '<span class="ms-typ">печатает<i></i><i></i><i></i></span>';if(String(p.id)===String(MS.me))return 'заметки для себя';if(p.online)return '<span class="ms-on">в сети</span>';return p.seen?'был(а) '+msWhen(p.seen):'был(а) давно'}
+// «в сети» — пока у человека открыт сайт (метка обновляется каждые 15 с, после закрытия гаснет через ~30 с)
+function msStatus(p){if(!p)return '';if(MS.typing)return '<span class="ms-typ">печатает<i></i><i></i><i></i></span>';if(String(p.id)===String(MS.me))return 'заметки для себя';const on=MS.on2[p.id];if(on&&on.on)return '<span class="ms-on">в сети</span>';const ls=(on&&on.t)||p.seen;return ls?'был(а) '+msWhen(ls):'был(а) недавно'}
 const msName=p=>p?esc(p.name)+(p.verified?`<span class="ms-vf">${ico('check','s')}</span>`:''):'…';
 const msAva=(p,cls='')=>`<img class="ms-ava ${cls}" src="${avaSrc(p?p.avatar:'planet')}" alt="" loading="lazy">`;
 const fsz=n=>n>1048576?(n/1048576).toFixed(1).replace('.',',')+' МБ':n>1024?Math.round(n/1024)+' КБ':n+' Б';
+const fdur=s=>{s=Math.max(0,Math.round(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const linkify=s=>s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,'<br>');
 
-/* ---------- каркас ---------- */
+/* ---------- каркас + клавиатура iPhone: подгоняем высоту под видимую часть экрана ---------- */
+function msVV(){const m=$('#msgr');if(!m||!MS.on)return;const vv=window.visualViewport;if(!vv)return;m.style.height=vv.height+'px';m.style.transform=`translateY(${vv.offsetTop}px)`;const ml=$('#msMsgs');if(ml&&ml.dataset.stick!=='0')ml.scrollTop=ml.scrollHeight}
+if(window.visualViewport){visualViewport.addEventListener('resize',msVV);visualViewport.addEventListener('scroll',msVV)}
 function msShell(){let m=$('#msgr');if(m)return m;m=document.createElement('div');m.id='msgr';m.className='msgr';
   m.innerHTML=`<div class="ms-panes"><section class="ms-side" id="msSide"></section><section class="ms-main" id="msMain"></section></div>
-  <nav class="ms-tabs lq"><button data-act="ms-tab" data-t="chats">${ico('chat')}<span>Чаты</span><b class="ms-badge" hidden></b></button><button data-act="ms-tab" data-t="set">${ico('user')}<span>Настройки</span></button></nav>
-  <input type="file" id="msFileIn" multiple hidden>`;
+  <nav class="ms-tabs" id="msTabs"></nav><input type="file" id="msFileIn" multiple hidden>`;
   document.body.appendChild(m);
-  $('#msFileIn').addEventListener('change',e=>{msAttach([...e.target.files]);e.target.value=''});
+  $('#msFileIn').addEventListener('change',e=>{const fs=[...e.target.files];e.target.value='';if(fs.length===1&&/^image\//.test(fs[0].type))msCompose(fs[0]);else msAttach(fs.map(f=>({f})))});
   return m}
-async function msShow(r){const m=msShell();MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');
-  const peer=r.startsWith('msg-')?r.slice(4):null;
+function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&String(MS.prof)===String(MS.me);
+  t.innerHTML=`<button class="${MS.tab==='contacts'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msgc"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".9"/><circle cx="12" cy="9.5" r="3.3" fill="#0b0716"/><path d="M5.8 18.2c1.4-2.5 3.6-3.7 6.2-3.7s4.8 1.2 6.2 3.7" fill="#0b0716"/></svg><span>Контакты</span></button>
+  <button class="${MS.tab==='chats'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msg"><svg class="i" viewBox="0 0 24 24"><path d="M4 11.5C4 7.4 7.6 4.5 12 4.5s8 2.9 8 7-3.6 7-8 7c-.9 0-1.8-.1-2.6-.4L5 19.5l1.2-3.4C4.8 14.9 4 13.3 4 11.5z" fill="currentColor"/></svg><span>Чаты</span><b class="ms-badge" hidden></b></button>
+  <button class="${own?'on':''}" data-act="ms-go" data-h="#msgp-${MS.me}"><img src="${avaSrc(USR.avatar)}" alt=""><span>Профиль</span></button>`;
+  const m=$('#msgr');if(m){m.dataset.pane=MS.pane;m.dataset.own=own?'1':''}msBadge()}
+async function msShow(r){const m=msShell();const first=!MS.on;MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');if(first){m.classList.add('enter');setTimeout(()=>m.classList.remove('enter'),350);const pb=$('#view #pfBox');if(pb)pb.remove()}
+  msVV();
   try{await msInit()}catch(e){$('#msSide').innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`;return}
-  if(peer&&/^\d+$/.test(peer)){MS.peer=peer;MS.c=msCid(peer);await msPeers([peer]);MS.pane='chat';msDrawSide();msOpenChat()}
-  else{MS.c=null;MS.peer=null;MS.pane='list';msDrawSide();msDrawMain()}
-  m.dataset.pane=MS.pane;msLoop()}
-function msHide(){const m=$('#msgr');MS.on=false;document.body.classList.remove('ms-open');if(m)m.classList.remove('on');MS.c=null;msLoop()}
+  let x;
+  if((x=r.match(/^msg-(\d+)$/))){MS.peer=x[1];MS.c=msCid(x[1]);MS.prof=null;await msPeers([x[1]]);MS.pane='chat';msDrawSide();msOpenChat()}
+  else if((x=r.match(/^msgp-(\d+)$/))){MS.prof=x[1];MS.pane='prof';if(String(x[1])===String(MS.me)){MS.c=null}msDrawSide();msDrawProf()}
+  else{MS.tab=r==='msgc'?'contacts':'chats';MS.c=null;MS.peer=null;MS.prof=null;MS.pane='list';msDrawSide();msDrawMain()}
+  msTabs();msLoop()}
+function msHide(){const m=$('#msgr');MS.on=false;document.body.classList.remove('ms-open');if(m){m.classList.remove('on');m.style.height='';m.style.transform=''}MS.c=null;MS.prof=null;msRecStop(true);msLoop()}
 
-/* ---------- список чатов / настройки ---------- */
-function msDrawSide(){const s=$('#msSide');if(!s)return;$$('.ms-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===MS.tab));
-  if(MS.tab==='set'){s.innerHTML=msSettings();return}
-  s.innerHTML=`<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>Чаты</h1><button class="ib" data-act="ms-newchat" title="Новый чат">${ico('edit')}</button></div>
-    <label class="ms-search">${ico('search','s')}<input id="msQ" placeholder="Поиск людей и чатов" value="${esc(MS.q)}" autocomplete="off"></label>
-    <div class="ms-list" id="msList">${msListHTML()}</div>`;
+/* ---------- списки: чаты и контакты ---------- */
+function msDrawSide(){const s=$('#msSide');if(!s)return;const ct=MS.tab==='contacts';
+  s.innerHTML=`<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>${ct?'Контакты':'Чаты'}</h1><button class="ib" data-act="ms-newchat" title="Новый чат">${ico('edit')}</button></div>
+    <label class="ms-search">${ico('search','s')}<input id="msQ" placeholder="${ct?'Ник или ID человека':'Поиск людей и чатов'}" value="${esc(MS.q)}" autocomplete="off"></label>
+    <div class="ms-list" id="msList">${ct?msContactsHTML():msListHTML()}</div>`;
   const q=$('#msQ');let t;q.addEventListener('input',()=>{MS.q=q.value;clearTimeout(t);t=setTimeout(msSearch,250)});if(MS.q)msSearch()}
 function msListHTML(){const q=MS.q.trim().toLowerCase();
   const L=MS.chats.filter(c=>!q||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
   if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
-  return L.map(c=>{const p=MS.peers[c.p],mine=String(c.f)===String(MS.me),rd=mine&&c.n&&(MS.read[c.c]??-1)>=c.n-1;
-    return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${(rd?TK2:TK1)}</i>`:''}${msWhen(c.t)}</span></div>
+  return L.map(c=>{const p=MS.peers[c.p],mine=String(c.f)===String(MS.me),rd=mine&&c.n&&(MS.read[c.c]??-1)>=c.n-1,on=MS.on2[c.p]&&MS.on2[c.p].on;
+    return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
       <div class="ms-r2"><span>${mine?'<em>Вы: </em>':''}${esc(c.pv||'')}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:''}</div></div></a>`}).join('')}
-async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;box.innerHTML=msListHTML();if(q.length<1)return;
+function msContactsHTML(){const ids=[...new Set(MS.chats.map(c=>String(c.p)))].filter(id=>id!==String(MS.me));const L=ids.map(id=>MS.peers[id]).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+  return `<a class="ms-it" href="#msg-${MS.me}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b></div><div class="ms-r2"><span>заметки и файлы для себя</span></div></div></a>`
+    +(L.length?`<div class="ms-sec">Мои контакты</div>`+L.map(p=>{const on=MS.on2[p.id]&&MS.on2[p.id].on;return `<a class="ms-it" href="#msgp-${p.id}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>${on?'<span class="ms-on">в сети</span>':p.seen?'был(а) '+msWhen(p.seen):'ID '+p.id}</span></div></div></a>`}).join(''):`<div class="ms-empty"><b>Контактов пока нет</b><span>Найди человека по нику или ID сверху</span></div>`)}
+async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;box.innerHTML=MS.tab==='contacts'?msContactsHTML():msListHTML();if(q.length<1)return;
   try{const j=await peopleApi('q='+encodeURIComponent(q));if(MS.q.trim()!==q)return;const known=new Set(MS.chats.map(c=>String(c.p)));
     const ppl=j.people.filter(p=>!known.has(String(p.id)));if(!ppl.length)return;
-    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,online:p.online,seen:p.seen};
-      return `<a class="ms-it" href="#msg-${p.id}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>ID ${p.id}${p.bio?' · '+esc(p.bio):''}</span></div></div></a>`}).join(''))}catch(e){}}
-function msSettings(){const p=MS.peers[MS.me]||{name:USR.name,avatar:USR.avatar};
-  return `<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>Настройки</h1><span></span></div>
-  <a class="ms-me lq" href="#u-${USR.id}"><img src="${avaSrc(USR.avatar)}" alt=""><div><b>${esc(USR.name||'Профиль')}</b><small>ID ${USR.id} · ${esc(USR.email||'')}</small></div>${ico('chev','s r')}</a>
-  <div class="ms-grp lq">
-    <button class="ms-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button>
-    <a class="ms-row" href="#msg-${USR.id}">${ico('notes')}<span>Избранное — заметки себе</span>${ico('chev','s r')}</a>
-  </div>
-  <div class="ms-grp lq">
+    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen};
+      return `<a class="ms-it" href="#msgp-${p.id}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>ID ${p.id}${p.bio?' · '+esc(p.bio):''}</span></div></div></a>`}).join(''))}catch(e){}}
+
+/* ---------- профиль прямо в мессенджере (тот же, что на сайте) ---------- */
+async function msDrawProf(){const box=$('#msMain');if(!box)return;const id=MS.prof,own=String(id)===String(MS.me);
+  box.innerHTML=`<header class="ms-ch lq ms-pfh">${own?'<span style="width:40px"></span>':`<button class="ib" data-act="ms-back">${ico('left')}</button>`}<div class="ms-cht"><b>${own?'Мой профиль':'Профиль'}</b></div>${own?`<button class="ib" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button>`:`<a class="ib" href="#msg-${id}" title="Написать">${ico('chat')}</a>`}</header>
+    <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id]):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div>${own?msOptsHTML():''}</div>`;
+  try{const j=await peopleApi('id='+id);PEOPLE.cache[id]=j.profile;if(MS.prof===id){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(j.profile)}}catch(e){const b=$('#msgr #pfBox');if(b)b.innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`}}
+function msOptsHTML(){return `<div class="h3">${ico('chat')}Мессенджер</div><div class="ms-grp lq">
     <label class="ms-row">${ico('vol')}<span>Звук новых сообщений</span><input type="checkbox" data-ms-opt="snd" ${LS.get('msSnd',true)?'checked':''}></label>
     <label class="ms-row ms-pc">${ico('send')}<span>Отправка по Enter</span><input type="checkbox" data-ms-opt="enter" ${LS.get('msEnter',true)?'checked':''}></label>
-  </div>
-  <div class="ms-grp lq"><div class="ms-row ms-info">${ico('lock')}<span><b>Шифрование</b><small>Сообщения, фото, видео и файлы хранятся зашифрованными (AES-256-GCM, у каждого чата свой ключ) и передаются только по защищённому соединению HTTPS. Файлы видят только участники чата.</small></span></div></div>`}
+    <div class="ms-row ms-info">${ico('lock')}<span><b>Шифрование</b><small>Сообщения, фото, видео, голосовые и файлы хранятся зашифрованными (AES-256-GCM, у каждого чата свой ключ) и передаются только по HTTPS. Файлы видят только участники чата.</small></span></div>
+    <button class="ms-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button></div>`}
+function pfPaint(p){if(!p)return;if(route()==='u-'+p.id){const b=$('#view #pfBox');if(b)b.innerHTML=pfHTML(p)}if(MS.on&&String(MS.prof)===String(p.id)){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(p)}}
 
 /* ---------- чат ---------- */
-async function msOpenChat(){const c=MS.c,p=MS.peers[MS.peer];MS.typing=false;msDrawMain();
+async function msOpenChat(){const c=MS.c;MS.typing=false;msDrawMain();msPresence(true);
   if(!MS.msgs[c]){try{const j=await msApi('hist',null,'&c='+c);MS.msgs[c]=j.msgs;MS.from[c]=j.from;MS.read[c]=j.read;msDel(c,j.del)}catch(e){MS.msgs[c]=[];toast(e.message,'x')}}
   if(MS.c!==c)return;msPaintMsgs(true);msMarkRead()}
-function msDrawMain(){const box=$('#msMain');if(!box)return;const m=$('#msgr');if(m)m.dataset.pane=MS.pane;
+function msDrawMain(){const box=$('#msMain');if(!box)return;
   if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
   const p=MS.peers[MS.peer];
-  box.innerHTML=`<header class="ms-ch lq"><a class="ib" href="#msg">${ico('left')}<b class="ms-badge" hidden></b></a>
-      <a class="ms-cht" href="#u-${MS.peer}"><b>${msName(p)}</b><small id="msStat">${msStatus(p)}</small></a>
-      <a href="#u-${MS.peer}">${msAva(p,'sm')}</a></header>
+  box.innerHTML=`<header class="ms-ch"><button class="ib ms-back lq" data-act="ms-back">${ico('left')}<b class="ms-badge" hidden></b></button>
+      <a class="ms-cht lq" href="#msgp-${MS.peer}"><b>${msName(p)}</b><small id="msStat">${msStatus(p)}</small></a>
+      <a class="ms-chava" href="#msgp-${MS.peer}">${msAva(p,'sm')}</a></header>
     <div class="ms-msgs" id="msMsgs"><div class="ms-load">${ico('loader','s ldg')}</div></div>
+    <div class="ms-emo" id="msEmo" hidden></div>
     <form class="ms-comp" id="msComp">
       <button type="button" class="ms-att lq" data-act="ms-attach" title="Фото, видео, файл">${ico('clip')}</button>
-      <div class="ms-inp lq"><textarea id="msIn" rows="1" placeholder="Сообщение" enterkeyhint="send">${esc(MS.draft&&MS.draft[MS.c]||'')}</textarea></div>
-      <button type="submit" class="ms-send" id="msSend" title="Отправить">${ico('send')}</button>
+      <div class="ms-inp lq"><textarea id="msIn" rows="1" placeholder="Сообщение" enterkeyhint="send">${esc(MS.draft&&MS.draft[MS.c]||'')}</textarea><button type="button" class="ms-emob" data-act="ms-emo" title="Эмодзи">${SMILE}</button></div>
+      <button type="submit" class="ms-send lq" id="msSend" title="Отправить">${ico('send')}</button>
+      <button type="button" class="ms-mic lq" id="msMic" data-act="ms-rec" title="Голосовое сообщение">${MIC}</button>
+      <div class="ms-recbar lq" id="msRecBar" hidden><i class="ms-recdot"></i><span id="msRecT">0:00</span><canvas id="msRecWave" height="28"></canvas><button type="button" class="ms-reccan" data-act="ms-rec-cancel">Отмена</button></div>
     </form>`;
   msBadge();
   const inp=$('#msIn'),f=$('#msComp');const grow=()=>{inp.style.height='';inp.style.height=Math.min(140,inp.scrollHeight)+'px';f.classList.toggle('has',!!inp.value.trim())};grow();
   inp.addEventListener('input',()=>{grow();MS.draft=MS.draft||{};MS.draft[MS.c]=inp.value;msTyping()});
+  inp.addEventListener('focus',()=>{const e=$('#msEmo');if(e)e.hidden=true;setTimeout(msVV,300)});
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&LS.get('msEnter',true)&&matchMedia('(min-width:761px)').matches){e.preventDefault();msSend()}});
-  f.addEventListener('submit',e=>{e.preventDefault();msSend();inp.focus()});
-  const ml=$('#msMsgs');ml.addEventListener('scroll',()=>{if(ml.scrollTop<80&&!MS.hl)msOlder()},{passive:true});
+  f.addEventListener('submit',e=>{e.preventDefault();if(MS.rec)return msRecStop();msSend();inp.focus()});
+  const ml=$('#msMsgs');ml.addEventListener('scroll',()=>{ml.dataset.stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<120?'1':'0';if(ml.scrollTop<80&&!MS.hl)msOlder()},{passive:true});
   msLong(ml)}
 function msDel(c,del){if(!del||!MS.msgs[c])return;const D=new Set(del);MS.msgs[c].forEach(m=>{if(D.has(m.i)&&!m.d){m.d=1;m.x='';delete m.fl}})}
 async function msOlder(){const c=MS.c,from=MS.from[c];if(!c||!from)return;MS.hl=1;
   try{const j=await msApi('hist',null,'&c='+c+'&before='+from);if(MS.c!==c)return;const ml=$('#msMsgs'),h=ml.scrollHeight;MS.msgs[c]=j.msgs.concat(MS.msgs[c]);MS.from[c]=j.from;msDel(c,j.del);msPaintMsgs();ml.scrollTop+=ml.scrollHeight-h}catch(e){}finally{MS.hl=0}}
-function msMsgHTML(m,prev,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine&&m.i!=null&&(MS.read[c]??-1)>=m.i&&MS.peer!==String(MS.me);
+function msWave(wf,n=40){const a=String(wf||'').split('').map(ch=>parseInt(ch,36)||0);if(!a.length)return Array.from({length:n},(_,i)=>3+((i*7)%9));return Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)])}
+function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine&&m.i!=null&&(MS.read[c]??-1)>=m.i&&MS.peer!==String(MS.me);
   const grp=next&&String(next.f)===String(m.f)&&next.t-m.t<120e3&&new Date(next.t).toDateString()===new Date(m.t).toDateString();
-  const tick=mine?(m.err?`<i class="ms-tk er">!</i>`:m.pend?`<i class="ms-tk">${ico('hist','s')}</i>`:`<i class="ms-tk${rd?' rd':''}">${(rd?TK2:TK1)}</i>`):'';
-  const meta=`<span class="ms-mt">${msTime(m.t)}${tick}</span>`;
-  let body='';
+  const tick=mine?(m.err?`<i class="ms-tk er">!</i>`:m.pend?`<i class="ms-tk">${ico('hist','s')}</i>`:`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`):'';
+  const meta=`<span class="ms-mt">${msTime(m.t)}${tick}</span>`;let body='',kind='';
   if(m.d)body=`<span class="ms-delm">${ico('trash','s')}Сообщение удалено</span>${meta}`;
   else{const F=m.fl;let media='';
-    if(F){const src=F.local||(F.id?msFile(F.id):''),ar=F.w&&F.h?`aspect-ratio:${F.w}/${F.h};`:'';
-      if(F.ty.startsWith('image/'))media=`<button type="button" class="ms-img" data-act="ms-view" data-src="${esc(src)}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:''}</button>`;
-      else if(F.ty.startsWith('video/'))media=`<div class="ms-vid" style="${ar}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} controls playsinline preload="metadata"></video>`}</div>`;
-      else media=`<a class="ms-fl" ${m.pend?'':`href="${esc(msFile(F.id,1))}" download`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></a>`}
+    if(F){const src=F.local||(F.id?msFile(F.id):''),ar=F.w&&F.h?`aspect-ratio:${F.w}/${F.h};`:'',key=m.i??m.tmp;
+      if(F.vo){kind='voice';const bars=msWave(F.wf).map(v=>`<i style="height:${Math.max(3,v*2.4)}px"></i>`).join('');
+        media=`<div class="ms-voice" data-src="${esc(src)}" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:PLAYI}</button><div class="ms-vw"><div class="ms-bars">${bars}</div><small>${fdur(F.d)}</small></div></div>`}
+      else if(F.ty.startsWith('image/')){kind='img';media=`<button type="button" class="ms-img" data-act="ms-view" data-k="${key}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:''}</button>`}
+      else if(F.ty.startsWith('video/')){kind='img';media=`<div class="ms-vid" style="${ar}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} controls playsinline preload="metadata"></video><button type="button" class="ms-save lq" data-act="ms-save" data-k="${key}" title="Сохранить">${ico('down','s')}</button>`}</div>`}
+      else media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-save" data-k="${key}"`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></button>`}
     const txt=m.x?`<div class="ms-tx">${linkify(esc(m.x))}</div>`:'';
-    body=media+(txt||'')+meta}
-  const media=m.fl&&!m.d&&(m.fl.ty.startsWith('image/')||m.fl.ty.startsWith('video/'));
-  return `<div class="mb ${mine?'me':'th'}${grp?'':' tail'}${media&&!m.x?' bare':''}${m.d?' del':''}" data-i="${m.i??''}" data-tmp="${m.tmp||''}">${body}</div>`}
-const linkify=s=>s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,'<br>');
+    body=media+txt+meta}
+  const bare=kind==='img'&&!m.x;
+  return `<div class="mb ${mine?'me':'th'}${grp?'':' tail'}${bare?' bare':''}${kind==='img'&&m.x?' cap':''}${kind==='voice'?' vo':''}${m.d?' del':''}" data-i="${m.i??''}" data-tmp="${m.tmp||''}">${body}</div>`}
 function msPaintMsgs(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;const L=MS.msgs[c]||[];
   const stick=toBottom||ml.scrollHeight-ml.scrollTop-ml.clientHeight<120;
   if(!L.length){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
-  let h='',day='';L.forEach((m,k)=>{const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k-1],L[k+1])});
-  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight}
-function msAppend(ms){const ml=$('#msMsgs');if(!ml)return msPaintMsgs();const stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<160;msPaintMsgs();
-  ms.forEach(m=>{const el=ml.querySelector(`.mb[data-i="${m.i}"]`)||ml.querySelector(`.mb[data-tmp="${m.tmp}"]`);if(el)el.classList.add('new')});if(stick)ml.scrollTo({top:ml.scrollHeight,behavior:'smooth'})}
+  let h='',day='';L.forEach((m,k)=>{const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k+1])});
+  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync()}
+function msAppend(ms){const ml=$('#msMsgs');if(!ml)return;const stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<160;msPaintMsgs();
+  ms.forEach(m=>{const el=ml.querySelector(`.mb[data-i="${m.i}"]`)||ml.querySelector(`.mb[data-tmp="${m.tmp}"]`);if(el)el.classList.add('new')});if(stick)ml.scrollTop=ml.scrollHeight}
+const msFind=k=>(MS.msgs[MS.c]||[]).find(x=>String(x.i??x.tmp)===String(k));
 
 /* ---------- отправка ---------- */
 async function msSend(){const inp=$('#msIn');const x=(inp?inp.value:'').trim();if(!x||!MS.c)return;
   inp.value='';inp.style.height='';$('#msComp').classList.remove('has');if(MS.draft)delete MS.draft[MS.c];
   const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);
   await msPost(m,{to:MS.peer,x})}
-async function msPost(m,body){const c=MS.c;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
+async function msPost(m,body){const c=MS.c,peer=MS.peer;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
     const real={...j.m};if(m.fl&&m.fl.local)real.fl={...real.fl,local:m.fl.local};
     if(L.some(x=>x.i===real.i)){if(k>=0)L.splice(k,1)}else if(k>=0)L[k]=real;
-    const ch=MS.chats.find(x=>x.c===c);const pv=body.x?body.x.slice(0,80):'Файл';if(ch){ch.t=real.t;ch.f=MS.me;ch.pv=pv;ch.n=real.i+1}else MS.chats.unshift({c,p:MS.peer,t:real.t,f:MS.me,pv,n:real.i+1,u:0});
+    const ch=MS.chats.find(x=>x.c===c);const pv=body.x?body.x.slice(0,80):(body.fl&&body.fl.vo?'🎤 Голосовое':'Файл');if(ch){ch.t=real.t;ch.f=MS.me;ch.pv=pv;ch.n=real.i+1}else MS.chats.unshift({c,p:peer,t:real.t,f:MS.me,pv,n:real.i+1,u:0});
     if(MS.c===c)msPaintMsgs();msListPaint()}
   catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}
-function msListPaint(){const l=$('#msList');if(l&&!MS.q)l.innerHTML=msListHTML();msBadge()}
+function msListPaint(){const l=$('#msList');if(l&&!MS.q)l.innerHTML=MS.tab==='contacts'?msContactsHTML():msListHTML();msBadge()}
 function msTyping(){const now=Date.now();if(now-MS.lastTy<3000||!MS.c||MS.peer===String(MS.me))return;MS.lastTy=now;msApi('typing',{c:MS.c}).catch(()=>{})}
 async function msMarkRead(){const c=MS.c,L=MS.msgs[c]||[];if(!c||document.hidden)return;const last=[...L].reverse().find(m=>m.i!=null);if(!last)return;
   const ch=MS.chats.find(x=>x.c===c);if(ch&&!ch.u&&MS.rs===c+':'+last.i)return;MS.rs=c+':'+last.i;if(ch){ch.u=0;msListPaint()}
@@ -2569,55 +2664,136 @@ async function msShrink(f){if(!/^image\/(jpeg|png|webp|heic|heif)/.test(f.type)|
   try{const b=await createImageBitmap(f);const k=Math.min(1,1920/Math.max(b.width,b.height)),cv=document.createElement('canvas');cv.width=Math.round(b.width*k);cv.height=Math.round(b.height*k);cv.getContext('2d').drawImage(b,0,0,cv.width,cv.height);
     const bl=await new Promise(r=>cv.toBlob(r,'image/jpeg',.86));return bl&&bl.size<f.size?new File([bl],f.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}):f}catch(e){return f}}
 const b64ab=buf=>{const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode(...u.subarray(i,i+0x8000));return btoa(s)};
-async function msAttach(files){if(!MS.c)return;for(const f0 of files){
-  const f=await msShrink(f0);if(f.size>12*1024*1024){toast(`«${f.name}» больше 12 МБ`,'x');continue}
+async function msAttach(items){if(!MS.c)return;for(const it of items){
+  const f=it.raw?it.f:await msShrink(it.f);if(f.size>12*1024*1024){toast(`«${f.name}» больше 12 МБ`,'x');continue}
   const ty=f.type||'application/octet-stream',local=URL.createObjectURL(f),isImg=ty.startsWith('image/'),isVid=ty.startsWith('video/');
-  const meta=isImg||isVid?await msThumb(local,isVid):{};
-  const m={tmp:'f'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x:'',pend:1,prog:2,fl:{n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',local}};
+  const meta=(isImg||isVid)&&!it.vo?await msThumb(local,isVid):{};
+  const fl={n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',local,...(it.vo?{vo:1,d:it.d,wf:it.wf}:{})};
+  const m={tmp:'f'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x:it.x||'',pend:1,prog:2,fl};
   const c=MS.c,peer=MS.peer;(MS.msgs[c]=MS.msgs[c]||[]).push(m);msAppend([m]);
   try{const n=Math.max(1,Math.ceil(f.size/CH_SZ));let id='';
     for(let i=0;i<n;i++){const data=b64ab(await f.slice(i*CH_SZ,(i+1)*CH_SZ).arrayBuffer());
       const j=await msApi('up',{to:peer,id,i,n,name:f.name,type:ty,size:f.size,data});id=j.id;m.prog=Math.round((i+1)/n*100);
       const el=document.querySelector(`.mb[data-tmp="${m.tmp}"] .ms-prog i`);if(el)el.style.setProperty('--p',m.prog+'%')}
-    m.fl.id=id;await msPost(m,{to:peer,fl:{id,n:f.name,ty,sz:f.size,w:m.fl.w,h:m.fl.h,th:m.fl.th}})}
+    fl.id=id;const {local:_l,...send}=fl;await msPost(m,{to:peer,x:it.x||'',fl:send})}
   catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}}
 
-/* ---------- долгое нажатие: копировать / удалить ---------- */
-function msLong(ml){let t=0,el=null;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,video,button.ms-img'))return;el=b;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>{clearTimeout(t)};
-  ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&Math.abs(e.movementY)>4)stop()});
-  ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
-function msMenu(b){const i=b.dataset.i;const m=(MS.msgs[MS.c]||[]).find(x=>String(x.i)===i);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
-  b.classList.add('pick');setTimeout(()=>b.classList.remove('pick'),400);const mine=String(m.f)===String(MS.me);
-  openSheet(`<div class="ms-menu">${m.x?`<button class="opt" data-act="ms-copy" data-i="${i}">${ico('copy')}Копировать</button>`:''}${m.fl&&m.fl.id?`<a class="opt" href="${esc(msFile(m.fl.id,1))}" download data-act="close-sheet">${ico('down')}Скачать</a>`:''}${mine?`<button class="opt red" data-act="ms-del" data-i="${i}">${ico('trash')}Удалить у всех</button>`:''}<button class="opt" data-act="close-sheet">${ico('x')}Отмена</button></div>`)}
+/* ---------- фото перед отправкой: подпись + рисование карандашом ---------- */
+async function msCompose(file){const f=await msShrink(file);const url=URL.createObjectURL(f);const inp=$('#msIn');const cap=inp?inp.value:'';
+  const v=document.createElement('div');v.className='ms-viewer ms-cmp on';
+  v.innerHTML=`<div class="ms-vtop"><button class="ms-gbtn lq" data-x>${ico('x')}<span>Отмена</span></button><button class="ms-gbtn lq" data-pen>${PEN}<span>Рисовать</span></button></div>
+    <div class="ms-cvw"><canvas id="msCv"></canvas></div>
+    <div class="ms-pens" hidden>${['#ffffff','#ff4d4f','#ffc94d','#4ade80','#38bdf8','#a78bfa','#111111'].map((c,i)=>`<button style="--c:${c}" class="${i===1?'on':''}" data-c="${c}"></button>`).join('')}<input type="range" min="3" max="28" value="8" data-w><button class="ms-undo" data-undo>${ico('back','s')}</button></div>
+    <div class="ms-cbar"><div class="ms-inp lq"><textarea rows="1" placeholder="Добавить подпись…" data-cap>${esc(cap)}</textarea></div><button class="ms-send lq on" data-send>${ico('send')}</button></div>`;
+  document.body.appendChild(v);
+  const img=new Image();img.src=url;await img.decode().catch(()=>{});
+  const cv=v.querySelector('#msCv'),ctx=cv.getContext('2d');cv.width=img.naturalWidth;cv.height=img.naturalHeight;ctx.drawImage(img,0,0);
+  const hist=[];let draw=false,col='#ff4d4f',wid=8,pen=false,last=null;
+  const pt=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+  cv.addEventListener('pointerdown',e=>{if(!pen)return;e.preventDefault();cv.setPointerCapture(e.pointerId);hist.push(ctx.getImageData(0,0,cv.width,cv.height));if(hist.length>15)hist.shift();draw=true;last=pt(e);
+    const k=cv.width/cv.getBoundingClientRect().width;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=col;ctx.lineWidth=wid*k;ctx.beginPath();ctx.moveTo(...last);ctx.lineTo(last[0]+.1,last[1]+.1);ctx.stroke()});
+  cv.addEventListener('pointermove',e=>{if(!draw)return;const p=pt(e);ctx.beginPath();ctx.moveTo(...last);ctx.lineTo(...p);ctx.stroke();last=p});
+  const end=()=>{draw=false};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  v.addEventListener('click',async e=>{const t=e.target.closest('button,[data-w]');if(!t)return;
+    if(t.dataset.x!=null){v.remove();URL.revokeObjectURL(url)}
+    else if(t.dataset.pen!=null){pen=!pen;t.classList.toggle('on',pen);v.querySelector('.ms-pens').hidden=!pen;cv.classList.toggle('pen',pen)}
+    else if(t.dataset.c){col=t.dataset.c;v.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('on',b===t))}
+    else if(t.dataset.undo!=null){const h=hist.pop();if(h)ctx.putImageData(h,0,0)}
+    else if(t.dataset.send!=null){t.disabled=true;const x=v.querySelector('[data-cap]').value.trim();
+      const bl=hist.length?await new Promise(r=>cv.toBlob(r,'image/jpeg',.9)):f;const out=bl instanceof File?bl:new File([bl],(f.name||'photo').replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'});
+      v.remove();if(inp&&x===cap.trim()){inp.value='';inp.dispatchEvent(new Event('input'))}msAttach([{f:out,x,raw:true}])}});
+  v.querySelector('[data-w]').addEventListener('input',e=>{wid=+e.target.value})}
 
-/* ---------- опрос: раз в секунду, пока мессенджер открыт; иначе раз в 20 с — только счётчик ---------- */
-function msLoop(){clearTimeout(MS.timer);if(!USR||USR.id==null)return;MS.timer=setTimeout(msPoll,MS.on?(document.hidden?5000:1000):20000)}
+/* ---------- голосовые: моно 48 кГц, шумоподавление, AAC/Opus 128 кбит/с ---------- */
+async function msRecStart(){if(MS.rec)return;
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1,sampleRate:48000}});
+    const types=['audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];const mt=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
+    const rec=new MediaRecorder(st,{...(mt?{mimeType:mt}:{}),audioBitsPerSecond:128000});const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    const ac=new (window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();an.fftSize=512;ac.createMediaStreamSource(st).connect(an);const buf=new Uint8Array(an.fftSize);
+    const R=MS.rec={rec,st,chunks,ac,an,buf,lv:[],t0:Date.now(),mt:rec.mimeType||mt||'audio/webm'};rec.start(250);
+    $('#msComp').classList.add('rec');$('#msRecBar').hidden=false;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
+    const cv=$('#msRecWave'),g=cv.getContext('2d');cv.width=cv.clientWidth*2||200;
+    R.iv=setInterval(()=>{an.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const rms=Math.sqrt(s/buf.length);R.lv.push(rms);
+      const sec=(Date.now()-R.t0)/1000;const tl=$('#msRecT');if(tl)tl.textContent=fdur(sec);if(sec>=600)msRecStop();
+      g.clearRect(0,0,cv.width,cv.height);const n=Math.floor(cv.width/8),L=R.lv.slice(-n);g.fillStyle='#c4b5fd';L.forEach((v,i)=>{const h=Math.max(4,Math.min(cv.height,v*cv.height*4));g.fillRect(cv.width-(L.length-i)*8,(cv.height-h)/2,4,h)})},80)}
+  catch(e){toast('Нет доступа к микрофону — разреши его в настройках браузера','x')}}
+async function msRecStop(cancel){const R=MS.rec;if(!R)return;MS.rec=null;clearInterval(R.iv);const c=$('#msComp');if(c)c.classList.remove('rec');const b=$('#msRecBar');if(b)b.hidden=true;
+  const done=new Promise(r=>R.rec.onstop=r);try{R.rec.stop()}catch(e){}await done;R.st.getTracks().forEach(t=>t.stop());try{R.ac.close()}catch(e){}
+  const d=(Date.now()-R.t0)/1000;if(cancel||d<.6)return;
+  const blob=new Blob(R.chunks,{type:R.mt.split(';')[0]}),ext=/mp4/.test(R.mt)?'m4a':/ogg/.test(R.mt)?'ogg':'webm';
+  const mx=Math.max(.02,...R.lv);const wf=Array.from({length:48},(_,i)=>{const seg=R.lv.slice(Math.floor(i*R.lv.length/48),Math.floor((i+1)*R.lv.length/48)+1);const v=seg.length?Math.max(...seg):0;return Math.min(9,Math.round(v/mx*9)).toString(36)}).join('');
+  msAttach([{f:new File([blob],'voice.'+ext,{type:blob.type}),raw:true,vo:1,d:Math.round(d),wf}])}
+// проигрывание голосовых
+const MSV={a:null,k:null};
+function msVoiceSync(){if(!MSV.k)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(!el)return;el.classList.add('pl');const b=el.querySelector('.ms-vplay');if(b&&MSV.a&&!MSV.a.paused)b.innerHTML=PAUSEI}
+function msVoiceTick(){const a=MSV.a;if(!a)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(el){const p=a.duration?a.currentTime/a.duration:0;const bars=el.querySelectorAll('.ms-bars i');const n=Math.round(p*bars.length);bars.forEach((b,i)=>b.classList.toggle('on',i<n));const sm=el.querySelector('small');if(sm)sm.textContent=fdur(a.paused&&!a.currentTime?a.duration:a.currentTime)}}
+
+/* ---------- сохранить фото / видео / файл (на iPhone — через «Поделиться → Сохранить») ---------- */
+async function msSaveFile(m){const F=m.fl;if(!F||!F.id&&!F.local)return;toast('Сохраняю…','loader');
+  try{const blob=await fetch(F.local||msFile(F.id)).then(r=>{if(!r.ok)throw new Error('Файл не загрузился');return r.blob()});const file=new File([blob],F.n||'file',{type:F.ty||blob.type});
+    const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if((ios||/Android/.test(navigator.userAgent))&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]}).catch(()=>{});return}
+    const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=F.n||'file';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Сохранено','check')}
+  catch(e){toast(e.message,'x')}}
+
+/* ---------- долгое нажатие: копировать / сохранить / удалить ---------- */
+function msLong(ml){let t=0;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,video,.ms-vplay,.ms-save'))return;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>clearTimeout(t);
+  ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&(Math.abs(e.movementY)>4||Math.abs(e.movementX)>4))stop()});
+  ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
+function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+  b.classList.add('pick');setTimeout(()=>b.classList.remove('pick'),400);const mine=String(m.f)===String(MS.me);
+  openSheet(`<div class="ms-menu">${m.x?`<button class="opt" data-act="ms-copy" data-k="${k}">${ico('copy')}Копировать текст</button>`:''}${m.fl&&(m.fl.id||m.fl.local)?`<button class="opt" data-act="ms-save" data-k="${k}">${ico('down')}Сохранить ${m.fl.vo?'голосовое':m.fl.ty.startsWith('image/')?'фото':m.fl.ty.startsWith('video/')?'видео':'файл'}</button>`:''}${mine&&m.i!=null?`<button class="opt red" data-act="ms-del" data-i="${m.i}">${ico('trash')}Удалить у всех</button>`:''}<button class="opt" data-act="close-sheet">${ico('x')}Отмена</button></div>`)}
+
+/* ---------- эмодзи ---------- */
+const EMO='😀😂🤣😊😍😘😎🤔😴😭😡🥳🤯😱🙏👍👎👏🔥💯❤️💜💔✨🎉🚀💰💸📈📉🪙💎🎵🎧🎤😅😉🙃😇🤝👀💪🥲😤🤑🤡👻💀🌚🌝⭐️🌈☕️🍕🍔🍺🎁⚡️✅❌'.match(/\p{Extended_Pictographic}️?/gu)||[];
+
+/* ---------- присутствие и опрос ---------- */
+function msPresence(force){if(!MS.peer||String(MS.peer)===String(MS.me))return;const now=Date.now();if(!force&&now-(MS.prT||0)<10000)return;MS.prT=now;
+  msApi('on',null,'&ids='+MS.peer).then(j=>{Object.assign(MS.on2,j.on||{});const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}).catch(()=>{})}
+function msLoop(){clearTimeout(MS.timer);if(!USR||USR.id==null)return;MS.timer=setTimeout(msPoll,MS.on?(document.hidden?6000:1000):(document.hidden?60000:15000))}
 async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
-  try{if(!MS.ok)await msInit();const c=MS.on?MS.c:null,L=c?MS.msgs[c]:null,last=L?[...L].reverse().find(m=>m.i!=null):null;
-    const j=await msApi('poll',null,`&v=${MS.v}${c&&L?`&c=${c}&s=${last?last.i:(MS.from[c]||0)-1}`:''}`);
+  try{if(!MS.ok)await msInit();MS.n++;const c=MS.on?MS.c:null,L=c?MS.msgs[c]:null,last=L?[...L].reverse().find(m=>m.i!=null):null;
+    const hb=!document.hidden&&(MS.n%15===1||!MS.on); // «я в сети» — раз в 15 с, пока сайт открыт
+    const j=await msApi('poll',null,`&v=${MS.v}${hb?'&hb=1':''}${c&&L?`&c=${c}&s=${last?last.i:(MS.from[c]||0)-1}`:''}`);
     if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
-      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);const tw=MS.typing;MS.typing=j.typing;clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
-        if(add.length){MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>String(m.f)!==String(MS.me)))msMarkRead()}else msPaintMsgs();
-        const st=$('#msStat');if(st&&tw!==MS.typing)st.innerHTML=msStatus(MS.peers[MS.peer])}
-      if(msUnread()>before&&LS.get('msSnd',true))msBeep();
-      if(MS.on)msListPaint();else msBadge()}}
+      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);const tw=MS.typing;MS.typing=j.typing;
+        clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
+        if(add.length){MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
+        else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}
+        const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}
+      if(msUnread()>before&&LS.get('msSnd',true)&&!(MS.on&&c&&!document.hidden))msBeep();
+      if(MS.on)msListPaint();else msBadge()}
+    if(MS.on&&c)msPresence()}
   catch(e){if(/войти/.test(e.message))MS.ok=false}
   finally{MS.busy=false;msLoop()}}
 let msAC=null;function msBeep(){try{msAC=msAC||new AudioContext();const o=msAC.createOscillator(),g=msAC.createGain();o.type='sine';o.frequency.setValueAtTime(880,msAC.currentTime);o.frequency.exponentialRampToValueAtTime(1320,msAC.currentTime+.08);g.gain.setValueAtTime(.0001,msAC.currentTime);g.gain.exponentialRampToValueAtTime(.12,msAC.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,msAC.currentTime+.25);o.connect(g).connect(msAC.destination);o.start();o.stop(msAC.currentTime+.26)}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&MS.on){msLoop();msMarkRead()}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){MS.n=0;msLoop();if(MS.on)msMarkRead()}});
+addEventListener('pagehide',()=>{try{if(MS.tk)navigator.sendBeacon('/api/msg?a=off&tk='+encodeURIComponent(MS.tk))}catch(e){}});
 document.addEventListener('change',e=>{const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked)});
 
 const MS_ACT={
-  'ms-tab'(el){MS.tab=el.dataset.t;if(MS.tab==='chats'&&route()!=='msg')location.hash='#msg';MS.pane='list';const m=$('#msgr');if(m)m.dataset.pane='list';msDrawSide()},
+  'ms-go'(el){location.hash=el.dataset.h},
+  'ms-back'(){if(history.length>1&&MS.backOk)history.back();else location.hash=MS.tab==='contacts'?'#msgc':'#msg'},
   'ms-exit'(){location.hash='#home'},
   'ms-write'(el){location.hash='#msg-'+el.dataset.id},
   'ms-newchat'(){const q=$('#msQ');if(q){q.focus();q.placeholder='Ник или ID человека'}},
   'ms-attach'(){$('#msFileIn').click()},
-  'ms-view'(el){const v=document.createElement('div');v.className='ms-viewer';v.innerHTML=`<img src="${esc(el.dataset.src)}" alt=""><div class="ms-vbar"><a class="ib" href="${esc(el.dataset.src)}" download>${ico('down')}</a><button class="ib" data-x>${ico('x')}</button></div>`;
-    v.addEventListener('click',e=>{if(e.target.closest('[data-x]')||e.target===v||e.target.tagName==='IMG'){v.classList.add('off');setTimeout(()=>v.remove(),200)}});document.body.appendChild(v);requestAnimationFrame(()=>v.classList.add('on'))},
-  'ms-copy'(el){const m=(MS.msgs[MS.c]||[]).find(x=>String(x.i)===el.dataset.i);closeSheet();if(m)copyText(m.x)},
+  'ms-emo'(){const e=$('#msEmo');if(!e)return;if(!e.innerHTML)e.innerHTML=EMO.map(x=>`<button type="button" data-act="ms-emoadd" data-e="${x}">${x}</button>`).join('');const open=e.hidden;if(open){const i=$('#msIn');if(i&&document.activeElement===i){i.blur();setTimeout(()=>{e.hidden=false},250);return}}e.hidden=!open},
+  'ms-emoadd'(el){const i=$('#msIn');if(!i)return;const s=i.selectionStart??i.value.length;i.value=i.value.slice(0,s)+el.dataset.e+i.value.slice(i.selectionEnd??s);i.dispatchEvent(new Event('input'))},
+  'ms-rec'(){msRecStart()},
+  'ms-rec-cancel'(){msRecStop(true)},
+  'ms-vplay'(el){const k=el.dataset.k,src=el.dataset.src;if(!src)return;
+    if(MSV.k===k&&MSV.a){if(MSV.a.paused){MSV.a.play();el.innerHTML=PAUSEI}else{MSV.a.pause();el.innerHTML=PLAYI}return}
+    if(MSV.a){MSV.a.pause();const pb=document.querySelector(`.ms-voice[data-k="${MSV.k}"] .ms-vplay`);if(pb)pb.innerHTML=PLAYI}
+    const a=new Audio(src);a.preload='auto';MSV.a=a;MSV.k=k;a.ontimeupdate=msVoiceTick;a.onended=()=>{el.innerHTML=PLAYI;MSV.k=null;msVoiceTick()};a.play().then(()=>{el.innerHTML=PAUSEI}).catch(()=>toast('Не удалось воспроизвести','x'))},
+  'ms-save'(el){closeSheet();const m=msFind(el.dataset.k);if(m)msSaveFile(m)},
+  'ms-view'(el){const m=msFind(el.dataset.k);if(!m||!m.fl)return;const src=m.fl.local||msFile(m.fl.id);const v=document.createElement('div');v.className='ms-viewer';
+    v.innerHTML=`<img src="${esc(src)}" alt=""><div class="ms-vtop"><button class="ms-gbtn lq" data-x>${ico('x')}<span>Закрыть</span></button><button class="ms-gbtn lq" data-s>${ico('down')}<span>Сохранить</span></button></div>${m.x?`<div class="ms-vcap">${esc(m.x)}</div>`:''}`;
+    v.addEventListener('click',e=>{if(e.target.closest('[data-s]'))return msSaveFile(m);if(e.target.closest('[data-x]')||e.target===v){v.classList.add('off');setTimeout(()=>v.remove(),200)}});document.body.appendChild(v);requestAnimationFrame(()=>v.classList.add('on'))},
+  'ms-copy'(el){const m=msFind(el.dataset.k);closeSheet();if(m)copyText(m.x)},
   async 'ms-del'(el){closeSheet();const i=+el.dataset.i,m=(MS.msgs[MS.c]||[]).find(x=>x.i===i);if(!m)return;m.d=1;m.x='';delete m.fl;msPaintMsgs();try{await msApi('del',{c:MS.c,i})}catch(e){toast(e.message,'x')}},
 };
+
 
 
 /* ===================== views ===================== */
@@ -3648,8 +3824,8 @@ const GIFT_ACT={
       <button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="gift-shop"${to?` data-to="${to}"`:''}>Назад</button></div>`)},
   async 'gift-buy'(el){el.disabled=true;const to=el.dataset.to||null;
     try{const j=await peopleApi('a=gift-buy',{k:el.dataset.k,to});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();
-      if(to){toast('Подарок отправлен','star');try{const t=(await peopleApi('id='+to)).profile;PEOPLE.cache[t.id]=t;if(route()==='u-'+to)$('#pfBox').innerHTML=pfHTML(t)}catch(e){}}
-      else{toast('Подарок в профиле','star');if(route()==='u-'+j.profile.id)$('#pfBox').innerHTML=pfHTML(j.profile)}}
+      if(to){toast('Подарок отправлен','star');try{const t=(await peopleApi('id='+to)).profile;PEOPLE.cache[t.id]=t;pfPaint(t)}catch(e){}}
+      else{toast('Подарок в профиле','star');pfPaint(j.profile)}}
     catch(e){toast(e.message,'x');el.disabled=false}},
   'gift-view'(el){const p=PEOPLE.cache[el.dataset.u];if(!p)return;const g=(p.gifts||[]).find(x=>x.id===el.dataset.g);if(!g)return;const G=GIFT_CAT[g.k],r=giftRar(g.k);
     openSheet(`<div class="gv r-${r.c}"><button class="ib gv-x" data-act="close-sheet">${ico('x')}</button><div class="gv-img"><img src="${giftImg(g.k)}" alt=""></div><h3 class="gv-n">${G.n}</h3><div class="gv-r">${r.n} · ${G.p.toLocaleString('ru-RU')} XP</div>
@@ -3657,7 +3833,7 @@ const GIFT_ACT={
       ${p.self?`<div class="row" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gift-nick" data-g="${g.id}">${p.nick===g.id?'Убрать у ника':'Поставить у ника'}</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-start">${ico('pin','s')}Расставить</button></div>`:''}</div>`)},
   'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;
     GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;GL.anim=me.anim||'none';pfEdit.av=USR.avatar;
-    if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else{glPaint();scrollTo({top:0,behavior:'smooth'})}},
+    if(MS.on&&String(MS.prof)===String(USR.id)){glPaint();const sc=$('#msPfs');if(sc)sc.scrollTo({top:0,behavior:'smooth'})}else if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else{glPaint();scrollTo({top:0,behavior:'smooth'})}},
   'gl-cancel'(){GL.on=false;glPaint()},
   'gl-anim'(el){GL.anim=el.dataset.v;$$('.an-seg button').forEach(b=>b.classList.toggle('on',b===el))},
   'wal-name'(el){const i=$('#pfWalN');if(i)i.value=el.dataset.n;$$('.wal-chips button').forEach(b=>b.classList.toggle('on',b===el))},
@@ -3752,7 +3928,7 @@ document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.
 document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('#tgpStage.bubbles .tgp-g');if(el&&el.dataset.dragged){delete el.dataset.dragged;e.stopPropagation();e.preventDefault()}},true);
 const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true,anim:'none',tap:null}; // режим расстановки подарков в своём профиле
 function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen'),w=$('#pfWal'),wn=$('#pfWalN');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked;}
-function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
+function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(!me)return;const sc=$('#msPfs'),y=sc?sc.scrollTop:scrollY;pfPaint(me);if(sc)sc.scrollTop=y;else scrollTo(0,y)}
 // режим редактирования: тап по свободному месту шапки — выбрать подарок сюда, тап по аватарке — сменить аватарку
 document.addEventListener('click',e=>{if(!GL.on)return;const st=e.target.closest&&e.target.closest('#tgpStage.lay');if(!st||e.target.closest('.tgp-g'))return;
   if(e.target.closest('.tgp-ava'))return ACT['gl-avapick']();
@@ -4703,7 +4879,7 @@ function pfHTML(p){
     <div class="row gl-btns" style="margin-top:4px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
     ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
-      :act('ms-write',ico('send'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
+      :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
     ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
     ${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?act('app-get',ico('down'),'Приложение'):''}
     ${USR&&USR.admin&&!p.self?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''}
@@ -4752,10 +4928,10 @@ function pfHTML(p){
 }
 const TGI='<svg class="tgi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.4 11.8l10.9-4.2c.5-.2 1 .1.8.9l-1.9 8.8c-.1.6-.5.8-1 .5l-2.8-2.1-1.4 1.3c-.2.2-.3.3-.6.3l.2-2.9 5.3-4.8c.2-.2 0-.3-.3-.1L8 13.7l-2.8-.9c-.6-.2-.6-.6.2-1z"/></svg>';
 const tgLabel=t=>t.username?'@'+t.username:(t.name||'Telegram');
-function pfApply(p){PEOPLE.cache[p.id]=p;if(p.self){USR.avatar=p.avatar;meHead()}if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p)}
+function pfApply(p){PEOPLE.cache[p.id]=p;if(p.self){USR.avatar=p.avatar;meHead()}pfPaint(p)}
 function pfTgHTML(){return USR.tg?`<div class="tgrow">${TGI}<b>${esc(tgLabel(USR.tg))}</b><span class="k">привязан</span><button class="btn ghost sm" data-act="tg-unlink">Отвязать</button></div>`
   :`<button class="btn ghost" style="width:100%;justify-content:center" data-act="tg-link">${TGI}Привязать Telegram</button><div class="k" id="pfTgHint" style="margin-top:6px">Откроется бот Mundora — нажми там «Старт», и Telegram появится в твоём профиле.</div>`}
-async function pfTgCheck(){try{const j=await peopleApi('id='+USR.id);const p=j.profile;USR.tg=p.tg;PEOPLE.cache[p.id]=p;const b=$('#pfTg');if(b)b.innerHTML=pfTgHTML();if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p);return !!p.tg}catch(e){return false}}
+async function pfTgCheck(){try{const j=await peopleApi('id='+USR.id);const p=j.profile;USR.tg=p.tg;PEOPLE.cache[p.id]=p;const b=$('#pfTg');if(b)b.innerHTML=pfTgHTML();if(0)$('#pfBox').innerHTML=pfHTML(p);return !!p.tg}catch(e){return false}}
 function pfEdit(){
   let av=USR.avatar;
   openSheet(`<h3>${ico('edit')}Мой профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
@@ -4786,7 +4962,7 @@ Object.assign(ACT,{
     try{const data=await imgPrep(f,360,360,250e3);const j=await peopleApi('a=avatar',{data});const p=j.profile;
       USR.avatar=p.avatar;PEOPLE.cache[p.id]=p;pfEdit.av=p.avatar;meHead();
       const g=$('.ava-grid');if(g){g.querySelectorAll('button[data-k^="/"]').forEach(b=>b.remove());$$('.ava-grid button').forEach(b=>b.classList.remove('on'));el.insertAdjacentHTML('afterend',`<button class="on" data-act="pf-ava" data-k="${esc(p.avatar)}"><img src="${esc(p.avatar)}" alt=""></button>`)}
-      if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p)}
+      pfPaint(p)}
     catch(e){toast(e.message,'x')}finally{el.classList.remove('busy')}
   },
   'tg-go'(el){const u=el.dataset.u;if(!u){openSheet(`<h3>${TGI}Telegram<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><div class="k">У этого человека в Telegram нет ника, поэтому ссылку на профиль открыть нельзя.</div>`);return}
@@ -4816,7 +4992,7 @@ Object.assign(ACT,{
   async 'pf-save'(el){
     el.disabled=true;toast('Сохраняю — нейросеть проверяет имя…','loader');
     try{const j=await peopleApi('a=me',{name:$('#pfName').value,bio:$('#pfBio').value,avatar:pfEdit.av,open:$('#pfOpen').checked});
-      const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});PEOPLE.cache[p.id]=p;meHead();closeSheet();toast('Профиль сохранён','check');if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p)}
+      const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});PEOPLE.cache[p.id]=p;meHead();closeSheet();toast('Профиль сохранён','check');pfPaint(p)}
     catch(e){toast(e.message,'x');el.disabled=false}
   },
   'pf-share'(el){copyText(el.dataset.id)},

@@ -60,6 +60,7 @@ export default async function handler(req) {
     const me = W.id;
 
     if (a === 'poll') {
+      if (q('hb')) await kvMulti([['SET', 'on:' + me, '1', 'EX', '35'], ['SET', 'ls:' + me, String(Date.now())]]); // «в сети», пока сайт открыт
       const v = (await kv('GET', 'mv:' + me)) || '0';
       if (v === q('v')) return json({ v, same: 1 });
       const c = q('c'), s = +q('s');
@@ -78,6 +79,12 @@ export default async function handler(req) {
       const [raw, rd, dl] = await kvMulti([['LRANGE', 'cm:' + c, String(from), String(before - 1)], ['HGET', 'cr:' + c, p], ['HGETALL', 'cd:' + c]]);
       return json({ msgs: before > 0 ? await decodeMsgs(c, raw, from) : [], from, read: rd == null ? -1 : +rd, del: Object.keys(pairs(dl)).map(Number) });
     }
+    if (a === 'on') {
+      const ids = String(q('ids') || '').split(',').filter(x => /^\d{1,12}$/.test(x)).slice(0, 30);
+      const r = ids.length ? await kvMulti(ids.flatMap(id => [['GET', 'on:' + id], ['GET', 'ls:' + id]])) : [];
+      return json({ on: Object.fromEntries(ids.map((id, i) => [id, { on: !!r[i * 2], t: +r[i * 2 + 1] || 0 }])) });
+    }
+    if (a === 'off') { await kv('DEL', 'on:' + me); return json({ ok: 1 }); }
     if (a === 'peers') {
       const ids = String(q('ids') || '').split(',').filter(x => /^\d{1,12}$/.test(x)).slice(0, 60);
       const ems = ids.length ? await kvMulti(ids.map(id => ['GET', 'id:' + id])) : [];
@@ -91,12 +98,12 @@ export default async function handler(req) {
       const c = chatId(me, to);
       if (to !== me && !(await kv('GET', 'id:' + to))) return json({ error: 'Аккаунт не найден' }, 404);
       const x = String(body.x || '').slice(0, 4000);
-      const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000) } : null;
+      const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000), wf: String(body.fl.wf || '').replace(/[^0-9a-z]/g, '').slice(0, 80), vo: body.fl.vo ? 1 : 0 } : null;
       if (fl) { const m = await jget('mf:' + fl.id); if (!m || m.c !== c || m.o !== me) return json({ error: 'Файл не загружен' }, 400); }
       if (!x.trim() && !fl) return json({ error: 'Пустое сообщение' }, 400);
       const t = Date.now(), m = { f: +me, t, x, ...(fl ? { fl } : {}), ...(body.r != null ? { r: +body.r } : {}) };
       const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
-      const pv = await seal(c, x.trim() ? x.slice(0, 80) : (fl.ty.startsWith('image/') ? '🖼 Фото' : fl.ty.startsWith('video/') ? '🎬 Видео' : '📎 ' + fl.n));
+      const pv = await seal(c, x.trim() ? x.slice(0, 80) : (fl.vo ? '🎤 Голосовое' : fl.ty.startsWith('image/') ? '🖼 Фото' : fl.ty.startsWith('video/') ? '🎬 Видео' : '📎 ' + fl.n));
       const meta = JSON.stringify({ t, f: +me, pv, n: len });
       await kvMulti([['HSET', 'ci:' + me, c, meta], ['HSET', 'cu:' + me, c, '0'], ['HSET', 'cr:' + c, me, String(len - 1)], ['INCR', 'mv:' + me], ...(to !== me ? [['HSET', 'ci:' + to, c, meta], ['HINCRBY', 'cu:' + to, c, '1'], ['DEL', 'ty:' + c + ':' + me], ['INCR', 'mv:' + to]] : [])]);
       return json({ ok: 1, c, m: { ...m, i: len - 1 }, tmp: body.tmp });

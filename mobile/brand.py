@@ -68,4 +68,23 @@ if plat == 'android':
     # версия = номер сборки
     run = os.environ.get('GITHUB_RUN_NUMBER', '1')
     edit(os.path.join(root, 'app', 'build.gradle'), lambda s: re.sub(r'versionName "[^"]*"', f'versionName "1.0.{run}"', re.sub(r'versionCode \d+', f'versionCode {run}', s)))
+    # музыка в фоне: не ставим WebView на паузу, когда приложение свёрнуто
+    ma = os.path.join(root, 'app', 'src', 'main', 'java', 'app', 'mundora', 'MainActivity.java')
+    if os.path.exists(ma):
+        open(ma, 'w', encoding='utf-8').write('''package app.mundora;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (bridge != null && bridge.getWebView() != null) {
+            bridge.getWebView().onResume();
+            bridge.getWebView().resumeTimers();
+        }
+    }
+}
+''')
+        print('MainActivity: фоновое воспроизведение')
     print('android: цвета, тема и версия 1.0.' + run)
