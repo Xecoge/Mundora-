@@ -1473,6 +1473,12 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .mb.th .ms-abar i{background:#c4b5fd}
 .ms-fwl{display:flex;flex-direction:column;max-height:60vh;overflow-y:auto}.ms-fwl .ms-it{border:0;background:none;text-align:left;font:inherit;cursor:pointer;width:100%}
 .ms-fw{text-decoration:none}.ms-fw b{font-weight:750;text-decoration:underline;text-underline-offset:2px}
+
+.ms-prog{pointer-events:auto}.ms-prog i{grid-area:1/1}.ms-cxl{grid-area:1/1;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;cursor:pointer;z-index:2}
+.ms-prog.sm .ms-cxl{width:24px;height:24px}.ms-prog.sm{display:grid;place-items:center;width:42px;height:42px}.ms-cxl .i{width:14px;height:14px}
+/* при записи кнопка микрофона/кружка — справа, полоса записи — слева */
+.ms-comp.rec .ms-recbar{order:1}.ms-comp.rec .ms-mic,.ms-comp.rec .ms-send{order:2}
+.ms-comp.rec .ms-mic{margin-left:6px}
 </style>
 </head>
 <body>
@@ -2668,12 +2674,12 @@ function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine
   else{const F=m.fl;let media='';
     if(F){const src=F.local||(F.id?msFile(F.id):''),ar=F.w&&F.h?`aspect-ratio:${F.w}/${F.h};`:'',key=m.i??m.tmp;
       if(F.vo){kind='voice';const bars=msWave(F.wf).map(v=>`<i style="height:${Math.max(3,v*2.4)}px"></i>`).join('');
-        media=`<div class="ms-voice" data-src="${esc(src)}" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:PLAYI}</button><div class="ms-vw"><div class="ms-bars">${bars}</div><small>${fdur(F.d)}</small></div></div>`}
-      else if(F.ty.startsWith('image/')){kind='img';media=`<button type="button" class="ms-img" data-act="ms-view" data-k="${key}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:''}</button>`}
-      else if(F.rd){kind='rnd';media=`<div class="ms-rnd" data-k="${key}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} playsinline preload="metadata" data-act="ms-rplay" data-k="${key}"></video><svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><small>${fdur(F.d)}</small>`}</div>`}
-      else if(F.ty.startsWith('video/')){kind='img';media=`<div class="ms-vid" style="${ar}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} controls playsinline preload="metadata"></video><button type="button" class="ms-save lq" data-act="ms-save" data-k="${key}" title="Сохранить">${ico('down','s')}</button>`}</div>`}
-      else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
-      else media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-dl" data-k="${key}"`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></button>`}
+        media=`<div class="ms-voice" data-src="${esc(src)}" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><div class="ms-bars">${bars}</div><small>${fdur(F.d)}</small></div></div>`}
+      else if(F.ty.startsWith('image/')){kind='img';media=`<button type="button" class="ms-img" data-act="ms-view" data-k="${key}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:''}</button>`}
+      else if(F.rd){kind='rnd';media=`<div class="ms-rnd" data-k="${key}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} playsinline preload="metadata" data-act="ms-rplay" data-k="${key}"></video><svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><small>${fdur(F.d)}</small>`}</div>`}
+      else if(F.ty.startsWith('video/')){kind='img';media=`<div class="ms-vid" style="${ar}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} controls playsinline preload="metadata"></video><button type="button" class="ms-save lq" data-act="ms-save" data-k="${key}" title="Сохранить">${ico('down','s')}</button>`}</div>`}
+      else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
+      else media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-dl" data-k="${key}"`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></button>`}
     const txt=m.x?`<div class="ms-tx">${linkify(esc(m.x))}</div>`:'';
     const fw=m.fw!=null?`<a class="ms-fw" href="#msgp-${m.fw}">${ico('send','s')}<span>Переслано · От <b>${esc(String(m.fw)===String(MS.me)?(USR.name||'вас'):((MS.peers[m.fw]||{}).name||'ID '+m.fw))}</b></span></a>`:'';
     body=fw+media+txt+meta}
@@ -2722,11 +2728,11 @@ async function msAttach(items){if(!MS.c)return;for(const it of items){
   const m={tmp:'f'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x:it.x||'',pend:1,prog:2,fl};
   const c=MS.c,peer=MS.peer;(MS.msgs[c]=MS.msgs[c]||[]).push(m);msAppend([m]);
   try{const n=Math.max(1,Math.ceil(f.size/CH_SZ));let id='';
-    for(let i=0;i<n;i++){const data=b64ab(await f.slice(i*CH_SZ,(i+1)*CH_SZ).arrayBuffer());
+    for(let i=0;i<n;i++){if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});const data=b64ab(await f.slice(i*CH_SZ,(i+1)*CH_SZ).arrayBuffer());
       const j=await msApi('up',{to:peer,id,i,n,name:f.name,type:ty,size:f.size,data});id=j.id;m.prog=Math.round((i+1)/n*100);
       const el=document.querySelector(`.mb[data-tmp="${m.tmp}"] .ms-prog i`);if(el)el.style.setProperty('--p',m.prog+'%')}
-    fl.id=id;const {local:_l,...send}=fl;await msPost(m,{to:peer,x:it.x||'',fl:send})}
-  catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}}
+    if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});fl.id=id;const {local:_l,...send}=fl;await msPost(m,{to:peer,x:it.x||'',fl:send})}
+  catch(e){if(e.cancel||m.cancel){const L=MS.msgs[c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);if(MS.c===c)msPaintMsgs();toast('Отправка отменена','x');continue}m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}}
 
 /* ---------- несколько файлов: превью, убрать лишнее, подпись ---------- */
 function msPreview(files){let L=files.map(f=>({f,u:/^(image|video)\//.test(f.type)?URL.createObjectURL(f):''}));const inp=$('#msIn');
@@ -2881,6 +2887,7 @@ const MS_ACT={
   'ms-emo'(){const e=$('#msEmo');if(!e)return;if(!e.innerHTML)e.innerHTML=EMO.map(x=>`<button type="button" data-act="ms-emoadd" data-e="${x}">${x}</button>`).join('');const open=e.hidden;if(open){const i=$('#msIn');if(i&&document.activeElement===i){i.blur();setTimeout(()=>{e.hidden=false},250);return}}e.hidden=!open},
   'ms-emoadd'(el){const i=$('#msIn');if(!i)return;const s=i.selectionStart??i.value.length;i.value=i.value.slice(0,s)+el.dataset.e+i.value.slice(i.selectionEnd??s);i.dispatchEvent(new Event('input'))},
   'ms-rec-cancel'(){msRecStop(true)},
+  'ms-upcancel'(el,e){e&&e.stopPropagation();const m=msFind(el.dataset.k);if(!m||!m.pend)return;m.cancel=1;const L=MS.msgs[MS.c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);msPaintMsgs()},
   'ms-rplay'(el){const v=el,box=v.closest('.ms-rnd');if(!box)return;$$('.ms-rnd video').forEach(o=>{if(o!==v&&!o.paused){o.pause();o.closest('.ms-rnd').classList.remove('pl')}});
     if(v.paused){v.muted=false;v.play().catch(()=>{});box.classList.add('pl','big');const ring=box.querySelector('circle');v.ontimeupdate=()=>{if(ring&&v.duration)ring.style.strokeDashoffset=String(302*(1-v.currentTime/v.duration));const sm=box.querySelector('small');if(sm)sm.textContent=fdur(v.currentTime)};v.onended=()=>{box.classList.remove('pl','big');if(ring)ring.style.strokeDashoffset='302'}}
     else{v.pause();box.classList.remove('pl')}},
