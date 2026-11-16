@@ -2922,7 +2922,7 @@ function tourStart(k,steps,opt={}){
   if(TOUR.on||tourDone(k)||(!opt.full&&$('#full.open'))||$('#sheet.open')||!document.body.contains($('#player')))return false;
   const list=steps.map(x=>({...x,el:$(x.el)})).filter(x=>opt.full?tourHas(x.el):tourVis(x.el));
   if(list.length<2)return false;
-  TOUR.on=true;TOUR.k=k;TOUR.list=list;TOUR.i=0;tourMark(k);if(list.some(x=>x.el&&x.el.closest&&x.el.closest('#ytBox')))tourMark('video');
+  TOUR.on=true;TOUR.k=k;TOUR.list=list;TOUR.i=0;tourMark(k);
   let o=$('#tour');if(!o){o=document.createElement('div');o.id='tour';document.body.appendChild(o)}
   o.innerHTML='<div class="tr-hole"></div><div class="tr-card"></div>';o.hidden=false;tourPaint();return true}
 function tourPaint(){
@@ -2932,7 +2932,7 @@ function tourPaint(){
   const r=x.el.getBoundingClientRect(),pad=6,h=o.querySelector('.tr-hole'),c=o.querySelector('.tr-card');
   Object.assign(h.style,{left:r.left-pad+'px',top:r.top-pad+'px',width:r.width+pad*2+'px',height:r.height+pad*2+'px',borderRadius:Math.min(22,(r.height+pad*2)/2)+'px'});
   const last=TOUR.i===TOUR.list.length-1;
-  c.innerHTML=`<div class="tr-n">${TOUR.k==='video'?'Видеоплеер':TOUR.k==='full'?'Полный плеер':'Плеер'} · ${TOUR.i+1} из ${TOUR.list.length}</div><b>${x.t}</b><p>${x.d}</p><div class="tr-b"><button class="tr-skip" data-tr="skip">Пропустить</button><button class="btn sm" data-tr="next">${last?'Понятно':'Дальше'}</button></div>`;
+  c.innerHTML=`<div class="tr-n">${TOUR.k==='video2'?'Окошко с видео':'Плеер'} · ${TOUR.i+1} из ${TOUR.list.length}</div><b>${x.t}</b><p>${x.d}</p><div class="tr-b"><button class="tr-skip" data-tr="skip">Пропустить</button><button class="btn sm" data-tr="next">${last?'Понятно':'Дальше'}</button></div>`;
   const W=Math.min(300,innerWidth-24);c.style.width=W+'px';
   const ch=c.offsetHeight||150,below=r.bottom+pad+14+ch<innerHeight-8;
   c.style.top=(below?r.bottom+pad+12:Math.max(8,r.top-pad-12-ch))+'px';
@@ -2945,28 +2945,6 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-tr]');if(!
   e.stopPropagation();e.preventDefault();if(b.dataset.tr==='skip')return tourEnd();TOUR.i++;if(TOUR.i>=TOUR.list.length)return tourEnd();tourPaint()},true);
 addEventListener('resize',()=>{if(TOUR.on)tourPaint()});
 addEventListener('keydown',e=>{if(TOUR.on&&e.key==='Escape')tourEnd()});
-// обучение полного плеера на телефоне — один раз при первом открытии
-function tourFull(){
-  if(!isPhone()||!$('#full.open'))return;
-  tourStart('full',[
-    {el:'#full [data-act=close-full]',t:'Свернуть',d:'Стрелка вниз сворачивает полный плеер обратно в маленький. Музыка продолжит играть.'},
-    {el:'#ytSpace',t:'Видео',d:'Если трек играет через YouTube, видео показывается здесь.'},
-    {el:'#fArt',t:'Обложка',d:'Обложка трека. Ниже — название и исполнитель.'},
-    {el:'#full .prow',t:'Перемотка',d:'Тяни ползунок пальцем, чтобы перемотать. Слева — сколько прошло, справа — длина трека.'},
-    {el:'#fShuffle',t:'Перемешать',d:'Треки из очереди будут играть в случайном порядке.'},
-    {el:'#full .pbtns [data-act=prev]',t:'Назад',d:'Предыдущий трек. Если трек играет дольше пары секунд — начнёт его сначала.'},
-    {el:'#fPlay',t:'Играть / пауза',d:'Ставит музыку на паузу и продолжает.'},
-    {el:'#full .pbtns [data-act=next]',t:'Дальше',d:'Следующий трек. Если пропустить в первые 30 секунд, похожая музыка будет попадаться реже.'},
-    {el:'#fRepeat',t:'Повтор',d:'Включает повтор текущего трека.'},
-    {el:'#fLike',t:'Лайк',d:'Сохраняет трек в «Любимое». Подборки «Для тебя» и «Волна» подстраиваются под твой вкус.'},
-    {el:'#full [data-act=dislike-cur]',t:'Не нравится',d:'Пропускает трек, и такая музыка будет попадаться реже.'},
-    {el:'#full .facts [data-act=add-cur]',t:'В плейлист',d:'Добавляет трек в твой плейлист или создаёт новый.'},
-    {el:'#full [data-act=flow-from-cur]',t:'Похожее',d:'Запускает волну из треков, похожих на этот.'},
-    {el:'#full .full-top [data-act=queue]',t:'Очередь',d:'Показывает, что заиграет дальше.'},
-    {el:'#fExt',t:'Другие сервисы',d:'Открыть этот трек в Яндекс Музыке, YouTube или Spotify.'},
-    {el:'#full .facts [data-act=close-player]',t:'Закрыть плеер',d:'Останавливает музыку и убирает плеер.'},
-  ],{full:true});
-}
 function tourMusic(){
   const ph=isPhone();
   tourStart('music',[
@@ -2982,7 +2960,6 @@ function tourMusic(){
     {el:'#player [data-act=queue]',t:'Очередь',d:'Показывает, что заиграет дальше.'},
     {el:'#vol',t:'Громкость',d:'Тяни ползунок. Значок динамика рядом включает и выключает звук.'},
     {el:ph?'#player .pbtns [data-act=close-player]':'#player .p-right [data-act=close-player]',t:'Закрыть плеер',d:'Останавливает музыку и убирает плеер.'},
-    ...videoSteps(ph),
   ]);
 }
 // кнопки окошка с видео (рядом с плеером): видео, перетащить, развернуть, закрыть — на ПК и на телефоне
@@ -2992,9 +2969,13 @@ const videoSteps=ph=>[
   {el:'#ytBox [data-act=yt-expand]',t:'Развернуть видео',d:'Открывает полный плеер — видео будет внутри, большое. Свернуть обратно — стрелкой вниз сверху.'},
   {el:'#ytBox [data-act=close-player]',t:'Закрыть',d:'Останавливает музыку и закрывает окошко с видео.'},
 ];
-function tourVideo(){
-  if($('#ytBox').hidden)return;
-  tourStart('video',videoSteps(isPhone()));
+// обучение маленького окошка с видео: показывается один раз; если мешает другое обучение или открыт полный плеер — ждём
+let tourVidT=0;
+function tourVideo(n=0){
+  clearTimeout(tourVidT);
+  const b=$('#ytBox');if(!b||b.hidden||tourDone('video2')||document.body.classList.contains('fullyt'))return;
+  if(TOUR.on||$('#full.open')||$('#sheet.open')||!tourVis(b.querySelector('.ytin'))){if(n<60)tourVidT=setTimeout(()=>tourVideo(n+1),2000);return}
+  tourStart('video2',videoSteps(isPhone()));
 }
 /* ===================== курсы ценностей: золото, серебро, платина, палладий ===================== */
 IMG.metals='/img/met_gold.webp';IMG.exch='/img/exch.webp';
@@ -3319,9 +3300,9 @@ const ACT={
   shuffle(){P.shuffle=!P.shuffle;UI.modes();toast(P.shuffle?'Перемешивание включено':'Перемешивание выключено','shuffle')},
   repeat(){P.repeat=!P.repeat;UI.modes();toast(P.repeat?'Повтор трека включён':'Повтор выключен','repeat')},
   mute(){audio.muted=!audio.muted;toast(audio.muted?'Звук выключен':'Звук включён','vol')},
-  'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380);setTimeout(tourFull,600)}},
-  'close-full'(){if(TOUR.on&&TOUR.k==='full')tourEnd();$('#full').classList.remove('open');ytDock()},
-  'yt-expand'(){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380);setTimeout(tourFull,600)},
+  'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380)}},
+  'close-full'(){$('#full').classList.remove('open');ytDock()},
+  'yt-expand'(){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380)},
   like(el){const t=T_(el);if(t)toggleLike(t)},
   'like-cur'(){if(P.cur)toggleLike(P.cur)},
   'dislike-cur'(){if(P.cur)dislike(P.cur)},
