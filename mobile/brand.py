@@ -65,6 +65,12 @@ if plat == 'android':
         s = re.sub(r'(<style name="AppTheme\.NoActionBarLaunch"[^>]*>)', r'\1<item name="windowSplashScreenBackground">@color/mundoraBg</item>', s)
         return s
     edit(os.path.join(res, 'values', 'styles.xml'), styles)
+    # камера и микрофон для голосовых и видеокружков (Capacitor сам спросит разрешение, когда сайт попросит)
+    def perms(x):
+        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'CAMERA'] if f'permission.{p}"' not in x)
+        add += '' if 'android.hardware.camera' in x else '    <uses-feature android:name="android.hardware.camera" android:required="false" />\n'
+        return x.replace('</manifest>', add + '</manifest>')
+    edit(os.path.join(root, 'app', 'src', 'main', 'AndroidManifest.xml'), perms)
     # версия = номер сборки
     run = os.environ.get('GITHUB_RUN_NUMBER', '1')
     edit(os.path.join(root, 'app', 'build.gradle'), lambda s: re.sub(r'versionName "[^"]*"', f'versionName "1.0.{run}"', re.sub(r'versionCode \d+', f'versionCode {run}', s)))

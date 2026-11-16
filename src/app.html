@@ -1472,6 +1472,7 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .ms-abar{height:4px;border-radius:2px;background:rgba(255,255,255,.25);margin:6px 0 3px;overflow:hidden}.ms-abar i{display:block;height:100%;width:0;background:#fff;border-radius:2px}
 .mb.th .ms-abar i{background:#c4b5fd}
 .ms-fwl{display:flex;flex-direction:column;max-height:60vh;overflow-y:auto}.ms-fwl .ms-it{border:0;background:none;text-align:left;font:inherit;cursor:pointer;width:100%}
+.ms-fw{text-decoration:none}.ms-fw b{font-weight:750;text-decoration:underline;text-underline-offset:2px}
 </style>
 </head>
 <body>
@@ -2630,7 +2631,8 @@ function pfPaint(p){if(!p)return;if(route()==='u-'+p.id){const b=$('#view #pfBox
 /* ---------- чат ---------- */
 async function msOpenChat(){const c=MS.c;MS.typing=false;msDrawMain();msPresence(true);
   if(!MS.msgs[c]){try{const j=await msApi('hist',null,'&c='+c);MS.msgs[c]=j.msgs;MS.from[c]=j.from;MS.read[c]=j.read;msDel(c,j.del)}catch(e){MS.msgs[c]=[];toast(e.message,'x')}}
-  if(MS.c!==c)return;msPaintMsgs(true);msMarkRead()}
+  if(MS.c!==c)return;msPaintMsgs(true);msMarkRead();msFwPeers(c)}
+async function msFwPeers(c){const ids=[...new Set((MS.msgs[c]||[]).map(m=>m.fw).filter(x=>x!=null&&!MS.peers[x]).map(String))];if(!ids.length)return;await msPeers(ids);if(MS.c===c)msPaintMsgs()}
 function msDrawMain(){const box=$('#msMain');if(!box)return;
   if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
   const p=MS.peers[MS.peer];
@@ -2673,7 +2675,7 @@ function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine
       else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
       else media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-dl" data-k="${key}"`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></button>`}
     const txt=m.x?`<div class="ms-tx">${linkify(esc(m.x))}</div>`:'';
-    const fw=m.fw!=null&&String(m.fw)!==String(m.f)?`<div class="ms-fw">${ico('send','s')}Переслано от ${esc((MS.peers[m.fw]||{}).name||(String(m.fw)===String(MS.me)?'вас':'ID '+m.fw))}</div>`:'';
+    const fw=m.fw!=null?`<a class="ms-fw" href="#msgp-${m.fw}">${ico('send','s')}<span>Переслано · От <b>${esc(String(m.fw)===String(MS.me)?(USR.name||'вас'):((MS.peers[m.fw]||{}).name||'ID '+m.fw))}</b></span></a>`:'';
     body=fw+media+txt+meta}
   const bare=(kind==='img'||kind==='rnd')&&!m.x;
   return `<div class="mb ${mine?'me':'th'}${grp?'':' tail'}${bare?' bare':''}${kind==='img'&&m.x?' cap':''}${kind==='voice'?' vo':''}${kind==='rnd'?' rd':''}${m.d?' del':''}" data-i="${m.i??''}" data-tmp="${m.tmp||''}">${body}</div>`}
@@ -2853,7 +2855,7 @@ async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
     if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
       if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);const tw=MS.typing;MS.typing=j.typing;
         clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
-        if(add.length){MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
+        if(add.length){MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>m.fw!=null))msFwPeers(c);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
         else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}
         const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}
       if(msUnread()>before&&LS.get('msSnd',true)&&!(MS.on&&c&&!document.hidden))msBeep();
@@ -2895,7 +2897,7 @@ const MS_ACT={
   'ms-dl'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msDownload(m)},
   'ms-share'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msShare(m)},
   'ms-fwd'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msForward(m)},
-  async 'ms-fwto'(el){el.disabled=true;try{await msApi('fwd',{c:MS.c,i:+el.dataset.i,to:el.dataset.to});closeSheet();toast('Переслано','check')}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'ms-fwto'(el){el.disabled=true;try{const to=el.dataset.to;await msApi('fwd',{c:MS.c,i:+el.dataset.i,to});closeSheet();toast('Переслано','check');const c2=msCid(to);delete MS.msgs[c2];location.hash='#msg-'+to}catch(e){toast(e.message,'x');el.disabled=false}},
   async 'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);const i=m?m.i:-1;if(!m)return;m.d=1;m.x='';delete m.fl;msPaintMsgs();try{await msApi('del',{c:MS.c,i})}catch(e){toast(e.message,'x')}},
 };
 
