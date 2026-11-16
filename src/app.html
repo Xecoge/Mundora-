@@ -1116,6 +1116,7 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .composer .send{box-shadow:0 0 0 1px rgba(255,255,255,.2) inset,0 8px 22px -6px rgba(139,92,246,.9)}
 @media(max-width:1100px){.aiw{grid-template-columns:minmax(0,1fr)}.ai-side{display:none}.chat-top .ct-hist{display:grid}}
 @media(max-width:760px){.chat-top{top:8px;border-radius:20px;margin-bottom:10px}.ce-sugg{grid-template-columns:1fr}.chat-empty h2{font-size:26px}.ce-orb{width:92px;height:92px}.ce-orb img{width:70px;height:70px}.msg.a .av{display:none}}
+.gl-bar .ava-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}.gl-bar .ava-grid button{aspect-ratio:1;height:auto;min-height:0}
 </style>
 </head>
 <body>
@@ -3205,15 +3206,21 @@ const GIFT_ACT={
     openSheet(`<div class="gv r-${r.c}"><button class="ib gv-x" data-act="close-sheet">${ico('x')}</button><div class="gv-img"><img src="${giftImg(g.k)}" alt=""></div><h3 class="gv-n">${G.n}</h3><div class="gv-r">${r.n} · ${G.p.toLocaleString('ru-RU')} XP</div>
       <div class="glass tgp-info" style="margin-top:14px"><div class="tgp-row"><small>${g.from?'от кого':'получен'}</small><b>${g.from?`<a href="#u-${g.from.id}" data-act="close-sheet">${esc(g.from.name)}</a>`:'куплен за XP'}</b></div><div class="tgp-row"><small>дата</small><b>${new Date(g.t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b></div></div>
       ${p.self?`<div class="row" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gift-nick" data-g="${g.id}">${p.nick===g.id?'Убрать у ника':'Поставить у ника'}</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-start">${ico('pin','s')}Расставить</button></div>`:''}</div>`)},
-  'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else glPaint()},
+  'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;
+    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;pfEdit.av=USR.avatar;
+    if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else{glPaint();scrollTo({top:0,behavior:'smooth'})}},
   'gl-cancel'(){GL.on=false;glPaint()},
-  async 'gl-save'(el){el.disabled=true;try{const j=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick});PEOPLE.cache[j.profile.id]=j.profile;GL.on=false;glPaint();toast('Сохранено','check')}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'gl-save'(el){el.disabled=true;glGrab();toast('Сохраняю — нейросеть проверяет имя…','loader');
+    try{const j=await peopleApi('a=me',{name:GL.name,bio:GL.bio,avatar:pfEdit.av,open:GL.open});const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});meHead();
+      const k=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick});PEOPLE.cache[k.profile.id]=k.profile;GL.on=false;glPaint();toast('Профиль сохранён','check')}
+    catch(e){toast(e.message,'x');el.disabled=false;if(/имя|name/i.test(e.message)){const n=$('#pfName');if(n){n.focus();n.scrollIntoView({block:'center'})}}}},
   'gl-toggle'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);if(i>=0)GL.pos.splice(i,1);else{if(GL.pos.length>=10)return toast('Максимум 10 подарков у аватарки','x');const D=[[20,18],[80,16],[10,50],[90,48],[22,82],[78,84],[36,8],[64,8],[6,22],[94,76]];const d=D.find(([x,y])=>!GL.pos.some(p=>Math.abs(p.x-x)<6&&Math.abs(p.y-y)<6))||[50,90];GL.pos.push({id,x:d[0],y:d[1]})}glPaint()},
   'gl-nick'(el){GL.nick=el.dataset.g||null;glPaint()},
   async 'gift-nick'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const nick=me.nick===el.dataset.g?null:el.dataset.g;try{const j=await peopleApi('a=gift-layout',{nick});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();glPaint()}catch(e){toast(e.message,'x')}},
 };
-const GL={on:false,pos:[],nick:null}; // режим расстановки подарков в своём профиле
-function glPaint(){const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
+const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true}; // режим расстановки подарков в своём профиле
+function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked}
+function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
 // перетаскивание подарков по шапке профиля
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.tgp-g.drag');if(!b||!GL.on)return;e.preventDefault();
   const st=$('#tgpStage');if(!st)return;b.setPointerCapture(e.pointerId);b.classList.add('moving');const id=b.dataset.gid;
@@ -4053,27 +4060,35 @@ function pfHTML(p){
   const open=p.genres!==undefined;
   const s=c.stats;
   const canCov=USR&&USR.admin&&p.self; // обложку админ меняет только себе
+  if(p.self&&GL.on)glGrab();
   const gs=p.gifts||[],gby=Object.fromEntries(gs.map(g=>[g.id,g])),lay=p.self&&GL.on;
   const pos=(lay?GL.pos:(p.pos||[])).filter(x=>gby[x.id]),nickId=lay?GL.nick:p.nick,nickG=nickId&&gby[nickId];
   const patK=((pos[0]&&gby[pos[0].id])||gs[0]||{}).k;
   const act=(a,ic,t,extra='')=>`<button class="tgp-a" data-act="${a}" ${extra}>${ic}<span>${t}</span></button>`;
   return `<div class="tgp${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
     ${patK?`<div class="tgp-pat" aria-hidden="true">${TGP_PAT.map(([x,y,r])=>`<img src="${giftImg(patK)}" alt="" style="left:${x}%;top:${y}%;transform:rotate(${r}deg)">`).join('')}</div>`:''}
-    ${canCov?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
+    ${canCov&&!lay?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
     <div class="tgp-stage${lay?' lay':''}" id="tgpStage">
-      <img class="tgp-ava" src="${avaSrc(p.avatar)}" alt="">
+      <img class="tgp-ava" src="${avaSrc(lay&&pfEdit.av?pfEdit.av:p.avatar)}" alt="">
       ${pos.map(x=>{const g=gby[x.id];return `<button class="tgp-g r-${giftRar(g.k).c}${lay?' drag':''}" ${lay?`data-gid="${g.id}"`:`data-act="gift-view" data-u="${p.id}" data-g="${g.id}"`} style="left:${x.x}%;top:${x.y}%" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt="" draggable="false"></button>`}).join('')}
     </div>
     <h1 class="tgp-name">${esc(p.name)}${nickG?`<button class="tgp-nick" ${lay?'':`data-act="gift-view" data-u="${p.id}" data-g="${nickG.id}"`} title="${esc(GIFT_CAT[nickG.k].n)}"><img src="${giftImg(nickG.k)}" alt=""></button>`:''}${vBadge(p,true)}</h1>
     <div class="tgp-sub">${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span>${seenTxt(p)}</span></div>
   </div>
   ${lay?`<div class="glass gl-bar">
-    <div class="gl-h"><b>Расстановка подарков</b><span class="k">Тяни подарки пальцем или мышкой куда хочешь</span></div>
-    <div class="k gl-l">У аватарки · ${GL.pos.length} из 10</div>
-    <div class="gl-tray">${gs.map(g=>`<button class="gl-chip${GL.pos.some(x=>x.id===g.id)?' on':''}" data-act="gl-toggle" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')||'<span class="k">Сначала купи подарок</span>'}</div>
-    <div class="k gl-l">У ника (после имени, перед галочкой)</div>
-    <div class="gl-tray"><button class="gl-chip${!GL.nick?' on':''}" data-act="gl-nick" data-g="">${ico('x','s')}</button>${gs.map(g=>`<button class="gl-chip${GL.nick===g.id?' on':''}" data-act="gl-nick" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')}</div>
-    <div class="row" style="margin-top:12px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Готово</button></div>
+    <div class="gl-h"><b>Редактирование профиля</b><span class="k">Подарки в шапке тяни пальцем или мышкой куда хочешь</span></div>
+    <div class="k gl-l">Подарки у аватарки · ${GL.pos.length} из 10</div>
+    <div class="gl-tray">${gs.map(g=>`<button class="gl-chip${GL.pos.some(x=>x.id===g.id)?' on':''}" data-act="gl-toggle" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')||`<button class="btn ghost sm" data-act="gift-shop">${ico('star','s')}Купить первый подарок</button>`}</div>
+    ${gs.length?`<div class="k gl-l">Подарок у ника</div>
+    <div class="gl-tray"><button class="gl-chip${!GL.nick?' on':''}" data-act="gl-nick" data-g="">${ico('x','s')}</button>${gs.map(g=>`<button class="gl-chip${GL.nick===g.id?' on':''}" data-act="gl-nick" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')}</div>`:''}
+    <div class="k gl-l">Аватарка</div>
+    <div class="ava-grid"><button class="ava-up" data-act="pf-ava-up" title="Загрузить из галереи">${ico('plus')}</button>${String(pfEdit.av).startsWith('/')?`<button class="on" data-act="pf-ava" data-k="${esc(pfEdit.av)}"><img src="${esc(pfEdit.av)}" alt=""></button>`:''}${AVA_LIST.map(k=>`<button class="${k===pfEdit.av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
+    ${canCov?`<div class="k gl-l">Обложка</div><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-up" data-id="${p.id}">${ico('plus','s')}${p.cover?'Сменить':'Загрузить'}</button>${p.cover?`<button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-del" data-id="${p.id}">${ico('trash','s')}Убрать</button>`:''}</div>`:''}
+    <label class="k gl-l" style="display:block">Имя (проверяет нейросеть)</label><input class="in" id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать">
+    <label class="k gl-l" style="display:block">О себе</label><textarea class="in" id="pfBio" maxlength="160" rows="3" style="height:auto;padding:10px 14px;resize:none" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea>
+    <div class="k gl-l">Telegram</div><div id="pfTg">${pfTgHTML()}</div>
+    <label class="pf-tg"><input type="checkbox" id="pfOpen" ${GL.open?'checked':''}><span><b>Открытый профиль</b><small class="k">Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
+    <div class="row gl-btns" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
     ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
       :act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
@@ -4140,9 +4155,9 @@ async function peopleSearch(q,box){
 
 Object.assign(ACT,{
   vb(el,e){e.stopPropagation();const on=!el.classList.contains('show');$$('.vb.show').forEach(b=>b.classList.remove('show'));if(on){el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2600)}},
-  'pf-edit'(){closeSheet();pfEdit()},
+  'pf-edit'(){closeSheet();if(USR&&PEOPLE.cache[USR.id])ACT['gl-start']();else pfEdit()},
   'pf-me'(){closeSheet();location.hash='#u-'+USR.id},
-  'pf-ava'(el){pfEdit.av=el.dataset.k;$$('.ava-grid button').forEach(b=>b.classList.toggle('on',b===el))},
+  'pf-ava'(el){pfEdit.av=el.dataset.k;$$('.ava-grid button').forEach(b=>b.classList.toggle('on',b===el));const h=$('.tgp-ava');if(h&&GL.on)h.src=avaSrc(pfEdit.av)},
   async 'pf-ava-up'(el){
     const f=await pickImg();if(!f)return;el.classList.add('busy');
     try{const data=await imgPrep(f,360,360,250e3);const j=await peopleApi('a=avatar',{data});const p=j.profile;
