@@ -164,7 +164,7 @@ async function card(email, viewer, full) {
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
-    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), orbit: !!u.giftOrbit, wallets: walletsOut(u)
+    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), anim: ['orbit', 'bubbles'].includes(u.giftAnim) ? u.giftAnim : (u.giftOrbit ? 'orbit' : 'none'), wallets: walletsOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
   if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
@@ -267,7 +267,7 @@ export default async function handler(req) {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({})); const u = await getUser(me.email);
       if (Array.isArray(b.pos)) { u.giftPos = b.pos; delete u.giftSlots; u.giftPos = posOut(u); }
-      if (b.orbit !== undefined) u.giftOrbit = !!b.orbit;
+      if (b.anim !== undefined) { u.giftAnim = ['orbit', 'bubbles'].includes(b.anim) ? b.anim : 'none'; delete u.giftOrbit; }
       if (b.nick !== undefined) u.nickGift = b.nick && giftsOut(u).some(g => g.id === b.nick) ? b.nick : null;
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });

@@ -1206,6 +1206,24 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .tgp-stage.orbit .tgp-g{transition:none!important;will-change:transform}
 .tgp-stage.orbit .tgp-g:hover{transform:none}
 .tgp-name,.tgp-sub{z-index:3}
+
+/* пузыри — прозрачные, как мыльные */
+.tgp-stage.bubbles .tgp-g{width:var(--bs,52px)!important;height:var(--bs,52px)!important;margin:0!important;border-radius:50%;transition:none!important;will-change:transform;display:grid;place-items:center;touch-action:none;cursor:grab;
+ background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.7) 0 3.5%,rgba(255,255,255,.12) 9%,transparent 16%),
+  radial-gradient(circle at 72% 80%,rgba(255,255,255,.16),transparent 30%),
+  radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(220,210,255,.10) 70%,rgba(190,220,255,.26) 86%,rgba(255,255,255,.5) 98%,rgba(255,255,255,0) 100%),
+  conic-gradient(from 210deg,rgba(255,120,220,.10),rgba(120,200,255,.12),rgba(160,255,200,.08),rgba(255,220,120,.10),rgba(255,120,220,.10));
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 8px 20px -10px rgba(0,0,0,.6)}
+.tgp-stage.bubbles .tgp-g.grab{cursor:grabbing}
+.tgp-stage.bubbles .tgp-g img{width:46%!important;height:46%!important;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
+.tgp-stage.bubbles .tgp-g::before,.tgp-stage.bubbles .tgp-g::after{display:none!important}
+.tgp-stage.bubbles .tgp-ava{z-index:2}
+.tgp-stage.bubbles~.tgp-name,.tgp-stage.bubbles~.tgp-sub{z-index:1}
+.an-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.an-seg button{display:flex;flex-direction:column;gap:2px;padding:10px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font:inherit;text-align:left;cursor:pointer}
+.an-seg button b{font-size:13.5px}.an-seg button small{font-size:11px;color:#a49dc0;line-height:1.3}
+.an-seg button.on{background:linear-gradient(135deg,rgba(139,92,246,.45),rgba(109,40,217,.25));border-color:#c084fc}
+
 </style>
 </head>
 <body>
@@ -3296,9 +3314,10 @@ const GIFT_ACT={
       <div class="glass tgp-info" style="margin-top:14px"><div class="tgp-row"><small>${g.from?'от кого':'получен'}</small><b>${g.from?`<a href="#u-${g.from.id}" data-act="close-sheet">${esc(g.from.name)}</a>`:'куплен за XP'}</b></div><div class="tgp-row"><small>дата</small><b>${new Date(g.t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b></div></div>
       ${p.self?`<div class="row" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gift-nick" data-g="${g.id}">${p.nick===g.id?'Убрать у ника':'Поставить у ника'}</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-start">${ico('pin','s')}Расставить</button></div>`:''}</div>`)},
   'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;
-    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;GL.orbit=!!me.orbit;pfEdit.av=USR.avatar;
+    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;GL.anim=me.anim||'none';pfEdit.av=USR.avatar;
     if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else{glPaint();scrollTo({top:0,behavior:'smooth'})}},
   'gl-cancel'(){GL.on=false;glPaint()},
+  'gl-anim'(el){GL.anim=el.dataset.v;$$('.an-seg button').forEach(b=>b.classList.toggle('on',b===el))},
   'wal-name'(el){const i=$('#pfWalN');if(i)i.value=el.dataset.n;$$('.wal-chips button').forEach(b=>b.classList.toggle('on',b===el))},
   async 'wal-add'(el){const a=$('#pfWal'),n=$('#pfWalN');if(!a||!a.value.trim())return toast('Вставь адрес кошелька','x');el.disabled=true;
     try{const j=await peopleApi('a=wallet-add',{addr:a.value.trim(),name:n?n.value.trim():''});PEOPLE.cache[j.profile.id]=j.profile;delete WB[j.profile.id];glPaint();toast('Кошелёк привязан','check')}catch(e){toast(e.message,'x');el.disabled=false}},
@@ -3324,7 +3343,7 @@ const GIFT_ACT={
   'wal-copy'(el){copyText(el.dataset.a)},
   async 'gl-save'(el){el.disabled=true;glGrab();toast('Сохраняю — нейросеть проверяет имя…','loader');
     try{const j=await peopleApi('a=me',{name:GL.name,bio:GL.bio,avatar:pfEdit.av,open:GL.open});const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});meHead();
-      const k=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick,orbit:GL.orbit});PEOPLE.cache[k.profile.id]=k.profile;GL.on=false;glPaint();toast('Профиль сохранён','check')}
+      const k=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick,anim:GL.anim});PEOPLE.cache[k.profile.id]=k.profile;GL.on=false;glPaint();toast('Профиль сохранён','check')}
     catch(e){toast(e.message,'x');el.disabled=false;if(/имя|name/i.test(e.message)){const n=$('#pfName');if(n){n.focus();n.scrollIntoView({block:'center'})}}}},
   'gl-toggle'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);if(i>=0)GL.pos.splice(i,1);else{if(GL.pos.length>=10)return toast('Максимум 10 подарков у аватарки','x');const D=[[20,18],[80,16],[10,50],[90,48],[22,82],[78,84],[36,8],[64,8],[6,22],[94,76]];const d=D.find(([x,y])=>!GL.pos.some(p=>Math.abs(p.x-x)<6&&Math.abs(p.y-y)<6))||[50,90];GL.pos.push({id,x:d[0],y:d[1]})}glPaint()},
   'gl-nick'(el){GL.nick=el.dataset.g||null;glPaint()},
@@ -3341,8 +3360,48 @@ function orbitRun(){if(ORB.raf)return;const red=matchMedia('(prefers-reduced-mot
       el.style.zIndex=sn>0?'4':'0';el.style.opacity=(.45+dep*.55).toFixed(2);el.style.filter=sn<-.2?`blur(${((-sn-.2)*1.6).toFixed(2)}px) saturate(.8)`:''});
     ORB.raf=requestAnimationFrame(tick)};
   ORB.raf=requestAnimationFrame(tick)}
-const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true,orbit:false,tap:null}; // режим расстановки подарков в своём профиле
-function glGrab(){const ob=$('#pfOrbit');if(ob)GL.orbit=ob.checked;const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen'),w=$('#pfWal'),wn=$('#pfWalN');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked;}
+// «пузыри» как в Telegram: прозрачные мыльные пузыри с подарком внутри плавают по всей шапке профиля,
+// сталкиваются друг с другом, отскакивают от краёв (не вылетают), их можно схватить, подвигать и бросить
+const BUB={raf:0,st:null,b:[],drag:null};
+const hsh=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
+function bubBounds(st){const hero=st.closest('.tgp'),sr=st.getBoundingClientRect(),hr=hero?hero.getBoundingClientRect():sr;return {l:hr.left-sr.left+6,t:hr.top-sr.top+6,r:hr.right-sr.left-6,b:hr.bottom-sr.top-6}}
+function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)return;
+  if(BUB.st!==st){BUB.st=st;const W=st.clientWidth,H=st.clientHeight,base=innerWidth<=760?50:58;
+    BUB.b=[...st.querySelectorAll('.tgp-g')].map((el,i)=>{const h=hsh(el.dataset.g||i),dep=.78+(h%60)/100,sz=Math.round(base*dep);el.style.setProperty('--bs',sz+'px');el.style.zIndex=String(3+Math.round(dep*10));
+      const x=(parseFloat(el.style.left)||50)/100*W,y=(parseFloat(el.style.top)||50)/100*H,a=(h%628)/100;el.style.left='0';el.style.top='0';
+      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep}})}
+  if(BUB.raf)return;let last=performance.now();const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tick=now=>{const st=BUB.st;if(!st||!st.isConnected){BUB.raf=0;BUB.st=null;BUB.drag=null;return}
+    const dt=Math.min(.04,(now-last)/1000);last=now;const L=bubBounds(st),B=BUB.b,cruise=24;
+    for(const p of B){if(BUB.drag&&BUB.drag.p===p)continue;
+      if(!red){p.vx+=(Math.random()-.5)*50*dt;p.vy+=(Math.random()-.5)*50*dt;
+        const sp=Math.hypot(p.vx,p.vy);if(sp>cruise){const k=Math.max(cruise/sp,1-dt*1.6);p.vx*=k;p.vy*=k}else if(sp<10&&sp>0){p.vx*=10/sp;p.vy*=10/sp}
+        p.x+=p.vx*dt;p.y+=p.vy*dt}
+      const e=.82;if(p.x<L.l+p.r){p.x=L.l+p.r;p.vx=Math.abs(p.vx)*e}if(p.x>L.r-p.r){p.x=L.r-p.r;p.vx=-Math.abs(p.vx)*e}
+      if(p.y<L.t+p.r){p.y=L.t+p.r;p.vy=Math.abs(p.vy)*e}if(p.y>L.b-p.r){p.y=L.b-p.r;p.vy=-Math.abs(p.vy)*e}}
+    // столкновения пузырей (упругие, с массой)
+    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],b=B[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,md=(a.r+b.r)*.92;
+      if(d<md){const nx=dx/d,ny=dy/d,o=md-d,ma=BUB.drag&&BUB.drag.p===a?1e9:a.m,mb=BUB.drag&&BUB.drag.p===b?1e9:b.m,ta=mb/(ma+mb),tb=ma/(ma+mb);
+        a.x-=nx*o*ta;a.y-=ny*o*ta;b.x+=nx*o*tb;b.y+=ny*o*tb;const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+        if(rv<0){const jn=-(1.85)*rv/(1/ma+1/mb);a.vx-=jn/ma*nx;a.vy-=jn/ma*ny;b.vx+=jn/mb*nx;b.vy+=jn/mb*ny;a.sq=b.sq=1}}}
+    const t=now/1000;
+    for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*3);const wob=red?0:Math.sin(t*2.4+p.ph)*.035+p.sq*.08;
+      p.el.style.transform=`translate(${(p.x-p.r).toFixed(1)}px,${(p.y-p.r).toFixed(1)}px) scale(${(1+wob).toFixed(3)},${(1-wob).toFixed(3)})`}
+    BUB.raf=requestAnimationFrame(tick)};
+  BUB.raf=requestAnimationFrame(tick)}
+// схватить и бросить пузырь
+document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('#tgpStage.bubbles .tgp-g');if(!el||!BUB.st)return;const p=BUB.b.find(q=>q.el===el);if(!p)return;
+  e.preventDefault();el.setPointerCapture(e.pointerId);const sr=BUB.st.getBoundingClientRect();const D={p,ox:e.clientX-sr.left-p.x,oy:e.clientY-sr.top-p.y,hist:[],moved:0,x0:e.clientX,y0:e.clientY};BUB.drag=D;el.classList.add('grab');
+  const mv=ev=>{const r=BUB.st.getBoundingClientRect(),L=bubBounds(BUB.st);p.x=Math.max(L.l+p.r,Math.min(L.r-p.r,ev.clientX-r.left-D.ox));p.y=Math.max(L.t+p.r,Math.min(L.b-p.r,ev.clientY-r.top-D.oy));
+    D.moved=Math.max(D.moved,Math.hypot(ev.clientX-D.x0,ev.clientY-D.y0));D.hist.push([performance.now(),p.x,p.y]);if(D.hist.length>6)D.hist.shift()};
+  const up=()=>{el.releasePointerCapture&&el.releasePointerCapture(e.pointerId);el.classList.remove('grab');const H=D.hist;
+    if(H.length>1){const [t0,x0,y0]=H[0],[t1,x1,y1]=H[H.length-1],dt=Math.max(.016,(t1-t0)/1000);let vx=(x1-x0)/dt,vy=(y1-y0)/dt;const sp=Math.hypot(vx,vy),mx=900;if(sp>mx){vx*=mx/sp;vy*=mx/sp}p.vx=vx;p.vy=vy}
+    if(D.moved>6)el.dataset.dragged='1';BUB.drag=null;el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up)};
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)});
+// после броска не открывать карточку подарка
+document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('#tgpStage.bubbles .tgp-g');if(el&&el.dataset.dragged){delete el.dataset.dragged;e.stopPropagation();e.preventDefault()}},true);
+const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true,anim:'none',tap:null}; // режим расстановки подарков в своём профиле
+function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen'),w=$('#pfWal'),wn=$('#pfWalN');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked;}
 function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
 // режим редактирования: тап по свободному месту шапки — выбрать подарок сюда, тап по аватарке — сменить аватарку
 document.addEventListener('click',e=>{if(!GL.on)return;const st=e.target.closest&&e.target.closest('#tgpStage.lay');if(!st||e.target.closest('.tgp-g'))return;
@@ -4232,7 +4291,7 @@ function pfHTML(p){
   const s=c.stats;
   const canCov=USR&&USR.admin&&p.self; // обложку админ меняет только себе
   if(p.self&&GL.on)glGrab();
-  if(p.orbit&&!(p.self&&GL.on))setTimeout(orbitRun,0);
+  if(p.anim&&p.anim!=='none'&&!(p.self&&GL.on))setTimeout(()=>p.anim==='bubbles'?bubRun():orbitRun(),0);
   if((p.wallets||[]).length&&(!WB[p.id]||(!WB[p.id].p&&Date.now()-WB[p.id].t>60e3)))setTimeout(()=>walBal(p.id),0);
   const gs=p.gifts||[],gby=Object.fromEntries(gs.map(g=>[g.id,g])),lay=p.self&&GL.on;
   const pos=(lay?GL.pos:(p.pos||[])).filter(x=>gby[x.id]),nickId=lay?GL.nick:p.nick,nickG=nickId&&gby[nickId];
@@ -4241,7 +4300,7 @@ function pfHTML(p){
   return `<div class="tgp${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
     ${patK?`<div class="tgp-pat" aria-hidden="true">${TGP_PAT.map(([x,y,r])=>`<img src="${giftImg(patK)}" alt="" style="left:${x}%;top:${y}%;transform:rotate(${r}deg)">`).join('')}</div>`:''}
     ${canCov&&!lay?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
-    <div class="tgp-stage${lay?' lay':''}${!lay&&p.orbit&&pos.length?' orbit':''}" id="tgpStage">
+    <div class="tgp-stage${lay?' lay':''}${!lay&&pos.length&&p.anim&&p.anim!=='none'?' '+p.anim:''}" id="tgpStage">
       <img class="tgp-ava" src="${avaSrc(lay&&pfEdit.av?pfEdit.av:p.avatar)}" alt="">
       ${pos.map(x=>{const g=gby[x.id];return `<button class="tgp-g r-${giftRar(g.k).c}${lay?' drag':''}" ${lay?`data-gid="${g.id}"`:`data-act="gift-view" data-u="${p.id}" data-g="${g.id}"`} style="left:${x.x}%;top:${x.y}%" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt="" draggable="false"></button>`}).join('')}
     </div>
@@ -4251,7 +4310,9 @@ function pfHTML(p){
   </div>
   ${lay?`<div class="gl-bar">
     <div class="gl-tip lq">${ico('spark','s')}<span>Нажми на <b>свободное место</b> в шапке — добавишь подарок, на <b>аватарку</b> — сменишь её, на <b>ник</b> — подарок у ника. Подарки тяни куда хочешь, зажми — уберётся.</span></div>
-    <label class="lq-f lq pf-open"><input type="checkbox" id="pfOrbit" ${GL.orbit?'checked':''}><span><b>Подарки вращаются вокруг аватарки</b><small>3D-орбита: подарки сзади уменьшаются и уходят за аватарку, спереди становятся больше и пролетают поверх ника. Здесь, в редактировании, они стоят на месте, чтобы их было удобно расставлять.</small></span></label>
+    <div class="lq-f lq"><small>Анимация подарков в шапке</small>
+      <div class="an-seg">${[['none','Стоят','Как расставил'],['bubbles','Пузыри','Живые: летают по шапке, сталкиваются, их можно бросать'],['orbit','Орбита 3D','Кружат вокруг аватарки']].map(([v,n,d])=>`<button type="button" class="${GL.anim===v?'on':''}" data-act="gl-anim" data-v="${v}"><b>${n}</b><small>${d}</small></button>`).join('')}</div>
+      <small style="font-weight:400">В редактировании подарки стоят на месте, чтобы их было удобно расставлять.</small></div>
     <label class="lq-f lq"><small>Никнейм · проверяет нейросеть</small><input id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать"></label>
     <label class="lq-f lq"><small>О себе</small><textarea id="pfBio" maxlength="160" rows="3" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea></label>
     <div class="lq-f lq"><small>Криптокошельки · видны всем вместе с балансом, только просмотр</small>
