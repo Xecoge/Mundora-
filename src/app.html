@@ -1014,6 +1014,52 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .pf-ladder .done{background:rgba(139,92,246,.14)}.pf-ladder .done b{color:#fff}
 .pf-ladder .on{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:transparent;color:#efe9ff;box-shadow:0 6px 18px rgba(124,58,237,.45)}.pf-ladder .on b{color:#fff}
 
+
+/* ===== профиль в стиле Telegram + подарки ===== */
+.tgp{position:relative;overflow:hidden;text-align:center;padding:26px 16px 22px;border-radius:30px;background:radial-gradient(120% 90% at 50% 30%,rgba(124,58,237,.42),rgba(40,18,82,.55) 55%,rgba(14,10,24,.9));border:1px solid rgba(255,255,255,.08)}
+.tgp.has-cov{background:linear-gradient(180deg,rgba(9,5,20,.25),rgba(9,5,20,.8) 75%),var(--cov) center/cover no-repeat}
+.tgp-pat{position:absolute;inset:0;pointer-events:none}.tgp-pat img{position:absolute;width:30px;height:30px;object-fit:contain;opacity:.09;filter:grayscale(.3)}
+.tgp-stage{position:relative;height:200px;max-width:420px;margin:0 auto}
+.tgp-ava{position:absolute;left:50%;top:50%;width:132px;height:132px;margin:-66px 0 0 -66px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.06);box-shadow:0 0 0 4px rgba(255,255,255,.08),0 20px 50px -12px rgba(124,58,237,.8)}
+.tgp-ava:not([src*="img=ava"]){object-fit:contain;background:none;box-shadow:none;filter:drop-shadow(0 14px 28px rgba(124,58,237,.6))}
+.tgp-g{position:absolute;width:52px;height:52px;margin:-26px 0 0 -26px;border:0;padding:0;background:none;cursor:pointer;transition:transform .2s;z-index:1}
+.tgp-g:hover{transform:scale(1.12)}
+.tgp-g::before{content:'';position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,var(--gl,rgba(255,214,102,.55)) 0%,transparent 65%);z-index:-1}
+.tgp-g::after{content:'✦ ·✧';position:absolute;left:-8px;top:-10px;font-size:10px;letter-spacing:6px;color:#fff;opacity:.85;text-shadow:0 0 6px #fff;pointer-events:none}
+.tgp-g img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.gp0{left:20%;top:16%}.gp1{left:8%;top:52%}.gp2{left:22%;top:88%}.gp3{left:80%;top:14%}.gp4{left:92%;top:50%}.gp5{left:78%;top:88%}
+.r-com{--gl:rgba(200,210,235,.4)}.r-rare{--gl:rgba(96,165,250,.55)}.r-epic{--gl:rgba(192,132,252,.6)}.r-leg{--gl:rgba(255,200,80,.7)}
+.tgp-name{position:relative;margin-top:6px;font-size:28px;font-weight:800;letter-spacing:-.4px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;word-break:break-word}
+.tgp-sub{position:relative;display:flex;justify-content:center;align-items:center;gap:8px;margin-top:4px;color:#b9b0d6;font-size:15px}
+.tgp-acts{display:flex;gap:8px;margin-top:12px}
+.tgp-a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px 9px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);color:#fff;cursor:pointer;transition:background .2s}
+.tgp-a:hover{background:rgba(255,255,255,.11)}.tgp-a .i,.tgp-a .tgi{width:22px;height:22px}.tgp-a span{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tgp-info{margin-top:12px;padding:4px 16px}
+.tgp-row{display:block;width:100%;text-align:left;padding:11px 0;border:0;background:none;color:inherit;font:inherit}.tgp-row+.tgp-row{border-top:1px solid rgba(255,255,255,.07)}
+.tgp-row small{display:block;font-size:12.5px;color:#9c94bb;margin-bottom:2px}.tgp-row b{display:flex;align-items:center;gap:6px;font-weight:550;font-size:15px;word-break:break-all}.tgp-row p{margin:0;font-size:15px;line-height:1.45;white-space:pre-wrap}
+.tgp-link{color:#7cc4ff}button.tgp-row{cursor:pointer}
+.tgp-gifts{margin-top:12px;padding:14px 16px}
+.tgp-gh{display:flex;align-items:center;gap:8px;margin-bottom:10px}.tgp-gh b{font-size:17px}.tgp-gh .btn{margin-left:auto}
+.tgp-gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.tgp-gt,.gs-it{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px 10px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:radial-gradient(90% 70% at 50% 30%,var(--gl),rgba(255,255,255,.03) 70%);color:#fff;cursor:pointer;transition:transform .2s}
+.tgp-gt:hover,.gs-it:hover{transform:translateY(-2px)}
+.tgp-gt img,.gs-it img{width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.5));margin-bottom:4px}
+.tgp-gt b,.gs-it b{font-size:12.5px;line-height:1.2;text-align:center}.tgp-gt small,.gs-it small{font-size:11px;color:#b9b0d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tgp-pin{position:absolute;top:6px;right:6px;opacity:.8}.tgp-pin .i{width:13px;height:13px}
+.gs-bal{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);margin-bottom:10px}.gs-bal img{width:42px;height:42px;object-fit:contain}.gs-bal b{display:block;font-size:22px;font-weight:800}
+.gs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gs-pr{margin-top:6px;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.12);font-size:12px;font-weight:700}
+.gs-it.no{opacity:.55}.gs-it.no .gs-pr{background:rgba(255,255,255,.06)}
+.gv{text-align:center;position:relative}.gv-x{position:absolute;right:0;top:0}
+.gv-img{width:150px;height:150px;margin:6px auto 4px;border-radius:50%;background:radial-gradient(circle,var(--gl) 0%,transparent 68%);display:grid;place-items:center}.gv-img img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 12px 20px rgba(0,0,0,.55))}
+.gv-n{justify-content:center;margin:4px 0 2px}.gv-r{color:#b9b0d6;font-size:13.5px}.gv .tgp-info{text-align:left}
+.ge-stage{position:relative;height:150px;max-width:300px;margin:0 auto}
+.ge-ava{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;object-fit:cover}
+.ge-slot{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:14px;border:1.5px dashed rgba(255,255,255,.25);background:rgba(255,255,255,.04);display:grid;place-items:center;color:#b9b0d6;cursor:pointer;padding:3px}
+.ge-slot img{width:100%;height:100%;object-fit:contain}.ge-slot.on{border:2px solid #c084fc;box-shadow:0 0 14px rgba(192,132,252,.6)}
+.ge-list{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.ge-pick{flex:none;width:52px;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);display:grid;place-items:center;cursor:pointer;padding:4px;color:#b9b0d6}.ge-pick img{width:100%;height:100%;object-fit:contain}.ge-pick.used{opacity:.45}
+@media(max-width:760px){.tgp{border-radius:26px;padding:18px 10px 18px}.tgp-stage{height:180px}.tgp-ava{width:112px;height:112px;margin:-56px 0 0 -56px}.tgp-g{width:42px;height:42px;margin:-21px 0 0 -21px}.tgp-name{font-size:24px}.tgp-acts{gap:6px}.tgp-a{border-radius:16px;padding:10px 2px 8px}.gs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.gs-it img{width:52px;height:52px}}
 </style>
 </head>
 <body>
@@ -3050,6 +3096,41 @@ function rvInner(target){const d=RV[target];if(!d)return '<div class="skel" styl
   <div class="rvlist">${d.list.length?d.list.map(r=>`<div class="rvi"><img class="pav" src="${esc(avaSrc(r.avatar))}" alt=""><div class="rvb"><div class="rvh"><b>${esc(r.name||'Пользователь')}</b>${starsHTML(r.stars,12)}<span class="k">${new Date(r.t).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}</span>${r.mine||(USR&&USR.admin)?`<button class="ib sm" data-act="rv-del" data-t="${esc(target)}" data-u="${r.uid}" title="Удалить">${ico('trash','s')}</button>`:''}</div>${r.text?`<p>${esc(r.text)}</p>`:''}</div></div>`).join(''):`<div class="k" style="padding:10px 0">Пока отзывов нет — будь первым.</div>`}</div>`}
 const IS_APP=/MundoraApp/.test(navigator.userAgent);
 const APP_DL='https://github.com/Xecoge/Mundora-/releases/latest/download/';
+const GIFT_ACT={
+  async 'gift-shop'(el){
+    const to=el&&el.dataset.to&&String(el.dataset.to)!==String(USR.id)?el.dataset.to:null;
+    let me=PEOPLE.cache[USR.id];if(!me||!me.capital||me.capital.avail==null){try{me=(await peopleApi('id='+USR.id)).profile;PEOPLE.cache[me.id]=me}catch(e){}}
+    const av=me&&me.capital?me.capital.avail||0:0,tp=to&&PEOPLE.cache[to];
+    openSheet(`<h3>${ico('star')}${to?'Подарок для '+esc(tp?tp.name:'ID '+to):'Магазин подарков'}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+      <div class="gs-bal"><img src="/img/money.webp" alt=""><div><small class="k">Доступно для подарков</small><b class="num">${av.toLocaleString('ru-RU')} XP</b></div></div>
+      <div class="k" style="margin:-2px 0 12px">XP копятся за лайки, прослушивания, плейлисты, заметки и дни в Mundora. Покупка не понижает уровень.</div>
+      <div class="gs-grid">${Object.entries(GIFT_CAT).map(([k,g])=>{const r=giftRar(k);return `<button class="gs-it r-${r.c}${av<g.p?' no':''}" data-act="gift-pick" data-k="${k}"${to?` data-to="${to}"`:''}><img src="${giftImg(k)}" alt=""><b>${g.n}</b><small>${r.n}</small><span class="gs-pr">${g.p.toLocaleString('ru-RU')} XP</span></button>`}).join('')}</div>`)},
+  'gift-pick'(el){const k=el.dataset.k,g=GIFT_CAT[k],to=el.dataset.to,tp=to&&PEOPLE.cache[to],r=giftRar(k);
+    openSheet(`<div class="gv r-${r.c}"><div class="gv-img"><img src="${giftImg(k)}" alt=""></div><h3 class="gv-n">${g.n}</h3><div class="gv-r">${r.n}</div>
+      <div class="k" style="text-align:center;margin:8px 0 16px">${to?'Подарок появится в профиле '+esc(tp?tp.name:'ID '+to)+' с твоим именем.':'Подарок появится в твоём профиле и сразу встанет у аватарки, если есть свободное место.'}</div>
+      <button class="btn" style="width:100%;justify-content:center" data-act="gift-buy" data-k="${k}"${to?` data-to="${to}"`:''}>${ico('star','s')}${to?'Подарить':'Купить'} за ${g.p.toLocaleString('ru-RU')} XP</button>
+      <button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="gift-shop"${to?` data-to="${to}"`:''}>Назад</button></div>`)},
+  async 'gift-buy'(el){el.disabled=true;const to=el.dataset.to||null;
+    try{const j=await peopleApi('a=gift-buy',{k:el.dataset.k,to});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();
+      if(to){toast('Подарок отправлен','star');try{const t=(await peopleApi('id='+to)).profile;PEOPLE.cache[t.id]=t;if(route()==='u-'+to)$('#pfBox').innerHTML=pfHTML(t)}catch(e){}}
+      else{toast('Подарок в профиле','star');if(route()==='u-'+j.profile.id)$('#pfBox').innerHTML=pfHTML(j.profile)}}
+    catch(e){toast(e.message,'x');el.disabled=false}},
+  'gift-view'(el){const p=PEOPLE.cache[el.dataset.u];if(!p)return;const g=(p.gifts||[]).find(x=>x.id===el.dataset.g);if(!g)return;const G=GIFT_CAT[g.k],r=giftRar(g.k),on=(p.slots||[]).includes(g.id);
+    openSheet(`<div class="gv r-${r.c}"><button class="ib gv-x" data-act="close-sheet">${ico('x')}</button><div class="gv-img"><img src="${giftImg(g.k)}" alt=""></div><h3 class="gv-n">${G.n}</h3><div class="gv-r">${r.n} · ${G.p.toLocaleString('ru-RU')} XP</div>
+      <div class="glass tgp-info" style="margin-top:14px"><div class="tgp-row"><small>${g.from?'от кого':'получен'}</small><b>${g.from?`<a href="#u-${g.from.id}" data-act="close-sheet">${esc(g.from.name)}</a>`:'куплен за XP'}</b></div><div class="tgp-row"><small>дата</small><b>${new Date(g.t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b></div></div>
+      ${p.self?`<button class="btn${on?' ghost':''}" style="width:100%;justify-content:center;margin-top:14px" data-act="gift-toggle" data-g="${g.id}">${ico('pin','s')}${on?'Убрать от аватарки':'Показать у аватарки'}</button>`:''}</div>`)},
+  async 'gift-toggle'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const sl=[...(me.slots||[])];const i=sl.indexOf(el.dataset.g);
+    if(i>=0)sl[i]=null;else{const f=sl.indexOf(null);if(f<0)return toast('Все 6 мест заняты — убери другой подарок в «Изменить»','x');sl[f]=el.dataset.g}
+    await giftSaveSlots(sl);closeSheet()},
+  'gift-slot'(el){pfEdit.slot=+el.dataset.i;$$('.ge-slot').forEach(b=>b.classList.toggle('on',b===el));const me=PEOPLE.cache[USR.id];const gs=(me&&me.gifts)||[];
+    $('#geList').innerHTML=gs.length?`<button class="ge-pick" data-act="gift-put" data-g="">${ico('x','s')}</button>`+gs.map(g=>`<button class="ge-pick${(me.slots||[]).includes(g.id)?' used':''}" data-act="gift-put" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""></button>`).join(''):'<div class="k">Сначала купи подарок</div>'},
+  async 'gift-put'(el){const me=PEOPLE.cache[USR.id];if(!me||pfEdit.slot==null)return;const sl=[...(me.slots||[])].map(x=>x===el.dataset.g?null:x);sl[pfEdit.slot]=el.dataset.g||null;
+    await giftSaveSlots(sl);const box=$('#geStage');if(box)box.outerHTML=giftEditor();},
+};
+async function giftSaveSlots(sl){try{const j=await peopleApi('a=gift-slots',{slots:sl});PEOPLE.cache[j.profile.id]=j.profile;if(route()==='u-'+j.profile.id)$('#pfBox').innerHTML=pfHTML(j.profile);return j.profile}catch(e){toast(e.message,'x')}}
+function giftEditor(){const me=PEOPLE.cache[USR.id]||{},gby=Object.fromEntries((me.gifts||[]).map(g=>[g.id,g]));
+  return `<div id="geStage"><div class="ge-stage">${(me.slots||Array(6).fill(null)).map((id,i)=>{const g=id&&gby[id];return `<button class="ge-slot gp${i}${pfEdit.slot===i?' on':''}" data-act="gift-slot" data-i="${i}">${g?`<img src="${giftImg(g.k)}" alt="">`:ico('plus','s')}</button>`}).join('')}<img class="ge-ava" src="${avaSrc(USR.avatar)}" alt=""></div>
+  <div class="k" style="text-align:center;margin:6px 0">Нажми на место вокруг аватарки и выбери подарок</div><div class="ge-list" id="geList"></div></div>`}
 const RV_ACT={
   'app-get'(){openSheet(`<h3>${ico('down')}Приложение Mundora</h3><div class="glass" style="padding:14px 16px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`)},
   'rv-star'(el){const t=el.dataset.t,f=RVF[t]||(RVF[t]={s:0,x:''});const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;f.s=+el.dataset.s;f.touched=true;rvPaint(t)},
@@ -3770,7 +3851,7 @@ async function aiRunActions(am,list){
 }
 const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
 
-Object.assign(ACT,EX_ACT,RV_ACT);
+Object.assign(ACT,EX_ACT,RV_ACT,GIFT_ACT);
 Object.assign(ACT,{
   async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
   async 'tg-fill'(el){el.disabled=true;toast('Бот ищет темы и пишет посты — до минуты…','loader');try{const r=await tgApi('fill',{});toast('Заполнено: '+r.topics.length+' тем','check')}catch(e){toast(e.message,'x')}el.disabled=false},
@@ -3851,6 +3932,13 @@ V.after.user=async(rid,r)=>{
   try{const j=await peopleApi('id='+encodeURIComponent(id));PEOPLE.cache[id]=j.profile;if(route()===r){$('#pfBox').innerHTML=pfHTML(j.profile)}}
   catch(e){if(route()===r)$('#pfBox').innerHTML=`<div class="pf-miss"><img src="/img/asteroid.webp" alt=""><h2>Профиль не найден</h2><p class="k">${esc(e.message)}</p><a class="btn ghost" href="#search">${ico('search','s')}Искать людей</a></div>`}
 };
+// ---------- Подарки (крипто, 3D). Картинки: /img/gifts/<ключ>.webp; пока их нет — временные 3D-иконки сайта ----------
+const GIFT_CAT={usdt:{n:'Стопка USDT',p:250},btc:{n:'Золотой биткоин',p:300},doge:{n:'Doge-монета',p:350},eth:{n:'Эфир-кристалл',p:400},ton:{n:'Алмаз TON',p:450},ledger:{n:'Холодный кошелёк',p:600},rocket:{n:'Ракета to the Moon',p:800},bull:{n:'Бык',p:1200},bear:{n:'Медведь',p:1200},miner:{n:'Майнинг-риг',p:1500},whale:{n:'Кит',p:2500},diamond:{n:'Diamond Hands',p:5000}};
+const GIFT_TMP={usdt:'gift_stack',btc:'money',doge:'planet',eth:'crystal',ton:'gem_orbit',ledger:'box_open',rocket:'asteroid',bull:'bar_gold',bear:'bar_silver',miner:'orbit',whale:'planet2',diamond:'gift_planet'};
+const GIFT_READY=new Set([]); // ключи, для которых уже загружены настоящие картинки /img/gifts/<k>.webp
+const giftImg=k=>GIFT_READY.has(k)?`/img/gifts/${k}.webp`:`/img/${GIFT_TMP[k]||'gift_planet'}.webp`;
+const giftRar=k=>{const p=(GIFT_CAT[k]||{}).p||0;return p>=3000?{c:'leg',n:'Легендарный'}:p>=1000?{c:'epic',n:'Эпический'}:p>=450?{c:'rare',n:'Редкий'}:{c:'com',n:'Обычный'}};
+const TGP_PAT=[[4,8,-12],[16,30,8],[6,58,14],[18,84,-6],[30,6,4],[30,62,-10],[70,8,10],[84,28,-8],[94,56,6],[80,84,12],[68,62,-4],[44,90,8],[56,4,-6],[92,6,-14],[2,86,4],[96,86,-10]];
 const kXP=n=>n<1000?String(n):String(n/1000).replace('.',',')+'к';
 function pfHTML(p){
   const c=p.capital,pct=c.to==null?100:Math.max(3,Math.min(100,Math.round((c.score-c.from)/(c.to-c.from)*100)));
@@ -3858,17 +3946,36 @@ function pfHTML(p){
   const open=p.genres!==undefined;
   const s=c.stats;
   const canCov=USR&&USR.admin&&p.self; // обложку админ меняет только себе
-  return `<div class="pf-hero${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
+  const gs=p.gifts||[],gby=Object.fromEntries(gs.map(g=>[g.id,g])),sl=(p.slots||[]).map(id=>id&&gby[id]);
+  const patK=(sl.find(Boolean)||gs[0]||{}).k;
+  const act=(a,ic,t,extra='')=>`<button class="tgp-a" data-act="${a}" ${extra}>${ic}<span>${t}</span></button>`;
+  return `<div class="tgp${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
+    ${patK?`<div class="tgp-pat" aria-hidden="true">${TGP_PAT.map(([x,y,r])=>`<img src="${giftImg(patK)}" alt="" style="left:${x}%;top:${y}%;transform:rotate(${r}deg)">`).join('')}</div>`:''}
     ${canCov?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
-    <img class="pf-ava" src="${avaSrc(p.avatar)}" alt="">
-    <div class="pf-id">
-      <h1>${esc(p.name)}${vBadge(p,true)}</h1>
-      <div class="pf-meta"><span class="pill mono">ID ${p.id}</span>${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span class="k">${seenTxt(p)}</span></div>
-      ${p.tg?`<button class="pf-tglink" data-act="tg-go" data-u="${esc(p.tg.username||'')}" title="Telegram">${TGI}<span>${esc(tgLabel(p.tg))}</span></button>`:''}
-      <div class="k pf-mail">${ico('lock','s')}${esc(p.email)}${joined?' · в Mundora с '+joined:''}</div>
-      ${p.bio?`<p class="pf-bio">${esc(p.bio)}</p>`:''}
-      <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button>${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?`<button class="btn ghost sm" data-act="app-get">${ico('down','s')}Приложение</button>`:''}</div>
+    <div class="tgp-stage">
+      ${sl.map((g,i)=>g?`<button class="tgp-g gp${i} r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`:'').join('')}
+      <img class="tgp-ava" src="${avaSrc(p.avatar)}" alt="">
     </div>
+    <h1 class="tgp-name">${esc(p.name)}${vBadge(p,true)}</h1>
+    <div class="tgp-sub">${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span>${seenTxt(p)}</span></div>
+  </div>
+  <div class="tgp-acts">
+    ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
+      :act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
+    ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
+    ${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?act('app-get',ico('down'),'Приложение'):''}
+    ${USR&&USR.admin&&!p.self?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''}
+  </div>
+  <div class="glass tgp-info">
+    ${p.bio?`<div class="tgp-row"><small>о себе</small><p>${esc(p.bio)}</p></div>`:''}
+    ${p.tg?`<button class="tgp-row" data-act="tg-go" data-u="${esc(p.tg.username||'')}"><small>telegram</small><b class="tgp-link">${esc(tgLabel(p.tg))}</b></button>`:''}
+    <div class="tgp-row"><small>почта</small><b>${ico('lock','s')}${esc(p.email)}</b></div>
+    ${joined?`<div class="tgp-row"><small>в Mundora</small><b>с ${joined}</b></div>`:''}
+  </div>
+  <div class="glass tgp-gifts">
+    <div class="tgp-gh"><b>Подарки</b><span class="k">${gs.length||''}</span>${p.self?`<button class="btn ghost sm" data-act="gift-shop">${ico('plus','s')}Купить</button>`:`<button class="btn ghost sm" data-act="gift-shop" data-to="${p.id}">${ico('star','s')}Подарить</button>`}</div>
+    ${gs.length?`<div class="tgp-gg">${gs.map(g=>`<button class="tgp-gt r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b><small>${g.from?'от '+esc(g.from.name):'куплен'}</small>${(p.slots||[]).includes(g.id)?'<i class="tgp-pin">'+ico('pin','s')+'</i>':''}</button>`).join('')}</div>`
+      :`<div class="k" style="padding:6px 2px 4px">${p.self?'Пока нет подарков. Купи за очки опыта — они появятся вокруг аватарки.':'Пока нет подарков — подари первым.'}</div>`}
   </div>
   <div class="glass pf-cap">
     <div class="pf-cap-top"><img src="/img/money.webp" alt=""><div style="flex:1;min-width:0"><span class="k">Очки опыта · рейтинг</span><b class="num">${c.score.toLocaleString('ru-RU')} <small>XP</small></b></div><div class="pf-lvl"><b>${c.level}</b><span>ур.</span></div></div>
@@ -3897,12 +4004,13 @@ function pfTgHTML(){return USR.tg?`<div class="tgrow">${TGI}<b>${esc(tgLabel(USR
   :`<button class="btn ghost" style="width:100%;justify-content:center" data-act="tg-link">${TGI}Привязать Telegram</button><div class="k" id="pfTgHint" style="margin-top:6px">Откроется бот Mundora — нажми там «Старт», и Telegram появится в твоём профиле.</div>`}
 async function pfTgCheck(){try{const j=await peopleApi('id='+USR.id);const p=j.profile;USR.tg=p.tg;PEOPLE.cache[p.id]=p;const b=$('#pfTg');if(b)b.innerHTML=pfTgHTML();if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p);return !!p.tg}catch(e){return false}}
 function pfEdit(){
-  let av=USR.avatar;
+  let av=USR.avatar;pfEdit.slot=null;
   openSheet(`<h3>${ico('edit')}Мой профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
   <div class="k" style="margin-bottom:6px">Аватар</div>
   <div class="ava-grid"><button class="ava-up" data-act="pf-ava-up" title="Загрузить из галереи">${ico('plus')}</button>${String(av).startsWith('/')?`<button class="on" data-act="pf-ava" data-k="${esc(av)}"><img src="${esc(av)}" alt=""></button>`:''}${AVA_LIST.map(k=>`<button class="${k===av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
   <label class="k" style="display:block;margin:14px 0 6px">Имя (проверяет нейросеть)</label><input class="in" id="pfName" maxlength="24" value="${esc(USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'')}" placeholder="Как тебя показывать">
   <label class="k" style="display:block;margin:12px 0 6px">О себе</label><textarea class="in" id="pfBio" maxlength="160" rows="3" style="height:auto;padding:10px 14px;resize:none" placeholder="Пара слов — видят все">${esc(USR.bio||'')}</textarea>
+  <div class="k" style="margin:14px 0 6px">Подарки у аватарки</div>${giftEditor()}
   <div class="k" style="margin:14px 0 6px">Telegram</div><div id="pfTg">${pfTgHTML()}</div>
   <label class="pf-tg"><input type="checkbox" id="pfOpen" ${USR.open!==false?'checked':''}><span><b>Открытый профиль</b><small class="k">Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
   <button class="btn" style="width:100%;justify-content:center;margin-top:14px" data-act="pf-save">${ico('check','s')}Сохранить</button>`);

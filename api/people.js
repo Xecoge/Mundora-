@@ -30,6 +30,16 @@ async function shLog(by, act, target) {
 const LV = [0, 1000, 2500, 5000, 8500, 13000, 19000, 27000, 37000, 50000];
 const TITLES = [[1, 'Новичок'], [2, 'Слушатель'], [4, 'Меломан'], [6, 'Знаток'], [8, 'Легенда'], [10, 'Икона Mundora']];
 const titleOf = l => TITLES.filter(([n]) => l >= n).pop()[1];
+// ---------- Подарки: покупаются за очки опыта (XP), показываются у аватарки ----------
+const GIFTS = {
+  usdt: { n: 'Стопка USDT', p: 250 }, btc: { n: 'Золотой биткоин', p: 300 }, doge: { n: 'Doge-монета', p: 350 },
+  eth: { n: 'Эфир-кристалл', p: 400 }, ton: { n: 'Алмаз TON', p: 450 }, ledger: { n: 'Холодный кошелёк', p: 600 },
+  rocket: { n: 'Ракета to the Moon', p: 800 }, bull: { n: 'Бык', p: 1200 }, bear: { n: 'Медведь', p: 1200 },
+  miner: { n: 'Майнинг-риг', p: 1500 }, whale: { n: 'Кит', p: 2500 }, diamond: { n: 'Diamond Hands', p: 5000 }
+};
+const SLOTS = 6;
+const giftsOut = u => (Array.isArray(u.gifts) ? u.gifts : []).filter(g => GIFTS[g.k]).map(g => ({ id: g.id, k: g.k, t: g.t, from: g.from || null }));
+const slotsOut = u => { const ids = new Set(giftsOut(u).map(g => g.id)); const s = Array.isArray(u.giftSlots) ? u.giftSlots : []; return Array.from({ length: SLOTS }, (_, i) => (s[i] && ids.has(s[i]) ? s[i] : null)); };
 const top = (o, n) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
 
 // «Капитализация» — очки за то, что человек делал на сайте (без сумм денег и текстов заметок)
@@ -56,7 +66,8 @@ async function card(email, viewer, full) {
     id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null,
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
-    online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false
+    online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
+    gifts: giftsOut(u), slots: slotsOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
   if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
@@ -65,6 +76,7 @@ async function card(email, viewer, full) {
   const vals = await kv('HMGET', 'd:' + email, ...keys);
   const d = {}; keys.forEach((k, i) => { d[k] = parse(vals[i]); });
   const cap = capital(u, d);
+  if (self) { cap.spent = u.xpSpent || 0; cap.avail = Math.max(0, cap.score - cap.spent); }
   const out = { ...base, capital: cap };
   if (base.open || self || viewer.admin) {
     const t = d.taste || {};
@@ -94,6 +106,37 @@ export default async function handler(req) {
       if (b.bio != null) u.bio = String(b.bio).replace(/[\u0000-\u0009\u000b-\u001f]/g, '').trim().slice(0, 160);
       if (b.avatar != null && AVATARS.includes(b.avatar)) u.avatar = b.avatar;
       if (b.open != null) u.open = !!b.open;
+      await putUser(u);
+      return json({ ok: true, profile: await card(me.email, me, true) });
+    }
+    if (a === 'gifts' && req.method === 'GET') return json({ catalog: GIFTS, slots: SLOTS });
+    if (req.method === 'POST' && a === 'gift-buy') {
+      if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — покупки недоступны' }, 423);
+      const b = await req.json().catch(() => ({})), G = GIFTS[b.k];
+      if (!G) return json({ error: 'Такого подарка нет' }, 400);
+      const u = await getUser(me.email);
+      const vals = await kv('HMGET', 'd:' + me.email, 'likes', 'playlists', 'plays', 'taste', 'notes', 'ops');
+      const d = {}; ['likes', 'playlists', 'plays', 'taste', 'notes', 'ops'].forEach((k, i) => { d[k] = parse(vals[i]); });
+      const avail = capital(u, d).score - (u.xpSpent || 0);
+      if (avail < G.p) return json({ error: `Не хватает ${(G.p - avail).toLocaleString('ru-RU')} XP` }, 402);
+      let tEmail = me.email;
+      if (b.to != null && String(b.to) !== String(u.id)) { tEmail = /^\d{1,12}$/.test(String(b.to)) ? await kv('GET', 'id:' + b.to) : null; if (!tEmail) return json({ error: 'Получатель не найден' }, 404); }
+      const t = tEmail === me.email ? u : await getUser(tEmail);
+      if (!t) return json({ error: 'Получатель не найден' }, 404);
+      t.gifts = Array.isArray(t.gifts) ? t.gifts : [];
+      if (t.gifts.length >= 200) return json({ error: 'У получателя уже слишком много подарков' }, 400);
+      const g = { id: rand(8), k: b.k, t: Date.now(), from: t === u ? null : { id: u.id, name: displayName(u) } };
+      t.gifts.unshift(g);
+      if (t === u) { const sl = slotsOut(u); const free = sl.indexOf(null); if (free >= 0 && b.place !== false) { sl[free] = g.id; u.giftSlots = sl; } }
+      u.xpSpent = (u.xpSpent || 0) + G.p;
+      await putUser(u); if (t !== u) await putUser(t);
+      return json({ ok: true, gift: g, profile: await card(me.email, me, true) });
+    }
+    if (req.method === 'POST' && a === 'gift-slots') {
+      if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
+      const b = await req.json().catch(() => ({})); const u = await getUser(me.email);
+      const ids = new Set(giftsOut(u).map(g => g.id)), seen = new Set();
+      u.giftSlots = Array.from({ length: SLOTS }, (_, i) => { const v = Array.isArray(b.slots) ? b.slots[i] : null; if (v && ids.has(v) && !seen.has(v)) { seen.add(v); return v; } return null; });
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
     }
