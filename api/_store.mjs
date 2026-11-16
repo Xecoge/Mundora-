@@ -79,6 +79,11 @@ export function memoryStore(load, persist) {
       }
       case 'DEL': r = a.filter(k => live(k) && (D.delete(k), X.delete(k), true)).length; break;
       case 'EXISTS': r = a.filter(k => live(k)).length; break;
+      case 'RPUSH': { if (!live(a[0])) D.set(a[0], { l: [] }); const L = D.get(a[0]).l; L.push(...a.slice(1)); r = L.length; break; }
+      case 'LLEN': r = live(a[0]) && D.get(a[0]).l ? D.get(a[0]).l.length : 0; break;
+      case 'LRANGE': { const L = live(a[0]) && D.get(a[0]).l ? D.get(a[0]).l : []; let s0 = +a[1], e0 = +a[2]; if (s0 < 0) s0 = Math.max(0, L.length + s0); if (e0 < 0) e0 = L.length + e0; r = L.slice(s0, e0 + 1); break; }
+      case 'LSET': { const L = live(a[0]) && D.get(a[0]).l; if (!L || !(+a[1] in L)) throw new Error('ERR index out of range'); L[+a[1]] = a[2]; r = 'OK'; break; }
+      case 'HINCRBY': { const o = h(a[0]); o[a[1]] = String((+o[a[1]] || 0) + +a[2]); r = +o[a[1]]; break; }
       case 'RENAME': { if (!live(a[0])) throw new Error('ERR no such key'); D.set(a[1], D.get(a[0])); D.delete(a[0]); if (X.has(a[0])) { X.set(a[1], X.get(a[0])); X.delete(a[0]); } else X.delete(a[1]); r = 'OK'; break; }
       case 'INCR': case 'INCRBY': { const v = (live(a[0]) ? +D.get(a[0]).v : 0) + (c === 'INCR' ? 1 : +a[1]); D.set(a[0], { v: String(v) }); r = v; break; }
       case 'EXPIRE': { if (!live(a[0])) { r = 0; break; } if (String(a[2] || '').toUpperCase() === 'NX' && X.has(a[0])) { r = 0; break; } X.set(a[0], now() + +a[1] * 1000); r = 1; break; }
@@ -96,7 +101,7 @@ export function memoryStore(load, persist) {
       case 'SCARD': r = live(a[0]) && D.get(a[0]).s ? D.get(a[0]).s.length : 0; break;
       default: throw new Error('unsupported ' + c);
     }
-    if (!/^(GET|EXISTS|TTL|HGET|HMGET|HGETALL|HLEN|SMEMBERS|SCARD|SISMEMBER)$/.test(c)) save();
+    if (!/^(GET|EXISTS|TTL|HGET|HMGET|HGETALL|HLEN|SMEMBERS|SCARD|SISMEMBER|LLEN|LRANGE)$/.test(c)) save();
     return r;
   }
   return { exec };

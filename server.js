@@ -27,6 +27,7 @@ const H = {
   sync: () => import('./api/sync.js').then(m => m.default),
   admin: () => import('./api/admin.js').then(m => m.default),
   people: () => import('./api/people.js').then(m => m.default),
+  msg: () => import('./api/msg.js').then(m => m.default),
   tg: () => import('./api/tg.js').then(m => m.handler),
   ping: () => import('./api/ping.js').then(m => m.default),
   proxy: () => import('./api/proxy.js').then(m => m.default),
@@ -52,6 +53,7 @@ function route(u) {
   if (p === '/api/sync') return ['sync', u];
   if (p === '/api/admin') return ['admin', u];
   if (p === '/api/people') return ['people', u];
+  if (p === '/api/msg') return ['msg', u];
   if (p === '/api/tg') return ['tg', u];
   if (p === '/tempo-ping') return ['ping', u];
   let m;

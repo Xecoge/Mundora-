@@ -1257,6 +1257,107 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
   .ctbl td.n{text-align:right;white-space:nowrap}.ctbl td.n .pcell{font-weight:750;font-size:14.5px}
   .ctbl td[data-c24]{font-size:12.5px}.ctbl td[data-c24] span{display:inline-block;padding:4px 7px;border-radius:9px;background:rgba(255,255,255,.06)}
 }
+/* ===================== Мессенджер ===================== */
+.msgr{position:fixed;inset:0;z-index:65;display:none;background:#0a0614;color:#fff;height:100dvh}
+.msgr.on{display:block;animation:msIn .28s cubic-bezier(.2,.9,.25,1)}
+@keyframes msIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+body.ms-open{overflow:hidden}
+body.ms-open .tabs,body.ms-open .tab-all{display:none!important}
+@media(max-width:760px){body.ms-open .player,body.ms-open .ytfloat{visibility:hidden}}
+.ms-panes{position:absolute;inset:0;display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr)}
+.ms-side{position:relative;display:flex;flex-direction:column;min-height:0;border-right:1px solid rgba(255,255,255,.07);background:#0d0819;padding-bottom:84px}
+.ms-main{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;
+  background:radial-gradient(900px 600px at 80% 0%,rgba(124,58,237,.22),transparent 60%),radial-gradient(700px 500px at 0% 100%,rgba(236,72,153,.12),transparent 60%),#0b0716}
+.ms-main::before{content:'';position:absolute;inset:0;opacity:.05;pointer-events:none;background-image:radial-gradient(circle at 20% 30%,#fff 0 1px,transparent 1.5px),radial-gradient(circle at 70% 60%,#fff 0 1px,transparent 1.5px);background-size:46px 46px,64px 64px}
+.ms-lhead{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 12px 6px}.ms-lhead h1{flex:1;font-size:26px;font-weight:800;letter-spacing:-.5px;margin:0}
+.ms-search{display:flex;align-items:center;gap:8px;margin:4px 12px 8px;height:40px;padding:0 12px;border-radius:14px;background:rgba(255,255,255,.07);color:#9c94bb}
+.ms-search input{flex:1;min-width:0;background:none;border:0;outline:none;color:#fff;font:inherit;font-size:15px}
+.ms-list{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:0 6px 10px;-webkit-overflow-scrolling:touch}
+.ms-it{display:flex;align-items:center;gap:11px;padding:8px 8px;border-radius:16px;color:#fff;transition:background .15s}
+.ms-it:hover{background:rgba(255,255,255,.05)}.ms-it.on{background:linear-gradient(120deg,rgba(139,92,246,.35),rgba(139,92,246,.12))}
+.ms-ava{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;background:rgba(255,255,255,.06)}.ms-ava.sm{width:38px;height:38px}
+.ms-itx{flex:1;min-width:0;border-bottom:1px solid rgba(255,255,255,.05);padding-bottom:8px}.ms-it:last-child .ms-itx{border-bottom:0}
+.ms-r1{display:flex;align-items:center;gap:6px}.ms-r1 b{flex:1;min-width:0;font-size:15.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.ms-tm{display:flex;align-items:center;gap:3px;font-size:12px;color:#8f88ad;flex:none}
+.ms-r2{display:flex;align-items:center;gap:6px;margin-top:2px}.ms-r2 span{flex:1;min-width:0;font-size:14px;color:#a49dc0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ms-r2 em{font-style:normal;color:#d6cfee}
+.ms-ub{min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:#8b5cf6;color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+.ms-vf{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#8b5cf6;flex:none}.ms-vf .i{width:10px;height:10px;stroke-width:3.5}
+.ms-tk{display:inline-flex;color:#8f88ad}.ms-tk .i{width:15px;height:15px}.ms-tk.rd{color:#a78bfa}.ms-tk.er{color:#f87171;font-weight:900;font-style:normal}
+.ms-sec{padding:12px 10px 4px;font-size:12px;font-weight:700;color:#8f88ad;text-transform:uppercase;letter-spacing:.04em}
+.ms-empty,.ms-blank,.ms-hello{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:40px 24px;color:#a49dc0;font-size:14px}
+.ms-empty img{width:110px}.ms-empty b,.ms-blank b,.ms-hello b{color:#fff;font-size:17px}.ms-blank{flex:1}.ms-hello{margin:auto}.ms-hello .ce-orb{width:96px;height:96px}.ms-hello .ce-orb img{width:96px;height:96px;border-radius:50%;object-fit:cover}
+.ms-tabs{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:calc(min(380px,100%) - 24px);height:60px;border-radius:30px;display:flex;padding:5px;gap:4px;z-index:3}
+.ms-tabs button{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;color:rgba(255,255,255,.6);font:inherit;font-size:11px;font-weight:650;border-radius:24px;cursor:pointer}
+.ms-tabs button.on{color:#fff;background:rgba(255,255,255,.14)}.ms-tabs .i{width:22px;height:22px}
+.ms-badge{position:absolute;top:2px;right:calc(50% - 26px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.ms-me{display:flex;align-items:center;gap:12px;margin:8px 12px;padding:12px;border-radius:20px;color:#fff}.ms-me img{width:56px;height:56px;border-radius:50%;object-fit:cover}.ms-me>div{flex:1;min-width:0}.ms-me b{display:block;font-size:17px}.ms-me small{display:block;color:#a49dc0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-me .r,.ms-row .r{transform:rotate(-90deg);opacity:.5}
+.ms-grp{margin:10px 12px;border-radius:18px;padding:2px 0}
+.ms-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;background:none;color:#fff;font:inherit;font-size:15px;text-align:left;cursor:pointer}.ms-row+.ms-row{border-top:1px solid rgba(255,255,255,.06)}
+.ms-row>span{flex:1;min-width:0}.ms-row>.i:first-child{color:#c4b5fd}.ms-row input{width:20px;height:20px;accent-color:#8b5cf6}
+.ms-info{align-items:flex-start;cursor:default}.ms-info small{display:block;color:#a49dc0;font-size:12.5px;line-height:1.45;margin-top:3px}
+/* шапка чата */
+.ms-ch{position:absolute;left:10px;right:10px;top:calc(8px + env(safe-area-inset-top));z-index:4;display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:24px}
+.ms-ch>a.ib{position:relative;color:#fff}.ms-ch .ms-badge{top:-2px;right:-6px}
+.ms-cht{flex:1;min-width:0;text-align:center;color:#fff}.ms-cht b{display:flex;align-items:center;justify-content:center;gap:4px;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ms-cht small{display:block;font-size:12.5px;color:#a49dc0}
+.ms-on{color:#a78bfa}.ms-typ{color:#a78bfa}.ms-typ i{display:inline-block;width:4px;height:4px;margin-left:2px;border-radius:50%;background:currentColor;animation:dt 1s infinite}.ms-typ i:nth-child(2){animation-delay:.15s}.ms-typ i:nth-child(3){animation-delay:.3s}
+/* сообщения */
+.ms-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px;padding:calc(76px + env(safe-area-inset-top)) 10px 92px;position:relative;z-index:1}
+.ms-load{margin:auto;color:#a49dc0}
+.ms-day{position:sticky;top:4px;z-index:2;display:flex;justify-content:center;margin:10px 0 6px;pointer-events:none}.ms-day span{padding:4px 11px;border-radius:12px;font-size:12.5px;font-weight:600;background:rgba(30,18,58,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.mb{position:relative;max-width:min(78%,520px);padding:7px 10px 6px 12px;border-radius:19px;font-size:15.5px;line-height:1.38;word-wrap:break-word;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text}
+.mb.me{align-self:flex-end;background:linear-gradient(140deg,#8b5cf6,#6d28d9);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+.mb.th{align-self:flex-start;background:rgba(38,26,66,.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.mb.tail.me{border-bottom-right-radius:6px;margin-bottom:6px}.mb.tail.th{border-bottom-left-radius:6px;margin-bottom:6px}
+.mb.new{animation:mbIn .26s cubic-bezier(.2,.9,.3,1.2)}@keyframes mbIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+.mb.me.new{transform-origin:100% 100%}.mb.th.new{transform-origin:0 100%}
+.mb.pick{transform:scale(.97);transition:transform .15s}
+.ms-tx{display:inline}.ms-tx a{color:#e9d5ff;text-decoration:underline}
+.ms-mt{float:right;display:inline-flex;align-items:center;gap:2px;margin:6px 0 -3px 10px;font-size:11.5px;color:rgba(255,255,255,.62);white-space:nowrap}.mb.me .ms-tk{color:rgba(255,255,255,.7)}.mb.me .ms-tk.rd{color:#fff}
+.mb.bare{padding:3px;background:none;box-shadow:none}.mb.bare .ms-mt{position:absolute;right:10px;bottom:10px;margin:0;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,.45);color:#fff}
+.ms-img{display:block;position:relative;width:min(300px,64vw);max-height:420px;border:0;padding:0;border-radius:16px;overflow:hidden;background:#1c1230 center/cover no-repeat;cursor:zoom-in}
+.ms-img img{display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}.ms-img.ld img{opacity:1}
+.mb:not(.bare) .ms-img{margin:-3px -7px 6px -9px;width:calc(100% + 16px);min-width:220px}
+.ms-vid{position:relative;width:min(300px,64vw);max-height:420px;border-radius:16px;overflow:hidden;background:#1c1230}.ms-vid video,.ms-vid img{display:block;width:100%;height:100%;object-fit:cover}
+.ms-prog{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.25)}.ms-prog i{width:46px;height:46px;border-radius:50%;background:conic-gradient(#fff var(--p),rgba(255,255,255,.2) 0);-webkit-mask:radial-gradient(circle,transparent 58%,#000 60%);mask:radial-gradient(circle,transparent 58%,#000 60%);transition:background .2s}
+.ms-prog.sm{position:static;background:none}.ms-prog.sm i{width:30px;height:30px}
+.ms-fl{display:flex;align-items:center;gap:10px;min-width:200px;color:#fff;padding:2px 0 4px}.ms-fli{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;flex:none}
+.ms-fl b{display:block;font-size:14.5px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ms-fl small{font-size:12.5px;opacity:.75}
+.ms-delm{display:inline-flex;align-items:center;gap:6px;font-style:italic;opacity:.65;font-size:14px}.ms-delm .i{width:14px;height:14px}
+/* поле ввода — плавающие стеклянные капсулы, как в iOS 26 */
+.ms-comp{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;align-items:flex-end;gap:8px;padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(11,7,22,.85),rgba(11,7,22,0))}
+.ms-att{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;cursor:pointer;border:0}
+.ms-inp{flex:1;min-width:0;border-radius:23px;padding:0 6px 0 16px;display:flex;align-items:flex-end;min-height:46px}
+.ms-inp textarea{flex:1;min-width:0;background:none;border:0;outline:none;resize:none;color:#fff;font:inherit;font-size:16px;line-height:1.4;padding:12px 0;max-height:140px}
+.ms-inp textarea::placeholder{color:rgba(255,255,255,.45)}
+.ms-send{width:46px;height:46px;border-radius:50%;flex:none;border:0;display:grid;place-items:center;color:#fff;cursor:pointer;background:linear-gradient(140deg,#a78bfa,#7c3aed);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px -6px rgba(124,58,237,.9);transform:scale(0);opacity:0;width:0;margin-left:-8px;transition:transform .22s cubic-bezier(.3,1.5,.5,1),opacity .15s,width .2s,margin .2s}
+.ms-comp.has .ms-send{transform:scale(1);opacity:1;width:46px;margin-left:0}.ms-send .i{width:21px;height:21px}
+.ms-menu{display:flex;flex-direction:column;gap:2px}.ms-menu .red{color:#fca5a5}
+.ms-viewer{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.92);display:grid;place-items:center;opacity:0;transition:opacity .2s}.ms-viewer.on{opacity:1}.ms-viewer.off{opacity:0}
+.ms-viewer img{max-width:100vw;max-height:100dvh;object-fit:contain;transform:scale(.94);transition:transform .25s}.ms-viewer.on img{transform:none}
+.ms-vbar{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;display:flex;gap:8px}.ms-vbar .ib{background:rgba(255,255,255,.14);color:#fff}
+.ms-pc{display:none}@media(min-width:761px){.ms-pc{display:flex}}
+.ms-badge[hidden]{display:none!important}
+.tab-all.dot::after{content:'';position:absolute;top:10px;right:12px;width:11px;height:11px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 2px rgba(20,10,40,.9)}
+.all-rec{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;min-height:0;padding:14px 16px;background:linear-gradient(135deg,rgba(139,92,246,.35),rgba(109,40,217,.15))!important;position:relative}
+.all-rec .i{width:30px;height:30px;color:#fff}.all-rec span{text-align:left;font-size:15px}.all-rec small{display:block;font-weight:500;color:#cfc6ea;font-size:12px}
+.all-rec .ms-badge{position:static;margin-left:auto}
+.all-lbl{grid-column:1/-1;font-size:12px;font-weight:700;color:#8f88ad;text-transform:uppercase;letter-spacing:.04em;padding:2px 2px 0}
+/* телефон: одна панель за раз, листается как в Telegram */
+@media(max-width:760px){
+  .ms-panes{display:block;overflow:hidden}
+  .ms-side,.ms-main{position:absolute;inset:0;transition:transform .32s cubic-bezier(.2,.9,.25,1);will-change:transform}
+  .ms-side{border:0}
+  .msgr[data-pane=list] .ms-main{transform:translateX(100%)}
+  .msgr[data-pane=chat] .ms-side{transform:translateX(-28%)}
+  .msgr[data-pane=chat] .ms-tabs{transform:translateX(-200%);opacity:0}
+  .ms-tabs{width:auto;right:12px;transition:transform .3s,opacity .2s}
+  .mb{max-width:84%}
+}
+@media(min-width:761px){.ms-ch>a.ib:first-child{display:none}.ms-ch{left:16px;right:16px}}
+
+.all-it.lq{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.06)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important}
+@media(max-width:760px){button.ava[data-act=profile]{display:none!important}}
 </style>
 </head>
 <body>
@@ -2287,7 +2388,7 @@ const MUSIC_R=['music','flow','search','playlists','remixes','library'];
 const isMusicR=r=>MUSIC_R.includes(r)||/^(artist|pl)-/.test(r);
 const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['metals','gem','Курсы ценностей'],['exch','spread','Обменники'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n],k)=>`<a class="it" href="#${v}" data-v="${v}" title="${n}" style="--k:${k}">${ico(i)}<span class="lt">${n}</span></a>`;
-$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],['reviews','star','Отзывы'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
+$('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['msg','send','Мессенджер'],['notes','notes','Заметки'],['reviews','star','Отзывы'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
 // телефон: в стеклянном меню только главное + профиль; всё остальное — в круглой кнопке с поиском
 function tabsDraw(){const me=USR&&USR.id!=null;
   $('#tabs').innerHTML=[['home','home','Главная'],['music','note','Музыка'],['ai','chat','ИИ']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('')
@@ -2298,9 +2399,11 @@ function tabsHL(){if(!$('#tabs a'))return;const r=route(),base=isMusicR(r)?'musi
   const b=$('#tabAll');if(b)b.classList.toggle('on',!['home','ai'].includes(base)&&!isMusicR(r)&&!(USR&&r==='u-'+USR.id))}
 const ALL_SEC=()=>[['crypto','coin','Крипта','курсы монет биткоин'],['finance','wallet','Финансы','деньги'],['budget','trend','Доходы и расходы','бюджет траты'],['metals','gem','Курсы ценностей','золото серебро'],['exch','spread','Обменники','обмен p2p'],['calc','calc','Калькулятор',''],['spread','spread','Спред','bid ask'],['percent','pct','Проценты',''],['tables','table','Таблицы','excel'],['history','hist','История','расчёты'],['notes','notes','Заметки','список'],['flow','flow','Волна','музыка'],['search','search','Поиск музыки и людей','трек артист'],['playlists','lists','Плейлисты','музыка'],['library','lib','Медиатека','лайки музыка'],['remixes','disc','Ремиксы','музыка'],['reviews','star','Отзывы','рейтинг'],...(USR&&USR.admin?[['admin','gem','Админ-панель','коды аккаунты']]:[])];
 function allPaint(q){q=(q||'').trim().toLowerCase();const L=ALL_SEC().filter(([v,i,n,k])=>!q||(n+' '+k).toLowerCase().includes(q));
-  const g=$('#allGrid');if(!g)return;g.innerHTML=L.map(([v,i,n])=>`<a class="all-it lq" href="#${v}" data-act="close-sheet">${ico(i)}<span>${n}</span></a>`).join('')
+  const g=$('#allGrid');if(!g)return;const n=typeof msUnread==='function'?msUnread():0;
+  g.innerHTML=(!q||'мессенджер чаты сообщения'.includes(q)?`<div class="all-lbl">Рекомендованное</div><a class="all-it all-rec lq" href="#msg" data-act="close-sheet">${ico('send')}<span>Мессенджер<small>Чаты, фото, видео и файлы · зашифровано</small></span><b class="ms-badge"${n?'':' hidden'}>${n}</b></a><div class="all-lbl">Все разделы</div>`:'')+L.map(([v,i,n])=>`<a class="all-it lq" href="#${v}" data-act="close-sheet">${ico(i)}<span>${n}</span></a>`).join('')
     +(q?`<a class="all-it all-q lq" href="#search" data-act="all-search" data-q="${esc(q)}">${ico('search')}<span>Искать «${esc(q)}» в музыке и людях</span></a>`:'')}
 setTimeout(()=>{try{tabsDraw()}catch(e){}},0);
+setTimeout(()=>{try{if(USR&&USR.id!=null&&!/^#msg/.test(location.hash))msLoop()}catch(e){}},2500);
 const FIN=['finance','ai','crypto','metals','exch','reviews','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
 
@@ -2308,6 +2411,7 @@ function route(){return (location.hash||'#home').slice(1)||'home'}
 let renderId=0;
 function render(){
   const r=route(),id=++renderId;
+  if(/^msg(-\d+)?$/.test(r)){tabsHL();msShow(r);return}else if(MS.on)msHide();
   const base0=r.startsWith('u-')?'user':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r;
   const base=isMusicR(r)?'music':base0;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));sideHL();
@@ -2322,6 +2426,199 @@ function render(){
   window.scrollTo({top:0,behavior:'instant'});
 }
 addEventListener('hashchange',render);
+/* ===================== Мессенджер (как Telegram) ===================== */
+const MS={on:false,tk:'',me:null,v:'0',chats:[],peers:{},c:null,peer:null,msgs:{},from:{},read:{},typing:false,timer:0,bg:0,busy:false,pane:'list',q:'',tab:'chats',ty:0,lastTy:0,ok:false};
+const TK1='<svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',TK2='<svg class="i" viewBox="0 0 28 24"><path d="M3 12.5l4.2 4.2L17 7M11.5 16.2l.5.5L22 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const msCid=p=>[String(MS.me),String(p)].sort((a,b)=>+a-+b).join('_');
+const msPeerOf=c=>c.split('_').find(x=>x!==String(MS.me))??String(MS.me);
+const msFile=(id,dl)=>`/api/msg?a=file&id=${encodeURIComponent(id)}&tk=${encodeURIComponent(MS.tk)}${dl?'&dl=1':''}`;
+async function msApi(a,body,qs=''){const r=await fetch('/api/msg?a='+a+qs+(body?'':'&tk='+encodeURIComponent(MS.tk)),body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,tk:MS.tk})}:{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j}
+async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers()}
+async function msPeers(extra=[]){const ids=[...new Set([...MS.chats.map(c=>c.p),...extra].map(String))].filter(id=>!MS.peers[id]);if(!ids.length)return;
+  try{const j=await msApi('peers',null,'&ids='+ids.join(','));j.peers.forEach(p=>MS.peers[p.id]=p)}catch(e){}}
+const msUnread=()=>MS.chats.reduce((n,c)=>n+(c.u||0),0);
+function msBadge(){const n=msUnread();$$('.ms-badge').forEach(b=>{b.textContent=n>99?'99+':n;b.hidden=!n});const t=$('#tabAll');if(t)t.classList.toggle('dot',n>0)}
+const msTime=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+function msWhen(t){const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return msTime(t);const y=new Date(n-864e5);if(d.toDateString()===y.toDateString())return 'вчера';return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}).replace('.','')}
+function msDay(t){const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return 'Сегодня';if(d.toDateString()===new Date(n-864e5).toDateString())return 'Вчера';return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',...(d.getFullYear()!==n.getFullYear()?{year:'numeric'}:{})})}
+function msStatus(p){if(!p)return '';if(MS.typing)return '<span class="ms-typ">печатает<i></i><i></i><i></i></span>';if(String(p.id)===String(MS.me))return 'заметки для себя';if(p.online)return '<span class="ms-on">в сети</span>';return p.seen?'был(а) '+msWhen(p.seen):'был(а) давно'}
+const msName=p=>p?esc(p.name)+(p.verified?`<span class="ms-vf">${ico('check','s')}</span>`:''):'…';
+const msAva=(p,cls='')=>`<img class="ms-ava ${cls}" src="${avaSrc(p?p.avatar:'planet')}" alt="" loading="lazy">`;
+const fsz=n=>n>1048576?(n/1048576).toFixed(1).replace('.',',')+' МБ':n>1024?Math.round(n/1024)+' КБ':n+' Б';
+
+/* ---------- каркас ---------- */
+function msShell(){let m=$('#msgr');if(m)return m;m=document.createElement('div');m.id='msgr';m.className='msgr';
+  m.innerHTML=`<div class="ms-panes"><section class="ms-side" id="msSide"></section><section class="ms-main" id="msMain"></section></div>
+  <nav class="ms-tabs lq"><button data-act="ms-tab" data-t="chats">${ico('chat')}<span>Чаты</span><b class="ms-badge" hidden></b></button><button data-act="ms-tab" data-t="set">${ico('user')}<span>Настройки</span></button></nav>
+  <input type="file" id="msFileIn" multiple hidden>`;
+  document.body.appendChild(m);
+  $('#msFileIn').addEventListener('change',e=>{msAttach([...e.target.files]);e.target.value=''});
+  return m}
+async function msShow(r){const m=msShell();MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');
+  const peer=r.startsWith('msg-')?r.slice(4):null;
+  try{await msInit()}catch(e){$('#msSide').innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`;return}
+  if(peer&&/^\d+$/.test(peer)){MS.peer=peer;MS.c=msCid(peer);await msPeers([peer]);MS.pane='chat';msDrawSide();msOpenChat()}
+  else{MS.c=null;MS.peer=null;MS.pane='list';msDrawSide();msDrawMain()}
+  m.dataset.pane=MS.pane;msLoop()}
+function msHide(){const m=$('#msgr');MS.on=false;document.body.classList.remove('ms-open');if(m)m.classList.remove('on');MS.c=null;msLoop()}
+
+/* ---------- список чатов / настройки ---------- */
+function msDrawSide(){const s=$('#msSide');if(!s)return;$$('.ms-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===MS.tab));
+  if(MS.tab==='set'){s.innerHTML=msSettings();return}
+  s.innerHTML=`<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>Чаты</h1><button class="ib" data-act="ms-newchat" title="Новый чат">${ico('edit')}</button></div>
+    <label class="ms-search">${ico('search','s')}<input id="msQ" placeholder="Поиск людей и чатов" value="${esc(MS.q)}" autocomplete="off"></label>
+    <div class="ms-list" id="msList">${msListHTML()}</div>`;
+  const q=$('#msQ');let t;q.addEventListener('input',()=>{MS.q=q.value;clearTimeout(t);t=setTimeout(msSearch,250)});if(MS.q)msSearch()}
+function msListHTML(){const q=MS.q.trim().toLowerCase();
+  const L=MS.chats.filter(c=>!q||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
+  if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
+  return L.map(c=>{const p=MS.peers[c.p],mine=String(c.f)===String(MS.me),rd=mine&&c.n&&(MS.read[c.c]??-1)>=c.n-1;
+    return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${(rd?TK2:TK1)}</i>`:''}${msWhen(c.t)}</span></div>
+      <div class="ms-r2"><span>${mine?'<em>Вы: </em>':''}${esc(c.pv||'')}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:''}</div></div></a>`}).join('')}
+async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;box.innerHTML=msListHTML();if(q.length<1)return;
+  try{const j=await peopleApi('q='+encodeURIComponent(q));if(MS.q.trim()!==q)return;const known=new Set(MS.chats.map(c=>String(c.p)));
+    const ppl=j.people.filter(p=>!known.has(String(p.id)));if(!ppl.length)return;
+    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,online:p.online,seen:p.seen};
+      return `<a class="ms-it" href="#msg-${p.id}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>ID ${p.id}${p.bio?' · '+esc(p.bio):''}</span></div></div></a>`}).join(''))}catch(e){}}
+function msSettings(){const p=MS.peers[MS.me]||{name:USR.name,avatar:USR.avatar};
+  return `<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>Настройки</h1><span></span></div>
+  <a class="ms-me lq" href="#u-${USR.id}"><img src="${avaSrc(USR.avatar)}" alt=""><div><b>${esc(USR.name||'Профиль')}</b><small>ID ${USR.id} · ${esc(USR.email||'')}</small></div>${ico('chev','s r')}</a>
+  <div class="ms-grp lq">
+    <button class="ms-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button>
+    <a class="ms-row" href="#msg-${USR.id}">${ico('notes')}<span>Избранное — заметки себе</span>${ico('chev','s r')}</a>
+  </div>
+  <div class="ms-grp lq">
+    <label class="ms-row">${ico('vol')}<span>Звук новых сообщений</span><input type="checkbox" data-ms-opt="snd" ${LS.get('msSnd',true)?'checked':''}></label>
+    <label class="ms-row ms-pc">${ico('send')}<span>Отправка по Enter</span><input type="checkbox" data-ms-opt="enter" ${LS.get('msEnter',true)?'checked':''}></label>
+  </div>
+  <div class="ms-grp lq"><div class="ms-row ms-info">${ico('lock')}<span><b>Шифрование</b><small>Сообщения, фото, видео и файлы хранятся зашифрованными (AES-256-GCM, у каждого чата свой ключ) и передаются только по защищённому соединению HTTPS. Файлы видят только участники чата.</small></span></div></div>`}
+
+/* ---------- чат ---------- */
+async function msOpenChat(){const c=MS.c,p=MS.peers[MS.peer];MS.typing=false;msDrawMain();
+  if(!MS.msgs[c]){try{const j=await msApi('hist',null,'&c='+c);MS.msgs[c]=j.msgs;MS.from[c]=j.from;MS.read[c]=j.read;msDel(c,j.del)}catch(e){MS.msgs[c]=[];toast(e.message,'x')}}
+  if(MS.c!==c)return;msPaintMsgs(true);msMarkRead()}
+function msDrawMain(){const box=$('#msMain');if(!box)return;const m=$('#msgr');if(m)m.dataset.pane=MS.pane;
+  if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
+  const p=MS.peers[MS.peer];
+  box.innerHTML=`<header class="ms-ch lq"><a class="ib" href="#msg">${ico('left')}<b class="ms-badge" hidden></b></a>
+      <a class="ms-cht" href="#u-${MS.peer}"><b>${msName(p)}</b><small id="msStat">${msStatus(p)}</small></a>
+      <a href="#u-${MS.peer}">${msAva(p,'sm')}</a></header>
+    <div class="ms-msgs" id="msMsgs"><div class="ms-load">${ico('loader','s ldg')}</div></div>
+    <form class="ms-comp" id="msComp">
+      <button type="button" class="ms-att lq" data-act="ms-attach" title="Фото, видео, файл">${ico('clip')}</button>
+      <div class="ms-inp lq"><textarea id="msIn" rows="1" placeholder="Сообщение" enterkeyhint="send">${esc(MS.draft&&MS.draft[MS.c]||'')}</textarea></div>
+      <button type="submit" class="ms-send" id="msSend" title="Отправить">${ico('send')}</button>
+    </form>`;
+  msBadge();
+  const inp=$('#msIn'),f=$('#msComp');const grow=()=>{inp.style.height='';inp.style.height=Math.min(140,inp.scrollHeight)+'px';f.classList.toggle('has',!!inp.value.trim())};grow();
+  inp.addEventListener('input',()=>{grow();MS.draft=MS.draft||{};MS.draft[MS.c]=inp.value;msTyping()});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&LS.get('msEnter',true)&&matchMedia('(min-width:761px)').matches){e.preventDefault();msSend()}});
+  f.addEventListener('submit',e=>{e.preventDefault();msSend();inp.focus()});
+  const ml=$('#msMsgs');ml.addEventListener('scroll',()=>{if(ml.scrollTop<80&&!MS.hl)msOlder()},{passive:true});
+  msLong(ml)}
+function msDel(c,del){if(!del||!MS.msgs[c])return;const D=new Set(del);MS.msgs[c].forEach(m=>{if(D.has(m.i)&&!m.d){m.d=1;m.x='';delete m.fl}})}
+async function msOlder(){const c=MS.c,from=MS.from[c];if(!c||!from)return;MS.hl=1;
+  try{const j=await msApi('hist',null,'&c='+c+'&before='+from);if(MS.c!==c)return;const ml=$('#msMsgs'),h=ml.scrollHeight;MS.msgs[c]=j.msgs.concat(MS.msgs[c]);MS.from[c]=j.from;msDel(c,j.del);msPaintMsgs();ml.scrollTop+=ml.scrollHeight-h}catch(e){}finally{MS.hl=0}}
+function msMsgHTML(m,prev,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine&&m.i!=null&&(MS.read[c]??-1)>=m.i&&MS.peer!==String(MS.me);
+  const grp=next&&String(next.f)===String(m.f)&&next.t-m.t<120e3&&new Date(next.t).toDateString()===new Date(m.t).toDateString();
+  const tick=mine?(m.err?`<i class="ms-tk er">!</i>`:m.pend?`<i class="ms-tk">${ico('hist','s')}</i>`:`<i class="ms-tk${rd?' rd':''}">${(rd?TK2:TK1)}</i>`):'';
+  const meta=`<span class="ms-mt">${msTime(m.t)}${tick}</span>`;
+  let body='';
+  if(m.d)body=`<span class="ms-delm">${ico('trash','s')}Сообщение удалено</span>${meta}`;
+  else{const F=m.fl;let media='';
+    if(F){const src=F.local||(F.id?msFile(F.id):''),ar=F.w&&F.h?`aspect-ratio:${F.w}/${F.h};`:'';
+      if(F.ty.startsWith('image/'))media=`<button type="button" class="ms-img" data-act="ms-view" data-src="${esc(src)}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:''}</button>`;
+      else if(F.ty.startsWith('video/'))media=`<div class="ms-vid" style="${ar}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} controls playsinline preload="metadata"></video>`}</div>`;
+      else media=`<a class="ms-fl" ${m.pend?'':`href="${esc(msFile(F.id,1))}" download`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></a>`}
+    const txt=m.x?`<div class="ms-tx">${linkify(esc(m.x))}</div>`:'';
+    body=media+(txt||'')+meta}
+  const media=m.fl&&!m.d&&(m.fl.ty.startsWith('image/')||m.fl.ty.startsWith('video/'));
+  return `<div class="mb ${mine?'me':'th'}${grp?'':' tail'}${media&&!m.x?' bare':''}${m.d?' del':''}" data-i="${m.i??''}" data-tmp="${m.tmp||''}">${body}</div>`}
+const linkify=s=>s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,'<br>');
+function msPaintMsgs(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;const L=MS.msgs[c]||[];
+  const stick=toBottom||ml.scrollHeight-ml.scrollTop-ml.clientHeight<120;
+  if(!L.length){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
+  let h='',day='';L.forEach((m,k)=>{const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k-1],L[k+1])});
+  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight}
+function msAppend(ms){const ml=$('#msMsgs');if(!ml)return msPaintMsgs();const stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<160;msPaintMsgs();
+  ms.forEach(m=>{const el=ml.querySelector(`.mb[data-i="${m.i}"]`)||ml.querySelector(`.mb[data-tmp="${m.tmp}"]`);if(el)el.classList.add('new')});if(stick)ml.scrollTo({top:ml.scrollHeight,behavior:'smooth'})}
+
+/* ---------- отправка ---------- */
+async function msSend(){const inp=$('#msIn');const x=(inp?inp.value:'').trim();if(!x||!MS.c)return;
+  inp.value='';inp.style.height='';$('#msComp').classList.remove('has');if(MS.draft)delete MS.draft[MS.c];
+  const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);
+  await msPost(m,{to:MS.peer,x})}
+async function msPost(m,body){const c=MS.c;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
+    const real={...j.m};if(m.fl&&m.fl.local)real.fl={...real.fl,local:m.fl.local};
+    if(L.some(x=>x.i===real.i)){if(k>=0)L.splice(k,1)}else if(k>=0)L[k]=real;
+    const ch=MS.chats.find(x=>x.c===c);const pv=body.x?body.x.slice(0,80):'Файл';if(ch){ch.t=real.t;ch.f=MS.me;ch.pv=pv;ch.n=real.i+1}else MS.chats.unshift({c,p:MS.peer,t:real.t,f:MS.me,pv,n:real.i+1,u:0});
+    if(MS.c===c)msPaintMsgs();msListPaint()}
+  catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}
+function msListPaint(){const l=$('#msList');if(l&&!MS.q)l.innerHTML=msListHTML();msBadge()}
+function msTyping(){const now=Date.now();if(now-MS.lastTy<3000||!MS.c||MS.peer===String(MS.me))return;MS.lastTy=now;msApi('typing',{c:MS.c}).catch(()=>{})}
+async function msMarkRead(){const c=MS.c,L=MS.msgs[c]||[];if(!c||document.hidden)return;const last=[...L].reverse().find(m=>m.i!=null);if(!last)return;
+  const ch=MS.chats.find(x=>x.c===c);if(ch&&!ch.u&&MS.rs===c+':'+last.i)return;MS.rs=c+':'+last.i;if(ch){ch.u=0;msListPaint()}
+  msApi('read',{c,s:last.i}).catch(()=>{})}
+
+/* ---------- файлы: фото сжимаются, у видео — кадр-обложка; всё уходит кусками по 512 КБ ---------- */
+const CH_SZ=512*1024;
+async function msThumb(src,isVid){return new Promise(res=>{const done=(el,w,h)=>{try{const k=Math.min(1,40/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*k));cv.height=Math.max(1,Math.round(h*k));cv.getContext('2d').drawImage(el,0,0,cv.width,cv.height);res({th:cv.toDataURL('image/jpeg',.6),w,h})}catch(e){res({w,h})}};
+  if(isVid){const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.src=src;v.onloadeddata=()=>{v.currentTime=Math.min(.5,(v.duration||1)/3)};v.onseeked=()=>done(v,v.videoWidth,v.videoHeight);v.onerror=()=>res({});setTimeout(()=>res({}),6000)}
+  else{const i=new Image();i.onload=()=>done(i,i.naturalWidth,i.naturalHeight);i.onerror=()=>res({});i.src=src}})}
+async function msShrink(f){if(!/^image\/(jpeg|png|webp|heic|heif)/.test(f.type)||f.size<350e3)return f;
+  try{const b=await createImageBitmap(f);const k=Math.min(1,1920/Math.max(b.width,b.height)),cv=document.createElement('canvas');cv.width=Math.round(b.width*k);cv.height=Math.round(b.height*k);cv.getContext('2d').drawImage(b,0,0,cv.width,cv.height);
+    const bl=await new Promise(r=>cv.toBlob(r,'image/jpeg',.86));return bl&&bl.size<f.size?new File([bl],f.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}):f}catch(e){return f}}
+const b64ab=buf=>{const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode(...u.subarray(i,i+0x8000));return btoa(s)};
+async function msAttach(files){if(!MS.c)return;for(const f0 of files){
+  const f=await msShrink(f0);if(f.size>12*1024*1024){toast(`«${f.name}» больше 12 МБ`,'x');continue}
+  const ty=f.type||'application/octet-stream',local=URL.createObjectURL(f),isImg=ty.startsWith('image/'),isVid=ty.startsWith('video/');
+  const meta=isImg||isVid?await msThumb(local,isVid):{};
+  const m={tmp:'f'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x:'',pend:1,prog:2,fl:{n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',local}};
+  const c=MS.c,peer=MS.peer;(MS.msgs[c]=MS.msgs[c]||[]).push(m);msAppend([m]);
+  try{const n=Math.max(1,Math.ceil(f.size/CH_SZ));let id='';
+    for(let i=0;i<n;i++){const data=b64ab(await f.slice(i*CH_SZ,(i+1)*CH_SZ).arrayBuffer());
+      const j=await msApi('up',{to:peer,id,i,n,name:f.name,type:ty,size:f.size,data});id=j.id;m.prog=Math.round((i+1)/n*100);
+      const el=document.querySelector(`.mb[data-tmp="${m.tmp}"] .ms-prog i`);if(el)el.style.setProperty('--p',m.prog+'%')}
+    m.fl.id=id;await msPost(m,{to:peer,fl:{id,n:f.name,ty,sz:f.size,w:m.fl.w,h:m.fl.h,th:m.fl.th}})}
+  catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}}
+
+/* ---------- долгое нажатие: копировать / удалить ---------- */
+function msLong(ml){let t=0,el=null;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,video,button.ms-img'))return;el=b;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>{clearTimeout(t)};
+  ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&Math.abs(e.movementY)>4)stop()});
+  ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
+function msMenu(b){const i=b.dataset.i;const m=(MS.msgs[MS.c]||[]).find(x=>String(x.i)===i);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+  b.classList.add('pick');setTimeout(()=>b.classList.remove('pick'),400);const mine=String(m.f)===String(MS.me);
+  openSheet(`<div class="ms-menu">${m.x?`<button class="opt" data-act="ms-copy" data-i="${i}">${ico('copy')}Копировать</button>`:''}${m.fl&&m.fl.id?`<a class="opt" href="${esc(msFile(m.fl.id,1))}" download data-act="close-sheet">${ico('down')}Скачать</a>`:''}${mine?`<button class="opt red" data-act="ms-del" data-i="${i}">${ico('trash')}Удалить у всех</button>`:''}<button class="opt" data-act="close-sheet">${ico('x')}Отмена</button></div>`)}
+
+/* ---------- опрос: раз в секунду, пока мессенджер открыт; иначе раз в 20 с — только счётчик ---------- */
+function msLoop(){clearTimeout(MS.timer);if(!USR||USR.id==null)return;MS.timer=setTimeout(msPoll,MS.on?(document.hidden?5000:1000):20000)}
+async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
+  try{if(!MS.ok)await msInit();const c=MS.on?MS.c:null,L=c?MS.msgs[c]:null,last=L?[...L].reverse().find(m=>m.i!=null):null;
+    const j=await msApi('poll',null,`&v=${MS.v}${c&&L?`&c=${c}&s=${last?last.i:(MS.from[c]||0)-1}`:''}`);
+    if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
+      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);const tw=MS.typing;MS.typing=j.typing;clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
+        if(add.length){MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>String(m.f)!==String(MS.me)))msMarkRead()}else msPaintMsgs();
+        const st=$('#msStat');if(st&&tw!==MS.typing)st.innerHTML=msStatus(MS.peers[MS.peer])}
+      if(msUnread()>before&&LS.get('msSnd',true))msBeep();
+      if(MS.on)msListPaint();else msBadge()}}
+  catch(e){if(/войти/.test(e.message))MS.ok=false}
+  finally{MS.busy=false;msLoop()}}
+let msAC=null;function msBeep(){try{msAC=msAC||new AudioContext();const o=msAC.createOscillator(),g=msAC.createGain();o.type='sine';o.frequency.setValueAtTime(880,msAC.currentTime);o.frequency.exponentialRampToValueAtTime(1320,msAC.currentTime+.08);g.gain.setValueAtTime(.0001,msAC.currentTime);g.gain.exponentialRampToValueAtTime(.12,msAC.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,msAC.currentTime+.25);o.connect(g).connect(msAC.destination);o.start();o.stop(msAC.currentTime+.26)}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&MS.on){msLoop();msMarkRead()}});
+document.addEventListener('change',e=>{const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked)});
+
+const MS_ACT={
+  'ms-tab'(el){MS.tab=el.dataset.t;if(MS.tab==='chats'&&route()!=='msg')location.hash='#msg';MS.pane='list';const m=$('#msgr');if(m)m.dataset.pane='list';msDrawSide()},
+  'ms-exit'(){location.hash='#home'},
+  'ms-write'(el){location.hash='#msg-'+el.dataset.id},
+  'ms-newchat'(){const q=$('#msQ');if(q){q.focus();q.placeholder='Ник или ID человека'}},
+  'ms-attach'(){$('#msFileIn').click()},
+  'ms-view'(el){const v=document.createElement('div');v.className='ms-viewer';v.innerHTML=`<img src="${esc(el.dataset.src)}" alt=""><div class="ms-vbar"><a class="ib" href="${esc(el.dataset.src)}" download>${ico('down')}</a><button class="ib" data-x>${ico('x')}</button></div>`;
+    v.addEventListener('click',e=>{if(e.target.closest('[data-x]')||e.target===v||e.target.tagName==='IMG'){v.classList.add('off');setTimeout(()=>v.remove(),200)}});document.body.appendChild(v);requestAnimationFrame(()=>v.classList.add('on'))},
+  'ms-copy'(el){const m=(MS.msgs[MS.c]||[]).find(x=>String(x.i)===el.dataset.i);closeSheet();if(m)copyText(m.x)},
+  async 'ms-del'(el){closeSheet();const i=+el.dataset.i,m=(MS.msgs[MS.c]||[]).find(x=>x.i===i);if(!m)return;m.d=1;m.x='';delete m.fl;msPaintMsgs();try{await msApi('del',{c:MS.c,i})}catch(e){toast(e.message,'x')}},
+};
+
 
 /* ===================== views ===================== */
 const pageHead=(title,sub,img,ctl='')=>`<div class="phead"><h1>${title}</h1><p>${sub}</p>${ctl?`<div class="ctl">${ctl}</div>`:''}<img src="${IMG[img]}" alt=""></div>`;
@@ -3490,7 +3787,7 @@ const MAIL_ACT={
 const ALL_ACT={
   'all-open'(){openSheet(`<h3>${ico('grid')}Все разделы<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
     <label class="cl-search all-s">${ico('search','s')}<input id="allQ" placeholder="Раздел, трек, артист или человек" autocomplete="off"></label>
-    <div class="all-grid" id="allGrid"></div>`);allPaint('');const q=$('#allQ');q.addEventListener('input',()=>allPaint(q.value));q.addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('#allGrid a');if(f)f.click()}});setTimeout(()=>q.focus(),250)},
+    <div class="all-grid" id="allGrid"></div>`);allPaint('');const q=$('#allQ');q.addEventListener('input',()=>allPaint(q.value));q.addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('#allGrid a');if(f)f.click()}});if(matchMedia('(min-width:761px)').matches)setTimeout(()=>q.focus(),250)},
   'all-search'(el,e){e&&e.preventDefault();closeSheet();sQ=el.dataset.q;sMode='all';location.hash='#search';setTimeout(()=>{const i=$('#sIn');if(i){i.value=sQ;i.dispatchEvent(new Event('input'))}},120)},
 };
 const RV_ACT={
@@ -4224,7 +4521,7 @@ async function aiRunActions(am,list){
 }
 const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
 
-Object.assign(ACT,EX_ACT,RV_ACT,GIFT_ACT,ALL_ACT,MAIL_ACT);
+Object.assign(ACT,EX_ACT,RV_ACT,GIFT_ACT,ALL_ACT,MAIL_ACT,MS_ACT);
 Object.assign(ACT,{
   async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
   async 'tg-fill'(el){el.disabled=true;toast('Бот ищет темы и пишет посты — до минуты…','loader');try{const r=await tgApi('fill',{});toast('Заполнено: '+r.topics.length+' тем','check')}catch(e){toast(e.message,'x')}el.disabled=false},
@@ -4406,7 +4703,7 @@ function pfHTML(p){
     <div class="row gl-btns" style="margin-top:4px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
     ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
-      :act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
+      :act('ms-write',ico('send'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
     ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
     ${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?act('app-get',ico('down'),'Приложение'):''}
     ${USR&&USR.admin&&!p.self?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''}
