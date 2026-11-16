@@ -1213,7 +1213,7 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
   radial-gradient(circle at 72% 80%,rgba(255,255,255,.16),transparent 30%),
   radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(220,210,255,.10) 70%,rgba(190,220,255,.26) 86%,rgba(255,255,255,.5) 98%,rgba(255,255,255,0) 100%),
   conic-gradient(from 210deg,rgba(255,120,220,.10),rgba(120,200,255,.12),rgba(160,255,200,.08),rgba(255,220,120,.10),rgba(255,120,220,.10));
- box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 8px 20px -10px rgba(0,0,0,.6)}
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 18px rgba(255,255,255,.06),0 8px 20px -10px rgba(0,0,0,.6);background-color:rgba(255,255,255,.04);backdrop-filter:blur(1.5px) brightness(1.05);-webkit-backdrop-filter:blur(1.5px) brightness(1.05)}
 .tgp-stage.bubbles .tgp-g.grab{cursor:grabbing}
 .tgp-stage.bubbles .tgp-g img{width:46%!important;height:46%!important;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
 .tgp-stage.bubbles .tgp-g::before,.tgp-stage.bubbles .tgp-g::after{display:none!important}
@@ -3369,12 +3369,15 @@ function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)re
   if(BUB.st!==st){BUB.st=st;const W=st.clientWidth,H=st.clientHeight,base=innerWidth<=760?50:58;
     BUB.b=[...st.querySelectorAll('.tgp-g')].map((el,i)=>{const h=hsh(el.dataset.g||i),dep=.78+(h%60)/100,sz=Math.round(base*dep);el.style.setProperty('--bs',sz+'px');el.style.zIndex=String(3+Math.round(dep*10));
       const x=(parseFloat(el.style.left)||50)/100*W,y=(parseFloat(el.style.top)||50)/100*H,a=(h%628)/100;el.style.left='0';el.style.top='0';
-      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep}})}
+      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep,sw:(h%2?1:-1)*(8+h%7)}})}
   if(BUB.raf)return;let last=performance.now();const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tick=now=>{const st=BUB.st;if(!st||!st.isConnected){BUB.raf=0;BUB.st=null;BUB.drag=null;return}
     const dt=Math.min(.04,(now-last)/1000);last=now;const L=bubBounds(st),B=BUB.b,cruise=24;
     for(const p of B){if(BUB.drag&&BUB.drag.p===p)continue;
-      if(!red){p.vx+=(Math.random()-.5)*50*dt;p.vy+=(Math.random()-.5)*50*dt;
+      if(!red){p.vx+=(Math.random()-.5)*40*dt;p.vy+=(Math.random()-.5)*40*dt;
+        // «живые»: мягко тянутся к аватарке и кружат возле неё, как в Telegram
+        {const av=st.querySelector('.tgp-ava'),AR=(av?av.offsetWidth:120)/2,cx=st.clientWidth/2,cy=st.clientHeight/2,dx=cx-p.x,dy=cy-p.y,d=Math.hypot(dx,dy)||1,R0=AR+p.r*.35+(p.ph%1)*26,f=(d-R0)*.9;
+          p.vx+=dx/d*f*dt+(-dy/d)*p.sw*dt;p.vy+=dy/d*f*dt+(dx/d)*p.sw*dt}
         const sp=Math.hypot(p.vx,p.vy);if(sp>cruise){const k=Math.max(cruise/sp,1-dt*1.6);p.vx*=k;p.vy*=k}else if(sp<10&&sp>0){p.vx*=10/sp;p.vy*=10/sp}
         p.x+=p.vx*dt;p.y+=p.vy*dt}
       const e=.82;if(p.x<L.l+p.r){p.x=L.l+p.r;p.vx=Math.abs(p.vx)*e}if(p.x>L.r-p.r){p.x=L.r-p.r;p.vx=-Math.abs(p.vx)*e}
@@ -3383,9 +3386,9 @@ function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)re
     for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],b=B[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,md=(a.r+b.r)*.92;
       if(d<md){const nx=dx/d,ny=dy/d,o=md-d,ma=BUB.drag&&BUB.drag.p===a?1e9:a.m,mb=BUB.drag&&BUB.drag.p===b?1e9:b.m,ta=mb/(ma+mb),tb=ma/(ma+mb);
         a.x-=nx*o*ta;a.y-=ny*o*ta;b.x+=nx*o*tb;b.y+=ny*o*tb;const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
-        if(rv<0){const jn=-(1.85)*rv/(1/ma+1/mb);a.vx-=jn/ma*nx;a.vy-=jn/ma*ny;b.vx+=jn/mb*nx;b.vy+=jn/mb*ny;a.sq=b.sq=1}}}
+        if(rv<0){const jn=-(1.85)*rv/(1/ma+1/mb);a.vx-=jn/ma*nx;a.vy-=jn/ma*ny;b.vx+=jn/mb*nx;b.vy+=jn/mb*ny;a.sq=b.sq=Math.min(1,Math.abs(rv)/80+.3)}}}
     const t=now/1000;
-    for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*3);const wob=red?0:Math.sin(t*2.4+p.ph)*.035+p.sq*.08;
+    for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*2.2);const wob=red?0:Math.sin(t*2.4+p.ph)*.03+p.sq*Math.sin(t*22)*.09;
       p.el.style.transform=`translate(${(p.x-p.r).toFixed(1)}px,${(p.y-p.r).toFixed(1)}px) scale(${(1+wob).toFixed(3)},${(1-wob).toFixed(3)})`}
     BUB.raf=requestAnimationFrame(tick)};
   BUB.raf=requestAnimationFrame(tick)}
