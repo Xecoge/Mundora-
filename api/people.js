@@ -57,24 +57,83 @@ const CHAINS = {
   sol: { n: 'Solana', sym: 'SOL', cg: 'solana', rx: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/, ex: a => 'https://solscan.io/account/' + a }
 };
 const chainOf = a => ['eth', 'ton', 'tron', 'btc', 'sol'].find(k => CHAINS[k].rx.test(a)) || null;
-const walletOut = u => (u.wallet && CHAINS[u.wallet.chain] ? { name: u.wallet.name || CHAINS[u.wallet.chain].n, chain: u.wallet.chain, net: CHAINS[u.wallet.chain].n, sym: CHAINS[u.wallet.chain].sym, addr: u.wallet.addr } : null);
+const walletsRaw = u => { let L = Array.isArray(u.wallets) ? u.wallets : []; if (!L.length && u.wallet && u.wallet.addr) L = [{ id: 'w0', ...u.wallet }]; return L.filter(w => w && CHAINS[w.chain]).slice(0, 5); };
+const walletsOut = u => walletsRaw(u).map(w => ({ id: w.id, name: w.name || CHAINS[w.chain].n, chain: w.chain, net: w.chain === 'eth' ? 'Ethereum + EVM' : CHAINS[w.chain].n, sym: CHAINS[w.chain].sym, addr: w.addr }));
 async function fj(url, body) {
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 7000);
   try { const r = await fetch(url, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal } : { signal: ctl.signal, headers: { accept: 'application/json' } }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
   finally { clearTimeout(tm); }
 }
-async function walletBalance(chain, a) {
-  const tokens = [];
-  if (chain === 'btc') { const j = await fj('https://mempool.space/api/address/' + a); const c = j.chain_stats || {}, m = j.mempool_stats || {}; return { amt: ((c.funded_txo_sum || 0) - (c.spent_txo_sum || 0) + (m.funded_txo_sum || 0) - (m.spent_txo_sum || 0)) / 1e8, tokens, txs: (c.tx_count || 0) + (m.tx_count || 0) }; }
-  if (chain === 'eth') { let j; try { j = await fj('https://ethereum-rpc.publicnode.com', { jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: [a, 'latest'] }); } catch (e) { j = await fj('https://cloudflare-eth.com', { jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: [a, 'latest'] }); } return { amt: Number(BigInt(j.result || '0x0')) / 1e18, tokens }; }
-  if (chain === 'ton') { try { const j = await fj('https://toncenter.com/api/v2/getAddressBalance?address=' + encodeURIComponent(a)); return { amt: Number(j.result || 0) / 1e9, tokens }; } catch (e) { const j = await fj('https://tonapi.io/v2/accounts/' + encodeURIComponent(a)); return { amt: Number(j.balance || 0) / 1e9, tokens }; } }
-  if (chain === 'tron') { const j = await fj('https://api.trongrid.io/v1/accounts/' + a); const d = (j.data || [])[0] || {}; (d.trc20 || []).forEach(o => { const v = o.TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t; if (v != null) tokens.push({ sym: 'USDT', amt: Number(v) / 1e6, cg: 'tether' }); }); return { amt: Number(d.balance || 0) / 1e6, tokens }; }
-  if (chain === 'sol') { const j = await fj('https://api.mainnet-beta.solana.com', { jsonrpc: '2.0', id: 1, method: 'getBalance', params: [a] }); return { amt: Number((j.result || {}).value || 0) / 1e9, tokens }; }
-  return { amt: 0, tokens };
+// ---- полный баланс: основная монета + все токены с ценой ----
+const EVM = [
+  { net: 'BNB Chain', rpc: 'https://bsc-rpc.publicnode.com', sym: 'BNB', cg: 'binancecoin', tok: [['USDT', '0x55d398326f99059fF775485246999027B3197955', 18], ['USDC', '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', 18]] },
+  { net: 'Polygon', rpc: 'https://polygon-bor-rpc.publicnode.com', sym: 'POL', cg: 'polygon-ecosystem-token', tok: [['USDT', '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', 6], ['USDC', '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359', 6]] },
+  { net: 'Arbitrum', rpc: 'https://arbitrum-one-rpc.publicnode.com', sym: 'ETH', cg: 'ethereum', tok: [['USDT', '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', 6], ['USDC', '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', 6]] },
+  { net: 'Base', rpc: 'https://base-rpc.publicnode.com', sym: 'ETH', cg: 'ethereum', tok: [['USDC', '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 6]] }
+];
+const big = (hex, dec) => { try { const v = BigInt(hex || '0x0'); const d = 10n ** BigInt(dec); return Number(v / d) + Number(v % d) / Number(d); } catch (e) { return 0; } };
+const rpc = (url, method, params) => fj(url, { jsonrpc: '2.0', id: 1, method, params }).then(j => j.result);
+async function evmChain(c, a) {
+  const pad = a.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+  const [nat, ...tk] = await Promise.all([rpc(c.rpc, 'eth_getBalance', [a, 'latest']).catch(() => '0x0'), ...c.tok.map(([, ct]) => rpc(c.rpc, 'eth_call', [{ to: ct, data: '0x70a08231' + pad }, 'latest']).catch(() => '0x0'))]);
+  const out = [{ sym: c.sym, name: c.sym, net: c.net, amt: big(nat, 18), cg: c.cg }];
+  c.tok.forEach(([sym, , dec], i) => out.push({ sym, name: sym, net: c.net, amt: big(tk[i], dec), stable: 1 }));
+  return out;
+}
+async function walletAssets(chain, a) {
+  const A = [];
+  if (chain === 'btc') { const j = await fj('https://mempool.space/api/address/' + a); const c = j.chain_stats || {}, m = j.mempool_stats || {}; A.push({ sym: 'BTC', name: 'Bitcoin', net: 'Bitcoin', amt: ((c.funded_txo_sum || 0) - (c.spent_txo_sum || 0) + (m.funded_txo_sum || 0) - (m.spent_txo_sum || 0)) / 1e8, cg: 'bitcoin' }); return A; }
+  if (chain === 'ton') {
+    const [acc, jt] = await Promise.all([fj('https://tonapi.io/v2/accounts/' + encodeURIComponent(a)).catch(() => null), fj('https://tonapi.io/v2/accounts/' + encodeURIComponent(a) + '/jettons?currencies=usd').catch(() => null)]);
+    let ton = acc ? Number(acc.balance || 0) / 1e9 : null;
+    if (ton == null) { const j = await fj('https://toncenter.com/api/v2/getAddressBalance?address=' + encodeURIComponent(a)); ton = Number(j.result || 0) / 1e9; }
+    A.push({ sym: 'TON', name: 'Toncoin', net: 'TON', amt: ton, cg: 'the-open-network' });
+    ((jt && jt.balances) || []).forEach(b => { const J = b.jetton || {}; if (J.verification === 'blacklist') return; const amt = Number(b.balance || 0) / 10 ** (+J.decimals || 9); const pr = ((b.price || {}).prices || {}).USD; A.push({ sym: J.symbol || '?', name: J.name || J.symbol, net: 'TON', amt, usd: pr != null ? amt * pr : undefined, icon: J.image }); });
+    return A;
+  }
+  if (chain === 'tron') {
+    try {
+      const j = await fj('https://apilist.tronscanapi.com/api/account/tokens?address=' + a + '&start=0&limit=50&hidden=0&show=0&sortType=0');
+      (j.data || []).forEach(t => { const amt = Number(t.quantity ?? (Number(t.balance || 0) / 10 ** (+t.tokenDecimal || 0))); if (!amt) return; A.push({ sym: t.tokenAbbr || t.tokenName || '?', name: t.tokenName, net: 'TRON', amt, usd: t.amountInUsd != null ? Number(t.amountInUsd) : undefined, icon: t.tokenLogo, cg: t.tokenId === '_' ? 'tron' : undefined }); });
+      if (!A.some(x => x.sym === 'TRX')) A.unshift({ sym: 'TRX', name: 'TRON', net: 'TRON', amt: 0, cg: 'tron' });
+      return A;
+    } catch (e) {
+      const j = await fj('https://api.trongrid.io/v1/accounts/' + a); const d = (j.data || [])[0] || {};
+      A.push({ sym: 'TRX', name: 'TRON', net: 'TRON', amt: Number(d.balance || 0) / 1e6, cg: 'tron' });
+      (d.trc20 || []).forEach(o => { const v = o.TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t; if (v != null) A.push({ sym: 'USDT', name: 'Tether', net: 'TRON', amt: Number(v) / 1e6, stable: 1 }); });
+      return A;
+    }
+  }
+  if (chain === 'eth') {
+    const [ep, ...rest] = await Promise.all([fj('https://api.ethplorer.io/getAddressInfo/' + a + '?apiKey=freekey').catch(() => null), ...EVM.map(c => evmChain(c, a).catch(() => []))]);
+    if (ep) {
+      A.push({ sym: 'ETH', name: 'Ethereum', net: 'Ethereum', amt: Number((ep.ETH || {}).balance || 0), cg: 'ethereum' });
+      (ep.tokens || []).forEach(t => { const I = t.tokenInfo || {}; const pr = I.price && I.price.rate; if (!pr) return; const amt = Number(t.rawBalance || t.balance || 0) / 10 ** (+I.decimals || 0); A.push({ sym: I.symbol || '?', name: I.name, net: 'Ethereum', amt, usd: amt * pr, icon: I.image ? 'https://ethplorer.io' + I.image : undefined }); });
+    } else {
+      const nat = await rpc('https://ethereum-rpc.publicnode.com', 'eth_getBalance', [a, 'latest']).catch(() => '0x0');
+      A.push({ sym: 'ETH', name: 'Ethereum', net: 'Ethereum', amt: big(nat, 18), cg: 'ethereum' });
+    }
+    rest.flat().forEach(x => A.push(x));
+    return A;
+  }
+  if (chain === 'sol') {
+    const [lam, tk] = await Promise.all([rpc('https://api.mainnet-beta.solana.com', 'getBalance', [a]), rpc('https://api.mainnet-beta.solana.com', 'getTokenAccountsByOwner', [a, { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' }, { encoding: 'jsonParsed' }]).catch(() => null)]);
+    A.push({ sym: 'SOL', name: 'Solana', net: 'Solana', amt: Number((lam || {}).value || 0) / 1e9, cg: 'solana' });
+    const acc = ((tk || {}).value || []).map(v => ((v.account || {}).data || {}).parsed || {}).map(p => p.info || {}).filter(i => i.tokenAmount && +i.tokenAmount.uiAmount > 0).slice(0, 40);
+    if (acc.length) {
+      let meta = [];
+      try { meta = await fj('https://lite-api.jup.ag/tokens/v2/search?query=' + acc.map(i => i.mint).join(',')); } catch (e) {}
+      const M = Object.fromEntries((Array.isArray(meta) ? meta : []).map(m => [m.id, m]));
+      const KN = { EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 'USDC', Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYb: 'USDT' };
+      acc.forEach(i => { const m = M[i.mint], amt = +i.tokenAmount.uiAmount; const sym = (m && m.symbol) || KN[i.mint]; if (!sym) return; A.push({ sym, name: (m && m.name) || sym, net: 'Solana', amt, usd: m && m.usdPrice != null ? amt * m.usdPrice : KN[i.mint] ? amt : undefined, icon: m && m.icon }); });
+    }
+    return A;
+  }
+  return A;
 }
 async function cgPrices() {
   const c = await jget('wb:prices'); if (c && Date.now() - c.t < 180e3) return c.p;
-  try { const p = await fj('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&include_24hr_change=true&ids=' + Object.values(CHAINS).map(x => x.cg).concat('tether').join(',')); await jset('wb:prices', { t: Date.now(), p }); return p; } catch (e) { return (c && c.p) || {}; }
+  try { const p = await fj('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&include_24hr_change=true&ids=' + Object.values(CHAINS).map(x => x.cg).concat('tether', 'binancecoin', 'polygon-ecosystem-token').join(',')); await jset('wb:prices', { t: Date.now(), p }); return p; } catch (e) { return (c && c.p) || {}; }
 }
 const nickOut = u => (u.nickGift && giftsOut(u).some(g => g.id === u.nickGift) ? u.nickGift : null);
 const top = (o, n) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
@@ -104,7 +163,7 @@ async function card(email, viewer, full) {
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
-    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), wallet: walletOut(u)
+    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), wallets: walletsOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
   if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
@@ -146,28 +205,40 @@ export default async function handler(req) {
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
     }
-    if (req.method === 'POST' && a === 'wallet-set') {
+    if (req.method === 'POST' && (a === 'wallet-add' || a === 'wallet-del')) {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({})); const u = await getUser(me.email);
-      const addr = String(b.addr || '').trim();
-      if (!addr) { delete u.wallet; await putUser(u); return json({ ok: true, profile: await card(me.email, me, true) }); }
-      const chain = chainOf(addr); if (!chain) return json({ error: 'Не похоже на адрес кошелька. Поддерживаются BTC, Ethereum (и сети EVM), TON, TRON и Solana' }, 400);
-      const name = String(b.name || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24) || CHAINS[chain].n;
-      u.wallet = { addr, chain, name, t: Date.now() }; await putUser(u);
+      let L = walletsRaw(u);
+      if (a === 'wallet-del') L = L.filter(w => w.id !== b.id);
+      else {
+        const addr = String(b.addr || '').trim(); const chain = chainOf(addr);
+        if (!chain) return json({ error: 'Не похоже на адрес кошелька. Поддерживаются Bitcoin, Ethereum и сети EVM (BNB, Polygon, Arbitrum, Base), TON, TRON и Solana' }, 400);
+        if (L.some(w => w.addr.toLowerCase() === addr.toLowerCase())) return json({ error: 'Этот кошелёк уже привязан' }, 409);
+        if (L.length >= 5) return json({ error: 'Можно привязать до 5 кошельков' }, 400);
+        const name = String(b.name || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24) || CHAINS[chain].n;
+        L.push({ id: rand(6), addr, chain, name, t: Date.now() });
+      }
+      u.wallets = L; delete u.wallet; await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
     }
-    if (a === 'wallet' && req.method === 'GET') {
+    if (a === 'wallets' && req.method === 'GET') {
       const id0 = url.searchParams.get('id'), em = /^\d{1,12}$/.test(id0 || '') ? await kv('GET', 'id:' + id0) : null;
-      const u = em && await getUser(em); const w = u && walletOut(u); if (!w) return json({ error: 'Кошелёк не привязан' }, 404);
-      const key = 'wb:' + w.chain + ':' + w.addr; let c = await jget(key);
-      if (!c || Date.now() - c.t > 60e3) {
-        try { const bal = await walletBalance(w.chain, w.addr); c = { t: Date.now(), ...bal }; await jset(key, c, 600); }
-        catch (e) { if (!c) return json({ wallet: { ...w, explorer: CHAINS[w.chain].ex(w.addr) }, error: 'Блокчейн сейчас не отвечает — попробуй позже' }); }
-      }
-      const P = await cgPrices(), pr = (P[CHAINS[w.chain].cg] || {}).usd || 0, ch = (P[CHAINS[w.chain].cg] || {}).usd_24h_change;
-      const tokens = (c.tokens || []).map(t => ({ sym: t.sym, amt: t.amt, usd: t.amt * (((P[t.cg] || {}).usd) || 1) }));
-      const usd = c.amt * pr + tokens.reduce((n, t) => n + t.usd, 0);
-      return json({ wallet: { ...w, explorer: CHAINS[w.chain].ex(w.addr) }, bal: { amt: c.amt, usd: c.amt * pr, price: pr, ch24: ch ?? null, tokens, total: usd, txs: c.txs ?? null, t: c.t } });
+      const u = em && await getUser(em); const W = u ? walletsOut(u) : []; if (!W.length) return json({ wallets: [], total: 0 });
+      const P = await cgPrices();
+      const MAIN = ['BTC', 'ETH', 'TON', 'TRX', 'SOL'];
+      const res = await Promise.all(W.map(async w => {
+        const key = 'wa:' + w.chain + ':' + w.addr; let c = await jget(key), err = '';
+        if (!c || Date.now() - c.t > 90e3) {
+          try { c = { t: Date.now(), A: await walletAssets(w.chain, w.addr) }; await jset(key, c, 900); }
+          catch (e) { err = 'Блокчейн сейчас не отвечает — попробуй позже'; }
+        }
+        const assets = ((c && c.A) || []).map(x => { const pr = x.cg ? ((P[x.cg] || {}).usd || 0) : x.stable ? 1 : null; const usd = x.usd != null ? x.usd : pr != null ? x.amt * pr : null; return { sym: x.sym, name: x.name, net: x.net, amt: x.amt, usd, icon: x.icon || null, ch24: x.cg ? ((P[x.cg] || {}).usd_24h_change ?? null) : null, main: !!x.cg && x.net === ({ btc: 'Bitcoin', eth: 'Ethereum', ton: 'TON', tron: 'TRON', sol: 'Solana' })[w.chain] }; })
+          .filter(x => x.main || (x.amt > 0 && (x.usd == null || x.usd >= 0.01)))
+          .sort((x, y) => (y.main - x.main) || ((y.usd || 0) - (x.usd || 0))).slice(0, 40);
+        const total = assets.reduce((n, x) => n + (x.usd || 0), 0);
+        return { ...w, explorer: CHAINS[w.chain].ex(w.addr), assets, total, t: c ? c.t : Date.now(), error: err || undefined };
+      }));
+      return json({ wallets: res, total: res.reduce((n, w) => n + w.total, 0) });
     }
     if (a === 'gifts' && req.method === 'GET') return json({ catalog: GIFTS, max: MAXPOS });
     if (req.method === 'POST' && a === 'gift-buy') {

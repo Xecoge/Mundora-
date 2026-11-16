@@ -1176,7 +1176,7 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .wal-m{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:16px;perspective:1200px}
 .wal-bd{position:absolute;inset:0;background:rgba(6,3,14,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transition:opacity .3s}
 .wal-m.on .wal-bd{opacity:1}.wal-m.off .wal-bd{opacity:0}
-.wal-wrap{position:relative;width:min(380px,100%);display:flex;flex-direction:column;gap:12px}
+.wal-wrap{position:relative;width:min(380px,calc(100vw - 32px));min-width:0;display:flex;flex-direction:column;gap:12px}
 .wal-card.big{aspect-ratio:1.586;display:flex;flex-direction:column;padding:18px 18px 16px;transition:transform .55s cubic-bezier(.2,.9,.25,1.12),opacity .35s;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 40px 80px -24px var(--c1),0 0 0 1px rgba(255,255,255,.12)}
 .wal-m.off .wal-card.big{transform:scale(.85) rotateX(-12deg)!important;opacity:0!important;transition:transform .25s ease-in,opacity .25s}
 .wal-card.big .wc-sum{margin:auto 0 0}
@@ -1186,6 +1186,20 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 @keyframes shine{to{transform:translateX(120%)}}
 .wal-info{padding:6px 16px 14px;border-radius:24px;background:linear-gradient(170deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),rgba(18,10,36,.6);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid rgba(255,255,255,.13);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .45s cubic-bezier(.2,.9,.25,1)}
 .wal-info:empty{display:none}.wal-info.on{opacity:1;transform:none}.wal-m.off .wal-info{opacity:0}
+
+.wi-st{display:inline-flex}.wi-st .wi{margin-left:-7px;box-shadow:0 0 0 2px rgba(20,10,40,.9)}.wi-st .wi:first-child{margin-left:0}
+.wal-top{display:flex;align-items:center;justify-content:space-between;color:#fff;font-size:17px;font-weight:800;min-height:36px}.wal-top .ib{margin-left:auto;color:#fff;background:rgba(255,255,255,.1)}
+.wal-cards{width:100%;min-width:0;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;transition:transform .55s cubic-bezier(.2,.9,.25,1.12),opacity .35s;padding:4px 0}
+.wal-cards::-webkit-scrollbar{display:none}.wal-cards .wal-card{flex:0 0 100%;scroll-snap-align:center;transition:none!important}
+.wal-m.off .wal-cards{transform:scale(.85) rotateX(-12deg)!important;opacity:0!important;transition:transform .25s ease-in,opacity .25s}
+.wal-dots{display:flex;justify-content:center;gap:6px;margin-top:-4px}.wal-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:.2s}.wal-dots i.on{background:#fff;width:18px;border-radius:9px}
+.wal-info{max-height:42vh;overflow-y:auto}
+.as-h{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}.as-h b{font-size:15px}
+.as-r{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,.06)}
+.as-i{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;background:rgba(255,255,255,.08)}.as-l{display:grid;place-items:center;font-weight:800;color:#c4b5fd}
+.as-n{flex:1;min-width:0}.as-n b{display:block;font-size:14.5px}.as-n small{display:block;font-size:11.5px;color:#9c94bb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.as-v{text-align:right}.as-v b{display:block;font-size:14.5px;font-variant-numeric:tabular-nums}.as-v small{display:block;font-size:11.5px;color:#9c94bb;white-space:nowrap}
+.wl-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)}.wl-row>div{flex:1;min-width:0}.wl-row b{display:block;font-size:14px}.wl-row small{display:block;font-size:11.5px;color:#9c94bb;font-family:ui-monospace,Menlo,Consolas,monospace}
 </style>
 </head>
 <body>
@@ -3276,10 +3290,13 @@ const GIFT_ACT={
       <div class="glass tgp-info" style="margin-top:14px"><div class="tgp-row"><small>${g.from?'от кого':'получен'}</small><b>${g.from?`<a href="#u-${g.from.id}" data-act="close-sheet">${esc(g.from.name)}</a>`:'куплен за XP'}</b></div><div class="tgp-row"><small>дата</small><b>${new Date(g.t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b></div></div>
       ${p.self?`<div class="row" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gift-nick" data-g="${g.id}">${p.nick===g.id?'Убрать у ника':'Поставить у ника'}</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-start">${ico('pin','s')}Расставить</button></div>`:''}</div>`)},
   'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;
-    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;pfEdit.av=USR.avatar;GL.wAddr=me.wallet?me.wallet.addr:'';GL.wName=me.wallet?me.wallet.name:'';
+    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;pfEdit.av=USR.avatar;
     if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else{glPaint();scrollTo({top:0,behavior:'smooth'})}},
   'gl-cancel'(){GL.on=false;glPaint()},
-  'wal-name'(el){const i=$('#pfWalN');if(i)i.value=el.dataset.n;GL.wName=el.dataset.n;$$('.wal-chips button').forEach(b=>b.classList.toggle('on',b===el))},
+  'wal-name'(el){const i=$('#pfWalN');if(i)i.value=el.dataset.n;$$('.wal-chips button').forEach(b=>b.classList.toggle('on',b===el))},
+  async 'wal-add'(el){const a=$('#pfWal'),n=$('#pfWalN');if(!a||!a.value.trim())return toast('Вставь адрес кошелька','x');el.disabled=true;
+    try{const j=await peopleApi('a=wallet-add',{addr:a.value.trim(),name:n?n.value.trim():''});PEOPLE.cache[j.profile.id]=j.profile;delete WB[j.profile.id];glPaint();toast('Кошелёк привязан','check')}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'wal-del'(el){try{const j=await peopleApi('a=wallet-del',{id:el.dataset.w});PEOPLE.cache[j.profile.id]=j.profile;delete WB[j.profile.id];glPaint()}catch(e){toast(e.message,'x')}},
   'gl-nickpick'(){const me=PEOPLE.cache[USR.id];const gs=(me&&me.gifts)||[];if(!gs.length)return ACT['gift-shop']();
     openSheet(`<h3>${ico('star')}Подарок у ника<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><div class="k" style="margin-bottom:10px">Будет стоять сразу после имени, перед галочкой.</div>
     <div class="gs-grid"><button class="gs-it${!GL.nick?' sel':''}" data-act="gl-nickset" data-g="">${ico('x')}<b>Без подарка</b></button>${gs.map(g=>`<button class="gs-it r-${giftRar(g.k).c}${GL.nick===g.id?' sel':''}" data-act="gl-nickset" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b></button>`).join('')}</div>`)},
@@ -3296,12 +3313,11 @@ const GIFT_ACT={
     if(i>=0){GL.pos.splice(i,1);glPaint();ACT['gl-giftpick']();return}
     if(GL.pos.length>=10)return toast('В шапке уже 10 подарков — убери один','x');
     const t=GL.tap||{x:50,y:90};GL.pos.push({id,x:t.x,y:t.y});closeSheet();glPaint()},
-  async 'wal-open'(el){const id=el.dataset.id,p=PEOPLE.cache[id],w=p&&p.wallet;if(!w)return;walModal(el,id,w)},
+  async 'wal-open'(el){const id=el.dataset.id,p=PEOPLE.cache[id];if(!p||!(p.wallets||[]).length)return;walModal(el,id,p.wallets)},
   'wal-close'(){walClose()},
   'wal-copy'(el){copyText(el.dataset.a)},
   async 'gl-save'(el){el.disabled=true;glGrab();toast('Сохраняю — нейросеть проверяет имя…','loader');
     try{const j=await peopleApi('a=me',{name:GL.name,bio:GL.bio,avatar:pfEdit.av,open:GL.open});const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});meHead();
-      const me0=PEOPLE.cache[p.id]||{},w0=me0.wallet;if((w0?w0.addr:'')!==GL.wAddr||(GL.wAddr&&w0&&w0.name!==GL.wName)){try{await peopleApi('a=wallet-set',{addr:GL.wAddr,name:GL.wName})}catch(e){toast(e.message,'x');el.disabled=false;const w=$('#pfWal');if(w){w.focus();w.scrollIntoView({block:'center'})}return}}
       const k=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick});PEOPLE.cache[k.profile.id]=k.profile;GL.on=false;glPaint();toast('Профиль сохранён','check')}
     catch(e){toast(e.message,'x');el.disabled=false;if(/имя|name/i.test(e.message)){const n=$('#pfName');if(n){n.focus();n.scrollIntoView({block:'center'})}}}},
   'gl-toggle'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);if(i>=0)GL.pos.splice(i,1);else{if(GL.pos.length>=10)return toast('Максимум 10 подарков у аватарки','x');const D=[[20,18],[80,16],[10,50],[90,48],[22,82],[78,84],[36,8],[64,8],[6,22],[94,76]];const d=D.find(([x,y])=>!GL.pos.some(p=>Math.abs(p.x-x)<6&&Math.abs(p.y-y)<6))||[50,90];GL.pos.push({id,x:d[0],y:d[1]})}glPaint()},
@@ -3309,7 +3325,7 @@ const GIFT_ACT={
   async 'gift-nick'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const nick=me.nick===el.dataset.g?null:el.dataset.g;try{const j=await peopleApi('a=gift-layout',{nick});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();glPaint()}catch(e){toast(e.message,'x')}},
 };
 const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true,wAddr:'',wName:'',tap:null}; // режим расстановки подарков в своём профиле
-function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen'),w=$('#pfWal'),wn=$('#pfWalN');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked;if(w)GL.wAddr=w.value.trim();if(wn)GL.wName=wn.value.trim()}
+function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen'),w=$('#pfWal'),wn=$('#pfWalN');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked;}
 function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
 // режим редактирования: тап по свободному месту шапки — выбрать подарок сюда, тап по аватарке — сменить аватарку
 document.addEventListener('click',e=>{if(!GL.on)return;const st=e.target.closest&&e.target.closest('#tgpStage.lay');if(!st||e.target.closest('.tgp-g'))return;
@@ -4140,30 +4156,38 @@ V.after.user=async(rid,r)=>{
 const WB={};
 const usdF=v=>'$'+(+v).toLocaleString('ru-RU',{maximumFractionDigits:v>=100?0:2});
 const numF=v=>(+v).toLocaleString('ru-RU',{maximumFractionDigits:v>=1?4:8});
-function walBalTxt(id){const x=WB[id];if(!x||!x.j)return '<i class="wb-ld"></i>';const b=x.j.bal;return b?usdF(b.total):'—'}
-async function walBal(id,force){const x=WB[id];if(x&&!force&&(x.p||Date.now()-x.t<60e3))return x.p||x.j;
-  const pr=peopleApi('a=wallet&id='+id).catch(e=>({error:e.message}));WB[id]={t:Date.now(),p:pr,j:x&&x.j};const j=await pr;WB[id]={t:Date.now(),j};
+function walBalTxt(id){const x=WB[id];if(!x||!x.j)return '<i class="wb-ld"></i>';return x.j.wallets&&x.j.wallets.length?usdF(x.j.total):'—'}
+const plural=(n,a,b,c)=>{n=Math.abs(n)%100;const k=n%10;return n>10&&n<20?c:k>1&&k<5?b:k===1?a:c};
+async function walBal(id,force){const x=WB[id];if(x&&!force&&(x.p||Date.now()-x.t<60e3))return x.p||x.j;// async → всегда промис
+  const pr=peopleApi('a=wallets&id='+id).catch(e=>({error:e.message}));WB[id]={t:Date.now(),p:pr,j:x&&x.j};const j=await pr;WB[id]={t:Date.now(),j};
   $$(`[data-wb="${id}"]`).forEach(e=>e.innerHTML=walBalTxt(id));return j}
-function walModal(src,id,w){
-  walClose(true);const m=document.createElement('div');m.id='walM';m.className='wal-m';
-  const r=src.getBoundingClientRect();
-  m.innerHTML=`<div class="wal-bd" data-act="wal-close"></div><div class="wal-wrap"><div class="wal-card big c-${w.chain}" id="walCard">
-    <div class="wc-shine"></div>
-    <div class="wc-top">${walIco(w.chain)}<b>${esc(w.name)}</b><span class="wc-net">${esc(w.net)}</span><button class="ib" data-act="wal-close">${ico('x')}</button></div>
-    <div class="wc-sum" id="walSum"><small>Баланс</small><div class="ldg-line"></div></div>
-    <div class="wc-foot"><button class="wc-addr" data-act="wal-copy" data-a="${esc(w.addr)}">${esc(w.addr.slice(0,8)+'…'+w.addr.slice(-6))}${ico('copy','s')}</button><span class="wc-chip"></span></div>
-  </div><div class="wal-info" id="walInfo"></div></div>`;
+const assetIco=x=>x.icon?`<img class="as-i" src="${esc(x.icon)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;as-i as-l&quot;>${esc((x.sym||'?').slice(0,1))}</span>'">`:`<span class="as-i as-l">${esc((x.sym||'?').slice(0,1))}</span>`;
+function walCardHTML(w,d){const b=d&&d.wallets?d.wallets.find(x=>x.id===w.id):null,m=b&&b.assets.find(x=>x.main);
+  return `<div class="wal-card big c-${w.chain}" data-wid="${w.id}"><div class="wc-shine"></div>
+    <div class="wc-top">${walIco(w.chain)}<b>${esc(w.name)}</b><span class="wc-net">${esc(w.net)}</span></div>
+    <div class="wc-sum"><small>Баланс</small>${b?(b.error&&!b.assets.length?`<div class="wc-err">${esc(b.error)}</div>`:`<div class="wc-usd">${usdF(b.total)}</div><div class="wc-nat">${b.assets.length} ${plural(b.assets.length,'актив','актива','активов')}${m&&m.ch24!=null?` · ${esc(m.sym)} <span class="${m.ch24>=0?'up2':'dn2'}">${m.ch24>=0?'▲':'▼'} ${Math.abs(m.ch24).toFixed(2).replace('.',',')}%</span>`:''}</div>`):'<div class="ldg-line"></div>'}</div>
+    <div class="wc-foot"><button class="wc-addr" data-act="wal-copy" data-a="${esc(w.addr)}">${esc(w.addr.slice(0,8)+'…'+w.addr.slice(-6))}${ico('copy','s')}</button><span class="wc-chip"></span></div></div>`}
+function walInfoHTML(w,d){const b=d&&d.wallets?d.wallets.find(x=>x.id===w.id):null;if(!b)return '';
+  return `<div class="as-h"><b>Активы</b><span class="k">обновлено ${new Date(b.t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</span></div>
+    ${b.assets.length?b.assets.map(x=>`<div class="as-r">${assetIco(x)}<div class="as-n"><b>${esc(x.sym)}</b><small>${esc(x.net)}${x.name&&x.name!==x.sym?' · '+esc(x.name):''}</small></div><div class="as-v"><b>${x.usd!=null?usdF(x.usd):'—'}</b><small>${numF(x.amt)} ${esc(x.sym)}</small></div></div>`).join(''):`<div class="k" style="padding:8px 0">${esc(b.error||'Пусто')}</div>`}
+    <a class="btn" style="width:100%;justify-content:center;margin-top:12px" href="${esc(b.explorer)}" target="_blank" rel="noopener">${ico('ext','s')}Открыть в обозревателе блоков</a>
+    <div class="k" style="text-align:center;margin-top:8px">Только просмотр: Mundora не может переводить средства и не видит ключи.</div>`}
+function walModal(src,id,ws){
+  walClose(true);const m=document.createElement('div');m.id='walM';m.className='wal-m';m.dataset.uid=id;
+  const r=src.getBoundingClientRect(),d=WB[id]&&WB[id].j;
+  m.innerHTML=`<div class="wal-bd" data-act="wal-close"></div><div class="wal-wrap">
+    <div class="wal-top"><span id="walTot">${ws.length>1?(d&&d.wallets?'Всего '+usdF(d.total):'Всего …'):''}</span><button class="ib" data-act="wal-close">${ico('x')}</button></div>
+    <div class="wal-cards" id="walCards">${ws.map(w=>walCardHTML(w,d)).join('')}</div>
+    ${ws.length>1?`<div class="wal-dots">${ws.map((w,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}
+    <div class="wal-info" id="walInfo">${walInfoHTML(ws[0],d)}</div></div>`;
   document.body.appendChild(m);
-  const c=m.querySelector('.wal-card'),cr=c.getBoundingClientRect();
-  // карточка «вылетает» из плашки в профиле и раскрывается по центру
-  c.style.transformOrigin='center';c.style.transform=`translate(${r.left+r.width/2-(cr.left+cr.width/2)}px,${r.top+r.height/2-(cr.top+cr.height/2)}px) scale(${Math.max(.15,r.width/cr.width)}) rotateX(25deg)`;c.style.opacity='.2';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{m.classList.add('on');c.style.transform='';c.style.opacity=''}));
-  walBal(id).then(j=>{if(!document.getElementById('walM'))return;const b=j&&j.bal,W=(j&&j.wallet)||w;
-    $('#walSum').innerHTML=b?`<small>Баланс</small><div class="wc-usd">${usdF(b.total)}</div><div class="wc-nat">${numF(b.amt)} ${esc(W.sym)}${b.ch24!=null?` <span class="${b.ch24>=0?'up2':'dn2'}">${b.ch24>=0?'▲':'▼'} ${Math.abs(b.ch24).toFixed(2).replace('.',',')}%</span>`:''}</div>`:`<small>Баланс</small><div class="wc-err">${esc((j&&j.error)||'Не удалось получить баланс')}</div>`;
-    $('#walInfo').innerHTML=(b?`<div class="tgp-row"><small>${esc(W.sym)}</small><b>${numF(b.amt)} · ${usdF(b.usd)}</b></div>${(b.tokens||[]).map(t=>`<div class="tgp-row"><small>${esc(t.sym)}</small><b>${numF(t.amt)} · ${usdF(t.usd)}</b></div>`).join('')}${b.price?`<div class="tgp-row"><small>курс ${esc(W.sym)}</small><b>${usdF(b.price)}</b></div>`:''}${b.txs!=null?`<div class="tgp-row"><small>транзакций</small><b>${b.txs}</b></div>`:''}<div class="tgp-row"><small>обновлено</small><b>${new Date(b.t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</b></div>`:'')
-      +(W.explorer?`<a class="btn" style="width:100%;justify-content:center;margin-top:10px" href="${esc(W.explorer)}" target="_blank" rel="noopener">${ico('ext','s')}Открыть в обозревателе блоков</a>`:'')
-      +`<div class="k" style="text-align:center;margin-top:8px">Только просмотр: Mundora не может переводить средства и не видит ключи.</div>`;
-    $('#walInfo').classList.add('on')});
+  const c=m.querySelector('.wal-cards'),cr=c.getBoundingClientRect();
+  c.style.transform=`translate(${r.left+r.width/2-(cr.left+cr.width/2)}px,${r.top+r.height/2-(cr.top+cr.height/2)}px) scale(${Math.max(.15,r.width/cr.width)}) rotateX(25deg)`;c.style.opacity='.2';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{m.classList.add('on');c.style.transform='';c.style.opacity='';if(d)$('#walInfo').classList.add('on')}));
+  let cur=0;const pick=()=>{const i=Math.round(c.scrollLeft/Math.max(1,c.clientWidth));if(i===cur)return;cur=i;$$('.wal-dots i').forEach((e,k)=>e.classList.toggle('on',k===i));const dd=WB[id]&&WB[id].j;$('#walInfo').innerHTML=walInfoHTML(ws[i],dd)};
+  c.addEventListener('scroll',()=>{clearTimeout(c._t);c._t=setTimeout(pick,60)},{passive:true});
+  walBal(id).then(j=>{if(!document.getElementById('walM'))return;c.innerHTML=ws.map(w=>walCardHTML(w,j)).join('');c.querySelectorAll('.wc-shine').forEach(e=>e.style.animationDelay='0s');c.scrollLeft=cur*c.clientWidth;
+    const t=$('#walTot');if(t&&ws.length>1)t.textContent='Всего '+usdF(j.total||0);$('#walInfo').innerHTML=walInfoHTML(ws[cur],j);$('#walInfo').classList.add('on')});
 }
 function walClose(now){const m=document.getElementById('walM');if(!m)return;if(now)return m.remove();m.classList.remove('on');m.classList.add('off');setTimeout(()=>m.remove(),280)}
 addEventListener('keydown',e=>{if(e.key==='Escape')walClose()});
@@ -4191,7 +4215,7 @@ function pfHTML(p){
   const s=c.stats;
   const canCov=USR&&USR.admin&&p.self; // обложку админ меняет только себе
   if(p.self&&GL.on)glGrab();
-  if(p.wallet&&(!WB[p.id]||(!WB[p.id].p&&Date.now()-WB[p.id].t>60e3)))setTimeout(()=>walBal(p.id),0);
+  if((p.wallets||[]).length&&(!WB[p.id]||(!WB[p.id].p&&Date.now()-WB[p.id].t>60e3)))setTimeout(()=>walBal(p.id),0);
   const gs=p.gifts||[],gby=Object.fromEntries(gs.map(g=>[g.id,g])),lay=p.self&&GL.on;
   const pos=(lay?GL.pos:(p.pos||[])).filter(x=>gby[x.id]),nickId=lay?GL.nick:p.nick,nickG=nickId&&gby[nickId];
   const patK=((pos[0]&&gby[pos[0].id])||gs[0]||{}).k;
@@ -4204,17 +4228,19 @@ function pfHTML(p){
       ${pos.map(x=>{const g=gby[x.id];return `<button class="tgp-g r-${giftRar(g.k).c}${lay?' drag':''}" ${lay?`data-gid="${g.id}"`:`data-act="gift-view" data-u="${p.id}" data-g="${g.id}"`} style="left:${x.x}%;top:${x.y}%" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt="" draggable="false"></button>`}).join('')}
     </div>
     <h1 class="tgp-name"${lay?' data-act="gl-nickpick" role="button"':''}>${esc(p.name)}${nickG?`<button class="tgp-nick" ${lay?'':`data-act="gift-view" data-u="${p.id}" data-g="${nickG.id}"`} title="${esc(GIFT_CAT[nickG.k].n)}"><img src="${giftImg(nickG.k)}" alt=""></button>`:''}${vBadge(p,true)}</h1>
-    ${p.wallet?`<div class="tgp-sub"><button class="tgp-wal" data-act="wal-open" data-id="${p.id}">${walIco(p.wallet.chain)}<span>${esc(p.wallet.name)}</span><span class="wal-bal" data-wb="${p.id}">${walBalTxt(p.id)}</span>${ico('chev','s r')}</button></div>`:''}
+    ${(p.wallets||[]).length?`<div class="tgp-sub"><button class="tgp-wal" data-act="wal-open" data-id="${p.id}"><span class="wi-st">${p.wallets.slice(0,3).map(w=>walIco(w.chain)).join('')}</span><span>${p.wallets.length===1?esc(p.wallets[0].name):p.wallets.length+' '+plural(p.wallets.length,'кошелёк','кошелька','кошельков')}</span><span class="wal-bal" data-wb="${p.id}">${walBalTxt(p.id)}</span>${ico('chev','s r')}</button></div>`:''}
     <div class="tgp-sub tgp-seen"><span>${seenTxt(p)}</span></div>
   </div>
   ${lay?`<div class="gl-bar">
     <div class="gl-tip lq">${ico('spark','s')}<span>Нажми на <b>свободное место</b> в шапке — добавишь подарок, на <b>аватарку</b> — сменишь её, на <b>ник</b> — подарок у ника. Подарки тяни куда хочешь, зажми — уберётся.</span></div>
     <label class="lq-f lq"><small>Никнейм · проверяет нейросеть</small><input id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать"></label>
     <label class="lq-f lq"><small>О себе</small><textarea id="pfBio" maxlength="160" rows="3" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea></label>
-    <div class="lq-f lq"><small>Криптокошелёк · виден всем, только для просмотра</small>
-      <input id="pfWal" value="${esc(GL.wAddr)}" placeholder="Адрес: BTC, ETH, TON, TRON или Solana" autocomplete="off" spellcheck="false">
-      <input id="pfWalN" maxlength="24" value="${esc(GL.wName)}" placeholder="Название, например Tonkeeper">
-      <div class="wal-chips">${WAL_APPS.map(n=>`<button type="button" class="${GL.wName===n?'on':''}" data-act="wal-name" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+    <div class="lq-f lq"><small>Криптокошельки · видны всем вместе с балансом, только просмотр</small>
+      ${(p.wallets||[]).map(w=>`<div class="wl-row">${walIco(w.chain)}<div><b>${esc(w.name)}</b><small>${esc(w.net)} · ${esc(w.addr.slice(0,6)+'…'+w.addr.slice(-4))}</small></div><button type="button" class="ib" data-act="wal-del" data-w="${w.id}" title="Отвязать">${ico('trash','s')}</button></div>`).join('')}
+      ${(p.wallets||[]).length<5?`<input id="pfWal" placeholder="Адрес: BTC, ETH/BNB/Polygon/Arbitrum/Base, TON, TRON, Solana" autocomplete="off" spellcheck="false">
+      <input id="pfWalN" maxlength="24" placeholder="Название, например Tonkeeper">
+      <div class="wal-chips">${WAL_APPS.map(n=>`<button type="button" data-act="wal-name" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+      <button type="button" class="btn sm" style="justify-content:center" data-act="wal-add">${ico('plus','s')}Привязать кошелёк</button>`:''}
     </div>
     <div class="lq-f lq"><small>Telegram</small><div id="pfTg">${pfTgHTML()}</div></div>
     <label class="lq-f lq pf-open"><input type="checkbox" id="pfOpen" ${GL.open?'checked':''}><span><b>Открытый профиль</b><small>Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
