@@ -31,7 +31,8 @@ jobs:
             npx cap add android
             python3 brand.py android
             npx cap sync android
-            cd android && chmod +x gradlew && ./gradlew assembleRelease --no-daemon -q && cd ..
+            chmod +x android/gradlew
+            (cd android; ./gradlew assembleRelease --no-daemon -q)
             if [ -n "$KP" ]; then
               openssl enc -d -aes-256-cbc -pbkdf2 -in keys/release.jks.enc -out ks.jks -pass env:KP; PASS="$KP"; echo "Подпись: основной ключ"
             else

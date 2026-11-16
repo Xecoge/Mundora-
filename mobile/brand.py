@@ -51,7 +51,10 @@ if plat == 'android':
         s = re.sub(r'(<color name="colorAccent">)[^<]*', r'\g<1>#8B5CF6', s)
         if 'mundoraBg' not in s: s = s.replace('</resources>', f'    <color name="mundoraBg">{BG}</color>\n</resources>')
         return s
-    edit(os.path.join(res, 'values', 'colors.xml'), colors)
+    cx = os.path.join(res, 'values', 'colors.xml')
+    if not os.path.exists(cx):
+        open(cx, 'w', encoding='utf-8').write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n</resources>\n')
+    edit(cx, colors)
     def styles(s):
         add = ('<item name="android:windowBackground">@color/mundoraBg</item>'
                '<item name="android:statusBarColor">@color/mundoraBg</item>'
