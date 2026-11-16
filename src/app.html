@@ -1208,7 +1208,7 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .tgp-name,.tgp-sub{z-index:3}
 
 /* пузыри — прозрачные, как мыльные */
-.tgp-stage.bubbles .tgp-g{width:var(--bs,52px)!important;height:var(--bs,52px)!important;margin:0!important;border-radius:50%;transition:none!important;will-change:transform;display:grid;place-items:center;touch-action:none;cursor:grab;
+.tgp-stage.bubbles .tgp-g{width:var(--bs,52px)!important;height:var(--bs,52px)!important;margin:0!important;border-radius:50%;transition:opacity .5s!important;will-change:transform;display:grid;place-items:center;touch-action:none;cursor:grab;
  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.7) 0 3.5%,rgba(255,255,255,.12) 9%,transparent 16%),
   radial-gradient(circle at 72% 80%,rgba(255,255,255,.16),transparent 30%),
   radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(220,210,255,.10) 70%,rgba(190,220,255,.26) 86%,rgba(255,255,255,.5) 98%,rgba(255,255,255,0) 100%),
@@ -3367,9 +3367,9 @@ const hsh=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return
 function bubBounds(st){const hero=st.closest('.tgp'),sr=st.getBoundingClientRect(),hr=hero?hero.getBoundingClientRect():sr;return {l:hr.left-sr.left+6,t:hr.top-sr.top+6,r:hr.right-sr.left-6,b:hr.bottom-sr.top-6}}
 function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)return;
   if(BUB.st!==st){BUB.st=st;const W=st.clientWidth,H=st.clientHeight,base=innerWidth<=760?50:58;
-    BUB.b=[...st.querySelectorAll('.tgp-g')].map((el,i)=>{const h=hsh(el.dataset.g||i),dep=.78+(h%60)/100,sz=Math.round(base*dep);el.style.setProperty('--bs',sz+'px');el.style.zIndex=String(3+Math.round(dep*10));
+    BUB.b=[...st.querySelectorAll('.tgp-g')].map((el,i)=>{const h=hsh(el.dataset.g||i),dep=.78+(h%60)/100,sz=Math.round(base*dep);el.style.setProperty('--bs',sz+'px');el.style.zIndex=String(3+Math.round(dep*10));el.dataset.zi=el.style.zIndex;
       const x=(parseFloat(el.style.left)||50)/100*W,y=(parseFloat(el.style.top)||50)/100*H,a=(h%628)/100;el.style.left='0';el.style.top='0';
-      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep,sw:(h%2?1:-1)*(8+h%7)}})}
+      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep,zi:String(3+Math.round(dep*10)),sw:(h%2?1:-1)*(8+h%7)}})}
   if(BUB.raf)return;let last=performance.now();const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tick=now=>{const st=BUB.st;if(!st||!st.isConnected){BUB.raf=0;BUB.st=null;BUB.drag=null;return}
     const dt=Math.min(.04,(now-last)/1000);last=now;const L=bubBounds(st),B=BUB.b,cruise=24;
@@ -3383,13 +3383,17 @@ function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)re
       const e=.82;if(p.x<L.l+p.r){p.x=L.l+p.r;p.vx=Math.abs(p.vx)*e}if(p.x>L.r-p.r){p.x=L.r-p.r;p.vx=-Math.abs(p.vx)*e}
       if(p.y<L.t+p.r){p.y=L.t+p.r;p.vy=Math.abs(p.vy)*e}if(p.y>L.b-p.r){p.y=L.b-p.r;p.vy=-Math.abs(p.vy)*e}}
     // столкновения пузырей (упругие, с массой)
-    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],b=B[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,md=(a.r+b.r)*.92;
+    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],b=B[j];if(Math.abs((a.z||0)-(b.z||0))>.9)continue;const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,md=(a.r+b.r)*.92;
       if(d<md){const nx=dx/d,ny=dy/d,o=md-d,ma=BUB.drag&&BUB.drag.p===a?1e9:a.m,mb=BUB.drag&&BUB.drag.p===b?1e9:b.m,ta=mb/(ma+mb),tb=ma/(ma+mb);
         a.x-=nx*o*ta;a.y-=ny*o*ta;b.x+=nx*o*tb;b.y+=ny*o*tb;const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
         if(rv<0){const jn=-(1.85)*rv/(1/ma+1/mb);a.vx-=jn/ma*nx;a.vy-=jn/ma*ny;b.vx+=jn/mb*nx;b.vy+=jn/mb*ny;a.sq=b.sq=Math.min(1,Math.abs(rv)/80+.3)}}}
     const t=now/1000;
     for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*2.2);const wob=red?0:Math.sin(t*2.4+p.ph)*.03+p.sq*Math.sin(t*22)*.09;
-      p.el.style.transform=`translate(${(p.x-p.r).toFixed(1)}px,${(p.y-p.r).toFixed(1)}px) scale(${(1+wob).toFixed(3)},${(1-wob).toFixed(3)})`}
+      // глубина: пузырь то уплывает за аватарку (меньше, тусклее, прячется), то выплывает вперёд
+      const dragging=BUB.drag&&BUB.drag.p===p;p.z=red||dragging?1:Math.sin(t*(.35+(p.ph%1)*.25)+p.ph*1.7);
+      const back=p.z<-.25,ds=.84+(p.z+1)*.1;
+      if(back!==p.back){p.back=back;p.el.style.zIndex=back?'1':p.zi;p.el.style.opacity=back?'.72':''}
+      p.el.style.transform=`translate(${(p.x-p.r).toFixed(1)}px,${(p.y-p.r).toFixed(1)}px) scale(${((1+wob)*ds).toFixed(3)},${((1-wob)*ds).toFixed(3)})`}
     BUB.raf=requestAnimationFrame(tick)};
   BUB.raf=requestAnimationFrame(tick)}
 // схватить и бросить пузырь
