@@ -1121,6 +1121,54 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 @property --hp{syntax:'<percentage>';inherits:false;initial-value:0%}
 @keyframes hp{to{--hp:100%}}
 .tgp-g.gone{transform:scale(0)!important;opacity:0;transition:transform .2s,opacity .2s}
+
+/* ===== редактирование в стекле + кошелёк ===== */
+.gl-bar{margin-top:12px;display:flex;flex-direction:column;gap:10px;padding:0!important;background:none!important;border:0!important}
+.gl-tip{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:18px;font-size:13px;line-height:1.45;color:#d6cfee}.gl-tip>.i{color:#c4b5fd;flex:none;margin-top:2px}
+.lq-f{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:20px}
+.lq-f>small{font-size:12px;color:#a49dc0;font-weight:600}
+.lq-f input:not([type=checkbox]),.lq-f textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:11px 13px;color:#fff;font:inherit;font-size:15px;outline:none;resize:none;transition:border-color .2s,background .2s}
+.lq-f input:focus,.lq-f textarea:focus{border-color:rgba(192,132,252,.6);background:rgba(255,255,255,.09)}
+#pfWal{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.wal-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.wal-chips button{flex:none;padding:6px 11px;border-radius:99px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#d6cfee;font:inherit;font-size:12.5px;cursor:pointer}.wal-chips button.on{background:rgba(192,132,252,.25);border-color:#c084fc;color:#fff}
+.pf-open{flex-direction:row;align-items:flex-start;gap:12px;cursor:pointer}.pf-open input{width:20px;height:20px;accent-color:#8b5cf6;margin-top:2px;flex:none}.pf-open b{display:block;font-size:14.5px}.pf-open small{display:block;font-size:12px;color:#a49dc0;margin-top:2px}
+.lq-f .tgrow{background:none}
+.tgp-stage.lay{cursor:copy}.tgp-stage.lay .tgp-ava{cursor:pointer}.tgp-name[data-act]{cursor:pointer}
+.tgp-stage.lay .tgp-ava{outline:2px dashed rgba(255,255,255,.35);outline-offset:4px}
+.gs-it.sel{border-color:#c084fc!important;box-shadow:0 0 14px rgba(192,132,252,.45)}
+.gl-ava{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))!important}
+.tgp-wal{display:inline-flex;align-items:center;gap:7px;padding:5px 10px 5px 5px;border-radius:99px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(170deg,rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(18,10,36,.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#fff;font:inherit;font-size:13.5px;font-weight:650;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.tgp-wal .r{transform:rotate(-90deg);opacity:.6;width:14px;height:14px}
+.wi{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.wi-btc{background:#f7931a}.wi-eth{background:#627eea}.wi-ton{background:#0098ea}.wi-tron{background:#ef0027}.wi-sol{background:linear-gradient(135deg,#9945ff,#14f195)}
+.tgp-seen{margin-top:6px!important;font-size:14px!important}
+.wal-card{position:relative;overflow:hidden;border-radius:26px;padding:16px 16px 14px;color:#fff;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 20px 40px -18px var(--c1)}
+.wal-card::after{content:'';position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),transparent 70%)}
+.c-btc{--c1:#f7931a;--c2:#8a4a00}.c-eth{--c1:#627eea;--c2:#2b2f7a}.c-ton{--c1:#0098ea;--c2:#00476e}.c-tron{--c1:#ef0027;--c2:#6e0012}.c-sol{--c1:#9945ff;--c2:#0f6b4e}
+.wc-top{position:relative;z-index:1;display:flex;align-items:center;gap:8px}.wc-top b{font-size:16px}.wc-net{font-size:12px;padding:3px 9px;border-radius:99px;background:rgba(0,0,0,.22)}.wc-top .ib{margin-left:auto;color:#fff}
+.wc-sum{position:relative;z-index:1;margin:18px 0 12px}.wc-sum small{font-size:12.5px;opacity:.8}.wc-usd{font-size:38px;font-weight:850;letter-spacing:-1px;line-height:1.1}.wc-nat{font-size:14px;opacity:.92;margin-top:2px}.wc-nat .up2,.wc-nat .dn2{font-size:12.5px;font-weight:700}
+.wc-err{font-size:14px;opacity:.9}.ldg-line{height:38px;width:60%;border-radius:12px;background:rgba(255,255,255,.18);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+.wc-addr{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:99px;border:0;background:rgba(0,0,0,.25);color:#fff;font:inherit;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;cursor:pointer}
+
+/* ===== капитализация · рейтинг ===== */
+.pf-cap2{margin-top:12px;padding:16px;border-radius:26px}
+.pc-head{display:flex;align-items:center;gap:14px}
+.pc-ring{width:74px;height:74px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(#c084fc var(--p),rgba(255,255,255,.08) 0);box-shadow:0 0 24px rgba(139,92,246,.45)}
+.pc-ring>div{width:60px;height:60px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8b5cf6,#4c1d95);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.pc-ring b{font-size:24px;line-height:1;font-weight:850}.pc-ring small{font-size:10.5px;opacity:.85}
+.pc-ht{min-width:0}.pc-ht small{display:block;font-size:12px;color:#a49dc0;font-weight:600}.pc-ht b{display:block;font-size:22px;font-weight:800;letter-spacing:-.3px}.pc-ht span{font-size:13px;color:#cfc6ea}
+.pf-cap2 .pf-bar{margin-top:14px}
+.pc-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.pc-tiles>div{padding:11px 12px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)}
+.pc-tiles small{display:block;font-size:11.5px;color:#a49dc0;font-weight:600}.pc-tiles b{display:block;font-size:20px;font-weight:800;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pc-tiles span{font-size:11px;color:#8f88ad}
+.pc-tiles .hl{background:linear-gradient(135deg,rgba(139,92,246,.35),rgba(109,40,217,.18));border-color:rgba(192,132,252,.35)}
+.pc-gv{display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;border-radius:20px;background:radial-gradient(120% 140% at 0% 50%,var(--gl),rgba(255,255,255,.03) 60%);border:1px solid rgba(255,255,255,.08)}
+.pc-gvi{display:flex;flex:none}.pc-gvi img{width:40px;height:40px;object-fit:contain;margin-left:-12px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));position:relative}.pc-gvi img:first-child{margin-left:0;width:48px;height:48px}
+.pc-gvt{min-width:0}.pc-gvt small{display:block;font-size:11.5px;color:#cfc6ea;font-weight:600}.pc-gvt b{display:block;font-size:20px;font-weight:800}.pc-gvt span{font-size:12px;color:#b9b0d6}
+.pc-more{margin-top:10px}.pc-more summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;color:#c4b5fd;font-weight:600;padding:4px 2px}.pc-more summary::-webkit-details-marker{display:none}.pc-more .chev{transition:transform .2s}.pc-more[open] .chev{transform:rotate(180deg)}
+.pf-parts .neg b{color:#fca5a5!important}
+@media(max-width:760px){.pc-tiles b{font-size:17px}.pc-tiles>div{padding:10px}.pc-ht b{font-size:19px}}
 </style>
 </head>
 <body>
@@ -3211,20 +3259,59 @@ const GIFT_ACT={
       <div class="glass tgp-info" style="margin-top:14px"><div class="tgp-row"><small>${g.from?'от кого':'получен'}</small><b>${g.from?`<a href="#u-${g.from.id}" data-act="close-sheet">${esc(g.from.name)}</a>`:'куплен за XP'}</b></div><div class="tgp-row"><small>дата</small><b>${new Date(g.t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b></div></div>
       ${p.self?`<div class="row" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gift-nick" data-g="${g.id}">${p.nick===g.id?'Убрать у ника':'Поставить у ника'}</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-start">${ico('pin','s')}Расставить</button></div>`:''}</div>`)},
   'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;
-    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;pfEdit.av=USR.avatar;
+    GL.name=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';GL.bio=USR.bio||'';GL.open=USR.open!==false;pfEdit.av=USR.avatar;GL.wAddr=me.wallet?me.wallet.addr:'';GL.wName=me.wallet?me.wallet.name:'';
     if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else{glPaint();scrollTo({top:0,behavior:'smooth'})}},
   'gl-cancel'(){GL.on=false;glPaint()},
+  'wal-name'(el){const i=$('#pfWalN');if(i)i.value=el.dataset.n;GL.wName=el.dataset.n;$$('.wal-chips button').forEach(b=>b.classList.toggle('on',b===el))},
+  'gl-nickpick'(){const me=PEOPLE.cache[USR.id];const gs=(me&&me.gifts)||[];if(!gs.length)return ACT['gift-shop']();
+    openSheet(`<h3>${ico('star')}Подарок у ника<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><div class="k" style="margin-bottom:10px">Будет стоять сразу после имени, перед галочкой.</div>
+    <div class="gs-grid"><button class="gs-it${!GL.nick?' sel':''}" data-act="gl-nickset" data-g="">${ico('x')}<b>Без подарка</b></button>${gs.map(g=>`<button class="gs-it r-${giftRar(g.k).c}${GL.nick===g.id?' sel':''}" data-act="gl-nickset" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b></button>`).join('')}</div>`)},
+  'gl-nickset'(el){GL.nick=el.dataset.g||null;closeSheet();glPaint()},
+  'gl-avapick'(){const av=pfEdit.av;openSheet(`<h3>${ico('user')}Аватарка<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    <div class="ava-grid gl-ava"><button class="ava-up" data-act="pf-ava-up" title="Загрузить из галереи">${ico('plus')}</button>${String(av).startsWith('/')?`<button class="on" data-act="gl-avaset" data-k="${esc(av)}"><img src="${esc(av)}" alt=""></button>`:''}${AVA_LIST.map(k=>`<button class="${k===av?'on':''}" data-act="gl-avaset" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
+    <div class="k" style="margin-top:10px">«+» — своё фото из галереи, его видят все.</div>`)},
+  'gl-avaset'(el){pfEdit.av=el.dataset.k;closeSheet();const h=$('.tgp-ava');if(h)h.src=avaSrc(pfEdit.av)},
+  'gl-giftpick'(){const me=PEOPLE.cache[USR.id];const gs=(me&&me.gifts)||[];
+    openSheet(`<h3>${ico('star')}Подарки в профиле<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><div class="k" style="margin-bottom:10px">Нажми, чтобы поставить подарок в это место. Подарок с отметкой уже в шапке — нажми ещё раз, чтобы убрать. В шапке до 10 подарков.</div>
+    ${gs.length?`<div class="gs-grid">${gs.map(g=>{const on=GL.pos.some(x=>x.id===g.id);return `<button class="gs-it r-${giftRar(g.k).c}${on?' sel':''}" data-act="gl-giftset" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b><small>${on?'в шапке · убрать':'поставить сюда'}</small></button>`}).join('')}</div>`:`<div class="k">Подарков пока нет.</div>`}
+    <button class="btn ghost" style="width:100%;justify-content:center;margin-top:12px" data-act="gift-shop">${ico('plus','s')}Купить подарок</button>`)},
+  'gl-giftset'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);
+    if(i>=0){GL.pos.splice(i,1);glPaint();ACT['gl-giftpick']();return}
+    if(GL.pos.length>=10)return toast('В шапке уже 10 подарков — убери один','x');
+    const t=GL.tap||{x:50,y:90};GL.pos.push({id,x:t.x,y:t.y});closeSheet();glPaint()},
+  async 'wal-open'(el){const id=el.dataset.id,p=PEOPLE.cache[id],w=p&&p.wallet;if(!w)return;
+    const head=`<div class="wal-card c-${w.chain}"><div class="wc-top">${walIco(w.chain)}<b>${esc(w.name)}</b><span class="wc-net">${esc(w.net)}</span><button class="ib" data-act="close-sheet">${ico('x')}</button></div>`;
+    openSheet(head+`<div class="wc-sum"><div class="ldg-line"></div></div></div><div class="k" style="text-align:center;margin-top:10px">${ico('loader','s ldg')} Смотрю баланс в блокчейне…</div>`);
+    let j;try{j=await peopleApi('a=wallet&id='+id)}catch(e){j={error:e.message}}
+    if(!$('#sheet.open')||!$('.wal-card'))return;
+    const b=j.bal,W=j.wallet||w,usd=v=>'$'+(+v).toLocaleString('ru-RU',{maximumFractionDigits:v>=100?0:2}),num=v=>(+v).toLocaleString('ru-RU',{maximumFractionDigits:v>=1?4:8});
+    openSheet(head+`<div class="wc-sum">${b?`<small>Баланс</small><div class="wc-usd">${usd(b.total)}</div><div class="wc-nat">${num(b.amt)} ${esc(W.sym)}${b.ch24!=null?` <span class="${b.ch24>=0?'up2':'dn2'}">${b.ch24>=0?'▲':'▼'} ${Math.abs(b.ch24).toFixed(2).replace('.',',')}%</span>`:''}</div>`:`<div class="wc-err">${esc(j.error||'Не удалось получить баланс')}</div>`}</div>
+      <button class="wc-addr" data-act="wal-copy" data-a="${esc(W.addr)}">${esc(W.addr.slice(0,8)+'…'+W.addr.slice(-6))}${ico('copy','s')}</button></div>
+      ${b?`<div class="glass tgp-info" style="margin-top:12px">
+        <div class="tgp-row"><small>${esc(W.sym)}</small><b>${num(b.amt)} · ${usd(b.usd)}</b></div>
+        ${(b.tokens||[]).map(t=>`<div class="tgp-row"><small>${esc(t.sym)}</small><b>${num(t.amt)} · ${usd(t.usd)}</b></div>`).join('')}
+        ${b.price?`<div class="tgp-row"><small>курс ${esc(W.sym)}</small><b>${usd(b.price)}</b></div>`:''}
+        ${b.txs!=null?`<div class="tgp-row"><small>транзакций</small><b>${b.txs}</b></div>`:''}
+        <div class="tgp-row"><small>обновлено</small><b>${new Date(b.t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</b></div></div>`:''}
+      ${W.explorer?`<a class="btn" style="width:100%;justify-content:center;margin-top:12px" href="${esc(W.explorer)}" target="_blank" rel="noopener">${ico('ext','s')}Открыть в обозревателе блоков</a>`:''}
+      <div class="k" style="text-align:center;margin-top:10px">Только просмотр: Mundora не может переводить средства и не видит ключи.</div>`)},
+  'wal-copy'(el){copyText(el.dataset.a)},
   async 'gl-save'(el){el.disabled=true;glGrab();toast('Сохраняю — нейросеть проверяет имя…','loader');
     try{const j=await peopleApi('a=me',{name:GL.name,bio:GL.bio,avatar:pfEdit.av,open:GL.open});const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});meHead();
+      const me0=PEOPLE.cache[p.id]||{},w0=me0.wallet;if((w0?w0.addr:'')!==GL.wAddr||(GL.wAddr&&w0&&w0.name!==GL.wName)){try{await peopleApi('a=wallet-set',{addr:GL.wAddr,name:GL.wName})}catch(e){toast(e.message,'x');el.disabled=false;const w=$('#pfWal');if(w){w.focus();w.scrollIntoView({block:'center'})}return}}
       const k=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick});PEOPLE.cache[k.profile.id]=k.profile;GL.on=false;glPaint();toast('Профиль сохранён','check')}
     catch(e){toast(e.message,'x');el.disabled=false;if(/имя|name/i.test(e.message)){const n=$('#pfName');if(n){n.focus();n.scrollIntoView({block:'center'})}}}},
   'gl-toggle'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);if(i>=0)GL.pos.splice(i,1);else{if(GL.pos.length>=10)return toast('Максимум 10 подарков у аватарки','x');const D=[[20,18],[80,16],[10,50],[90,48],[22,82],[78,84],[36,8],[64,8],[6,22],[94,76]];const d=D.find(([x,y])=>!GL.pos.some(p=>Math.abs(p.x-x)<6&&Math.abs(p.y-y)<6))||[50,90];GL.pos.push({id,x:d[0],y:d[1]})}glPaint()},
   'gl-nick'(el){GL.nick=el.dataset.g||null;glPaint()},
   async 'gift-nick'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const nick=me.nick===el.dataset.g?null:el.dataset.g;try{const j=await peopleApi('a=gift-layout',{nick});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();glPaint()}catch(e){toast(e.message,'x')}},
 };
-const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true}; // режим расстановки подарков в своём профиле
-function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked}
+const GL={on:false,pos:[],nick:null,name:'',bio:'',open:true,wAddr:'',wName:'',tap:null}; // режим расстановки подарков в своём профиле
+function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen'),w=$('#pfWal'),wn=$('#pfWalN');if(n)GL.name=n.value;if(b)GL.bio=b.value;if(o)GL.open=o.checked;if(w)GL.wAddr=w.value.trim();if(wn)GL.wName=wn.value.trim()}
 function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
+// режим редактирования: тап по свободному месту шапки — выбрать подарок сюда, тап по аватарке — сменить аватарку
+document.addEventListener('click',e=>{if(!GL.on)return;const st=e.target.closest&&e.target.closest('#tgpStage.lay');if(!st||e.target.closest('.tgp-g'))return;
+  if(e.target.closest('.tgp-ava'))return ACT['gl-avapick']();
+  const r=st.getBoundingClientRect();GL.tap={x:Math.round(Math.max(2,Math.min(98,(e.clientX-r.left)/r.width*100))*10)/10,y:Math.round(Math.max(2,Math.min(98,(e.clientY-r.top)/r.height*100))*10)/10};ACT['gl-giftpick']()});
 // перетаскивание подарков по шапке профиля
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.tgp-g.drag');if(!b||!GL.on)return;e.preventDefault();
   const st=$('#tgpStage');if(!st)return;b.setPointerCapture(e.pointerId);b.classList.add('moving','hold');const id=b.dataset.gid,x0=e.clientX,y0=e.clientY;let moved=false;
@@ -4046,6 +4133,8 @@ V.after.user=async(rid,r)=>{
   catch(e){if(route()===r)$('#pfBox').innerHTML=`<div class="pf-miss"><img src="/img/asteroid.webp" alt=""><h2>Профиль не найден</h2><p class="k">${esc(e.message)}</p><a class="btn ghost" href="#search">${ico('search','s')}Искать людей</a></div>`}
 };
 // ---------- Подарки (крипто, 3D). Картинки: /img/gifts/<ключ>.webp; пока их нет — временные 3D-иконки сайта ----------
+const WAL_APPS=['Tonkeeper','Telegram Wallet','MyTonWallet','MetaMask','Trust Wallet','Phantom','TronLink','Exodus','Ledger','Bybit','OKX','Binance'];
+const walIco=c=>`<span class="wi wi-${c}">${({btc:'₿',eth:'Ξ',ton:'◆',tron:'T',sol:'◎'})[c]||'•'}</span>`;
 const GIFT_CAT={usdt:{n:'Стопка USDT',p:250},btc:{n:'Золотой биткоин',p:300},doge:{n:'Doge-монета',p:350},eth:{n:'Эфир-кристалл',p:400},ton:{n:'Алмаз TON',p:450},ledger:{n:'Холодный кошелёк',p:600},rocket:{n:'Ракета to the Moon',p:800},bull:{n:'Бык',p:1200},bear:{n:'Медведь',p:1200},miner:{n:'Майнинг-риг',p:1500},whale:{n:'Кит',p:2500},diamond:{n:'Diamond Hands',p:5000}};
 const GIFT_TMP={usdt:'gift_stack',btc:'money',doge:'planet',eth:'crystal',ton:'gem_orbit',ledger:'box_open',rocket:'asteroid',bull:'bar_gold',bear:'bar_silver',miner:'orbit',whale:'planet2',diamond:'gift_planet'};
 const GIFT_READY=new Set(['usdt','btc','doge','eth','ton','ledger','rocket','bull','bear','miner','whale','diamond']); // ключи, для которых уже загружены настоящие картинки /img/gifts/<k>.webp
@@ -4078,23 +4167,23 @@ function pfHTML(p){
       <img class="tgp-ava" src="${avaSrc(lay&&pfEdit.av?pfEdit.av:p.avatar)}" alt="">
       ${pos.map(x=>{const g=gby[x.id];return `<button class="tgp-g r-${giftRar(g.k).c}${lay?' drag':''}" ${lay?`data-gid="${g.id}"`:`data-act="gift-view" data-u="${p.id}" data-g="${g.id}"`} style="left:${x.x}%;top:${x.y}%" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt="" draggable="false"></button>`}).join('')}
     </div>
-    <h1 class="tgp-name">${esc(p.name)}${nickG?`<button class="tgp-nick" ${lay?'':`data-act="gift-view" data-u="${p.id}" data-g="${nickG.id}"`} title="${esc(GIFT_CAT[nickG.k].n)}"><img src="${giftImg(nickG.k)}" alt=""></button>`:''}${vBadge(p,true)}</h1>
-    <div class="tgp-sub">${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span>${seenTxt(p)}</span></div>
+    <h1 class="tgp-name"${lay?' data-act="gl-nickpick" role="button"':''}>${esc(p.name)}${nickG?`<button class="tgp-nick" ${lay?'':`data-act="gift-view" data-u="${p.id}" data-g="${nickG.id}"`} title="${esc(GIFT_CAT[nickG.k].n)}"><img src="${giftImg(nickG.k)}" alt=""></button>`:''}${vBadge(p,true)}</h1>
+    ${p.wallet?`<div class="tgp-sub"><button class="tgp-wal" data-act="wal-open" data-id="${p.id}">${walIco(p.wallet.chain)}<span>${esc(p.wallet.name)}</span>${ico('chev','s r')}</button></div>`:''}
+    <div class="tgp-sub tgp-seen"><span>${seenTxt(p)}</span></div>
   </div>
-  ${lay?`<div class="glass gl-bar">
-    <div class="gl-h"><b>Редактирование профиля</b><span class="k">Подарки в шапке тяни пальцем или мышкой куда хочешь. Зажми подарок и подержи — он уберётся.</span></div>
-    <div class="k gl-l">Подарки у аватарки · ${GL.pos.length} из 10</div>
-    <div class="gl-tray">${gs.map(g=>`<button class="gl-chip${GL.pos.some(x=>x.id===g.id)?' on':''}" data-act="gl-toggle" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')||`<button class="btn ghost sm" data-act="gift-shop">${ico('star','s')}Купить первый подарок</button>`}</div>
-    ${gs.length?`<div class="k gl-l">Подарок у ника</div>
-    <div class="gl-tray"><button class="gl-chip${!GL.nick?' on':''}" data-act="gl-nick" data-g="">${ico('x','s')}</button>${gs.map(g=>`<button class="gl-chip${GL.nick===g.id?' on':''}" data-act="gl-nick" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')}</div>`:''}
-    <div class="k gl-l">Аватарка</div>
-    <div class="ava-grid"><button class="ava-up" data-act="pf-ava-up" title="Загрузить из галереи">${ico('plus')}</button>${String(pfEdit.av).startsWith('/')?`<button class="on" data-act="pf-ava" data-k="${esc(pfEdit.av)}"><img src="${esc(pfEdit.av)}" alt=""></button>`:''}${AVA_LIST.map(k=>`<button class="${k===pfEdit.av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
-    ${canCov?`<div class="k gl-l">Обложка</div><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-up" data-id="${p.id}">${ico('plus','s')}${p.cover?'Сменить':'Загрузить'}</button>${p.cover?`<button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-del" data-id="${p.id}">${ico('trash','s')}Убрать</button>`:''}</div>`:''}
-    <label class="k gl-l" style="display:block">Имя (проверяет нейросеть)</label><input class="in" id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать">
-    <label class="k gl-l" style="display:block">О себе</label><textarea class="in" id="pfBio" maxlength="160" rows="3" style="height:auto;padding:10px 14px;resize:none" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea>
-    <div class="k gl-l">Telegram</div><div id="pfTg">${pfTgHTML()}</div>
-    <label class="pf-tg"><input type="checkbox" id="pfOpen" ${GL.open?'checked':''}><span><b>Открытый профиль</b><small class="k">Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
-    <div class="row gl-btns" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
+  ${lay?`<div class="gl-bar">
+    <div class="gl-tip lq">${ico('spark','s')}<span>Нажми на <b>свободное место</b> в шапке — добавишь подарок, на <b>аватарку</b> — сменишь её, на <b>ник</b> — подарок у ника. Подарки тяни куда хочешь, зажми — уберётся.</span></div>
+    <label class="lq-f lq"><small>Никнейм · проверяет нейросеть</small><input id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать"></label>
+    <label class="lq-f lq"><small>О себе</small><textarea id="pfBio" maxlength="160" rows="3" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea></label>
+    <div class="lq-f lq"><small>Криптокошелёк · виден всем, только для просмотра</small>
+      <input id="pfWal" value="${esc(GL.wAddr)}" placeholder="Адрес: BTC, ETH, TON, TRON или Solana" autocomplete="off" spellcheck="false">
+      <input id="pfWalN" maxlength="24" value="${esc(GL.wName)}" placeholder="Название, например Tonkeeper">
+      <div class="wal-chips">${WAL_APPS.map(n=>`<button type="button" class="${GL.wName===n?'on':''}" data-act="wal-name" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+    </div>
+    <div class="lq-f lq"><small>Telegram</small><div id="pfTg">${pfTgHTML()}</div></div>
+    <label class="lq-f lq pf-open"><input type="checkbox" id="pfOpen" ${GL.open?'checked':''}><span><b>Открытый профиль</b><small>Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
+    ${canCov?`<div class="lq-f lq"><small>Обложка</small><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-up" data-id="${p.id}">${ico('plus','s')}${p.cover?'Сменить':'Загрузить'}</button>${p.cover?`<button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-del" data-id="${p.id}">${ico('trash','s')}Убрать</button>`:''}</div></div>`:''}
+    <div class="row gl-btns" style="margin-top:4px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
     ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
       :act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
@@ -4113,12 +4202,23 @@ function pfHTML(p){
     ${gs.length?`<div class="tgp-gg">${gs.map(g=>`<button class="tgp-gt r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b><small>${g.from?'от '+esc(g.from.name):'куплен'}</small>${(p.pos||[]).some(x=>x.id===g.id)||p.nick===g.id?'<i class="tgp-pin">'+ico('pin','s')+'</i>':''}</button>`).join('')}</div>`
       :`<div class="k" style="padding:6px 2px 4px">${p.self?'Пока нет подарков. Купи за очки опыта — они появятся вокруг аватарки.':'Пока нет подарков — подари первым.'}</div>`}
   </div>
-  <div class="glass pf-cap">
-    <div class="pf-cap-top"><img src="/img/money.webp" alt=""><div style="flex:1;min-width:0"><span class="k">Очки опыта · рейтинг</span><b class="num">${c.score.toLocaleString('ru-RU')} <small>XP</small></b></div><div class="pf-lvl"><b>${c.level}</b><span>ур.</span></div></div>
+  <div class="pf-cap2 lq">
+    <div class="pc-head">
+      <div class="pc-ring" style="--p:${pct}%"><div><b>${c.level}</b><small>ур.</small></div></div>
+      <div class="pc-ht"><small>Капитализация · рейтинг</small><b>${esc(c.title)}</b><span>${c.to==null?'Максимальный уровень':`до ${c.level+1} ур. — ${(c.to-c.score).toLocaleString('ru-RU')} XP`}</span></div>
+    </div>
     <div class="pf-bar"><i style="width:${pct}%"></i></div>
-    <div class="k" style="display:flex;justify-content:space-between;margin-top:6px"><span>${esc(c.title)}</span><span>${c.to==null?'максимальный уровень':`до ${c.level+1} ур.: ${(c.to-c.score).toLocaleString('ru-RU')} XP`}</span></div>
-    ${c.ladder?`<div class="pf-ladder">${c.ladder.map((f,i)=>`<span class="${i+1<c.level?'done':i+1===c.level?'on':''}"><b>${i+1}</b><small>${i+1===c.ladder.length?kXP(f)+'+':kXP(f)+'–'+kXP(c.ladder[i+1])}</small></span>`).join('')}</div>`:''}
-    <div class="pf-parts">${c.parts.map(([n,v])=>`<span>${esc(n)} <b>+${v.toLocaleString('ru-RU')}</b></span>`).join('')}</div>
+    <div class="pc-tiles">
+      <div><small>Заработано</small><b class="up2">+${c.score.toLocaleString('ru-RU')}</b><span>XP за всё время</span></div>
+      <div><small>Потрачено</small><b class="dn2">${c.spent?'−'+c.spent.toLocaleString('ru-RU'):'0'}</b><span>на подарки</span></div>
+      <div class="hl"><small>Доступно</small><b>${(c.avail??c.score).toLocaleString('ru-RU')}</b><span>XP на подарки</span></div>
+    </div>
+    ${(()=>{const gs=(p.gifts||[]).filter(g=>GIFT_CAT[g.k]);if(!gs.length)return '';const val=gs.reduce((n,g)=>n+GIFT_CAT[g.k].p,0),top=[...gs].sort((a,b)=>GIFT_CAT[b.k].p-GIFT_CAT[a.k].p).slice(0,4),rar=giftRar(top[0].k);
+      return `<div class="pc-gv r-${rar.c}"><div class="pc-gvi">${top.map((g,i)=>`<img src="${giftImg(g.k)}" alt="" style="z-index:${9-i}">`).join('')}</div><div class="pc-gvt"><small>Ценность подарков</small><b>${val.toLocaleString('ru-RU')} XP</b><span>${gs.length} шт. · самый ценный — ${esc(GIFT_CAT[top[0].k].n)}</span></div></div>`})()}
+    <details class="pc-more"><summary>Уровни и откуда опыт ${ico('chev','s chev')}</summary>
+      ${c.ladder?`<div class="pf-ladder">${c.ladder.map((f,i)=>`<span class="${i+1<c.level?'done':i+1===c.level?'on':''}"><b>${i+1}</b><small>${i+1===c.ladder.length?kXP(f)+'+':kXP(f)+'–'+kXP(c.ladder[i+1])}</small></span>`).join('')}</div>`:''}
+      <div class="pf-parts">${c.parts.map(([n,v])=>`<span>${esc(n)} <b>+${v.toLocaleString('ru-RU')}</b></span>`).join('')}${c.spent?`<span class="neg">Подарки <b>−${c.spent.toLocaleString('ru-RU')}</b></span>`:''}</div>
+    </details>
   </div>
   <div class="pf-stats">
     <div class="glass"><img src="/img/gift_planet.webp" alt=""><b>${s.likes}</b><span class="k">лайков</span></div>
