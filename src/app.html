@@ -1479,6 +1479,30 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 /* при записи кнопка микрофона/кружка — справа, полоса записи — слева */
 .ms-comp.rec .ms-recbar{order:1}.ms-comp.rec .ms-mic,.ms-comp.rec .ms-send{order:2}
 .ms-comp.rec .ms-mic{margin-left:6px}
+
+/* видео в чате и полноэкранный плеер */
+.ms-vid{cursor:pointer}.ms-vid video{pointer-events:none}
+.ms-vdur{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:10px;background:rgba(0,0,0,.5);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;z-index:2}
+.ms-vmute{position:absolute;left:8px;top:34px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:2;opacity:.85}.ms-vmute .i{width:13px;height:13px}
+.ms-vmute::after{content:'';position:absolute;width:16px;height:2px;background:#fff;transform:rotate(-45deg);border-radius:2px}
+.ms-vv{position:fixed;inset:0;z-index:82;background:#000;display:grid;place-items:center;opacity:0;transition:opacity .22s}.ms-vv.on{opacity:1}
+.ms-vv video{max-width:100vw;max-height:100dvh;width:100%;height:100%;object-fit:contain}
+.ms-vvtop{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:4px;padding:calc(8px + env(safe-area-inset-top)) 8px 10px;background:linear-gradient(rgba(0,0,0,.65),transparent);transition:opacity .25s}
+.ms-vvtop .ib{color:#fff;width:46px;height:46px}.ms-vvtop .ib .i{width:24px;height:24px}
+.ms-vvt{flex:1;min-width:0;padding-left:4px}.ms-vvt b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ms-vvt small{font-size:13px;opacity:.8}
+.ms-vvc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;cursor:pointer;transition:opacity .25s}.ms-vvc .i{width:34px;height:34px}
+.ms-vvbot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:12px;padding:14px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.7));transition:opacity .25s}
+.ms-vvbot input{flex:1;height:28px;-webkit-appearance:none;appearance:none;background:transparent;--p:0%}
+.ms-vvbot input::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#fff var(--p),rgba(255,255,255,.3) var(--p))}
+.ms-vvbot input::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;margin-top:-5.5px}
+.ms-vvbot input::-moz-range-track{height:3px;background:rgba(255,255,255,.3)}.ms-vvbot input::-moz-range-progress{height:3px;background:#fff}.ms-vvbot input::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#fff}.ms-vvtm{font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ms-vv.hide .ms-vvtop,.ms-vv.hide .ms-vvbot,.ms-vv.hide .ms-vvc{opacity:0;pointer-events:none}
+.ms-vvmenu{position:absolute;right:10px;top:calc(62px + env(safe-area-inset-top));min-width:260px;border-radius:20px;padding:6px;background:rgba(28,24,38,.96);border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 50px rgba(0,0,0,.7);animation:pop .16s ease;z-index:3}
+.ms-vvmenu[hidden]{display:none}
+.ms-vvmenu button{display:flex;align-items:center;gap:14px;width:100%;padding:12px 14px;border:0;background:none;color:#fff;font:inherit;font-size:16px;text-align:left;border-radius:14px;cursor:pointer}
+.ms-vvmenu button:active{background:rgba(255,255,255,.08)}.ms-vvmenu button .i{width:22px;height:22px}.ms-vvmenu button b{min-width:40px;font-size:15px}
+.ms-vvmenu button.on{color:#b79cff}.ms-vvmenu .red{color:#fca5a5}.ms-vvmenu i{display:block;height:6px;margin:4px -6px;background:rgba(0,0,0,.35)}
+.ms-vvh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:linear-gradient(90deg,#6d28d9,#8b5cf6);margin-bottom:6px}.ms-vvh b{flex:1}.ms-vvh .i{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -2677,7 +2701,7 @@ function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine
         media=`<div class="ms-voice" data-src="${esc(src)}" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><div class="ms-bars">${bars}</div><small>${fdur(F.d)}</small></div></div>`}
       else if(F.ty.startsWith('image/')){kind='img';media=`<button type="button" class="ms-img" data-act="ms-view" data-k="${key}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:''}</button>`}
       else if(F.rd){kind='rnd';media=`<div class="ms-rnd" data-k="${key}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} playsinline preload="metadata" data-act="ms-rplay" data-k="${key}"></video><svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><small>${fdur(F.d)}</small>`}</div>`}
-      else if(F.ty.startsWith('video/')){kind='img';media=`<div class="ms-vid" style="${ar}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} controls playsinline preload="metadata"></video><button type="button" class="ms-save lq" data-act="ms-save" data-k="${key}" title="Сохранить">${ico('down','s')}</button>`}</div>`}
+      else if(F.ty.startsWith('video/')){kind='img';media=`<div class="ms-vid" style="${ar}" ${m.pend?'':`data-act="ms-vopen" data-k="${key}"`}>${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} muted loop playsinline preload="metadata"></video><span class="ms-vdur">${F.d?fdur(F.d):'0:00'}</span><span class="ms-vmute">${ico('vol','s')}</span>`}</div>`}
       else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
       else media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-dl" data-k="${key}"`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></button>`}
     const txt=m.x?`<div class="ms-tx">${linkify(esc(m.x))}</div>`:'';
@@ -2689,7 +2713,7 @@ function msPaintMsgs(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;co
   const stick=toBottom||ml.scrollHeight-ml.scrollTop-ml.clientHeight<120;
   if(!L.length){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
   let h='',day='';L.forEach((m,k)=>{const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k+1])});
-  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync()}
+  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync();msVidObserve()}
 function msAppend(ms){const ml=$('#msMsgs');if(!ml)return;const stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<160;msPaintMsgs();
   ms.forEach(m=>{const el=ml.querySelector(`.mb[data-i="${m.i}"]`)||ml.querySelector(`.mb[data-tmp="${m.tmp}"]`);if(el)el.classList.add('new')});if(stick)ml.scrollTop=ml.scrollHeight}
 const msFind=k=>(MS.msgs[MS.c]||[]).find(x=>String(x.i??x.tmp)===String(k));
@@ -2839,6 +2863,46 @@ const MSV={a:null,k:null};
 function msVoiceSync(){if(!MSV.k)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(!el)return;el.classList.add('pl');const b=el.querySelector('.ms-vplay');if(b&&MSV.a&&!MSV.a.paused)b.innerHTML=PAUSEI}
 function msVoiceTick(){const a=MSV.a;if(!a)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(el){const p=a.duration?a.currentTime/a.duration:0;const ab=el.querySelector('.ms-abar i');if(ab)ab.style.width=(p*100)+'%';const bars=el.querySelectorAll('.ms-bars i');const n=Math.round(p*bars.length);bars.forEach((b,i)=>b.classList.toggle('on',i<n));const sm=el.querySelector('small');if(sm&&!el.classList.contains('ms-aud'))sm.textContent=fdur(a.paused&&!a.currentTime?a.duration:a.currentTime);else if(sm&&a.duration)sm.textContent=fdur(a.currentTime)+' / '+fdur(a.duration)}}
 
+/* ---------- видео как в Telegram: в чате играет без звука по кругу, по нажатию — полноэкранный плеер ---------- */
+const GEAR='<svg class="i" viewBox="0 0 24 24"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.7 7.7 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.7 7.7 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.7 7.7 0 0 0 1.7 1l.3 2.5h4l.4-2.5a7.7 7.7 0 0 0 1.7-1l2.4 1 2-3.4zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>';
+const DOTS='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>';
+const FWD='<svg class="i" viewBox="0 0 24 24"><path fill="currentColor" d="M13 5l8 7-8 7v-4.2c-5.6 0-8.6 1.9-10 5.2.6-5.6 3.6-10 10-10.8z"/></svg>';
+const LOOPI='<svg class="i" viewBox="0 0 24 24"><path d="M4 12a6 6 0 0 1 6-6h8m-3-3 3 3-3 3M20 12a6 6 0 0 1-6 6H6m3 3-3-3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+let MSVO=null;
+function msVidObserve(){const ml=$('#msMsgs');if(!ml)return;MSVO=MSVO||new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;v.play().catch(()=>{})}else v.pause()}),{root:null,threshold:.35});
+  ml.querySelectorAll('.ms-vid video').forEach(v=>{if(v._o)return;v._o=1;MSVO.observe(v);const b=v.parentNode.querySelector('.ms-vdur');const upd=()=>{if(b&&v.duration)b.textContent=fdur(v.duration-v.currentTime)};v.addEventListener('loadedmetadata',upd);v.addEventListener('timeupdate',upd)})}
+function msVideo(m){const F=m.fl;if(!F)return;const src=F.local||msFile(F.id);const p=MS.peers[m.f]||{};const who=String(m.f)===String(MS.me)?(USR.name||'Вы'):p.name||'';
+  const ov=document.createElement('div');ov.className='ms-vv';
+  ov.innerHTML=`<video src="${esc(src)}" playsinline autoplay ${F.th?`poster="${F.th}"`:''}></video>
+    <div class="ms-vvtop"><button class="ib" data-v="x">${ico('left')}</button><div class="ms-vvt"><b>${esc(who)}</b><small>${new Date(m.t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})} в ${msTime(m.t)}</small></div>
+      ${m.i!=null?`<button class="ib" data-v="fwd" title="Переслать">${FWD}</button>`:''}<button class="ib" data-v="gear" title="Скорость">${GEAR}</button><button class="ib" data-v="more">${DOTS}</button></div>
+    <button class="ms-vvc" data-v="pp">${PAUSEI}</button>
+    <div class="ms-vvbot"><input type="range" min="0" max="1000" value="0" data-v="seek"><span class="ms-vvtm">0:00 / 0:00</span></div>
+    <div class="ms-vvmenu" hidden></div>`;
+  document.body.appendChild(ov);requestAnimationFrame(()=>ov.classList.add('on'));
+  const v=ov.querySelector('video'),pp=ov.querySelector('.ms-vvc'),sk=ov.querySelector('[data-v=seek]'),tm=ov.querySelector('.ms-vvtm'),menu=ov.querySelector('.ms-vvmenu');
+  {const bv=document.querySelector(`.ms-vid[data-k="${m.i??m.tmp}"] video`);if(bv&&bv.currentTime>.3)v.addEventListener('loadedmetadata',()=>{v.currentTime=bv.currentTime},{once:true})}
+  v.play().catch(()=>{});let hideT=0;const show=()=>{ov.classList.remove('hide');clearTimeout(hideT);hideT=setTimeout(()=>{if(!v.paused&&menu.hidden)ov.classList.add('hide')},2800)};show();
+  v.addEventListener('timeupdate',()=>{if(!sk._drag&&v.duration)sk.value=String(Math.round(v.currentTime/v.duration*1000));sk.style.setProperty('--p',(sk.value/10)+'%');tm.textContent=fdur(v.currentTime)+' / '+fdur(v.duration||F.d)});
+  v.addEventListener('play',()=>{pp.innerHTML=PAUSEI;show()});v.addEventListener('pause',()=>{pp.innerHTML=PLAYI;ov.classList.remove('hide')});
+  sk.addEventListener('input',()=>{sk._drag=1;if(v.duration){v.currentTime=sk.value/1000*v.duration}});sk.addEventListener('change',()=>{sk._drag=0});
+  const close=()=>{ov.classList.remove('on');setTimeout(()=>ov.remove(),220);v.pause()};
+  const opts=(html)=>{menu.innerHTML=html;menu.hidden=false;ov.classList.remove('hide')};
+  ov.addEventListener('click',e=>{const b=e.target.closest('[data-v]');const k=b&&b.dataset.v;
+    if(!b){if(!menu.hidden){menu.hidden=true;return}if(e.target===v||e.target===ov){ov.classList.toggle('hide')}return}
+    if(k==='x')return close();
+    if(k==='pp'){v.paused?v.play():v.pause();return}
+    if(k==='fwd'){close();return msForward(m)}
+    if(k==='gear')return opts(`<div class="ms-vvh">${GEAR}<b>Скорость</b><span>${v.playbackRate}x</span></div>${[[.2,'Очень медленно'],[.5,'Медленно'],[1,'Стандартно'],[1.5,'Быстро'],[2,'Очень быстро']].map(([r,n])=>`<button data-v="rate" data-r="${r}" class="${v.playbackRate===r?'on':''}"><b>${r}x</b>${n}</button>`).join('')}<i></i><button data-v="loop" class="${v.loop?'on':''}">${LOOPI}Зациклить</button>`);
+    if(k==='rate'){v.playbackRate=+b.dataset.r;menu.hidden=true;return}
+    if(k==='loop'){v.loop=!v.loop;menu.hidden=true;toast(v.loop?'Повтор включён':'Повтор выключен','check');return}
+    if(k==='more')return opts(`<button data-v="save">${ico('down')}Сохранить в галерею</button><button data-v="share">${ico('ext')}Поделиться</button>${m.i!=null?`<button data-v="fwd">${FWD}Переслать</button>`:''}<button data-v="x">${ico('chat')}Показать в чате</button>${String(m.f)===String(MS.me)&&m.i!=null?`<button data-v="del" class="red">${ico('trash')}Удалить</button>`:''}`);
+    if(k==='save'){menu.hidden=true;return msSaveFile(m)}
+    if(k==='share'){menu.hidden=true;return msShare(m)}
+    if(k==='del'){close();return ACT['ms-del']({dataset:{k:String(m.i)}})}
+  });
+  ov.addEventListener('pointermove',show,{passive:true})}
+
 /* ---------- скачать / поделиться / переслать ---------- */
 function msDownload(m){const F=m.fl;if(!F)return;if(!F.id){toast('Файл ещё отправляется','loader');return}
   const a=document.createElement('a');a.href=msFile(F.id,1);a.download=F.n||'file';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();toast('Скачивается: '+(F.n||'файл'),'down')}
@@ -2853,7 +2917,7 @@ function msForward(m){const L=MS.chats.map(c=>MS.peers[c.p]).filter(Boolean);con
   openSheet(`<h3>${ico('send')}Переслать<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><div class="ms-fwl">${[self,...L.filter(p=>String(p.id)!==String(MS.me))].map(p=>`<button class="ms-it" data-act="ms-fwto" data-to="${p.id}" data-i="${m.i}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${String(p.id)===String(MS.me)?'Избранное':msName(p)}</b></div></div></button>`).join('')}</div>`)}
 
 /* ---------- долгое нажатие: копировать / сохранить / удалить ---------- */
-function msLong(ml){let t=0;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,video,.ms-vplay,.ms-save'))return;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>clearTimeout(t);
+function msLong(ml){let t=0;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,.ms-vplay,.ms-save'))return;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>clearTimeout(t);
   ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&(Math.abs(e.movementY)>4||Math.abs(e.movementX)>4))stop()});
   ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
 function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
@@ -2920,6 +2984,7 @@ const MS_ACT={
     v.addEventListener('click',e=>{if(e.target.closest('[data-s]'))return msSaveFile(m);if(e.target.closest('[data-x]')||e.target===v){v.classList.add('off');setTimeout(()=>v.remove(),200)}});document.body.appendChild(v);requestAnimationFrame(()=>v.classList.add('on'))},
   'ms-copy'(el){const m=msFind(el.dataset.k);msSelClose();closeSheet();if(m)copyText(m.x)},
   'ms-selx'(){msSelClose()},
+  'ms-vopen'(el){const m=msFind(el.dataset.k);if(m)msVideo(m)},
   'ms-dl'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msDownload(m)},
   'ms-share'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msShare(m)},
   'ms-fwd'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msForward(m)},
