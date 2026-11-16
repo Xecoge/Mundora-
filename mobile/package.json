@@ -2,11 +2,10 @@
   "name": "mundora-app",
   "private": true,
   "version": "1.0.0",
-  "description": "Mundora — приложение для Android и iOS (Capacitor)",
+  "description": "Mundora — приложение для Android (Capacitor)",
   "dependencies": {
     "@capacitor/android": "^7.0.0",
     "@capacitor/cli": "^7.0.0",
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/ios": "^7.0.0"
+    "@capacitor/core": "^7.0.0"
   }
 }

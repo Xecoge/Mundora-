@@ -12,10 +12,5 @@
   "android": {
     "backgroundColor": "#0e0a18",
     "adjustMarginsForEdgeToEdge": "auto"
-  },
-  "ios": {
-    "backgroundColor": "#0e0a18",
-    "contentInset": "never",
-    "limitsNavigationsToAppBoundDomains": false
   }
 }

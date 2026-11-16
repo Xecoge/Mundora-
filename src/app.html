@@ -3051,11 +3051,7 @@ function rvInner(target){const d=RV[target];if(!d)return '<div class="skel" styl
 const IS_APP=/MundoraApp/.test(navigator.userAgent);
 const APP_DL='https://github.com/Xecoge/Mundora-/releases/latest/download/';
 const RV_ACT={
-  'app-get'(){const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-    const and=`<div class="glass" style="padding:14px 16px;margin-bottom:10px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`;
-    const io=`<div class="glass" style="padding:14px 16px;margin-bottom:10px"><b>iPhone</b><div class="k" style="margin:4px 0 10px">Без App Store iPhone ставит приложение только с подписью Apple. Файл подписывается твоим Apple ID через Sideloadly или AltStore на компьютере.</div><a class="btn ghost sm" href="${APP_DL}Mundora-iOS.ipa">${ico('down','s')}Скачать .ipa</a>
-      <div class="k" style="margin-top:12px">Быстрый вариант без компьютера: открой сайт в Safari → «Поделиться» → «На экран Домой». Mundora откроется на весь экран со своей иконкой.</div></div>`;
-    openSheet(`<h3>${ico('down')}Приложение Mundora</h3>${ios?io+and:and+io}`)},
+  'app-get'(){openSheet(`<h3>${ico('down')}Приложение Mundora</h3><div class="glass" style="padding:14px 16px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`)},
   'rv-star'(el){const t=el.dataset.t,f=RVF[t]||(RVF[t]={s:0,x:''});const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;f.s=+el.dataset.s;f.touched=true;rvPaint(t)},
   async 'rv-send'(el){const t=el.dataset.t,f=RVF[t]||{s:0,x:''};const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;const er=el.parentElement.querySelector('.rverr');
     if(!f.s){if(er)er.textContent='Поставь оценку звёздами';return}el.disabled=true;
@@ -3871,7 +3867,7 @@ function pfHTML(p){
       ${p.tg?`<button class="pf-tglink" data-act="tg-go" data-u="${esc(p.tg.username||'')}" title="Telegram">${TGI}<span>${esc(tgLabel(p.tg))}</span></button>`:''}
       <div class="k pf-mail">${ico('lock','s')}${esc(p.email)}${joined?' · в Mundora с '+joined:''}</div>
       ${p.bio?`<p class="pf-bio">${esc(p.bio)}</p>`:''}
-      <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button>${p.self&&!IS_APP?`<button class="btn ghost sm" data-act="app-get">${ico('down','s')}Приложение</button>`:''}</div>
+      <div class="row" style="margin-top:12px">${p.self?`<button class="btn sm" data-act="pf-edit">${ico('edit','s')}Изменить профиль</button>`:''}${USR&&USR.admin&&!p.self?`<button class="btn ghost sm" data-act="pf-manage" data-id="${p.id}">${ico('gem','s')}Управлять</button>`:''}<button class="btn ghost sm" data-act="pf-share" data-id="${p.id}">${ico('copy','s')}ID</button>${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?`<button class="btn ghost sm" data-act="app-get">${ico('down','s')}Приложение</button>`:''}</div>
     </div>
   </div>
   <div class="glass pf-cap">
