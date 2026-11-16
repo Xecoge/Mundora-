@@ -87,6 +87,15 @@ import android.os.Environment;
 import android.webkit.CookieManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
+import android.content.ContentValues;
+import android.media.MediaScannerConnection;
+import android.os.Build;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.webkit.JavascriptInterface;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -112,6 +121,40 @@ public class MainActivity extends BridgeActivity {
                     Toast.makeText(this, "Не удалось скачать", Toast.LENGTH_SHORT).show();
                 }
             });
+            bridge.getWebView().addJavascriptInterface(new SaveBridge(), "MundoraNative");
+        }
+    }
+
+    // сохранить видео/фото, собранное на странице (кружок в рамке), прямо в галерею
+    public class SaveBridge {
+        @JavascriptInterface
+        public boolean saveMedia(String name, String mime, String b64) {
+            try {
+                byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                boolean vid = mime != null && mime.startsWith("video");
+                if (Build.VERSION.SDK_INT >= 29) {
+                    ContentValues v = new ContentValues();
+                    v.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+                    v.put(MediaStore.MediaColumns.MIME_TYPE, mime);
+                    v.put(MediaStore.MediaColumns.RELATIVE_PATH, (vid ? Environment.DIRECTORY_MOVIES : Environment.DIRECTORY_PICTURES) + "/Mundora");
+                    Uri col = vid ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    Uri u = getContentResolver().insert(col, v);
+                    if (u == null) return false;
+                    OutputStream o = getContentResolver().openOutputStream(u);
+                    o.write(data); o.close();
+                } else {
+                    File d = new File(Environment.getExternalStoragePublicDirectory(vid ? Environment.DIRECTORY_MOVIES : Environment.DIRECTORY_PICTURES), "Mundora");
+                    d.mkdirs();
+                    File f = new File(d, name);
+                    FileOutputStream o = new FileOutputStream(f);
+                    o.write(data); o.close();
+                    MediaScannerConnection.scanFile(MainActivity.this, new String[]{f.getAbsolutePath()}, null, null);
+                }
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Сохранено в галерею", Toast.LENGTH_SHORT).show());
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
     }
 
