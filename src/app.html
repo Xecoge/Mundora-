@@ -3369,16 +3369,17 @@ function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)re
   if(BUB.st!==st){BUB.st=st;const W=st.clientWidth,H=st.clientHeight,base=innerWidth<=760?50:58;
     BUB.b=[...st.querySelectorAll('.tgp-g')].map((el,i)=>{const h=hsh(el.dataset.g||i),dep=.78+(h%60)/100,sz=Math.round(base*dep);el.style.setProperty('--bs',sz+'px');el.style.zIndex=String(3+Math.round(dep*10));el.dataset.zi=el.style.zIndex;
       const x=(parseFloat(el.style.left)||50)/100*W,y=(parseFloat(el.style.top)||50)/100*H,a=(h%628)/100;el.style.left='0';el.style.top='0';
-      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep,zi:String(3+Math.round(dep*10)),sw:(h%2?1:-1)*(8+h%7)}})}
+      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep,zi:String(3+Math.round(dep*10)),th:i*Math.PI*2/Math.max(1,st.querySelectorAll('.tgp-g').length)+(h%100)/300,w:Math.PI*2/(13+(h%5)),rr:(h%5)*7,sw:(h%2?1:-1)*(8+h%7)}})}
   if(BUB.raf)return;let last=performance.now();const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tick=now=>{const st=BUB.st;if(!st||!st.isConnected){BUB.raf=0;BUB.st=null;BUB.drag=null;return}
     const dt=Math.min(.04,(now-last)/1000);last=now;const L=bubBounds(st),B=BUB.b,cruise=24;
     for(const p of B){if(BUB.drag&&BUB.drag.p===p)continue;
-      if(!red){p.vx+=(Math.random()-.5)*40*dt;p.vy+=(Math.random()-.5)*40*dt;
-        // «живые»: мягко тянутся к аватарке и кружат возле неё, как в Telegram
-        {const av=st.querySelector('.tgp-ava'),AR=(av?av.offsetWidth:120)/2,cx=st.clientWidth/2,cy=st.clientHeight/2,dx=cx-p.x,dy=cy-p.y,d=Math.hypot(dx,dy)||1,R0=AR+p.r*.35+(p.ph%1)*26,f=(d-R0)*.9;
-          p.vx+=dx/d*f*dt+(-dy/d)*p.sw*dt;p.vy+=dy/d*f*dt+(dx/d)*p.sw*dt}
-        const sp=Math.hypot(p.vx,p.vy);if(sp>cruise){const k=Math.max(cruise/sp,1-dt*1.6);p.vx*=k;p.vy*=k}else if(sp<10&&sp>0){p.vx*=10/sp;p.vy*=10/sp}
+      if(!red){
+        // 3D-орбита: каждый пузырь летит по наклонному эллипсу вокруг аватарки — сзади уходит под неё, спереди пролетает поверх ника.
+        // Его тянет «пружиной» к своей точке на орбите, поэтому после броска и столкновений он сам возвращается.
+        const av=st.querySelector('.tgp-ava'),AR=(av?av.offsetWidth:120)/2,cx=st.clientWidth/2,cy=st.clientHeight/2;
+        p.th+=p.w*dt;const Rx=Math.min(st.clientWidth/2-p.r-4,AR+28+p.rr),Ry=Rx*.42,tx=cx+Math.cos(p.th)*Rx,ty=cy+8+Math.sin(p.th)*Ry;
+        p.vx+=((tx-p.x)*5.5-p.vx*2.4+(Math.random()-.5)*30)*dt;p.vy+=((ty-p.y)*5.5-p.vy*2.4+(Math.random()-.5)*30)*dt;
         p.x+=p.vx*dt;p.y+=p.vy*dt}
       const e=.82;if(p.x<L.l+p.r){p.x=L.l+p.r;p.vx=Math.abs(p.vx)*e}if(p.x>L.r-p.r){p.x=L.r-p.r;p.vx=-Math.abs(p.vx)*e}
       if(p.y<L.t+p.r){p.y=L.t+p.r;p.vy=Math.abs(p.vy)*e}if(p.y>L.b-p.r){p.y=L.b-p.r;p.vy=-Math.abs(p.vy)*e}}
@@ -3390,9 +3391,9 @@ function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)re
     const t=now/1000;
     for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*2.2);const wob=red?0:Math.sin(t*2.4+p.ph)*.03+p.sq*Math.sin(t*22)*.09;
       // глубина: пузырь то уплывает за аватарку (меньше, тусклее, прячется), то выплывает вперёд
-      const dragging=BUB.drag&&BUB.drag.p===p;p.z=red||dragging?1:Math.sin(t*(.35+(p.ph%1)*.25)+p.ph*1.7);
-      const back=p.z<-.25,ds=.84+(p.z+1)*.1;
-      if(back!==p.back){p.back=back;p.el.style.zIndex=back?'1':p.zi;p.el.style.opacity=back?'.72':''}
+      const dragging=BUB.drag&&BUB.drag.p===p;p.z=dragging?1:red?.5:Math.sin(p.th);
+      const back=p.z<-.15,ds=.68+(p.z+1)*.24;
+      if(back!==p.back){p.back=back;p.el.style.zIndex=back?'1':p.zi}p.el.style.opacity=back?(.55+(p.z+1)*.4).toFixed(2):'';p.el.style.filter=p.z<-.5?`blur(${((-p.z-.5)*1.4).toFixed(2)}px)`:''
       p.el.style.transform=`translate(${(p.x-p.r).toFixed(1)}px,${(p.y-p.r).toFixed(1)}px) scale(${((1+wob)*ds).toFixed(3)},${((1-wob)*ds).toFixed(3)})`}
     BUB.raf=requestAnimationFrame(tick)};
   BUB.raf=requestAnimationFrame(tick)}
