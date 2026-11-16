@@ -146,9 +146,10 @@ function capital(u, d) {
   const notes = Array.isArray(d.notes) ? d.notes.length : 0, ops = Array.isArray(d.ops) ? d.ops.length : 0;
   const days = Math.max(1, Math.ceil((Date.now() - (u.created || Date.now())) / 864e5));
   const parts = [['Лайки', likes * 5], ['Плейлисты', pls.length * 20 + plTracks * 2], ['Прослушивания', Math.max(events, plays)], ['Заметки', notes * 8], ['Финансы', ops * 3], ['Дни в Mundora', days * 10], ['Галочка', u.verified ? 500 : 0], ['Бонус основателя', u.id != null && (String(u.id) === '0' || String(u.id) === '1') ? 50000 : 0]];
-  const score = parts.reduce((n, p) => n + p[1], 0);
+  const earned = parts.reduce((n, p) => n + p[1], 0), spent = Math.max(0, u.xpSpent || 0);
+  const score = Math.max(0, earned - spent); // рейтинг = заработано минус потрачено на подарки
   const level = LV.filter(x => score >= x).length;
-  return { score, level, max: LV.length, title: titleOf(level), from: LV[level - 1], to: LV[level] ?? null, ladder: LV, parts: parts.filter(p => p[1] > 0), stats: { likes, playlists: pls.length, plTracks, plays: Math.max(events, plays), notes, ops, days } };
+  return { score, earned, spent, avail: score, level, max: LV.length, title: titleOf(level), from: LV[level - 1], to: LV[level] ?? null, ladder: LV, parts: parts.filter(p => p[1] > 0), stats: { likes, playlists: pls.length, plTracks, plays: Math.max(events, plays), notes, ops, days } };
 }
 
 async function card(email, viewer, full) {
@@ -163,7 +164,7 @@ async function card(email, viewer, full) {
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
-    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), wallets: walletsOut(u)
+    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), orbit: !!u.giftOrbit, wallets: walletsOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
   if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
@@ -172,7 +173,6 @@ async function card(email, viewer, full) {
   const vals = await kv('HMGET', 'd:' + email, ...keys);
   const d = {}; keys.forEach((k, i) => { d[k] = parse(vals[i]); });
   const cap = capital(u, d);
-  cap.spent = Math.max(0, u.xpSpent || 0); cap.avail = Math.max(0, cap.score - cap.spent); // траты видны всем, как и рейтинг
   const out = { ...base, capital: cap };
   if (base.open || self || viewer.admin) {
     const t = d.taste || {};
@@ -248,7 +248,7 @@ export default async function handler(req) {
       const u = await getUser(me.email);
       const vals = await kv('HMGET', 'd:' + me.email, 'likes', 'playlists', 'plays', 'taste', 'notes', 'ops');
       const d = {}; ['likes', 'playlists', 'plays', 'taste', 'notes', 'ops'].forEach((k, i) => { d[k] = parse(vals[i]); });
-      const avail = capital(u, d).score - (u.xpSpent || 0);
+      const avail = capital(u, d).score;
       if (avail < G.p) return json({ error: `Не хватает ${(G.p - avail).toLocaleString('ru-RU')} XP` }, 402);
       let tEmail = me.email;
       if (b.to != null && String(b.to) !== String(u.id)) { tEmail = /^\d{1,12}$/.test(String(b.to)) ? await kv('GET', 'id:' + b.to) : null; if (!tEmail) return json({ error: 'Получатель не найден' }, 404); }
@@ -267,6 +267,7 @@ export default async function handler(req) {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({})); const u = await getUser(me.email);
       if (Array.isArray(b.pos)) { u.giftPos = b.pos; delete u.giftSlots; u.giftPos = posOut(u); }
+      if (b.orbit !== undefined) u.giftOrbit = !!b.orbit;
       if (b.nick !== undefined) u.nickGift = b.nick && giftsOut(u).some(g => g.id === b.nick) ? b.nick : null;
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
