@@ -2561,7 +2561,7 @@ const PLAYI='<svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill
 const msCid=p=>[String(MS.me),String(p)].sort((a,b)=>+a-+b).join('_');
 const msFile=(id,dl)=>`/api/msg?a=file&id=${encodeURIComponent(id)}&tk=${encodeURIComponent(MS.tk)}${dl?'&dl=1':''}`;
 async function msApi(a,body,qs=''){const r=await fetch('/api/msg?a='+a+qs+(body?'':'&tk='+encodeURIComponent(MS.tk)),body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,tk:MS.tk})}:{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j}
-async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers()}
+async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers();mqResume()}
 async function msPeers(extra=[],force){const ids=[...new Set([...MS.chats.map(c=>c.p),...extra].map(String))].filter(id=>force||!MS.peers[id]);if(!ids.length)return;
   try{const j=await msApi('peers',null,'&ids='+ids.join(','));j.peers.forEach(p=>MS.peers[p.id]=p)}catch(e){}}
 const msUnread=()=>MS.chats.reduce((n,c)=>n+(c.u||0),0);
@@ -2637,7 +2637,7 @@ function pfPaint(p){if(!p)return;if(route()==='u-'+p.id){const b=$('#view #pfBox
 /* ---------- чат ---------- */
 async function msOpenChat(){const c=MS.c;MS.typing=false;msDrawMain();msPresence(true);
   if(!MS.msgs[c]){try{const j=await msApi('hist',null,'&c='+c);MS.msgs[c]=j.msgs;MS.from[c]=j.from;MS.read[c]=j.read;msDel(c,j.del)}catch(e){MS.msgs[c]=[];toast(e.message,'x')}}
-  if(MS.c!==c)return;msPaintMsgs(true);msMarkRead();msFwPeers(c)}
+  if(MS.c!==c)return;mqShow(c);msPaintMsgs(true);msMarkRead();msFwPeers(c)}
 async function msFwPeers(c){const ids=[...new Set((MS.msgs[c]||[]).map(m=>m.fw).filter(x=>x!=null&&!MS.peers[x]).map(String))];if(!ids.length)return;await msPeers(ids);if(MS.c===c)msPaintMsgs()}
 function msDrawMain(){const box=$('#msMain');if(!box)return;
   if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
@@ -2668,7 +2668,7 @@ async function msOlder(){const c=MS.c,from=MS.from[c];if(!c||!from)return;MS.hl=
 function msWave(wf,n=40){const a=String(wf||'').split('').map(ch=>parseInt(ch,36)||0);if(!a.length)return Array.from({length:n},(_,i)=>3+((i*7)%9));return Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)])}
 function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine&&m.i!=null&&(MS.read[c]??-1)>=m.i&&MS.peer!==String(MS.me);
   const grp=next&&String(next.f)===String(m.f)&&next.t-m.t<120e3&&new Date(next.t).toDateString()===new Date(m.t).toDateString();
-  const tick=mine?(m.err?`<i class="ms-tk er">!</i>`:m.pend?`<i class="ms-tk">${ico('hist','s')}</i>`:`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`):'';
+  const tick=mine?(m.err?`<i class="ms-tk er" role="button" data-act="ms-retry" data-k="${m.i??m.tmp}" title="Повторить">!</i>`:m.pend?`<i class="ms-tk">${ico('hist','s')}</i>`:`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`):'';
   const meta=`<span class="ms-mt">${msTime(m.t)}${tick}</span>`;let body='',kind='';
   if(m.d)body=`<span class="ms-delm">${ico('trash','s')}Сообщение удалено</span>${meta}`;
   else{const F=m.fl;let media='';
@@ -2699,12 +2699,12 @@ async function msSend(){const inp=$('#msIn');const x=(inp?inp.value:'').trim();i
   inp.value='';inp.style.height='';$('#msComp').classList.remove('has');if(MS.draft)delete MS.draft[MS.c];
   const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);
   await msPost(m,{to:MS.peer,x})}
-async function msPost(m,body){const c=MS.c,peer=MS.peer;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
+async function msPost(m,body,c0,p0){const c=c0||MS.c,peer=p0||MS.peer;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
     const real={...j.m};if(m.fl&&m.fl.local)real.fl={...real.fl,local:m.fl.local};
     if(L.some(x=>x.i===real.i)){if(k>=0)L.splice(k,1)}else if(k>=0)L[k]=real;
     const ch=MS.chats.find(x=>x.c===c);const pv=body.x?body.x.slice(0,80):(body.fl&&body.fl.vo?'🎤 Голосовое':body.fl&&body.fl.rd?'📹 Видеосообщение':'Файл');if(ch){ch.t=real.t;ch.f=MS.me;ch.pv=pv;ch.n=real.i+1}else MS.chats.unshift({c,p:peer,t:real.t,f:MS.me,pv,n:real.i+1,u:0});
     if(MS.c===c)msPaintMsgs();msListPaint()}
-  catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}
+  catch(e){m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();if(!m._j)toast(e.message,'x');else throw e}}
 function msListPaint(){const l=$('#msList');if(l&&!MS.q)l.innerHTML=MS.tab==='contacts'?msContactsHTML():msListHTML();msBadge()}
 function msTyping(){const now=Date.now();if(now-MS.lastTy<3000||!MS.c||MS.peer===String(MS.me))return;MS.lastTy=now;msApi('typing',{c:MS.c}).catch(()=>{})}
 async function msMarkRead(){const c=MS.c,L=MS.msgs[c]||[];if(!c||document.hidden)return;const last=[...L].reverse().find(m=>m.i!=null);if(!last)return;
@@ -2720,19 +2720,37 @@ async function msShrink(f){if(!/^image\/(jpeg|png|webp|heic|heif)/.test(f.type)|
   try{const b=await createImageBitmap(f);const k=Math.min(1,1920/Math.max(b.width,b.height)),cv=document.createElement('canvas');cv.width=Math.round(b.width*k);cv.height=Math.round(b.height*k);cv.getContext('2d').drawImage(b,0,0,cv.width,cv.height);
     const bl=await new Promise(r=>cv.toBlob(r,'image/jpeg',.86));return bl&&bl.size<f.size?new File([bl],f.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}):f}catch(e){return f}}
 const b64ab=buf=>{const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode(...u.subarray(i,i+0x8000));return btoa(s)};
+/* ---------- очередь отправки: файлы, голосовые и кружки сохраняются в браузере и догружаются сами —
+   даже если свернул/закрыл сайт: при следующем открытии загрузка продолжится с того же места ---------- */
+const MQ={db:null,m:new Map(),busy:new Set()};
+function mqDB(){return MQ.db||(MQ.db=new Promise((res,rej)=>{const r=indexedDB.open('mundora-msg',1);r.onupgradeneeded=()=>r.result.createObjectStore('q',{keyPath:'tmp'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+async function mqTx(mode,fn){try{const db=await mqDB();return await new Promise((res,rej)=>{const t=db.transaction('q',mode);const r=fn(t.objectStore('q'));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}catch(e){return null}}
+const mqPut=j=>mqTx('readwrite',s=>s.put(j)),mqDel=tmp=>mqTx('readwrite',s=>s.delete(tmp)),mqAll=()=>mqTx('readonly',s=>s.getAll());
+function mqMsg(j){let m=MQ.m.get(j.tmp);if(!m){m={tmp:j.tmp,f:+j.me,t:j.t,x:j.x||'',pend:1,prog:Math.round(j.next/Math.max(1,j.n)*100)||2,fl:{...j.fl,local:URL.createObjectURL(j.f)}};MQ.m.set(j.tmp,m)}return m}
+function mqShow(c){for(const m of MQ.m.values()){const j=m._j;if(!j||j.c!==c)continue;const L=(MS.msgs[c]=MS.msgs[c]||[]);if(!L.includes(m))L.push(m)}}
+async function mqResume(){const all=(await mqAll())||[];for(const j of all){if(String(j.me)!==String(MS.me))continue;const m=mqMsg(j);m._j=j;if(MS.msgs[j.c])mqShow(j.c);msRun(j,m)}if(MS.c)msPaintMsgs()}
+addEventListener('online',()=>{for(const m of MQ.m.values())if(m._j&&m.err){m.err=0;m.pend=1;msRun(m._j,m)}});
+async function msRun(j,m){if(MQ.busy.has(j.tmp))return;MQ.busy.add(j.tmp);m._j=j;
+  try{const n=j.n;
+    for(let i=j.next;i<n;i++){if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});
+      const data=b64ab(await j.f.slice(i*CH_SZ,(i+1)*CH_SZ).arrayBuffer());let r,tries=0;
+      for(;;){try{r=await msApi('up',{to:j.to,id:j.id,i,n,name:j.fl.n,type:j.fl.ty,size:j.fl.sz,data});break}catch(e){if(m.cancel||++tries>4||/Нет доступа|больше/.test(e.message))throw e;await new Promise(z=>setTimeout(z,1500*tries))}}
+      j.id=r.id;j.next=i+1;mqPut(j);m.prog=Math.round((i+1)/n*100);
+      const el=document.querySelector(`.mb[data-tmp="${m.tmp}"] .ms-prog i`);if(el)el.style.setProperty('--p',m.prog+'%')}
+    if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});
+    const {local:_l,...send}=m.fl;await msPost(m,{to:j.to,x:j.x||'',fl:{...send,id:j.id}},j.c,j.to);if(!m.err){mqDel(j.tmp);MQ.m.delete(j.tmp)}}
+  catch(e){const c=j.c;if(e.cancel||m.cancel){mqDel(j.tmp);MQ.m.delete(j.tmp);const L=MS.msgs[c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);if(MS.c===c)msPaintMsgs();toast('Отправка отменена','x')}
+    else{m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast((e.message||'Ошибка')+' — отправлю, когда появится связь','x')}}
+  finally{MQ.busy.delete(j.tmp)}}
 async function msAttach(items){if(!MS.c)return;for(const it of items){
   const f=it.raw?it.f:await msShrink(it.f);if(f.size>12*1024*1024){toast(`«${f.name}» больше 12 МБ`,'x');continue}
   const ty=f.type||'application/octet-stream',local=URL.createObjectURL(f),isImg=ty.startsWith('image/'),isVid=ty.startsWith('video/');
   const meta=it.th||((isImg||isVid)&&!it.vo?await msThumb(local,isVid):{});
-  const fl={n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',local,...(it.vo?{vo:1,d:it.d,wf:it.wf}:{}),...(it.rd?{rd:1,d:it.d}:{})};
-  const m={tmp:'f'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x:it.x||'',pend:1,prog:2,fl};
-  const c=MS.c,peer=MS.peer;(MS.msgs[c]=MS.msgs[c]||[]).push(m);msAppend([m]);
-  try{const n=Math.max(1,Math.ceil(f.size/CH_SZ));let id='';
-    for(let i=0;i<n;i++){if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});const data=b64ab(await f.slice(i*CH_SZ,(i+1)*CH_SZ).arrayBuffer());
-      const j=await msApi('up',{to:peer,id,i,n,name:f.name,type:ty,size:f.size,data});id=j.id;m.prog=Math.round((i+1)/n*100);
-      const el=document.querySelector(`.mb[data-tmp="${m.tmp}"] .ms-prog i`);if(el)el.style.setProperty('--p',m.prog+'%')}
-    if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});fl.id=id;const {local:_l,...send}=fl;await msPost(m,{to:peer,x:it.x||'',fl:send})}
-  catch(e){if(e.cancel||m.cancel){const L=MS.msgs[c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);if(MS.c===c)msPaintMsgs();toast('Отправка отменена','x');continue}m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast(e.message,'x')}}}
+  const fl={n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',...(it.vo?{vo:1,d:it.d,wf:it.wf}:{}),...(it.rd?{rd:1,d:it.d}:{})};
+  const tmp='f'+Date.now()+Math.random().toString(36).slice(2,6);
+  const j={tmp,me:MS.me,to:MS.peer,c:MS.c,f,x:it.x||'',fl,id:'',next:0,n:Math.max(1,Math.ceil(f.size/CH_SZ)),t:Date.now()};
+  const m={tmp,f:+MS.me,t:j.t,x:j.x,pend:1,prog:2,fl:{...fl,local}};m._j=j;MQ.m.set(tmp,m);
+  (MS.msgs[j.c]=MS.msgs[j.c]||[]).push(m);msAppend([m]);await mqPut(j);msRun(j,m)}}
 
 /* ---------- несколько файлов: превью, убрать лишнее, подпись ---------- */
 function msPreview(files){let L=files.map(f=>({f,u:/^(image|video)\//.test(f.type)?URL.createObjectURL(f):''}));const inp=$('#msIn');
@@ -2839,10 +2857,10 @@ function msLong(ml){let t=0;const start=e=>{const b=e.target.closest('.mb');if(!
   ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&(Math.abs(e.movementY)>4||Math.abs(e.movementX)>4))stop()});
   ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
 function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
-  msSelClose();b.classList.add('sel');MS.sel=k;const mine=String(m.f)===String(MS.me),F=m.fl&&(m.fl.id||m.fl.local);
+  msSelClose();b.classList.add('sel');MS.sel=k;const mine=String(m.f)===String(MS.me),F=m.fl&&(m.fl.id||m.fl.local)&&m.i!=null;
   const bar=document.createElement('div');bar.className='ms-selbar lq';bar.id='msSel';
   const btn=(a,i,t,cls='')=>`<button class="${cls}" data-act="${a}" data-k="${k}">${i}<span>${t}</span></button>`;
-  bar.innerHTML=btn('ms-selx',ico('x'),'Закрыть')+(m.x?btn('ms-copy',ico('copy'),'Копировать'):'')+(F?btn('ms-dl',ico('down'),'Скачать'):'')+(F||m.x?btn('ms-share',ico('ext'),'Поделиться'):'')+(m.i!=null?btn('ms-fwd',ico('send'),'Переслать'):'')+(mine&&m.i!=null?btn('ms-del',ico('trash'),'Удалить','red'):'');
+  bar.innerHTML=btn('ms-selx',ico('x'),'Закрыть')+(m.x?btn('ms-copy',ico('copy'),'Копировать'):'')+(F?btn('ms-dl',ico('down'),'Скачать'):'')+(F||m.x?btn('ms-share',ico('ext'),'Поделиться'):'')+(m.i!=null?btn('ms-fwd',ico('send'),'Переслать'):'')+(mine&&m.i!=null?btn('ms-del',ico('trash'),'Удалить','red'):'')+(m.err&&m._j?btn('ms-retry',ico('refresh'),'Повторить'):'')+((m.pend||m.err)&&m.i==null?btn('ms-upcancel',ico('x'),'Отменить отправку','red'):'');
   const box=$('#msMain');if(box)box.appendChild(bar)}
 function msSelClose(){const s=$('#msSel');if(s)s.remove();$$('.mb.sel').forEach(x=>x.classList.remove('sel'));MS.sel=null}
 document.addEventListener('pointerdown',e=>{if(MS.sel&&!e.target.closest('#msSel')&&!e.target.closest('.mb.sel'))msSelClose()},true);
@@ -2887,7 +2905,8 @@ const MS_ACT={
   'ms-emo'(){const e=$('#msEmo');if(!e)return;if(!e.innerHTML)e.innerHTML=EMO.map(x=>`<button type="button" data-act="ms-emoadd" data-e="${x}">${x}</button>`).join('');const open=e.hidden;if(open){const i=$('#msIn');if(i&&document.activeElement===i){i.blur();setTimeout(()=>{e.hidden=false},250);return}}e.hidden=!open},
   'ms-emoadd'(el){const i=$('#msIn');if(!i)return;const s=i.selectionStart??i.value.length;i.value=i.value.slice(0,s)+el.dataset.e+i.value.slice(i.selectionEnd??s);i.dispatchEvent(new Event('input'))},
   'ms-rec-cancel'(){msRecStop(true)},
-  'ms-upcancel'(el,e){e&&e.stopPropagation();const m=msFind(el.dataset.k);if(!m||!m.pend)return;m.cancel=1;const L=MS.msgs[MS.c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);msPaintMsgs()},
+  'ms-upcancel'(el,e){e&&e.stopPropagation();const m=msFind(el.dataset.k);if(!m||!(m.pend||m.err))return;m.cancel=1;if(m._j){mqDel(m.tmp);MQ.m.delete(m.tmp)}const L=MS.msgs[MS.c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);msPaintMsgs()},
+  'ms-retry'(el){const m=msFind(el.dataset.k);if(!m||!m._j)return;m.err=0;m.pend=1;msPaintMsgs();msRun(m._j,m)},
   'ms-rplay'(el){const v=el,box=v.closest('.ms-rnd');if(!box)return;$$('.ms-rnd video').forEach(o=>{if(o!==v&&!o.paused){o.pause();o.closest('.ms-rnd').classList.remove('pl')}});
     if(v.paused){v.muted=false;v.play().catch(()=>{});box.classList.add('pl','big');const ring=box.querySelector('circle');v.ontimeupdate=()=>{if(ring&&v.duration)ring.style.strokeDashoffset=String(302*(1-v.currentTime/v.duration));const sm=box.querySelector('small');if(sm)sm.textContent=fdur(v.currentTime)};v.onended=()=>{box.classList.remove('pl','big');if(ring)ring.style.strokeDashoffset='302'}}
     else{v.pause();box.classList.remove('pl')}},
