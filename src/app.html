@@ -1117,6 +1117,10 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 @media(max-width:1100px){.aiw{grid-template-columns:minmax(0,1fr)}.ai-side{display:none}.chat-top .ct-hist{display:grid}}
 @media(max-width:760px){.chat-top{top:8px;border-radius:20px;margin-bottom:10px}.ce-sugg{grid-template-columns:1fr}.chat-empty h2{font-size:26px}.ce-orb{width:92px;height:92px}.ce-orb img{width:70px;height:70px}.msg.a .av{display:none}}
 .gl-bar .ava-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}.gl-bar .ava-grid button{aspect-ratio:1;height:auto;min-height:0}
+.tgp-g.drag.hold::before{background:radial-gradient(circle,rgba(248,113,113,.0) 40%,transparent 41%),conic-gradient(#f87171 0,#f87171 var(--hp,0%),transparent 0);-webkit-mask:radial-gradient(circle,transparent 52%,#000 54%,#000 64%,transparent 66%);mask:radial-gradient(circle,transparent 52%,#000 54%,#000 64%,transparent 66%);animation:hp .65s linear forwards}
+@property --hp{syntax:'<percentage>';inherits:false;initial-value:0%}
+@keyframes hp{to{--hp:100%}}
+.tgp-g.gone{transform:scale(0)!important;opacity:0;transition:transform .2s,opacity .2s}
 </style>
 </head>
 <body>
@@ -3223,9 +3227,11 @@ function glGrab(){const n=$('#pfName'),b=$('#pfBio'),o=$('#pfOpen');if(n)GL.name
 function glPaint(){glGrab();const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
 // перетаскивание подарков по шапке профиля
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.tgp-g.drag');if(!b||!GL.on)return;e.preventDefault();
-  const st=$('#tgpStage');if(!st)return;b.setPointerCapture(e.pointerId);b.classList.add('moving');const id=b.dataset.gid;
-  const mv=ev=>{const r=st.getBoundingClientRect();const x=Math.max(2,Math.min(98,(ev.clientX-r.left)/r.width*100)),y=Math.max(2,Math.min(98,(ev.clientY-r.top)/r.height*100));b.style.left=x+'%';b.style.top=y+'%';const p=GL.pos.find(q=>q.id===id);if(p){p.x=Math.round(x*10)/10;p.y=Math.round(y*10)/10}};
-  const up=()=>{b.classList.remove('moving');b.removeEventListener('pointermove',mv);b.removeEventListener('pointerup',up);b.removeEventListener('pointercancel',up)};
+  const st=$('#tgpStage');if(!st)return;b.setPointerCapture(e.pointerId);b.classList.add('moving','hold');const id=b.dataset.gid,x0=e.clientX,y0=e.clientY;let moved=false;
+  // зажал и держишь, не двигая, — подарок убирается из шапки
+  const ht=setTimeout(()=>{if(moved)return;up();GL.pos=GL.pos.filter(q=>q.id!==id);try{navigator.vibrate&&navigator.vibrate(30)}catch(_){}b.classList.add('gone');setTimeout(glPaint,220)},650);
+  const mv=ev=>{if(!moved&&Math.hypot(ev.clientX-x0,ev.clientY-y0)<7)return;if(!moved){moved=true;clearTimeout(ht);b.classList.remove('hold')}const r=st.getBoundingClientRect();const x=Math.max(2,Math.min(98,(ev.clientX-r.left)/r.width*100)),y=Math.max(2,Math.min(98,(ev.clientY-r.top)/r.height*100));b.style.left=x+'%';b.style.top=y+'%';const p=GL.pos.find(q=>q.id===id);if(p){p.x=Math.round(x*10)/10;p.y=Math.round(y*10)/10}};
+  const up=()=>{clearTimeout(ht);b.classList.remove('moving','hold');b.removeEventListener('pointermove',mv);b.removeEventListener('pointerup',up);b.removeEventListener('pointercancel',up)};
   b.addEventListener('pointermove',mv);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
 const RV_ACT={
   'app-get'(){openSheet(`<h3>${ico('down')}Приложение Mundora</h3><div class="glass" style="padding:14px 16px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`)},
@@ -4076,7 +4082,7 @@ function pfHTML(p){
     <div class="tgp-sub">${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span>${seenTxt(p)}</span></div>
   </div>
   ${lay?`<div class="glass gl-bar">
-    <div class="gl-h"><b>Редактирование профиля</b><span class="k">Подарки в шапке тяни пальцем или мышкой куда хочешь</span></div>
+    <div class="gl-h"><b>Редактирование профиля</b><span class="k">Подарки в шапке тяни пальцем или мышкой куда хочешь. Зажми подарок и подержи — он уберётся.</span></div>
     <div class="k gl-l">Подарки у аватарки · ${GL.pos.length} из 10</div>
     <div class="gl-tray">${gs.map(g=>`<button class="gl-chip${GL.pos.some(x=>x.id===g.id)?' on':''}" data-act="gl-toggle" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')||`<button class="btn ghost sm" data-act="gift-shop">${ico('star','s')}Купить первый подарок</button>`}</div>
     ${gs.length?`<div class="k gl-l">Подарок у ника</div>
