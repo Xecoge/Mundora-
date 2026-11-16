@@ -73,12 +73,46 @@ if plat == 'android':
     if os.path.exists(ma):
         open(ma, 'w', encoding='utf-8').write('''package app.mundora;
 
+import android.app.DownloadManager;
+import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.webkit.CookieManager;
+import android.webkit.URLUtil;
+import android.widget.Toast;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // скачивание файлов из чатов в «Загрузки» телефона
+        if (bridge != null && bridge.getWebView() != null) {
+            bridge.getWebView().setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
+                try {
+                    DownloadManager.Request r = new DownloadManager.Request(Uri.parse(url));
+                    String cookie = CookieManager.getInstance().getCookie(url);
+                    if (cookie != null) r.addRequestHeader("cookie", cookie);
+                    r.addRequestHeader("User-Agent", userAgent);
+                    String name = URLUtil.guessFileName(url, contentDisposition, mimeType);
+                    r.setTitle(name);
+                    r.setMimeType(mimeType);
+                    r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+                    ((DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(r);
+                    Toast.makeText(this, "Скачивается: " + name, Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "Не удалось скачать", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+        // музыка в фоне: не ставим WebView на паузу, когда приложение свёрнуто
         if (bridge != null && bridge.getWebView() != null) {
             bridge.getWebView().onResume();
             bridge.getWebView().resumeTimers();

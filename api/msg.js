@@ -98,15 +98,37 @@ export default async function handler(req) {
       const c = chatId(me, to);
       if (to !== me && !(await kv('GET', 'id:' + to))) return json({ error: 'Аккаунт не найден' }, 404);
       const x = String(body.x || '').slice(0, 4000);
-      const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000), wf: String(body.fl.wf || '').replace(/[^0-9a-z]/g, '').slice(0, 80), vo: body.fl.vo ? 1 : 0 } : null;
+      const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000), wf: String(body.fl.wf || '').replace(/[^0-9a-z]/g, '').slice(0, 80), vo: body.fl.vo ? 1 : 0, rd: body.fl.rd ? 1 : 0 } : null;
       if (fl) { const m = await jget('mf:' + fl.id); if (!m || m.c !== c || m.o !== me) return json({ error: 'Файл не загружен' }, 400); }
       if (!x.trim() && !fl) return json({ error: 'Пустое сообщение' }, 400);
       const t = Date.now(), m = { f: +me, t, x, ...(fl ? { fl } : {}), ...(body.r != null ? { r: +body.r } : {}) };
       const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
-      const pv = await seal(c, x.trim() ? x.slice(0, 80) : (fl.vo ? '🎤 Голосовое' : fl.ty.startsWith('image/') ? '🖼 Фото' : fl.ty.startsWith('video/') ? '🎬 Видео' : '📎 ' + fl.n));
+      const pv = await seal(c, x.trim() ? x.slice(0, 80) : (fl.vo ? '🎤 Голосовое' : fl.rd ? '📹 Видеосообщение' : fl.ty.startsWith('image/') ? '🖼 Фото' : fl.ty.startsWith('video/') ? '🎬 Видео' : '📎 ' + fl.n));
       const meta = JSON.stringify({ t, f: +me, pv, n: len });
       await kvMulti([['HSET', 'ci:' + me, c, meta], ['HSET', 'cu:' + me, c, '0'], ['HSET', 'cr:' + c, me, String(len - 1)], ['INCR', 'mv:' + me], ...(to !== me ? [['HSET', 'ci:' + to, c, meta], ['HINCRBY', 'cu:' + to, c, '1'], ['DEL', 'ty:' + c + ':' + me], ['INCR', 'mv:' + to]] : [])]);
       return json({ ok: 1, c, m: { ...m, i: len - 1 }, tmp: body.tmp });
+    }
+    if (a === 'fwd') { // переслать сообщение (и файл) в другой чат: файл перешифровывается ключом нового чата
+      const c0 = String(body.c || ''), i = +body.i, to = String(body.to ?? '');
+      if (!inChat(c0, me) || !(i >= 0) || !/^\d{1,12}$/.test(to)) return json({ error: 'Нет доступа' }, 403);
+      if (to !== me && !(await kv('GET', 'id:' + to))) return json({ error: 'Аккаунт не найден' }, 404);
+      const [r] = await kvMulti([['LRANGE', 'cm:' + c0, String(i), String(i)]]); const m0 = JSON.parse((await open(c0, r && r[0])) || 'null');
+      if (!m0 || m0.d) return json({ error: 'Сообщение недоступно' }, 404);
+      const c = chatId(me, to); let fl = null;
+      if (m0.fl && m0.fl.id) {
+        const fm = await jget('mf:' + m0.fl.id); if (!fm) return json({ error: 'Файл не найден' }, 404);
+        const parts = await kvMulti(Array.from({ length: fm.k }, (_, k) => ['GET', 'mfc:' + m0.fl.id + ':' + k]));
+        const nid = rand(10);
+        await jset('mf:' + nid, { ...fm, c, o: me, t: Date.now() });
+        for (let k = 0; k < parts.length; k++) await kv('SET', 'mfc:' + nid + ':' + k, await seal(c, await open(c0, parts[k], true)));
+        fl = { ...m0.fl, id: nid };
+      }
+      const t = Date.now(), m = { f: +me, t, x: m0.x || '', ...(fl ? { fl } : {}), fw: +(m0.fw ?? m0.f) };
+      const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
+      const pv = await seal(c, '↪ ' + (m.x ? m.x.slice(0, 70) : fl ? (fl.vo ? 'Голосовое' : fl.rd ? 'Видеосообщение' : fl.n) : ''));
+      const meta = JSON.stringify({ t, f: +me, pv, n: len });
+      await kvMulti([['HSET', 'ci:' + me, c, meta], ['HSET', 'cr:' + c, me, String(len - 1)], ['INCR', 'mv:' + me], ...(to !== me ? [['HSET', 'ci:' + to, c, meta], ['HINCRBY', 'cu:' + to, c, '1'], ['INCR', 'mv:' + to]] : [])]);
+      return json({ ok: 1, c });
     }
     if (a === 'read') {
       const c = String(body.c || ''); if (!inChat(c, me)) return json({ error: 'Нет доступа' }, 403);
@@ -146,7 +168,7 @@ export default async function handler(req) {
       const bufs = await Promise.all(parts.map(p => open(m.c, p, true)));
       if (bufs.some(b => !b)) return new Response('Файл ещё загружается или повреждён', { status: 409 });
       const total = bufs.reduce((n, b) => n + b.length, 0), out = new Uint8Array(total); let o = 0; bufs.forEach(b => { out.set(b, o); o += b.length; });
-      return new Response(out, { headers: { 'content-type': m.ty, 'content-length': String(total), 'cache-control': 'private, max-age=31536000, immutable', 'content-disposition': (q('dl') ? 'attachment' : 'inline') + "; filename*=UTF-8''" + encodeURIComponent(m.n) } });
+      return new Response(out, { headers: { 'content-type': m.ty, 'content-length': String(total), 'cache-control': 'private, max-age=31536000, immutable', 'content-disposition': (q('dl') ? 'attachment' : 'inline') + '; filename="' + (m.n.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '') || 'file') + "\"; filename*=UTF-8''" + encodeURIComponent(m.n) } });
     }
     return json({ error: 'Неизвестный запрос' }, 404);
   } catch (e) { return json({ error: e.message }, 500); }
