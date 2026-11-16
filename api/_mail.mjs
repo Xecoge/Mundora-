@@ -60,8 +60,8 @@ function smtp({ host, port, user, pass, from, fromName, to, subject, text, html 
 
 export function codeMail(code, kind) {
   const site = String(process.env.SITE_URL || 'https://mundorai.vercel.app').replace(/\/+$/, '');
-  const what = kind === 'reg' ? 'create your account' : kind === 'reset' ? 'reset your password' : 'sign in';
-  const title = kind === 'reg' ? 'Welcome to Mundora' : kind === 'reset' ? 'Reset your password' : 'Your sign-in code';
+  const what = kind === 'reg' ? 'create your account' : kind === 'reset' ? 'reset your password' : kind === 'change' ? 'link this email to your Mundora account' : 'sign in';
+  const title = kind === 'reg' ? 'Welcome to Mundora' : kind === 'reset' ? 'Reset your password' : kind === 'change' ? 'Confirm your new email' : 'Your sign-in code';
   const subject = `${code} is your Mundora code`;
   const text = `${title}\n\nUse this code to ${what}: ${code}\n\nIt expires in 10 minutes. If you didn't request it, just ignore this email.\n\n— Mundora\n${site}`;
   const spaced = code.split('').join('&#8202;');

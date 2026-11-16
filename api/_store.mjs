@@ -79,6 +79,7 @@ export function memoryStore(load, persist) {
       }
       case 'DEL': r = a.filter(k => live(k) && (D.delete(k), X.delete(k), true)).length; break;
       case 'EXISTS': r = a.filter(k => live(k)).length; break;
+      case 'RENAME': { if (!live(a[0])) throw new Error('ERR no such key'); D.set(a[1], D.get(a[0])); D.delete(a[0]); if (X.has(a[0])) { X.set(a[1], X.get(a[0])); X.delete(a[0]); } else X.delete(a[1]); r = 'OK'; break; }
       case 'INCR': case 'INCRBY': { const v = (live(a[0]) ? +D.get(a[0]).v : 0) + (c === 'INCR' ? 1 : +a[1]); D.set(a[0], { v: String(v) }); r = v; break; }
       case 'EXPIRE': { if (!live(a[0])) { r = 0; break; } if (String(a[2] || '').toUpperCase() === 'NX' && X.has(a[0])) { r = 0; break; } X.set(a[0], now() + +a[1] * 1000); r = 1; break; }
       case 'TTL': r = !live(a[0]) ? -2 : X.has(a[0]) ? Math.ceil((X.get(a[0]) - now()) / 1000) : -1; break;

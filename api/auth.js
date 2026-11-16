@@ -157,6 +157,38 @@ async function handle(req) {
     return json({ ok: true });
   }
 
+  // ---------- смена почты: код приходит на НОВУЮ почту, после подтверждения аккаунт переезжает ----------
+  if (a === 'email-start' || a === 'email-confirm') {
+    const me = await currentUser(req); if (!me) return err('Не выполнен вход', 401);
+    if (me.email === ADMIN()) return err('Почту владельца меняют в настройках Vercel (ADMIN_EMAIL)', 403);
+    if (me.status === 'frozen') return err('Аккаунт заморожен — почту сменить нельзя', 423);
+    const nw = normEmail(body.email);
+    if (!okEmail(nw)) return err('Похоже, в почте ошибка');
+    if (nw === me.email) return err('Это и так твоя почта');
+    if (await getUser(nw)) return err('Эта почта уже занята другим аккаунтом', 409);
+    if (a === 'email-start') {
+      if (!(await limit('ec:' + me.email, 6, 3600))) return err('Слишком много попыток. Попробуй через час', 429);
+      const r = await sendCode(req, nw, 'change', { from: me.email });
+      return json({ ok: true, wait: r.wait });
+    }
+    const c = String(body.code || '').replace(/\D/g, ''), p = await jget('p:' + nw);
+    if (!p || p.kind !== 'change' || p.from !== me.email) return err('Код устарел — запроси новый', 410);
+    if (p.tries >= 5) { await kv('DEL', 'p:' + nw); return err('Слишком много неверных попыток — запроси новый код', 429); }
+    if (c.length !== 6 || await sign('c:' + nw + ':' + c) !== p.h) { p.tries++; await jset('p:' + nw, p, CODE_TTL); return err(`Неверный код. Осталось попыток: ${5 - p.tries}`, 403); }
+    const old = me.email, u = await getUser(old); if (!u) return err('Аккаунт не найден', 404);
+    u.email = nw; await putUser(u);
+    const ren = async k => { try { if (await kv('EXISTS', k + old)) await kv('RENAME', k + old, k + nw); } catch (e) {} };
+    for (const k of ['d:', 'dt:', 'dv:', 'img:ava:', 'img:cov:', 'sh:']) await ren(k);
+    const [isAdm, isSh] = await kvMulti([['SISMEMBER', 'admins', old], ['SISMEMBER', 'shadow_admins', old]]);
+    await kvMulti([['DEL', 'u:' + old], ['SREM', 'users', old], ['SADD', 'users', nw], ['DEL', 'p:' + nw],
+      ...(u.id != null ? [['SET', 'id:' + u.id, nw]] : []),
+      ...(isAdm ? [['SREM', 'admins', old], ['SADD', 'admins', nw]] : []), ...(isSh ? [['SREM', 'shadow_admins', old], ['SADD', 'shadow_admins', nw]] : []),
+      ...(u.tg && u.tg.id ? [['SET', 'tg:uid:' + u.tg.id, nw]] : []), ...(u.name ? [['SET', 'nm:' + u.name.toLowerCase(), nw]] : [])]);
+    const sids = (await kv('SMEMBERS', 'us:' + old)) || [];
+    if (sids.length) await kvMulti([...sids.map(x => ['DEL', 's:' + x]), ['DEL', 'us:' + old]]);
+    return jsonC({ ok: true, email: nw }, [await createSession(req, nw)]);
+  }
+
   if (a === 'name') {
     if (!(await limit('nm:' + ip, 40, 600))) return err('Слишком много проверок, подожди', 429);
     const r = await checkName(body.name, normEmail(body.email));

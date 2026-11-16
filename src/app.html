@@ -1224,6 +1224,39 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .an-seg button b{font-size:13.5px}.an-seg button small{font-size:11px;color:#a49dc0;line-height:1.3}
 .an-seg button.on{background:linear-gradient(135deg,rgba(139,92,246,.45),rgba(109,40,217,.25));border-color:#c084fc}
 
+
+/* ===== телефон: меню Главная / Музыка / ИИ / Профиль + круглая кнопка «все разделы» ===== */
+.tab-all{display:none}
+@media(max-width:760px){
+  .tabs{right:90px!important;padding:0 5px!important}
+  .tabs a{min-width:0}
+  .tabs .tb-me img{width:26px;height:26px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1.5px rgba(255,255,255,.5)}
+  .tabs .tb-me span{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tabs .tb-me.on img{box-shadow:0 0 0 2px #fff,0 0 12px rgba(192,132,252,.8)}
+  .tab-all{display:grid;place-items:center;position:fixed;right:12px;bottom:calc(10px + var(--safe));width:66px;height:66px;border-radius:50%;z-index:46;color:#fff;cursor:pointer;
+    background:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.2);box-shadow:var(--hi),0 20px 40px rgba(0,0,0,.55);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);transition:transform .2s}
+  .tab-all:active{transform:scale(.92)}.tab-all .i{width:26px;height:26px}
+  .tab-all.on{background:linear-gradient(160deg,rgba(192,132,252,.45),rgba(109,40,217,.35))}
+}
+.all-s{margin-bottom:12px;height:46px;border-radius:16px}
+.all-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-height:62vh;overflow-y:auto;padding-bottom:4px}
+.all-it{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:14px 6px;border-radius:20px;color:#fff;text-align:center;font-size:12.5px;font-weight:600;min-height:86px}
+.all-it .i{width:26px;height:26px;color:#c4b5fd}.all-it span{line-height:1.25}
+.all-q{grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 14px;justify-content:flex-start}
+
+/* крипта на телефоне: строка = монета · цена · изменение за 24 ч */
+@media(max-width:760px){
+  .ctbl{overflow:visible!important}.ctbl table,.ctbl tbody{display:block;width:100%;min-width:0!important}.ctbl thead{display:none}
+  .ctbl tbody tr{display:grid;grid-template-columns:30px minmax(0,1fr) auto 72px;align-items:center;column-gap:6px;padding:2px 8px 2px 4px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .ctbl tbody tr:last-child{border-bottom:0}
+  .ctbl td{padding:9px 0!important;border:0!important;min-width:0}.ctbl td.hm{display:none!important}
+  .ctbl td:first-child{width:auto!important}.ctbl td:first-child .ib{width:30px;height:30px}
+  .ctbl .cname{min-width:0;display:grid!important;grid-template-columns:30px minmax(0,1fr);grid-template-areas:"i n" "i s";column-gap:9px;align-items:center}
+  .ctbl .cname img{grid-area:i;width:30px!important;height:30px!important}.ctbl .cname b{grid-area:n;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ctbl .cname small{grid-area:s;display:block!important;font-size:11.5px;color:#8f88ad;margin:0}
+  .ctbl td.n{text-align:right;white-space:nowrap}.ctbl td.n .pcell{font-weight:750;font-size:14.5px}
+  .ctbl td[data-c24]{font-size:12.5px}.ctbl td[data-c24] span{display:inline-block;padding:4px 7px;border-radius:9px;background:rgba(255,255,255,.06)}
+}
 </style>
 </head>
 <body>
@@ -2255,7 +2288,19 @@ const isMusicR=r=>MUSIC_R.includes(r)||/^(artist|pl)-/.test(r);
 const NAV_F=[['ai','chat','ИИ-помощник'],['crypto','coin','Крипта'],['metals','gem','Курсы ценностей'],['exch','spread','Обменники'],['calc','calc','Калькулятор'],['budget','trend','Доходы и расходы'],['tables','table','Таблицы'],['spread','spread','Спред'],['percent','pct','Проценты'],['history','hist','История']];
 const navItem=([v,i,n],k)=>`<a class="it" href="#${v}" data-v="${v}" title="${n}" style="--k:${k}">${ico(i)}<span class="lt">${n}</span></a>`;
 $('#navM').innerHTML=NAV_M.map(navItem).join('');$('#navF').innerHTML=NAV_F.map(navItem).join('');$('#navP').innerHTML=[['notes','notes','Заметки'],['reviews','star','Отзывы'],...(USR&&USR.admin?[['admin','gem','Админ-панель']]:[])].map(navItem).join('');
-$('#tabs').innerHTML=[['home','home','Главная'],['music','note','Музыка'],['crypto','coin','Крипта'],['finance','wallet','Финансы'],['ai','chat','ИИ']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('');
+// телефон: в стеклянном меню только главное + профиль; всё остальное — в круглой кнопке с поиском
+function tabsDraw(){const me=USR&&USR.id!=null;
+  $('#tabs').innerHTML=[['home','home','Главная'],['music','note','Музыка'],['ai','chat','ИИ']].map(([v,i,n])=>`<a href="#${v}" data-v="${v}">${ico(i)}<span>${n}</span></a>`).join('')
+    +(me?`<a href="#u-${USR.id}" data-v="me" class="tb-me"><img src="${avaSrc(USR.avatar)}" alt=""><span>${esc((USR.name||'Профиль').slice(0,12))}</span></a>`:'');
+  let b=$('#tabAll');if(!b){b=document.createElement('button');b.id='tabAll';b.className='tab-all';b.title='Все разделы и поиск';b.dataset.act='all-open';b.innerHTML=ico('search');document.body.appendChild(b)}
+  tabsHL()}
+function tabsHL(){if(!$('#tabs a'))return;const r=route(),base=isMusicR(r)?'music':r;$$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='me'&&USR&&r==='u-'+USR.id)));
+  const b=$('#tabAll');if(b)b.classList.toggle('on',!['home','ai'].includes(base)&&!isMusicR(r)&&!(USR&&r==='u-'+USR.id))}
+const ALL_SEC=()=>[['crypto','coin','Крипта','курсы монет биткоин'],['finance','wallet','Финансы','деньги'],['budget','trend','Доходы и расходы','бюджет траты'],['metals','gem','Курсы ценностей','золото серебро'],['exch','spread','Обменники','обмен p2p'],['calc','calc','Калькулятор',''],['spread','spread','Спред','bid ask'],['percent','pct','Проценты',''],['tables','table','Таблицы','excel'],['history','hist','История','расчёты'],['notes','notes','Заметки','список'],['flow','flow','Волна','музыка'],['search','search','Поиск музыки и людей','трек артист'],['playlists','lists','Плейлисты','музыка'],['library','lib','Медиатека','лайки музыка'],['remixes','disc','Ремиксы','музыка'],['reviews','star','Отзывы','рейтинг'],...(USR&&USR.admin?[['admin','gem','Админ-панель','коды аккаунты']]:[])];
+function allPaint(q){q=(q||'').trim().toLowerCase();const L=ALL_SEC().filter(([v,i,n,k])=>!q||(n+' '+k).toLowerCase().includes(q));
+  const g=$('#allGrid');if(!g)return;g.innerHTML=L.map(([v,i,n])=>`<a class="all-it lq" href="#${v}" data-act="close-sheet">${ico(i)}<span>${n}</span></a>`).join('')
+    +(q?`<a class="all-it all-q lq" href="#search" data-act="all-search" data-q="${esc(q)}">${ico('search')}<span>Искать «${esc(q)}» в музыке и людях</span></a>`:'')}
+setTimeout(()=>{try{tabsDraw()}catch(e){}},0);
 const FIN=['finance','ai','crypto','metals','exch','reviews','notes','calc','budget','tables','spread','percent','history'];
 const MUSICLIB=['playlists','library','remixes'];
 
@@ -2266,7 +2311,7 @@ function render(){
   const base0=r.startsWith('u-')?'user':r.startsWith('coin-')?'crypto':r.startsWith('note-')?'notes':r;
   const base=isMusicR(r)?'music':base0;
   $$('.it').forEach(a=>a.classList.toggle('on',a.dataset.v===base));sideHL();
-  $$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===base||(a.dataset.v==='finance'&&FIN.includes(base)&&base!=='crypto'&&base!=='ai')));
+  tabsHL();
   // большой плеер «Сейчас играет» — только в музыкальных разделах; в остальных — компактная плашка
   document.body.classList.toggle('mroute',isMusicR(r));
   cryptoLeave(r);if(r!=='home')homeLive(false);if(r!=='home'&&r!=='metals')metLive(false);
@@ -3423,6 +3468,31 @@ document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.c
   const mv=ev=>{if(!moved&&Math.hypot(ev.clientX-x0,ev.clientY-y0)<7)return;if(!moved){moved=true;clearTimeout(ht);b.classList.remove('hold')}const r=st.getBoundingClientRect();const x=Math.max(2,Math.min(98,(ev.clientX-r.left)/r.width*100)),y=Math.max(2,Math.min(98,(ev.clientY-r.top)/r.height*100));b.style.left=x+'%';b.style.top=y+'%';const p=GL.pos.find(q=>q.id===id);if(p){p.x=Math.round(x*10)/10;p.y=Math.round(y*10)/10}};
   const up=()=>{clearTimeout(ht);b.classList.remove('moving','hold');b.removeEventListener('pointermove',mv);b.removeEventListener('pointerup',up);b.removeEventListener('pointercancel',up)};
   b.addEventListener('pointermove',mv);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
+async function authApi(a,body){const r=await fetch('/api/auth?a='+a,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j}
+const MAIL_ACT={
+  'email-change'(){openSheet(`<h3>${ico('lock')}Сменить почту<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    <div class="k" style="margin-bottom:10px">Сейчас: <b>${esc(USR.email)}</b>. На новую почту придёт код — после подтверждения вход будет по ней, все данные останутся.</div>
+    <label class="lq-f lq"><small>Новая почта</small><input id="ecMail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com"></label>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:12px" data-act="email-send">${ico('send','s')}Получить код</button>`);setTimeout(()=>{const i=$('#ecMail');i&&i.focus()},250)},
+  async 'email-send'(el){const m=($('#ecMail')||{}).value||MAIL_ACT.mail||'';if(!m.trim())return toast('Впиши новую почту','x');el.disabled=true;
+    try{await authApi('email-start',{email:m.trim()});MAIL_ACT.mail=m.trim();
+      openSheet(`<h3>${ico('lock')}Код с новой почты<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+      <div class="k" style="margin-bottom:10px">Отправили 6 цифр на <b>${esc(MAIL_ACT.mail)}</b>. Проверь «Спам», если письма нет. Код действует 10 минут.</div>
+      <label class="lq-f lq"><small>Код из письма</small><input id="ecCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="letter-spacing:.4em;font-size:22px;text-align:center"></label>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:12px" data-act="email-ok">${ico('check','s')}Подтвердить и сменить</button>
+      <button class="btn ghost" style="width:100%;justify-content:center;margin-top:8px" data-act="email-send">Отправить ещё раз</button>`);setTimeout(()=>{const i=$('#ecCode');i&&i.focus()},250)}
+    catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'email-ok'(el){const c=(($('#ecCode')||{}).value||'').replace(/\D/g,'');if(c.length!==6)return toast('Код — 6 цифр','x');el.disabled=true;
+    try{try{await syncNow()}catch(e){}const j=await authApi('email-confirm',{email:MAIL_ACT.mail,code:c});
+      try{localStorage.setItem('tempo:owner',j.email)}catch(e){}USR.email=j.email;closeSheet();toast('Почта изменена','check');setTimeout(()=>location.reload(),700)}
+    catch(e){toast(e.message,'x');el.disabled=false}},
+};
+const ALL_ACT={
+  'all-open'(){openSheet(`<h3>${ico('grid')}Все разделы<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    <label class="cl-search all-s">${ico('search','s')}<input id="allQ" placeholder="Раздел, трек, артист или человек" autocomplete="off"></label>
+    <div class="all-grid" id="allGrid"></div>`);allPaint('');const q=$('#allQ');q.addEventListener('input',()=>allPaint(q.value));q.addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('#allGrid a');if(f)f.click()}});setTimeout(()=>q.focus(),250)},
+  'all-search'(el,e){e&&e.preventDefault();closeSheet();sQ=el.dataset.q;sMode='all';location.hash='#search';setTimeout(()=>{const i=$('#sIn');if(i){i.value=sQ;i.dispatchEvent(new Event('input'))}},120)},
+};
 const RV_ACT={
   'app-get'(){openSheet(`<h3>${ico('down')}Приложение Mundora</h3><div class="glass" style="padding:14px 16px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`)},
   'rv-star'(el){const t=el.dataset.t,f=RVF[t]||(RVF[t]={s:0,x:''});const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;f.s=+el.dataset.s;f.touched=true;rvPaint(t)},
@@ -4154,7 +4224,7 @@ async function aiRunActions(am,list){
 }
 const actsHTML=a=>a&&a.length?`<div class="acts">${a.map(x=>`<${x.go?`a href="${esc(x.go)}"`:'span'} class="act ${x.s}">${x.s==='run'?ico('loader','ldg s'):x.s==='ok'?ico('check','s'):ico('x','s')}<span>${esc(x.t)}</span></${x.go?'a':'span'}>`).join('')}</div>`:'';
 
-Object.assign(ACT,EX_ACT,RV_ACT,GIFT_ACT);
+Object.assign(ACT,EX_ACT,RV_ACT,GIFT_ACT,ALL_ACT,MAIL_ACT);
 Object.assign(ACT,{
   async 'tg-setup'(el){el.disabled=true;toast('Подключаю бота…','loader');try{const r=await tgApi('setup',{});toast('Бот @'+r.username+' подключён','check');await tgLoad();admDraw()}catch(e){toast(e.message,'x')}el.disabled=false},
   async 'tg-fill'(el){el.disabled=true;toast('Бот ищет темы и пишет посты — до минуты…','loader');try{const r=await tgApi('fill',{});toast('Заполнено: '+r.topics.length+' тем','check')}catch(e){toast(e.message,'x')}el.disabled=false},
@@ -4215,7 +4285,7 @@ function nameGate(){
   $('#ngBtn').addEventListener('click',go);$('#ngIn').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
   setTimeout(()=>$('#ngIn').focus(),100);
 }
-function meHead(){if(!USR)return;$('#uName').textContent=USR.name||'Профиль';const im=$('#avaImg');if(im){im.src=avaSrc(USR.avatar);im.classList.add('own')}sideMe()}
+function meHead(){if(!USR)return;try{tabsDraw()}catch(e){}$('#uName').textContent=USR.name||'Профиль';const im=$('#avaImg');if(im){im.src=avaSrc(USR.avatar);im.classList.add('own')}sideMe()}
 // карточка профиля внизу левого меню
 function sideMe(){if(!USR)return;const n=$('#sideName'),a=$('#sideAva'),sb=$('#sideSub');if(!n)return;n.textContent=USR.name||'Профиль';if(a)a.src=avaSrc(USR.avatar);
   const c=PEOPLE.cache[USR.id]&&PEOPLE.cache[USR.id].capital;if(sb)sb.textContent=(USR.id!=null?'ID '+USR.id:'Mundora')+(c?' · '+c.level+' ур. · '+c.score.toLocaleString('ru-RU')+' XP':'')}
@@ -4344,7 +4414,7 @@ function pfHTML(p){
   <div class="glass tgp-info">
     ${p.bio?`<div class="tgp-row"><small>о себе</small><p>${esc(p.bio)}</p></div>`:''}
     ${p.tg?`<button class="tgp-row" data-act="tg-go" data-u="${esc(p.tg.username||'')}"><small>telegram</small><b class="tgp-link">${esc(tgLabel(p.tg))}</b></button>`:''}
-    <div class="tgp-row"><small>почта</small><b>${ico('lock','s')}${esc(p.email)}</b></div>
+    ${p.self?`<button class="tgp-row" data-act="email-change"><small>почта · нажми, чтобы сменить</small><b>${ico('lock','s')}${esc(p.email)}${ico('edit','s')}</b></button>`:`<div class="tgp-row"><small>почта</small><b>${ico('lock','s')}${esc(p.email)}</b></div>`}
     ${joined?`<div class="tgp-row"><small>в Mundora</small><b>с ${joined}</b></div>`:''}
   </div>
   <div class="glass tgp-gifts">
