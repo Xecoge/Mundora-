@@ -37,9 +37,18 @@ const GIFTS = {
   rocket: { n: 'Ракета to the Moon', p: 800 }, bull: { n: 'Бык', p: 1200 }, bear: { n: 'Медведь', p: 1200 },
   miner: { n: 'Майнинг-риг', p: 1500 }, whale: { n: 'Кит', p: 2500 }, diamond: { n: 'Diamond Hands', p: 5000 }
 };
-const SLOTS = 6;
+const MAXPOS = 10; // сколько подарков можно разложить вокруг аватарки
+const DEFPOS = [[20, 18], [80, 16], [10, 50], [90, 48], [22, 82], [78, 84], [36, 8], [64, 8], [6, 22], [94, 76]];
 const giftsOut = u => (Array.isArray(u.gifts) ? u.gifts : []).filter(g => GIFTS[g.k]).map(g => ({ id: g.id, k: g.k, t: g.t, from: g.from || null }));
-const slotsOut = u => { const ids = new Set(giftsOut(u).map(g => g.id)); const s = Array.isArray(u.giftSlots) ? u.giftSlots : []; return Array.from({ length: SLOTS }, (_, i) => (s[i] && ids.has(s[i]) ? s[i] : null)); };
+const clampP = v => Math.max(2, Math.min(98, Math.round(+v * 10) / 10 || 0));
+function posOut(u) {
+  const ids = new Set(giftsOut(u).map(g => g.id));
+  let pos = Array.isArray(u.giftPos) ? u.giftPos : null;
+  if (!pos && Array.isArray(u.giftSlots)) pos = u.giftSlots.map((id, i) => id && { id, x: DEFPOS[i][0], y: DEFPOS[i][1] }).filter(Boolean); // старые «места»
+  const seen = new Set();
+  return (pos || []).filter(p => p && ids.has(p.id) && !seen.has(p.id) && seen.add(p.id)).slice(0, MAXPOS).map(p => ({ id: p.id, x: clampP(p.x), y: clampP(p.y) }));
+}
+const nickOut = u => (u.nickGift && giftsOut(u).some(g => g.id === u.nickGift) ? u.nickGift : null);
 const top = (o, n) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
 
 // «Капитализация» — очки за то, что человек делал на сайте (без сумм денег и текстов заметок)
@@ -49,7 +58,7 @@ function capital(u, d) {
   const events = (d.taste && d.taste.events) || 0, plays = Array.isArray(d.plays) ? d.plays.length : 0;
   const notes = Array.isArray(d.notes) ? d.notes.length : 0, ops = Array.isArray(d.ops) ? d.ops.length : 0;
   const days = Math.max(1, Math.ceil((Date.now() - (u.created || Date.now())) / 864e5));
-  const parts = [['Лайки', likes * 5], ['Плейлисты', pls.length * 20 + plTracks * 2], ['Прослушивания', Math.max(events, plays)], ['Заметки', notes * 8], ['Финансы', ops * 3], ['Дни в Mundora', days * 10], ['Галочка', u.verified ? 500 : 0]];
+  const parts = [['Лайки', likes * 5], ['Плейлисты', pls.length * 20 + plTracks * 2], ['Прослушивания', Math.max(events, plays)], ['Заметки', notes * 8], ['Финансы', ops * 3], ['Дни в Mundora', days * 10], ['Галочка', u.verified ? 500 : 0], ['Бонус основателя', u.id != null && (String(u.id) === '0' || String(u.id) === '1') ? 50000 : 0]];
   const score = parts.reduce((n, p) => n + p[1], 0);
   const level = LV.filter(x => score >= x).length;
   return { score, level, max: LV.length, title: titleOf(level), from: LV[level - 1], to: LV[level] ?? null, ladder: LV, parts: parts.filter(p => p[1] > 0), stats: { likes, playlists: pls.length, plTracks, plays: Math.max(events, plays), notes, ops, days } };
@@ -67,7 +76,7 @@ async function card(email, viewer, full) {
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
-    gifts: giftsOut(u), slots: slotsOut(u)
+    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
   if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
@@ -109,7 +118,7 @@ export default async function handler(req) {
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
     }
-    if (a === 'gifts' && req.method === 'GET') return json({ catalog: GIFTS, slots: SLOTS });
+    if (a === 'gifts' && req.method === 'GET') return json({ catalog: GIFTS, max: MAXPOS });
     if (req.method === 'POST' && a === 'gift-buy') {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — покупки недоступны' }, 423);
       const b = await req.json().catch(() => ({})), G = GIFTS[b.k];
@@ -127,16 +136,16 @@ export default async function handler(req) {
       if (t.gifts.length >= 200) return json({ error: 'У получателя уже слишком много подарков' }, 400);
       const g = { id: rand(8), k: b.k, t: Date.now(), from: t === u ? null : { id: u.id, name: displayName(u) } };
       t.gifts.unshift(g);
-      if (t === u) { const sl = slotsOut(u); const free = sl.indexOf(null); if (free >= 0 && b.place !== false) { sl[free] = g.id; u.giftSlots = sl; } }
+      if (t === u && b.place !== false) { const ps = posOut(u); if (ps.length < MAXPOS) { const d = DEFPOS.find(([x, y]) => !ps.some(p => Math.abs(p.x - x) < 6 && Math.abs(p.y - y) < 6)) || DEFPOS[ps.length]; ps.push({ id: g.id, x: d[0], y: d[1] }); u.giftPos = ps; delete u.giftSlots; } }
       u.xpSpent = (u.xpSpent || 0) + G.p;
       await putUser(u); if (t !== u) await putUser(t);
       return json({ ok: true, gift: g, profile: await card(me.email, me, true) });
     }
-    if (req.method === 'POST' && a === 'gift-slots') {
+    if (req.method === 'POST' && a === 'gift-layout') { // где лежат подарки у аватарки и какой стоит у ника
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({})); const u = await getUser(me.email);
-      const ids = new Set(giftsOut(u).map(g => g.id)), seen = new Set();
-      u.giftSlots = Array.from({ length: SLOTS }, (_, i) => { const v = Array.isArray(b.slots) ? b.slots[i] : null; if (v && ids.has(v) && !seen.has(v)) { seen.add(v); return v; } return null; });
+      if (Array.isArray(b.pos)) { u.giftPos = b.pos; delete u.giftSlots; u.giftPos = posOut(u); }
+      if (b.nick !== undefined) u.nickGift = b.nick && giftsOut(u).some(g => g.id === b.nick) ? b.nick : null;
       await putUser(u);
       return json({ ok: true, profile: await card(me.email, me, true) });
     }

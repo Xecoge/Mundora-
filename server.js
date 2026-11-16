@@ -67,7 +67,7 @@ http.createServer(async (req, res) => {
   if (!r) { // статика: картинки и config.js
     const f = path.normalize(decodeURIComponent(u.pathname));
     const fp = path.join(ROOT, f);
-    if (!/^[\\/](img[\\/][\w.-]+|config\.js)$/.test(f) || !fp.startsWith(ROOT)) { res.writeHead(404); return res.end('Not found'); }
+    if (!/^[\\/](img[\\/](?:gifts[\\/])?[\w.-]+|config\.js)$/.test(f) || !fp.startsWith(ROOT)) { res.writeHead(404); return res.end('Not found'); }
     return fs.readFile(fp, (e, d) => { if (e) { res.writeHead(404); return res.end('Not found'); } res.writeHead(200, { 'content-type': MIME[path.extname(fp)] || 'application/octet-stream', 'cache-control': 'no-cache' }); res.end(d); });
   }
   try {

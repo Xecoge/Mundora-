@@ -20,7 +20,7 @@ html{background:var(--bg);color-scheme:dark}
 .bgfx{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(900px 520px at 55% -10%,rgba(124,58,237,.38),transparent 70%),radial-gradient(600px 420px at 100% 100%,rgba(168,85,247,.18),transparent 70%);transform:translateZ(0)}
 #view.vin{animation:vin .32s cubic-bezier(.2,.8,.2,1)}
 @keyframes vin{from{opacity:0;transform:translateY(10px)}}
-body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:14px;overflow-x:hidden}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:14px;overflow-x:hidden;overflow-x:clip}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 input,select,textarea{font:inherit;color:var(--text)}
 a{color:inherit;text-decoration:none}
@@ -446,7 +446,7 @@ body.noplay .composer{bottom:16px}
 @media(min-width:1101px){.side .sep{display:none}}
 @media(max-width:900px){.grid2,.layout2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.grid3>:last-child{grid-column:1/-1}}
 @media(max-width:760px){
-  html{overflow-x:hidden}
+  html{overflow-x:hidden;overflow-x:clip}
   .sbox{flex-wrap:wrap;height:auto;min-height:52px;border-radius:24px;padding:6px 12px;row-gap:4px}
   .sbox input{min-width:0;flex:1 1 50%;height:40px}
   .sbox>.seg{order:3;flex:1 1 100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
@@ -1060,6 +1060,62 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .ge-list{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
 .ge-pick{flex:none;width:52px;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);display:grid;place-items:center;cursor:pointer;padding:4px;color:#b9b0d6}.ge-pick img{width:100%;height:100%;object-fit:contain}.ge-pick.used{opacity:.45}
 @media(max-width:760px){.tgp{border-radius:26px;padding:18px 10px 18px}.tgp-stage{height:180px}.tgp-ava{width:112px;height:112px;margin:-56px 0 0 -56px}.tgp-g{width:42px;height:42px;margin:-21px 0 0 -21px}.tgp-name{font-size:24px}.tgp-acts{gap:6px}.tgp-a{border-radius:16px;padding:10px 2px 8px}.gs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.gs-it img{width:52px;height:52px}}
+
+/* подарки маленькие, свободная расстановка */
+.tgp-g{width:34px!important;height:34px!important;margin:-17px 0 0 -17px!important;touch-action:none}
+.tgp-g::before{inset:-12px!important}
+.tgp-g::after{content:''!important;inset:-10px;left:-10px;top:-10px;width:auto;height:auto;background:radial-gradient(circle at 18% 22%,#fff 0 1.2px,transparent 2px),radial-gradient(circle at 82% 30%,#fff 0 1px,transparent 1.8px),radial-gradient(circle at 70% 85%,#fff 0 1.2px,transparent 2px),radial-gradient(circle at 25% 78%,#ffe9a8 0 1px,transparent 1.8px);opacity:.9;position:absolute;animation:tw 2.4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.35}50%{opacity:1}}
+.tgp-stage.lay{outline:1.5px dashed rgba(255,255,255,.22);outline-offset:4px;border-radius:22px}
+.tgp-g.drag{cursor:grab}.tgp-g.drag.moving{cursor:grabbing;transform:scale(1.25);z-index:3}
+.tgp-g.drag img{pointer-events:none}
+.tgp-nick{display:inline-grid;place-items:center;width:30px;height:30px;padding:0;margin:0 2px 0 6px;border:0;background:none;cursor:pointer;vertical-align:middle}.tgp-nick img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}
+.gl-bar{margin-top:12px;padding:14px 16px}.gl-h b{display:block;font-size:16px}.gl-l{margin:12px 0 6px}
+.gl-tray{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.gl-chip{flex:none;width:50px;height:50px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);display:grid;place-items:center;cursor:pointer;padding:5px;color:#b9b0d6}.gl-chip img{width:100%;height:100%;object-fit:contain}
+.gl-chip.on{border-color:#c084fc;background:rgba(192,132,252,.18);box-shadow:0 0 12px rgba(192,132,252,.45)}
+@media(max-width:760px){.tgp-g{width:30px!important;height:30px!important;margin:-15px 0 0 -15px!important}.tgp-nick{width:26px;height:26px}}
+
+.tgp-menu{padding:4px 6px}.tgp-mi{display:flex;align-items:center;gap:12px;width:100%;padding:12px 10px;border:0;background:none;color:#fff;font:inherit;font-size:15px;text-align:left;cursor:pointer;border-radius:14px}
+.tgp-mi+.tgp-mi{border-top:1px solid rgba(255,255,255,.06)}.tgp-mi:hover{background:rgba(255,255,255,.05)}.tgp-mi>.i{color:#c4b5fd;width:22px;height:22px;flex:none}
+.tgp-mi span{flex:1;min-width:0}.tgp-mi small{display:block;font-size:12px;color:#9c94bb}.tgp-mi .oi{width:26px;height:26px;object-fit:contain}.tgp-mi.red{color:#fca5a5}.tgp-mi.red .i{color:#fca5a5}
+.tgp-mi .r{transform:rotate(-90deg);opacity:.5}
+
+/* ===== ИИ-чат: liquid glass + история ===== */
+.lq{background:linear-gradient(170deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),rgba(18,10,36,.5)!important;backdrop-filter:blur(28px) saturate(1.7);-webkit-backdrop-filter:blur(28px) saturate(1.7);border:1px solid rgba(255,255,255,.13)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(255,255,255,.04),0 22px 50px -20px rgba(0,0,0,.7)!important}
+.aiw{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
+.ai-side{position:sticky;top:16px;display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:24px;max-height:calc(100vh - 32px - var(--pl))}
+.cl-search{display:flex;align-items:center;gap:8px;padding:0 12px;height:40px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#9c94bb}
+.cl-search input{flex:1;min-width:0;background:none;border:0;outline:none;color:#fff;font:inherit;font-size:14px}
+.chat-list{overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin:0 -4px;padding:0 4px;scrollbar-width:thin}
+#sheet .chat-list{max-height:60vh;margin-top:8px}
+.cl-day{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#8f88ad;padding:10px 8px 4px}
+.cl-it{display:flex;align-items:center;gap:8px;padding:9px 8px 9px 12px;border-radius:14px;cursor:pointer;transition:background .15s}
+.cl-it:hover{background:rgba(255,255,255,.06)}.cl-it.on{background:linear-gradient(120deg,rgba(139,92,246,.3),rgba(139,92,246,.1));box-shadow:inset 0 0 0 1px rgba(192,132,252,.25)}
+.cl-tx{flex:1;min-width:0}.cl-tx b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cl-tx small{display:block;font-size:12px;color:#9c94bb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-t{font-size:11px;color:#8f88ad}.cl-del{width:30px!important;height:30px!important;opacity:0;transition:opacity .15s}.cl-it:hover .cl-del,.cl-it.on .cl-del{opacity:.7}
+.cl-empty{padding:24px 10px;text-align:center;color:#8f88ad;font-size:13px}
+.aiw .chat{max-width:none;width:100%;margin:0;min-width:0;min-height:calc(100vh - 60px)}
+.chat-top{position:sticky;top:12px;z-index:5;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:22px;margin-bottom:16px}
+.chat-top .ct-hist{display:none}
+.ct-orb,.ce-orb,.msg.a .av{border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.35),rgba(139,92,246,.35) 45%,rgba(40,16,90,.8));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 18px rgba(139,92,246,.55);display:grid;place-items:center;overflow:hidden;flex:none;border:1px solid rgba(255,255,255,.18)}
+.ct-orb{width:38px;height:38px}.ct-orb img{width:30px;height:30px;object-fit:contain}
+.ct-t{flex:1;min-width:0}.ct-t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct-t small{display:flex;align-items:center;gap:6px;font-size:12px;color:#a49dc0}
+.ct-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80}
+.chat-empty{padding:30px 10px 20px}.ce-orb{width:110px;height:110px;margin:0 auto 14px;animation:orb 4s ease-in-out infinite}.ce-orb img{width:84px;height:84px;object-fit:contain}
+@keyframes orb{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 30px rgba(139,92,246,.5)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 55px rgba(192,132,252,.8)}}
+.chat-empty h2{font-size:30px}
+.ce-sugg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-width:560px;margin:6px auto 0}
+.ce-sugg button{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:18px;color:#fff;font:inherit;font-size:13.5px;text-align:left;cursor:pointer;transition:transform .2s}
+.ce-sugg button:hover{transform:translateY(-2px)}.ce-sugg .i{color:#c4b5fd;flex:none}
+.msg.a .av{width:34px;height:34px}.msg.a .av img{width:26px;height:26px;margin:0;object-fit:contain}
+.msg.a .bub{background:none!important;border:0!important;padding:4px 2px 0!important}
+.msg.u .bub{background:linear-gradient(135deg,rgba(139,92,246,.92),rgba(109,40,217,.9))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 26px -10px rgba(109,40,217,.8);border-radius:22px 22px 6px 22px!important}
+.think{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important;border-radius:14px!important}
+.composer.lq{border-radius:28px!important;padding:8px 8px 6px!important}
+.composer .send{box-shadow:0 0 0 1px rgba(255,255,255,.2) inset,0 8px 22px -6px rgba(139,92,246,.9)}
+@media(max-width:1100px){.aiw{grid-template-columns:minmax(0,1fr)}.ai-side{display:none}.chat-top .ct-hist{display:grid}}
+@media(max-width:760px){.chat-top{top:8px;border-radius:20px;margin-bottom:10px}.ce-sugg{grid-template-columns:1fr}.chat-empty h2{font-size:26px}.ce-orb{width:92px;height:92px}.ce-orb img{width:70px;height:70px}.msg.a .av{display:none}}
 </style>
 </head>
 <body>
@@ -1264,7 +1320,7 @@ const mLabel=k=>{const [y,m]=k.split('-').map(Number);return `${MONTHS_F[m-1]} $
 
 /* ===================== аккаунт: кто вошёл (сервер кладёт TEMPO_USER в страницу) ===================== */
 const USR=window.TEMPO_USER||null;
-const SYNC_LIST=['likes','playlists','plays','recent','taste','banned','imported','ops','hist','seeded','prefs','notes','chat','chatFin','cryptoFav','cryptoCur','cryptoType','cryptoRange'];
+const SYNC_LIST=['likes','playlists','plays','recent','taste','banned','imported','ops','hist','seeded','prefs','notes','chats','chatFin','cryptoFav','cryptoCur','cryptoType','cryptoRange'];
 const SYNC_SET=new Set(SYNC_LIST);
 const SY={ver:0,dirty:new Set(),busy:false,again:false,t:0,last:0,err:'',frozen:!!(USR&&USR.status==='frozen'),iv:0,pend:false};
 (()=>{
@@ -2444,16 +2500,33 @@ V.after.artist=async(id,r)=>{
 };
 
 /* ---------- AI chat ---------- */
-const CH={msgs:LS.get('chat',[]),busy:false,ctl:null,files:[],draft:'',useFin:LS.get('chatFin',true)};
+const CH={msgs:LS.get('chat',[]),busy:false,ctl:null,files:[],draft:'',useFin:LS.get('chatFin',true),cid:LS.get('chatId','')||uid(),chats:LS.get('chats',[]),q:'',upd:0};
+LS.set('chatId',CH.cid);
 CH.msgs.forEach(m=>{if(m.pending){delete m.pending;if(!m.text)m.error='Ответ прерван'}});
+// история чатов: каждый чат — {id,title,updated,msgs}; удалённые остаются «надгробием» {del:true}, чтобы не вернулись с другого устройства
+const chatTitle=m=>{const u=m.find(x=>x.role==='user'&&(x.text||'').trim());return u?u.text.replace(/\s+/g,' ').trim().slice(0,70):(m.some(x=>x.files&&x.files.length)?'Файл':'Новый чат')};
+const chatLite=m=>m.filter(x=>!x.pending).map(x=>{const o={role:x.role,text:x.text||'',ts:x.ts};if(x.secs)o.secs=x.secs;if(x.acts)o.acts=x.acts;if(x.error)o.error=x.error;if(x.files&&x.files.length)o.files=x.files.map(f=>({name:f.name,type:f.type,size:f.size,kind:f.kind,thumb:f.thumb}));return o});
+function chatStore(){if(!CH.msgs.length)return;const now=Date.now();CH.upd=now;const e={id:CH.cid,title:chatTitle(CH.msgs),updated:now,msgs:chatLite(CH.msgs)};CH.chats=[e,...CH.chats.filter(c=>c.id!==CH.cid)].slice(0,60);LS.set('chats',CH.chats);chatListPaint()}
+function chatLocal(){try{localStorage.setItem('tempo:chat',JSON.stringify(CH.msgs))}catch(e){}}
+if(!CH.chats.length&&CH.msgs.length)setTimeout(chatStore,0); // перенос старого чата в историю
 function chatSave(){
-  CH.msgs=CH.msgs.slice(-40);
+  CH.msgs=CH.msgs.slice(-40);chatStore();
   try{localStorage.setItem('tempo:chat',JSON.stringify(CH.msgs))}catch(e){
     CH.msgs.forEach((m,i)=>{if(i<CH.msgs.length-4)(m.files||[]).forEach(f=>{delete f.data;delete f.pages})});
     try{localStorage.setItem('tempo:chat',JSON.stringify(CH.msgs))}catch(e2){}
   }
-  syncMark('chat');
 }
+function chatDay(t){const d=new Date(t),n=new Date();const a=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();return t>=a?'Сегодня':t>=a-864e5?'Вчера':t>=a-7*864e5?'На этой неделе':'Раньше'}
+function chatListHTML(){
+  const q=CH.q.trim().toLowerCase();
+  const L=CH.chats.filter(c=>!c.del&&c.msgs&&c.msgs.length).filter(c=>!q||(c.title||'').toLowerCase().includes(q)||c.msgs.some(m=>(m.text||'').toLowerCase().includes(q)));
+  if(!L.length)return `<div class="cl-empty">${q?'Ничего не нашлось':'Здесь будут твои чаты'}</div>`;
+  let last='';return L.map(c=>{const g=chatDay(c.updated||0),h=g!==last?`<div class="cl-day">${g}</div>`:'';last=g;
+    const hit=q&&!(c.title||'').toLowerCase().includes(q)?(c.msgs.find(m=>(m.text||'').toLowerCase().includes(q))||{}).text:'';
+    const sn=hit?hit.slice(Math.max(0,hit.toLowerCase().indexOf(q)-30),Math.max(0,hit.toLowerCase().indexOf(q)-30)+90):((c.msgs.filter(m=>m.role==='assistant'&&m.text).pop()||{}).text||'');
+    return h+`<div class="cl-it${c.id===CH.cid?' on':''}" data-act="chat-open" data-id="${c.id}" role="button" tabindex="0"><div class="cl-tx"><b>${esc(c.title||'Чат')}</b><small>${esc(sn.replace(/[#*`>_\[\]]/g,'').replace(/\s+/g,' ').slice(0,90))}</small></div><span class="cl-t">${new Date(c.updated||0).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</span><button class="ib cl-del" data-act="chat-del" data-id="${c.id}" title="Удалить">${ico('trash','s')}</button></div>`}).join('')}
+function chatListPaint(){$$('.chat-list').forEach(el=>el.innerHTML=chatListHTML())}
+const CHAT_SUGG=[['wallet','Запиши расход 450 ₽ на кофе'],['play','Включи что-нибудь бодрое'],['coin','Какой сейчас курс биткоина?'],['notes','Создай заметку со списком покупок']];
 const LIBS={};
 function loadLib(url,glob){if(window[glob])return Promise.resolve(window[glob]);if(LIBS[url])return LIBS[url];return LIBS[url]=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=url;sc.onload=()=>window[glob]?res(window[glob]):rej(new Error('библиотека не загрузилась'));sc.onerror=()=>{delete LIBS[url];rej(new Error('нет доступа к библиотеке для чтения файла'))};document.head.appendChild(sc)})}
 const CDN={pdf:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',pdfw:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',mammoth:'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',xlsx:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',jszip:'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'};
@@ -2603,7 +2676,7 @@ function msgHTML(m,i){
   if(m.role==='user')return `<div class="msg u" data-i="${i}"><div class="bub">${filesHTML(m.files)}${m.text?`<div class="md">${esc(m.text).replace(/\n/g,'<br>')}</div>`:''}</div></div>`;
   const live=!!m.pending,hasAns=!!(m.text&&m.text.trim());
   const think=m.reasoning?`<details class="think"${m._thOpen?' open':''}><summary>${ico(live&&!hasAns?'loader':'spark',live&&!hasAns?'ldg s':'s')}<span>${live&&!hasAns?'Думает'+(m.secs?` · ${m.secs} с`:'…'):'Ход мыслей'+(m.secs?` · ${m.secs} с`:'')}</span>${ico('chev','s chev')}</summary><div class="th">${m._thOpen?esc(thTail(m.reasoning)):''}</div></details>`:'';
-  return `<div class="msg a" data-i="${i}"><div class="av"><img src="${IMG.thumbs}" alt=""></div><div class="bub">${think}
+  return `<div class="msg a" data-i="${i}"><div class="av"><img src="/img/logo-mark.webp" alt=""></div><div class="bub">${think}
     <div class="ans md">${hasAns?md(aiShown(m.text,live)):live?'<span class="dots"><i></i><i></i><i></i></span>':''}</div>${actsHTML(m.acts)}
     ${m.error?`<div class="notice" style="margin-top:8px">${ico('x')}<div style="flex:1;word-break:break-word">Ошибка: ${esc(m.error)}</div><button class="btn sm" data-act="chat-retry" data-i="${i}">${ico('refresh')}Ещё раз</button></div>`:''}
     ${!live&&!m.error?`<div class="mact"><button class="ib" data-act="chat-copy" data-i="${i}" title="Копировать">${ico('copy','s')}</button><button class="ib" data-act="chat-retry" data-i="${i}" title="Ответить заново">${ico('refresh','s')}</button>${m.stopped?'<span class="k">остановлено</span>':''}</div>`:''}
@@ -2648,11 +2721,23 @@ async function chatRun(am,effort='medium'){
   if(!list.length&&!am.stopped&&!am.error&&aiClaims(said)){am.acts=[{s:'run',t:'…'}];chatPaint(am);list=await aiRepair(msgs,said).catch(()=>[]);if(!list.length){am.acts=[{s:'err',t:'ИИ не прислал команду — попробуй сказать иначе'}];chatPaint(am);chatSave()}}
   if(list.length&&!am.stopped)await aiRunActions(am,list);
 }
-V.ai=()=>`<div class="chat" id="chatBox">
-  <div class="chat-top"><div class="h2">${ico('chat')}ИИ-помощник</div>${CH.msgs.length?`<button class="btn ghost sm" data-act="chat-new">${ico('plus')}Новый чат</button>`:''}</div>
-  ${CH.msgs.length?'':`<div class="chat-empty"><img src="${IMG.thumbs}" alt=""><h2>Спроси или попроси сделать</h2><p>ИИ сам управляет сайтом: «запиши расход 450 ₽ на кофе», «включи что-нибудь бодрое», «создай заметку со списком покупок», «добавь биткоин в избранное». Файлы и изображения тоже можно прикреплять.</p></div>`}
+V.ai=()=>`<div class="aiw">
+  <aside class="ai-side lq">
+    <button class="btn" style="width:100%;justify-content:center" data-act="chat-new">${ico('plus','s')}Новый чат</button>
+    <label class="cl-search">${ico('search','s')}<input class="cl-q" placeholder="Поиск по чатам" value="${esc(CH.q)}"></label>
+    <div class="chat-list">${chatListHTML()}</div>
+  </aside>
+  <div class="chat" id="chatBox">
+  <div class="chat-top lq">
+    <button class="ib ct-hist" data-act="chat-hist" title="История чатов">${ico('hist')}</button>
+    <span class="ct-orb"><img src="/img/logo-mark.webp" alt=""></span>
+    <div class="ct-t"><b>${esc(CH.msgs.length?chatTitle(CH.msgs):'ИИ-помощник Mundora')}</b><small>${AI.on?'<i class="ct-dot"></i>на связи · управляет сайтом':'не настроен'}</small></div>
+    <button class="ib" data-act="chat-new" title="Новый чат">${ico('edit')}</button>
+  </div>
+  ${CH.msgs.length?'':`<div class="chat-empty"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><h2>Чем помочь?</h2><p>Спроси что угодно или попроси сделать на сайте — ИИ сам запишет расход, включит музыку, создаст заметку. Можно прикрепить фото или файл.</p>
+    <div class="ce-sugg">${CHAT_SUGG.map(([i,t])=>`<button class="lq" data-act="chat-sugg" data-t="${esc(t)}">${ico(i,'s')}<span>${t}</span></button>`).join('')}</div></div>`}
   <div class="msgs" id="msgs">${CH.msgs.map(msgHTML).join('')}</div>
-  <form class="composer" id="chatF">
+  <form class="composer lq" id="chatF">
     <div class="att" id="att"></div>
     <div class="crow">
       <label class="ib" title="Прикрепить файл или фото">${ico('clip')}<input type="file" id="chatFile" multiple hidden></label>
@@ -2660,8 +2745,9 @@ V.ai=()=>`<div class="chat" id="chatBox">
       <button class="send" id="chatSend" type="submit" title="Отправить">${ico('send')}</button>
     </div>
     <div class="cmeta"><span class="lock" title="Рассуждение включено всегда">${ico('lock','s')}Рассуждение · авто</span><button type="button" class="chip dark${CH.useFin?' on':''}" data-act="chat-fin">${ico('wallet','s')}Мои данные</button>${AI.on?'':'<span class="k">ИИ не настроен на сервере</span>'}</div>
-  </form></div>`;
+  </form></div></div>`;
 V.after.ai=()=>{
+  $$('.cl-q').forEach(q=>q.addEventListener('input',()=>{CH.q=q.value;chatListPaint()}));
   const f=$('#chatF'),inp=$('#chatIn'),box=$('#chatBox');
   const grow=()=>{inp.style.height='';inp.style.height=Math.min(220,inp.scrollHeight)+'px'};grow();
   f.addEventListener('submit',e=>{e.preventDefault();chatSend()});
@@ -3115,22 +3201,25 @@ const GIFT_ACT={
       if(to){toast('Подарок отправлен','star');try{const t=(await peopleApi('id='+to)).profile;PEOPLE.cache[t.id]=t;if(route()==='u-'+to)$('#pfBox').innerHTML=pfHTML(t)}catch(e){}}
       else{toast('Подарок в профиле','star');if(route()==='u-'+j.profile.id)$('#pfBox').innerHTML=pfHTML(j.profile)}}
     catch(e){toast(e.message,'x');el.disabled=false}},
-  'gift-view'(el){const p=PEOPLE.cache[el.dataset.u];if(!p)return;const g=(p.gifts||[]).find(x=>x.id===el.dataset.g);if(!g)return;const G=GIFT_CAT[g.k],r=giftRar(g.k),on=(p.slots||[]).includes(g.id);
+  'gift-view'(el){const p=PEOPLE.cache[el.dataset.u];if(!p)return;const g=(p.gifts||[]).find(x=>x.id===el.dataset.g);if(!g)return;const G=GIFT_CAT[g.k],r=giftRar(g.k);
     openSheet(`<div class="gv r-${r.c}"><button class="ib gv-x" data-act="close-sheet">${ico('x')}</button><div class="gv-img"><img src="${giftImg(g.k)}" alt=""></div><h3 class="gv-n">${G.n}</h3><div class="gv-r">${r.n} · ${G.p.toLocaleString('ru-RU')} XP</div>
       <div class="glass tgp-info" style="margin-top:14px"><div class="tgp-row"><small>${g.from?'от кого':'получен'}</small><b>${g.from?`<a href="#u-${g.from.id}" data-act="close-sheet">${esc(g.from.name)}</a>`:'куплен за XP'}</b></div><div class="tgp-row"><small>дата</small><b>${new Date(g.t).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b></div></div>
-      ${p.self?`<button class="btn${on?' ghost':''}" style="width:100%;justify-content:center;margin-top:14px" data-act="gift-toggle" data-g="${g.id}">${ico('pin','s')}${on?'Убрать от аватарки':'Показать у аватарки'}</button>`:''}</div>`)},
-  async 'gift-toggle'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const sl=[...(me.slots||[])];const i=sl.indexOf(el.dataset.g);
-    if(i>=0)sl[i]=null;else{const f=sl.indexOf(null);if(f<0)return toast('Все 6 мест заняты — убери другой подарок в «Изменить»','x');sl[f]=el.dataset.g}
-    await giftSaveSlots(sl);closeSheet()},
-  'gift-slot'(el){pfEdit.slot=+el.dataset.i;$$('.ge-slot').forEach(b=>b.classList.toggle('on',b===el));const me=PEOPLE.cache[USR.id];const gs=(me&&me.gifts)||[];
-    $('#geList').innerHTML=gs.length?`<button class="ge-pick" data-act="gift-put" data-g="">${ico('x','s')}</button>`+gs.map(g=>`<button class="ge-pick${(me.slots||[]).includes(g.id)?' used':''}" data-act="gift-put" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""></button>`).join(''):'<div class="k">Сначала купи подарок</div>'},
-  async 'gift-put'(el){const me=PEOPLE.cache[USR.id];if(!me||pfEdit.slot==null)return;const sl=[...(me.slots||[])].map(x=>x===el.dataset.g?null:x);sl[pfEdit.slot]=el.dataset.g||null;
-    await giftSaveSlots(sl);const box=$('#geStage');if(box)box.outerHTML=giftEditor();},
+      ${p.self?`<div class="row" style="margin-top:14px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gift-nick" data-g="${g.id}">${p.nick===g.id?'Убрать у ника':'Поставить у ника'}</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-start">${ico('pin','s')}Расставить</button></div>`:''}</div>`)},
+  'gl-start'(){const me=PEOPLE.cache[USR.id];if(!me)return;closeSheet();GL.on=true;GL.pos=(me.pos||[]).map(x=>({...x}));GL.nick=me.nick||null;if(route()!=='u-'+USR.id)location.hash='#u-'+USR.id;else glPaint()},
+  'gl-cancel'(){GL.on=false;glPaint()},
+  async 'gl-save'(el){el.disabled=true;try{const j=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick});PEOPLE.cache[j.profile.id]=j.profile;GL.on=false;glPaint();toast('Сохранено','check')}catch(e){toast(e.message,'x');el.disabled=false}},
+  'gl-toggle'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);if(i>=0)GL.pos.splice(i,1);else{if(GL.pos.length>=10)return toast('Максимум 10 подарков у аватарки','x');const D=[[20,18],[80,16],[10,50],[90,48],[22,82],[78,84],[36,8],[64,8],[6,22],[94,76]];const d=D.find(([x,y])=>!GL.pos.some(p=>Math.abs(p.x-x)<6&&Math.abs(p.y-y)<6))||[50,90];GL.pos.push({id,x:d[0],y:d[1]})}glPaint()},
+  'gl-nick'(el){GL.nick=el.dataset.g||null;glPaint()},
+  async 'gift-nick'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const nick=me.nick===el.dataset.g?null:el.dataset.g;try{const j=await peopleApi('a=gift-layout',{nick});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();glPaint()}catch(e){toast(e.message,'x')}},
 };
-async function giftSaveSlots(sl){try{const j=await peopleApi('a=gift-slots',{slots:sl});PEOPLE.cache[j.profile.id]=j.profile;if(route()==='u-'+j.profile.id)$('#pfBox').innerHTML=pfHTML(j.profile);return j.profile}catch(e){toast(e.message,'x')}}
-function giftEditor(){const me=PEOPLE.cache[USR.id]||{},gby=Object.fromEntries((me.gifts||[]).map(g=>[g.id,g]));
-  return `<div id="geStage"><div class="ge-stage">${(me.slots||Array(6).fill(null)).map((id,i)=>{const g=id&&gby[id];return `<button class="ge-slot gp${i}${pfEdit.slot===i?' on':''}" data-act="gift-slot" data-i="${i}">${g?`<img src="${giftImg(g.k)}" alt="">`:ico('plus','s')}</button>`}).join('')}<img class="ge-ava" src="${avaSrc(USR.avatar)}" alt=""></div>
-  <div class="k" style="text-align:center;margin:6px 0">Нажми на место вокруг аватарки и выбери подарок</div><div class="ge-list" id="geList"></div></div>`}
+const GL={on:false,pos:[],nick:null}; // режим расстановки подарков в своём профиле
+function glPaint(){const me=USR&&PEOPLE.cache[USR.id];if(me&&route()==='u-'+me.id){const y=scrollY;$('#pfBox').innerHTML=pfHTML(me);scrollTo(0,y)}}
+// перетаскивание подарков по шапке профиля
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.tgp-g.drag');if(!b||!GL.on)return;e.preventDefault();
+  const st=$('#tgpStage');if(!st)return;b.setPointerCapture(e.pointerId);b.classList.add('moving');const id=b.dataset.gid;
+  const mv=ev=>{const r=st.getBoundingClientRect();const x=Math.max(2,Math.min(98,(ev.clientX-r.left)/r.width*100)),y=Math.max(2,Math.min(98,(ev.clientY-r.top)/r.height*100));b.style.left=x+'%';b.style.top=y+'%';const p=GL.pos.find(q=>q.id===id);if(p){p.x=Math.round(x*10)/10;p.y=Math.round(y*10)/10}};
+  const up=()=>{b.classList.remove('moving');b.removeEventListener('pointermove',mv);b.removeEventListener('pointerup',up);b.removeEventListener('pointercancel',up)};
+  b.addEventListener('pointermove',mv);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
 const RV_ACT={
   'app-get'(){openSheet(`<h3>${ico('down')}Приложение Mundora</h3><div class="glass" style="padding:14px 16px"><b>Android</b><div class="k" style="margin:4px 0 10px">Скачай файл и открой его. Если телефон спросит — разреши установку из этого источника.</div><a class="btn sm" href="${APP_DL}Mundora.apk">${ico('down','s')}Скачать для Android</a></div>`)},
   'rv-star'(el){const t=el.dataset.t,f=RVF[t]||(RVF[t]={s:0,x:''});const ta=$(`.rvtext[data-t="${t}"]`);if(ta)f.x=ta.value;f.s=+el.dataset.s;f.touched=true;rvPaint(t)},
@@ -3422,6 +3511,7 @@ const ACT={
   's-mode'(el){sMode=el.dataset.v;{const i=$('#sIn');if(i)i.placeholder=sMode==='people'?'Ник или ID человека…':'Трек, артист, ремикс или человек…'}$$('[data-act=s-mode]').forEach(b=>b.classList.toggle('on',b===el));doSearch()},
   genre(el){openGenre(el.dataset.g)},
   profile(){
+    if(USR&&USR.id!=null){closeSheet();location.hash='#u-'+USR.id;return}
     const g=topOf(S.taste.genre,3).map(x=>gRu(x[0]));
     openSheet(`<h3><span class="ava"><span class="pic"><img src="${IMG.crown}" alt=""></span></span>Профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
     ${USR?`<div class="acc"><img src="${avaSrc(USR.avatar)}" alt=""><div style="min-width:0;flex:1"><b>${esc(USR.name||'')}${vBadge(USR)}</b><small><span class="mono" style="letter-spacing:.06em">ID ${USR.id}</span> · ${esc(USR.email)}</small><small>${USR.owner?'владелец · ':USR.admin?'администратор · ':''}${{active:'аккаунт активен',frozen:'аккаунт заморожен'}[USR.status]||USR.status}</small></div></div>
@@ -3482,7 +3572,14 @@ const ACT={
   'n-ai-stop'(){NT.ai&&NT.ai.ctl.abort()},
   'n-ai-cancel'(){NT.ai=null;const b=$('#nAiOut');if(b)b.innerHTML=''},
   'n-ai-apply'(el){noteApply(el.dataset.m)},
-  'chat-new'(){if(CH.busy)CH.ctl&&CH.ctl.abort();CH.msgs=[];chatSave();render()},
+  'chat-new'(){if(CH.busy)CH.ctl&&CH.ctl.abort();chatStore();CH.cid=uid();LS.set('chatId',CH.cid);CH.msgs=[];chatLocal();closeSheet();render()},
+  'chat-open'(el,e){if(e&&e.target.closest('.cl-del'))return;if(CH.busy)CH.ctl&&CH.ctl.abort();const c=CH.chats.find(x=>x.id===el.dataset.id);if(!c)return;chatStore();CH.cid=c.id;LS.set('chatId',c.id);CH.msgs=JSON.parse(JSON.stringify(c.msgs||[]));CH.upd=c.updated;chatLocal();closeSheet();if(route()==='ai')render();else location.hash='#ai'},
+  'chat-del'(el,e){e&&e.stopPropagation();const id=el.dataset.id;CH.chats=CH.chats.map(c=>c.id===id?{id,del:true,updated:Date.now(),msgs:[]}:c);LS.set('chats',CH.chats);if(id===CH.cid){if(CH.busy)CH.ctl&&CH.ctl.abort();CH.cid=uid();LS.set('chatId',CH.cid);CH.msgs=[];chatLocal();render()}chatListPaint()},
+  'chat-hist'(){openSheet(`<h3>${ico('hist')}Чаты<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+    <button class="btn" style="width:100%;justify-content:center;margin-bottom:10px" data-act="chat-new">${ico('plus','s')}Новый чат</button>
+    <label class="cl-search">${ico('search','s')}<input class="cl-q" placeholder="Поиск по чатам" value="${esc(CH.q)}"></label><div class="chat-list">${chatListHTML()}</div>`);
+    $$('#sheet .cl-q').forEach(q=>{q.addEventListener('input',()=>{CH.q=q.value;chatListPaint()})})},
+  'chat-sugg'(el){const i=$('#chatIn');if(i){i.value=el.dataset.t;CH.draft=el.dataset.t}chatSend()},
   'chat-fin'(el){CH.useFin=!CH.useFin;LS.set('chatFin',CH.useFin);el.classList.toggle('on',CH.useFin);toast(CH.useFin?'ИИ видит твои данные на сайте и может их менять':'ИИ не видит твои данные','wallet')},
   'chat-copy'(el){const m=CH.msgs[+el.dataset.i];if(m)copyText(m.text||'')},
   'chat-retry'(el){if(CH.busy)return;const i=+el.dataset.i;CH.msgs=CH.msgs.slice(0,i);const am={role:'assistant',text:'',reasoning:'',ts:Date.now(),pending:true};CH.msgs.push(am);chatDraw();toBottom();chatRun(am,'fast')},
@@ -3494,9 +3591,10 @@ const ACT={
 };
 /* ===================== синхронизация с аккаунтом ===================== */
 const SYNC_MAX=900000;
-const SYNC_VIEWS={likes:/^(home|playlists|pl-|library|flow)/,playlists:/^(home|playlists|pl-)/,plays:/^(home|library)/,recent:/^home/,imported:/^(library|playlists)/,ops:/^(finance|budget|tables|home)/,hist:/^(history|calc|percent|spread)/,notes:/^(notes|note-)/,chat:/^ai$/,chatFin:/^ai$/,cryptoFav:/^(crypto|coin-)/,cryptoCur:/^(crypto|coin-)/,prefs:/^(flow|home)/};
+const SYNC_VIEWS={likes:/^(home|playlists|pl-|library|flow)/,playlists:/^(home|playlists|pl-)/,plays:/^(home|library)/,recent:/^home/,imported:/^(library|playlists)/,ops:/^(finance|budget|tables|home)/,hist:/^(history|calc|percent|spread)/,notes:/^(notes|note-)/,chats:/^ai$/,chatFin:/^ai$/,cryptoFav:/^(crypto|coin-)/,cryptoCur:/^(crypto|coin-)/,prefs:/^(flow|home)/};
 function syncLocal(k){try{const s=localStorage.getItem('tempo:'+k);return s==null?undefined:JSON.parse(s)}catch(e){return undefined}}
 function syncPack(k,v){
+  if(k==='chats'&&Array.isArray(v)){let L=v.slice(0,60);while(L.length>1&&JSON.stringify(L).length>SYNC_MAX){const i=L.map((c,j)=>c.msgs&&c.msgs.length?j:-1).filter(j=>j>=0).pop();if(i==null||i<1)break;L[i]={...L[i],msgs:L[i].msgs.slice(-6)};if(JSON.stringify(L).length>SYNC_MAX)L=L.slice(0,-1)}return L}
   if(k!=='chat'||!Array.isArray(v))return v;
   // в облако чат уходит без тяжёлых вложений (картинки остаются превью)
   let msgs=v.filter(m=>!m.pending).map(m=>m.files&&m.files.length?{...m,files:m.files.map(f=>({name:f.name,type:f.type,size:f.size,kind:f.kind,note:f.note,thumb:f.thumb,text:f.text&&f.text.length>6000?f.text.slice(0,6000)+'\n…[сокращено]':f.text}))}:m);
@@ -3505,7 +3603,7 @@ function syncPack(k,v){
 }
 const itemKey=(k,x)=>x==null?'':typeof x!=='object'?String(x):k==='chat'?x.role+':'+x.ts:x.id!=null?String(x.id):x.t&&x.t.id!=null?'t:'+x.t.id:JSON.stringify(x);
 const itemT=x=>x&&typeof x==='object'?(x.updated||x.ts||x.created||0):0;
-const SYNC_CAP={recent:80,plays:150,hist:300,chat:40};
+const SYNC_CAP={recent:80,plays:150,hist:300,chat:40,chats:60};
 function syncMerge(k,loc,rem){
   if(rem==null)return loc;if(loc==null)return rem;
   if(Array.isArray(loc)&&Array.isArray(rem)){
@@ -3514,6 +3612,7 @@ function syncMerge(k,loc,rem){
     for(const x of rem){const key=itemKey(k,x);if(!seen.has(key)){out.push(x);seen.add(key)}}
     if(k==='plays')out.sort((a,b)=>(b.ts||0)-(a.ts||0));
     if(k==='chat')out.sort((a,b)=>(a.ts||0)-(b.ts||0));
+    if(k==='chats')out.sort((a,b)=>(b.updated||0)-(a.updated||0));
     const cap=SYNC_CAP[k];return cap?(k==='chat'?out.slice(-cap):out.slice(0,cap)):out;
   }
   if(typeof loc==='object'&&typeof rem==='object'&&!Array.isArray(loc)&&!Array.isArray(rem)){
@@ -3532,6 +3631,7 @@ function syncApplyMem(k,v){
   if(KEYS.includes(k)){if(v!==undefined)S[k]=v;if(k==='taste'){S.taste=S.taste||{genre:{},mood:{},tag:{},artist:{},artistName:{},events:0};S.taste.lang=S.taste.lang||{}}if(k==='ops')S.ops=(S.ops||[]).filter(o=>!o.demo);if(k==='likes'||k==='banned')homeMix=null}
   else if(k==='notes'){NT.list=Array.isArray(v)?v:[];if(NT.cur)NT.cur=NT.list.find(n=>n.id===NT.cur.id)||NT.cur}
   else if(k==='chat'){if(!CH.busy)CH.msgs=Array.isArray(v)?v:[]}
+  else if(k==='chats'){CH.chats=Array.isArray(v)?v:[];const e=CH.chats.find(c=>c.id===CH.cid);if(e&&!CH.busy){if(e.del){CH.cid=uid();LS.set('chatId',CH.cid);CH.msgs=[];chatLocal()}else if((e.updated||0)>(CH.upd||0)){CH.msgs=JSON.parse(JSON.stringify(e.msgs||[]));CH.upd=e.updated;chatLocal()}}}
   else if(k==='chatFin')CH.useFin=v!==false;
   else if(k==='cryptoFav')CR.fav=Array.isArray(v)?v:[];
   else if(k==='cryptoCur')CR.cur=v||'usd';
@@ -3935,37 +4035,52 @@ V.after.user=async(rid,r)=>{
 // ---------- Подарки (крипто, 3D). Картинки: /img/gifts/<ключ>.webp; пока их нет — временные 3D-иконки сайта ----------
 const GIFT_CAT={usdt:{n:'Стопка USDT',p:250},btc:{n:'Золотой биткоин',p:300},doge:{n:'Doge-монета',p:350},eth:{n:'Эфир-кристалл',p:400},ton:{n:'Алмаз TON',p:450},ledger:{n:'Холодный кошелёк',p:600},rocket:{n:'Ракета to the Moon',p:800},bull:{n:'Бык',p:1200},bear:{n:'Медведь',p:1200},miner:{n:'Майнинг-риг',p:1500},whale:{n:'Кит',p:2500},diamond:{n:'Diamond Hands',p:5000}};
 const GIFT_TMP={usdt:'gift_stack',btc:'money',doge:'planet',eth:'crystal',ton:'gem_orbit',ledger:'box_open',rocket:'asteroid',bull:'bar_gold',bear:'bar_silver',miner:'orbit',whale:'planet2',diamond:'gift_planet'};
-const GIFT_READY=new Set([]); // ключи, для которых уже загружены настоящие картинки /img/gifts/<k>.webp
+const GIFT_READY=new Set(['usdt','btc','doge','eth','ton','ledger','rocket','bull','bear','miner','whale','diamond']); // ключи, для которых уже загружены настоящие картинки /img/gifts/<k>.webp
 const giftImg=k=>GIFT_READY.has(k)?`/img/gifts/${k}.webp`:`/img/${GIFT_TMP[k]||'gift_planet'}.webp`;
 const giftRar=k=>{const p=(GIFT_CAT[k]||{}).p||0;return p>=3000?{c:'leg',n:'Легендарный'}:p>=1000?{c:'epic',n:'Эпический'}:p>=450?{c:'rare',n:'Редкий'}:{c:'com',n:'Обычный'}};
 const TGP_PAT=[[4,8,-12],[16,30,8],[6,58,14],[18,84,-6],[30,6,4],[30,62,-10],[70,8,10],[84,28,-8],[94,56,6],[80,84,12],[68,62,-4],[44,90,8],[56,4,-6],[92,6,-14],[2,86,4],[96,86,-10]];
 const kXP=n=>n<1000?String(n):String(n/1000).replace('.',',')+'к';
+function pfAccount(){return `<div class="h3">${ico('user')}Аккаунт</div><div class="glass tgp-info tgp-menu">
+    ${USR.admin?`<button class="tgp-mi" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt=""><span>Админ-панель<small>коды и аккаунты</small></span>${ico('chev','s r')}</button>`:''}
+    ${USR.until&&!USR.admin?`<div class="tgp-mi">${ico('lock')}<span>Доступ по коду<small>до ${new Date(USR.until).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</small></span></div>`:''}
+    <button class="tgp-mi" data-act="backup">${ico('copy')}<span>Скопировать резервную копию<small>все данные одним текстом</small></span></button>
+    <button class="tgp-mi" data-act="restore">${ico('import')}<span>Восстановить из копии</span></button>
+    <button class="tgp-mi red" data-act="acc-logout">${ico('back')}<span>Выйти из аккаунта</span></button>
+  </div>`}
 function pfHTML(p){
   const c=p.capital,pct=c.to==null?100:Math.max(3,Math.min(100,Math.round((c.score-c.from)/(c.to-c.from)*100)));
   const joined=p.joined?new Date(p.joined).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}).replace(/\s*г\.$/,''):'';
   const open=p.genres!==undefined;
   const s=c.stats;
   const canCov=USR&&USR.admin&&p.self; // обложку админ меняет только себе
-  const gs=p.gifts||[],gby=Object.fromEntries(gs.map(g=>[g.id,g])),sl=(p.slots||[]).map(id=>id&&gby[id]);
-  const patK=(sl.find(Boolean)||gs[0]||{}).k;
+  const gs=p.gifts||[],gby=Object.fromEntries(gs.map(g=>[g.id,g])),lay=p.self&&GL.on;
+  const pos=(lay?GL.pos:(p.pos||[])).filter(x=>gby[x.id]),nickId=lay?GL.nick:p.nick,nickG=nickId&&gby[nickId];
+  const patK=((pos[0]&&gby[pos[0].id])||gs[0]||{}).k;
   const act=(a,ic,t,extra='')=>`<button class="tgp-a" data-act="${a}" ${extra}>${ic}<span>${t}</span></button>`;
   return `<div class="tgp${p.cover?' has-cov':''}"${p.cover?` style="--cov:url('${esc(p.cover)}')"`:''}>
     ${patK?`<div class="tgp-pat" aria-hidden="true">${TGP_PAT.map(([x,y,r])=>`<img src="${giftImg(patK)}" alt="" style="left:${x}%;top:${y}%;transform:rotate(${r}deg)">`).join('')}</div>`:''}
     ${canCov?`<button class="pf-covbtn" data-act="pf-cover" data-id="${p.id}" title="Обложка профиля">${ico('edit','s')}<span>Обложка</span></button>`:''}
-    <div class="tgp-stage">
-      ${sl.map((g,i)=>g?`<button class="tgp-g gp${i} r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`:'').join('')}
+    <div class="tgp-stage${lay?' lay':''}" id="tgpStage">
       <img class="tgp-ava" src="${avaSrc(p.avatar)}" alt="">
+      ${pos.map(x=>{const g=gby[x.id];return `<button class="tgp-g r-${giftRar(g.k).c}${lay?' drag':''}" ${lay?`data-gid="${g.id}"`:`data-act="gift-view" data-u="${p.id}" data-g="${g.id}"`} style="left:${x.x}%;top:${x.y}%" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt="" draggable="false"></button>`}).join('')}
     </div>
-    <h1 class="tgp-name">${esc(p.name)}${vBadge(p,true)}</h1>
+    <h1 class="tgp-name">${esc(p.name)}${nickG?`<button class="tgp-nick" ${lay?'':`data-act="gift-view" data-u="${p.id}" data-g="${nickG.id}"`} title="${esc(GIFT_CAT[nickG.k].n)}"><img src="${giftImg(nickG.k)}" alt=""></button>`:''}${vBadge(p,true)}</h1>
     <div class="tgp-sub">${p.admin?`<span class="pill adm">${p.owner?'владелец':'администратор'}</span>`:''}<span>${seenTxt(p)}</span></div>
   </div>
-  <div class="tgp-acts">
+  ${lay?`<div class="glass gl-bar">
+    <div class="gl-h"><b>Расстановка подарков</b><span class="k">Тяни подарки пальцем или мышкой куда хочешь</span></div>
+    <div class="k gl-l">У аватарки · ${GL.pos.length} из 10</div>
+    <div class="gl-tray">${gs.map(g=>`<button class="gl-chip${GL.pos.some(x=>x.id===g.id)?' on':''}" data-act="gl-toggle" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')||'<span class="k">Сначала купи подарок</span>'}</div>
+    <div class="k gl-l">У ника (после имени, перед галочкой)</div>
+    <div class="gl-tray"><button class="gl-chip${!GL.nick?' on':''}" data-act="gl-nick" data-g="">${ico('x','s')}</button>${gs.map(g=>`<button class="gl-chip${GL.nick===g.id?' on':''}" data-act="gl-nick" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""></button>`).join('')}</div>
+    <div class="row" style="margin-top:12px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Готово</button></div>
+  </div>`:`<div class="tgp-acts">
     ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
       :act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
     ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
     ${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?act('app-get',ico('down'),'Приложение'):''}
     ${USR&&USR.admin&&!p.self?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''}
-  </div>
+  </div>`}
   <div class="glass tgp-info">
     ${p.bio?`<div class="tgp-row"><small>о себе</small><p>${esc(p.bio)}</p></div>`:''}
     ${p.tg?`<button class="tgp-row" data-act="tg-go" data-u="${esc(p.tg.username||'')}"><small>telegram</small><b class="tgp-link">${esc(tgLabel(p.tg))}</b></button>`:''}
@@ -3974,7 +4089,7 @@ function pfHTML(p){
   </div>
   <div class="glass tgp-gifts">
     <div class="tgp-gh"><b>Подарки</b><span class="k">${gs.length||''}</span>${p.self?`<button class="btn ghost sm" data-act="gift-shop">${ico('plus','s')}Купить</button>`:`<button class="btn ghost sm" data-act="gift-shop" data-to="${p.id}">${ico('star','s')}Подарить</button>`}</div>
-    ${gs.length?`<div class="tgp-gg">${gs.map(g=>`<button class="tgp-gt r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b><small>${g.from?'от '+esc(g.from.name):'куплен'}</small>${(p.slots||[]).includes(g.id)?'<i class="tgp-pin">'+ico('pin','s')+'</i>':''}</button>`).join('')}</div>`
+    ${gs.length?`<div class="tgp-gg">${gs.map(g=>`<button class="tgp-gt r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b><small>${g.from?'от '+esc(g.from.name):'куплен'}</small>${(p.pos||[]).some(x=>x.id===g.id)||p.nick===g.id?'<i class="tgp-pin">'+ico('pin','s')+'</i>':''}</button>`).join('')}</div>`
       :`<div class="k" style="padding:6px 2px 4px">${p.self?'Пока нет подарков. Купи за очки опыта — они появятся вокруг аватарки.':'Пока нет подарков — подари первым.'}</div>`}
   </div>
   <div class="glass pf-cap">
@@ -3995,7 +4110,7 @@ function pfHTML(p){
   ${p.playlists.length?`<div class="h3">${ico('lists')}Плейлисты</div><div class="pf-pls">${p.playlists.map((pl,i)=>`<button class="glass pf-pl" data-act="pf-pl" data-id="${p.id}" data-i="${i}">${mosaic(pl.tracks)}<div class="tx"><b>${esc(pl.name)}</b><small class="k">${pl.count} тр.</small></div></button>`).join('')}</div>`:''}
   ${p.likes.length?`<div class="h3">${ico('heart')}Любимое<button class="btn sm" style="margin-left:auto" data-act="play-list" data-list="pf-likes">${ico('play','f')}Слушать</button></div>${trackList(p.likes,'pf-likes')}`:''}
   ${p.crypto.length?`<div class="h3">${ico('coin')}Следит за криптой</div><div class="row">${p.crypto.map(id=>{const c=CR.byId[id];return `<a class="chip dark" href="#coin-${esc(id)}">${c&&c.img?`<img src="${esc(c.img)}" alt="" style="width:16px;height:16px;border-radius:50%">`:''}${esc(c?c.sym:id)}</a>`}).join('')}</div>`:''}
-  `:`<div class="notice" style="margin-top:16px">${ico('lock')}<div>Пользователь скрыл музыку и подборки в своём профиле. Видна только капитализация.</div></div>`}`;
+  `:`<div class="notice" style="margin-top:16px">${ico('lock')}<div>Пользователь скрыл музыку и подборки в своём профиле. Видна только капитализация.</div></div>`}${p.self?pfAccount():''}`;
 }
 const TGI='<svg class="tgi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.4 11.8l10.9-4.2c.5-.2 1 .1.8.9l-1.9 8.8c-.1.6-.5.8-1 .5l-2.8-2.1-1.4 1.3c-.2.2-.3.3-.6.3l.2-2.9 5.3-4.8c.2-.2 0-.3-.3-.1L8 13.7l-2.8-.9c-.6-.2-.6-.6.2-1z"/></svg>';
 const tgLabel=t=>t.username?'@'+t.username:(t.name||'Telegram');
@@ -4004,13 +4119,13 @@ function pfTgHTML(){return USR.tg?`<div class="tgrow">${TGI}<b>${esc(tgLabel(USR
   :`<button class="btn ghost" style="width:100%;justify-content:center" data-act="tg-link">${TGI}Привязать Telegram</button><div class="k" id="pfTgHint" style="margin-top:6px">Откроется бот Mundora — нажми там «Старт», и Telegram появится в твоём профиле.</div>`}
 async function pfTgCheck(){try{const j=await peopleApi('id='+USR.id);const p=j.profile;USR.tg=p.tg;PEOPLE.cache[p.id]=p;const b=$('#pfTg');if(b)b.innerHTML=pfTgHTML();if(route()==='u-'+p.id)$('#pfBox').innerHTML=pfHTML(p);return !!p.tg}catch(e){return false}}
 function pfEdit(){
-  let av=USR.avatar;pfEdit.slot=null;
+  let av=USR.avatar;
   openSheet(`<h3>${ico('edit')}Мой профиль<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
   <div class="k" style="margin-bottom:6px">Аватар</div>
   <div class="ava-grid"><button class="ava-up" data-act="pf-ava-up" title="Загрузить из галереи">${ico('plus')}</button>${String(av).startsWith('/')?`<button class="on" data-act="pf-ava" data-k="${esc(av)}"><img src="${esc(av)}" alt=""></button>`:''}${AVA_LIST.map(k=>`<button class="${k===av?'on':''}" data-act="pf-ava" data-k="${k}"><img src="${avaSrc(k)}" alt=""></button>`).join('')}</div>
   <label class="k" style="display:block;margin:14px 0 6px">Имя (проверяет нейросеть)</label><input class="in" id="pfName" maxlength="24" value="${esc(USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'')}" placeholder="Как тебя показывать">
   <label class="k" style="display:block;margin:12px 0 6px">О себе</label><textarea class="in" id="pfBio" maxlength="160" rows="3" style="height:auto;padding:10px 14px;resize:none" placeholder="Пара слов — видят все">${esc(USR.bio||'')}</textarea>
-  <div class="k" style="margin:14px 0 6px">Подарки у аватарки</div>${giftEditor()}
+  <div class="k" style="margin:14px 0 6px">Подарки</div><button class="btn ghost" style="width:100%;justify-content:center" data-act="gl-start">${ico('star','s')}Расставить подарки и выбрать подарок у ника</button>
   <div class="k" style="margin:14px 0 6px">Telegram</div><div id="pfTg">${pfTgHTML()}</div>
   <label class="pf-tg"><input type="checkbox" id="pfOpen" ${USR.open!==false?'checked':''}><span><b>Открытый профиль</b><small class="k">Показывать другим лайки, плейлисты, вкус и крипту. Почта, финансы и заметки не видны никогда.</small></span></label>
   <button class="btn" style="width:100%;justify-content:center;margin-top:14px" data-act="pf-save">${ico('check','s')}Сохранить</button>`);
