@@ -987,6 +987,26 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .tr .td{font-variant-numeric:tabular-nums;color:#8f88ad;font-size:13px}
 .tr .ib{opacity:.55;transition:opacity .2s}.tr:hover .ib,.tr .ib.on{opacity:1}.tr .ib.on{color:#ff6ec7}
 @media(max-width:760px){.mhub>*{min-height:0!important}.tl{padding:4px;border-radius:18px}.tr{padding:7px 6px}}
+
+/* ===== главная на телефоне: компактнее, без вылезаний ===== */
+@media(max-width:760px){
+  .bento3{grid-template-columns:minmax(0,1fr)!important;gap:12px;margin-top:12px}
+  .bento3>*{grid-column:auto!important;min-width:0}
+  .bento3 .bt-met{order:1}.bento3 .bt-notew{order:2}
+  .bt-coin:not(.bt-mrow){grid-template-columns:40px 64px minmax(0,1fr) auto!important;gap:8px}
+  .bt-coin .ch{min-width:50px}
+  .grid2.hfin{gap:12px}
+  .hfin>.glass{min-height:0}
+  .hex{min-height:150px;padding-bottom:14px}
+  .hex .charimg{height:112px!important;right:-4px!important;bottom:-2px!important}
+  .hexrow{width:calc(100% - 118px)}
+  .hfin .charimg{height:122px!important}
+  .grid3{gap:12px;margin-top:12px}
+  .grid3>.glass{min-height:0!important;padding:16px}
+  .hai .charimg,.grid3 .charimg{height:84px!important;top:-12px!important}
+  .hai .k{max-width:66%!important}
+  .grid3 .kv{margin:6px 0}
+}
 </style>
 </head>
 <body>
@@ -2897,20 +2917,22 @@ const tourDone=k=>!!((S.prefs&&S.prefs.tours&&S.prefs.tours[k])||LS.get('tour_'+
 function tourMark(k){S.prefs=S.prefs||{};S.prefs.tours={...(S.prefs.tours||{}),[k]:Date.now()};LS.set('tour_'+k,1);try{save()}catch(e){}}
 function tourVis(el){if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return r.width>4&&r.height>4&&cs.visibility!=='hidden'&&cs.display!=='none'&&+cs.opacity>.2&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth}
 const isPhone=()=>innerWidth<=760;
-function tourStart(k,steps){
-  if(TOUR.on||tourDone(k)||$('#full.open')||$('#sheet.open')||!document.body.contains($('#player')))return false;
-  const list=steps.map(x=>({...x,el:$(x.el)})).filter(x=>tourVis(x.el));
+const tourHas=el=>{if(!el||!el.isConnected)return false;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return r.width>4&&r.height>4&&cs.visibility!=='hidden'&&cs.display!=='none'&&+cs.opacity>.2};
+function tourStart(k,steps,opt={}){
+  if(TOUR.on||tourDone(k)||(!opt.full&&$('#full.open'))||$('#sheet.open')||!document.body.contains($('#player')))return false;
+  const list=steps.map(x=>({...x,el:$(x.el)})).filter(x=>opt.full?tourHas(x.el):tourVis(x.el));
   if(list.length<2)return false;
   TOUR.on=true;TOUR.k=k;TOUR.list=list;TOUR.i=0;tourMark(k);if(list.some(x=>x.el&&x.el.closest&&x.el.closest('#ytBox')))tourMark('video');
   let o=$('#tour');if(!o){o=document.createElement('div');o.id='tour';document.body.appendChild(o)}
   o.innerHTML='<div class="tr-hole"></div><div class="tr-card"></div>';o.hidden=false;tourPaint();return true}
 function tourPaint(){
   const o=$('#tour'),x=TOUR.list[TOUR.i];if(!o||!x)return tourEnd();
+  if(x.el&&x.el.closest&&x.el.closest('#full')&&x.el.isConnected)x.el.scrollIntoView({block:'center',behavior:'instant'});
   if(!tourVis(x.el)){TOUR.list.splice(TOUR.i,1);return tourPaint()}
   const r=x.el.getBoundingClientRect(),pad=6,h=o.querySelector('.tr-hole'),c=o.querySelector('.tr-card');
   Object.assign(h.style,{left:r.left-pad+'px',top:r.top-pad+'px',width:r.width+pad*2+'px',height:r.height+pad*2+'px',borderRadius:Math.min(22,(r.height+pad*2)/2)+'px'});
   const last=TOUR.i===TOUR.list.length-1;
-  c.innerHTML=`<div class="tr-n">${TOUR.k==='video'?'Видеоплеер':'Плеер'} · ${TOUR.i+1} из ${TOUR.list.length}</div><b>${x.t}</b><p>${x.d}</p><div class="tr-b"><button class="tr-skip" data-tr="skip">Пропустить</button><button class="btn sm" data-tr="next">${last?'Понятно':'Дальше'}</button></div>`;
+  c.innerHTML=`<div class="tr-n">${TOUR.k==='video'?'Видеоплеер':TOUR.k==='full'?'Полный плеер':'Плеер'} · ${TOUR.i+1} из ${TOUR.list.length}</div><b>${x.t}</b><p>${x.d}</p><div class="tr-b"><button class="tr-skip" data-tr="skip">Пропустить</button><button class="btn sm" data-tr="next">${last?'Понятно':'Дальше'}</button></div>`;
   const W=Math.min(300,innerWidth-24);c.style.width=W+'px';
   const ch=c.offsetHeight||150,below=r.bottom+pad+14+ch<innerHeight-8;
   c.style.top=(below?r.bottom+pad+12:Math.max(8,r.top-pad-12-ch))+'px';
@@ -2923,6 +2945,28 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-tr]');if(!
   e.stopPropagation();e.preventDefault();if(b.dataset.tr==='skip')return tourEnd();TOUR.i++;if(TOUR.i>=TOUR.list.length)return tourEnd();tourPaint()},true);
 addEventListener('resize',()=>{if(TOUR.on)tourPaint()});
 addEventListener('keydown',e=>{if(TOUR.on&&e.key==='Escape')tourEnd()});
+// обучение полного плеера на телефоне — один раз при первом открытии
+function tourFull(){
+  if(!isPhone()||!$('#full.open'))return;
+  tourStart('full',[
+    {el:'#full [data-act=close-full]',t:'Свернуть',d:'Стрелка вниз сворачивает полный плеер обратно в маленький. Музыка продолжит играть.'},
+    {el:'#ytSpace',t:'Видео',d:'Если трек играет через YouTube, видео показывается здесь.'},
+    {el:'#fArt',t:'Обложка',d:'Обложка трека. Ниже — название и исполнитель.'},
+    {el:'#full .prow',t:'Перемотка',d:'Тяни ползунок пальцем, чтобы перемотать. Слева — сколько прошло, справа — длина трека.'},
+    {el:'#fShuffle',t:'Перемешать',d:'Треки из очереди будут играть в случайном порядке.'},
+    {el:'#full .pbtns [data-act=prev]',t:'Назад',d:'Предыдущий трек. Если трек играет дольше пары секунд — начнёт его сначала.'},
+    {el:'#fPlay',t:'Играть / пауза',d:'Ставит музыку на паузу и продолжает.'},
+    {el:'#full .pbtns [data-act=next]',t:'Дальше',d:'Следующий трек. Если пропустить в первые 30 секунд, похожая музыка будет попадаться реже.'},
+    {el:'#fRepeat',t:'Повтор',d:'Включает повтор текущего трека.'},
+    {el:'#fLike',t:'Лайк',d:'Сохраняет трек в «Любимое». Подборки «Для тебя» и «Волна» подстраиваются под твой вкус.'},
+    {el:'#full [data-act=dislike-cur]',t:'Не нравится',d:'Пропускает трек, и такая музыка будет попадаться реже.'},
+    {el:'#full .facts [data-act=add-cur]',t:'В плейлист',d:'Добавляет трек в твой плейлист или создаёт новый.'},
+    {el:'#full [data-act=flow-from-cur]',t:'Похожее',d:'Запускает волну из треков, похожих на этот.'},
+    {el:'#full .full-top [data-act=queue]',t:'Очередь',d:'Показывает, что заиграет дальше.'},
+    {el:'#fExt',t:'Другие сервисы',d:'Открыть этот трек в Яндекс Музыке, YouTube или Spotify.'},
+    {el:'#full .facts [data-act=close-player]',t:'Закрыть плеер',d:'Останавливает музыку и убирает плеер.'},
+  ],{full:true});
+}
 function tourMusic(){
   const ph=isPhone();
   tourStart('music',[
@@ -3275,9 +3319,9 @@ const ACT={
   shuffle(){P.shuffle=!P.shuffle;UI.modes();toast(P.shuffle?'Перемешивание включено':'Перемешивание выключено','shuffle')},
   repeat(){P.repeat=!P.repeat;UI.modes();toast(P.repeat?'Повтор трека включён':'Повтор выключен','repeat')},
   mute(){audio.muted=!audio.muted;toast(audio.muted?'Звук выключен':'Звук включён','vol')},
-  'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380)}},
-  'close-full'(){$('#full').classList.remove('open');ytDock()},
-  'yt-expand'(){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380)},
+  'open-full'(el,e){if(e.target.closest('[data-act=like-cur]'))return;if(P.cur){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380);setTimeout(tourFull,600)}},
+  'close-full'(){if(TOUR.on&&TOUR.k==='full')tourEnd();$('#full').classList.remove('open');ytDock()},
+  'yt-expand'(){$('#full').classList.add('open');ytDock();setTimeout(ytDock,380);setTimeout(tourFull,600)},
   like(el){const t=T_(el);if(t)toggleLike(t)},
   'like-cur'(){if(P.cur)toggleLike(P.cur)},
   'dislike-cur'(){if(P.cur)dislike(P.cur)},
