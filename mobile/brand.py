@@ -67,7 +67,7 @@ if plat == 'android':
     edit(os.path.join(res, 'values', 'styles.xml'), styles)
     # камера и микрофон для голосовых и видеокружков (Capacitor сам спросит разрешение, когда сайт попросит)
     def perms(x):
-        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'CAMERA', 'READ_MEDIA_IMAGES', 'READ_MEDIA_VIDEO', 'READ_MEDIA_AUDIO', 'READ_MEDIA_VISUAL_USER_SELECTED'] if f'permission.{p}"' not in x)
+        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'CAMERA', 'READ_MEDIA_IMAGES', 'READ_MEDIA_VIDEO', 'READ_MEDIA_AUDIO', 'READ_MEDIA_VISUAL_USER_SELECTED', 'ACCESS_FINE_LOCATION', 'ACCESS_COARSE_LOCATION'] if f'permission.{p}"' not in x)
         add += '' if 'READ_EXTERNAL_STORAGE' in x else '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />\n'
         add += '' if 'android.hardware.camera' in x else '    <uses-feature android:name="android.hardware.camera" android:required="false" />\n'
         return x.replace('</manifest>', add + '</manifest>')
