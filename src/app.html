@@ -1518,6 +1518,68 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .ms-rnd.big{touch-action:none}.ms-rnd.big:not(.pl) .ms-rnd-ring circle{stroke-width:3.4}
 .ms-prep{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:22px;font-weight:600;font-size:14px;white-space:nowrap}
 .ms-pfh.own{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;justify-content:flex-end}.ms-pfh.own .ms-cht{display:none}.ms-home{width:44px;height:44px;border-radius:50%}
+
+/* ===== Telegram iOS 26: жидкое стекло, реакции, меню, ответы ===== */
+.ms-tabs .ms-drop{position:absolute;left:0;top:5px;bottom:5px;width:0;border-radius:26px;background:radial-gradient(120% 140% at 30% 0%,rgba(255,255,255,.22),rgba(255,255,255,.06) 60%);box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 -1px 2px rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.25);-webkit-backdrop-filter:saturate(1.8) blur(2px);backdrop-filter:saturate(1.8) blur(2px);transition:transform .45s cubic-bezier(.3,1.35,.4,1),width .45s cubic-bezier(.3,1.35,.4,1);pointer-events:none;z-index:0}
+.ms-tabs .ms-drop.jelly{animation:drop .5s cubic-bezier(.3,1.3,.4,1)}
+@keyframes drop{0%{scale:1 1}35%{scale:1.18 .86}70%{scale:.96 1.05}100%{scale:1 1}}
+.ms-tabs button{z-index:1}.ms-tabs button.on{background:none!important}
+.mb{touch-action:pan-y}.mb.sw{z-index:3}
+.ms-swi{position:absolute;right:-46px;top:50%;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);color:#fff;opacity:0;transform:translateY(-50%) scale(.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.ms-swi .i{width:18px;height:18px}
+.mb.hl{animation:mbHl 1.4s ease}@keyframes mbHl{0%,30%{box-shadow:0 0 0 3px rgba(196,181,253,.9),0 0 30px rgba(139,92,246,.6)}100%{box-shadow:none}}
+.ms-rq{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-width:160px;margin:2px 0 5px;padding:5px 9px 5px 10px;border:0;border-left:3px solid #c4b5fd;border-radius:7px 10px 10px 7px;background:rgba(255,255,255,.12);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.mb.th .ms-rq{border-left-color:#a78bfa;background:rgba(167,139,250,.14)}
+.ms-rq b{font-size:13.5px;color:#ede9fe}.mb.th .ms-rq b{color:#c4b5fd}.ms-rq span{font-size:13.5px;opacity:.85;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;max-width:240px}
+.mb.bare .ms-rq,.mb.rd .ms-rq{background:rgba(30,18,58,.85)}
+.ms-rx{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px}
+.ms-rx button{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 6px 0 7px;border-radius:14px;border:0;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.ms-rx button span{font-size:16px;line-height:1}.ms-rx button img{width:20px;height:20px;border-radius:50%;object-fit:cover}
+.mb.th .ms-rx button{background:rgba(139,92,246,.22)}.ms-rx button.my{background:#fff;color:#4c1d95}.mb.th .ms-rx button.my{background:#8b5cf6;color:#fff}
+.ms-rx button.pop span{animation:rxPop .45s cubic-bezier(.3,1.6,.4,1)}@keyframes rxPop{0%{transform:scale(.3)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+.mb.bare .ms-rx,.mb.rd .ms-rx{padding:0 4px}
+.ms-mt em{font-style:normal;opacity:.75;margin-right:4px}
+.ms-heart{position:fixed;z-index:95;font-size:38px;pointer-events:none;transform:translate(-50%,-50%);animation:heart .8s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes heart{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}35%{opacity:1;transform:translate(-50%,-70%) scale(1.25)}100%{opacity:0;transform:translate(-50%,-160%) scale(.9)}}
+.ms-ctx{position:fixed;inset:0;z-index:88}
+.ms-ctxbg{position:absolute;inset:0;background:rgba(8,5,18,.35);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0);transition:backdrop-filter .28s,-webkit-backdrop-filter .28s,background .28s}
+.ms-ctx.on .ms-ctxbg{-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);background:rgba(8,5,18,.45)}
+.ms-ctx .ms-ctxm{z-index:2;pointer-events:none;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.ms-ctxr{position:fixed;z-index:3;display:flex;align-items:center;gap:2px;padding:5px 6px;border-radius:26px;transform:scale(.4);opacity:0;transition:transform .34s cubic-bezier(.3,1.5,.4,1),opacity .2s}
+.ms-ctx.on .ms-ctxr{transform:none;opacity:1}
+.ms-ctxr button{width:40px;height:40px;border:0;background:none;border-radius:50%;font-size:26px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:transform .15s;animation:rxIn .4s cubic-bezier(.3,1.6,.4,1) backwards;animation-delay:calc(var(--n)*25ms)}
+.ms-ctxr button:active{transform:scale(1.3)}.ms-ctxr button.on{background:rgba(255,255,255,.2)}
+.ms-ctxr .more{font-size:0;color:#fff;width:32px}.ms-ctxr .more .i{width:16px;height:16px;transform:rotate(90deg)}
+.ms-ctxr.wide{flex-wrap:wrap;width:min(300px,calc(100vw - 20px));justify-content:center}
+@keyframes rxIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+.ms-ctxa{position:fixed;z-index:3;min-width:230px;max-width:calc(100vw - 20px);padding:6px;border-radius:22px;transform:scale(.5);opacity:0;transition:transform .32s cubic-bezier(.3,1.35,.4,1),opacity .18s}
+.ms-ctx.on .ms-ctxa{transform:none;opacity:1}.ms-ctx.off .ms-ctxa,.ms-ctx.off .ms-ctxr{transform:scale(.6);opacity:0}.ms-ctx.off .ms-ctxbg{background:rgba(8,5,18,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0)}.ms-ctx.off .ms-ctxm{opacity:0;transition:opacity .15s}
+.ms-ctxa button{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;padding:11px 12px;border:0;background:none;color:#fff;font:inherit;font-size:16px;border-radius:14px;cursor:pointer;text-align:left}
+.ms-ctxa button:active{background:rgba(255,255,255,.1)}.ms-ctxa button .i{width:21px;height:21px;opacity:.95}.ms-ctxa .red{color:#fca5a5}
+.mb.ms-ghost{opacity:0}
+.ms-rbar{position:absolute;left:10px;right:10px;bottom:calc(66px + env(safe-area-inset-bottom));z-index:4;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:20px;animation:barIn .26s cubic-bezier(.3,1.3,.4,1)}
+@keyframes barIn{0%{transform:translateY(16px);opacity:0}100%{transform:none;opacity:1}}
+.ms-rbi{color:#c4b5fd;display:grid}.ms-rbi .i{width:22px;height:22px}
+.ms-rbt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;border:0;border-left:2.5px solid #a78bfa;padding:1px 0 1px 9px;background:none;color:#fff;font:inherit;text-align:left;cursor:pointer}
+.ms-rbt b{font-size:14px;color:#c4b5fd}.ms-rbt span{font-size:14px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ms-main.ms-hasbar .ms-msgs,#msMain.ms-hasbar .ms-msgs{padding-bottom:150px}
+.ms-pin{position:absolute;left:10px;right:10px;top:calc(62px + env(safe-area-inset-top));z-index:4;display:flex;align-items:center;gap:4px;padding:4px 4px 4px 6px;border-radius:18px;animation:barIn .26s}
+.ms-pint{flex:1;min-width:0;display:flex;align-items:center;gap:9px;border:0;background:none;color:#fff;font:inherit;text-align:left;cursor:pointer;padding:3px 4px}
+.ms-pint>i{width:3px;align-self:stretch;border-radius:2px;background:#a78bfa}.ms-pint span{display:flex;flex-direction:column;min-width:0}.ms-pint b{font-size:13.5px;color:#c4b5fd}.ms-pint small{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-pin .ib .i{width:20px;height:20px}
+#msMain.ms-haspin .ms-msgs{padding-top:calc(126px + env(safe-area-inset-top))}#msMain.ms-haspin .ms-day{top:58px}
+.ms-down{position:absolute;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:4;width:44px;height:44px;border-radius:50%;border:0;color:#fff;display:grid;place-items:center;cursor:pointer;transform:scale(.4);opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.3,1.5,.4,1),opacity .2s}
+.ms-down.on{transform:none;opacity:1;pointer-events:auto}.ms-down .i{transform:rotate(90deg);width:20px;height:20px}
+.ms-down b{position:absolute;top:-6px;left:50%;transform:translateX(-50%);min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#8b5cf6;font-size:12px;display:grid;place-items:center}
+#msMain.ms-hasbar .ms-down{bottom:calc(136px + env(safe-area-inset-bottom))}
+.ms-dust{position:fixed;z-index:89;pointer-events:none;overflow:visible}.ms-dust i{position:absolute;border-radius:50%}
+.ms-vrate{display:none;margin-left:6px;height:20px;padding:0 7px;border-radius:10px;border:0;background:rgba(255,255,255,.2);color:#fff;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer}
+.ms-voice.pl .ms-vrate{display:inline-block}.ms-vw{position:relative}.ms-vw small{display:inline-flex;align-items:center;gap:5px}
+.ms-unh{width:7px;height:7px;border-radius:50%;background:#c4b5fd;display:inline-block}
+.ms-1{display:inline-grid;vertical-align:middle;margin-left:6px;color:#fff;opacity:.95}.ms-1 .i{width:18px;height:18px}
+.ms-1.rn{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.45);border-radius:50%;padding:3px;z-index:3}
+.ms-r1{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:none;color:rgba(255,255,255,.7);display:grid;place-items:center;cursor:pointer}.ms-r1 .i{width:22px;height:22px}.ms-r1.on{color:#fff;background:#8b5cf6}
+.ms-flip{position:fixed;z-index:81;left:50%;top:calc(42% + min(36vw,150px) + 16px);transform:translateX(-50%);width:46px;height:46px;border-radius:50%;border:0;color:#fff;display:grid;place-items:center;cursor:pointer;animation:pop .2s}.ms-flip .i{width:22px;height:22px}
+.mb.new.me{animation:mbSend .42s cubic-bezier(.2,1.25,.35,1)}@keyframes mbSend{0%{transform:translateY(34px) scale(.92);opacity:.2}100%{transform:none;opacity:1}}
 </style>
 </head>
 <body>
@@ -2629,6 +2691,9 @@ function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&
   t.innerHTML=`<button class="${MS.tab==='contacts'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msgc"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".9"/><circle cx="12" cy="9.5" r="3.3" fill="#0b0716"/><path d="M5.8 18.2c1.4-2.5 3.6-3.7 6.2-3.7s4.8 1.2 6.2 3.7" fill="#0b0716"/></svg><span>Контакты</span></button>
   <button class="${MS.tab==='chats'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msg"><svg class="i" viewBox="0 0 24 24"><path d="M4 11.5C4 7.4 7.6 4.5 12 4.5s8 2.9 8 7-3.6 7-8 7c-.9 0-1.8-.1-2.6-.4L5 19.5l1.2-3.4C4.8 14.9 4 13.3 4 11.5z" fill="currentColor"/></svg><span>Чаты</span><b class="ms-badge" hidden></b></button>
   <button class="${own?'on':''}" data-act="ms-go" data-h="#msgp-${MS.me}"><img src="${avaSrc(USR.avatar)}" alt=""><span>Профиль</span></button>`;
+  t.insertAdjacentHTML('afterbegin','<i class="ms-drop"></i>');const on=t.querySelector('button.on'),d=t.querySelector('.ms-drop');
+  if(on&&d){const to=[on.offsetLeft,on.offsetWidth];if(MS.drop){d.style.transition='none';d.style.transform=`translateX(${MS.drop[0]}px)`;d.style.width=MS.drop[1]+'px';void d.offsetWidth;d.style.transition=''}
+    requestAnimationFrame(()=>{d.style.transform=`translateX(${to[0]}px)`;d.style.width=to[1]+'px';if(MS.drop&&MS.drop[0]!==to[0]){d.classList.remove('jelly');void d.offsetWidth;d.classList.add('jelly')}MS.drop=to})}else if(d)d.hidden=true;
   const m=$('#msgr');if(m){m.dataset.pane=MS.pane;m.dataset.own=own?'1':''}msBadge()}
 async function msShow(r){const m=msShell();const first=!MS.on;MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');if(first){m.classList.add('enter');setTimeout(()=>m.classList.remove('enter'),350);const pb=$('#view #pfBox');if(pb)pb.remove()}
   msVV();
@@ -2675,8 +2740,8 @@ function pfPaint(p){if(!p)return;if(route()==='u-'+p.id){const b=$('#view #pfBox
 
 /* ---------- чат ---------- */
 async function msOpenChat(){const c=MS.c;MS.typing=false;msDrawMain();msPresence(true);
-  if(!MS.msgs[c]){try{const j=await msApi('hist',null,'&c='+c);MS.msgs[c]=j.msgs;MS.from[c]=j.from;MS.read[c]=j.read;msDel(c,j.del)}catch(e){MS.msgs[c]=[];toast(e.message,'x')}}
-  if(MS.c!==c)return;mqShow(c);msPaintMsgs(true);msMarkRead();msFwPeers(c)}
+  if(!MS.msgs[c]){try{const j=await msApi('hist',null,'&c='+c);MS.msgs[c]=j.msgs;MS.from[c]=j.from;MS.read[c]=j.read;msDel(c,j.del);msExtras(c,j)}catch(e){MS.msgs[c]=[];toast(e.message,'x')}}
+  if(MS.c!==c)return;MS.reply=null;MS.edit=null;mqShow(c);msPaintMsgs(true);msPinBar();msMarkRead();msFwPeers(c)}
 async function msFwPeers(c){const ids=[...new Set((MS.msgs[c]||[]).map(m=>m.fw).filter(x=>x!=null&&!MS.peers[x]).map(String))];if(!ids.length)return;await msPeers(ids);if(MS.c===c)msPaintMsgs()}
 function msDrawMain(){const box=$('#msMain');if(!box)return;
   if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
@@ -2699,45 +2764,46 @@ function msDrawMain(){const box=$('#msMain');if(!box)return;
   inp.addEventListener('focus',()=>{const e=$('#msEmo');if(e)e.hidden=true;setTimeout(msVV,300)});
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&LS.get('msEnter',true)&&matchMedia('(min-width:761px)').matches){e.preventDefault();msSend()}});
   f.addEventListener('submit',e=>{e.preventDefault();if(MS.rec)return msRecStop(false,9e9);msSend();inp.focus()});
-  const ml=$('#msMsgs');ml.addEventListener('scroll',()=>{ml.dataset.stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<120?'1':'0';if(ml.scrollTop<80&&!MS.hl)msOlder()},{passive:true});
-  msLong(ml);msRndSeekBind(ml);msMicBind()}
+  const ml=$('#msMsgs');ml.addEventListener('scroll',()=>{msDownBtn();ml.dataset.stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<120?'1':'0';if(ml.scrollTop<80&&!MS.hl)msOlder()},{passive:true});
+  msLong(ml);msRndSeekBind(ml);msGestures(ml);msVoiceSeekBind(ml);msMicBind()}
 function msDel(c,del){if(!del||!MS.msgs[c])return;const D=new Set(del);MS.msgs[c].forEach(m=>{if(D.has(m.i)&&!m.d){m.d=1;m.x='';delete m.fl}})}
 async function msOlder(){const c=MS.c,from=MS.from[c];if(!c||!from)return;MS.hl=1;
-  try{const j=await msApi('hist',null,'&c='+c+'&before='+from);if(MS.c!==c)return;const ml=$('#msMsgs'),h=ml.scrollHeight;MS.msgs[c]=j.msgs.concat(MS.msgs[c]);MS.from[c]=j.from;msDel(c,j.del);msPaintMsgs();ml.scrollTop+=ml.scrollHeight-h}catch(e){}finally{MS.hl=0}}
+  try{const j=await msApi('hist',null,'&c='+c+'&before='+from);if(MS.c!==c)return;const ml=$('#msMsgs'),h=ml.scrollHeight;MS.msgs[c]=j.msgs.concat(MS.msgs[c]);MS.from[c]=j.from;msDel(c,j.del);msExtras(c,j);msPaintMsgs();ml.scrollTop+=ml.scrollHeight-h}catch(e){}finally{MS.hl=0}}
 function msWave(wf,n=40){const a=String(wf||'').split('').map(ch=>parseInt(ch,36)||0);if(!a.length)return Array.from({length:n},(_,i)=>3+((i*7)%9));return Array.from({length:n},(_,i)=>a[Math.floor(i*a.length/n)])}
 function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine&&m.i!=null&&(MS.read[c]??-1)>=m.i&&MS.peer!==String(MS.me);
   const grp=next&&String(next.f)===String(m.f)&&next.t-m.t<120e3&&new Date(next.t).toDateString()===new Date(m.t).toDateString();
   const tick=mine?(m.err?`<i class="ms-tk er" role="button" data-act="ms-retry" data-k="${m.i??m.tmp}" title="Повторить">!</i>`:m.pend?`<i class="ms-tk">${ico('hist','s')}</i>`:`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`):'';
-  const meta=`<span class="ms-mt">${msTime(m.t)}${tick}</span>`;let body='',kind='';
-  if(m.d)body=`<span class="ms-delm">${ico('trash','s')}Сообщение удалено</span>${meta}`;
+  const ed=c&&m.i!=null&&MS.ed[c]&&MS.ed[c][m.i];const meta=`<span class="ms-mt">${ed?'<em>изменено</em>':''}${msTime(m.t)}${tick}</span>`;let body='',kind='';
+  if(m.d)body=`<span class="ms-delm">${m.o1?ONEI:ico('trash','s')}${m.o1?'Одноразовое сообщение просмотрено':'Сообщение удалено'}</span>${meta}`;
   else{const F=m.fl;let media='';
     if(F){const src=F.local||(F.id?msFile(F.id):''),ar=F.w&&F.h?`aspect-ratio:${F.w}/${F.h};`:'',key=m.i??m.tmp;
-      if(F.vo){kind='voice';const bars=msWave(F.wf).map(v=>`<i style="height:${Math.max(3,v*2.4)}px"></i>`).join('');
-        media=`<div class="ms-voice" data-src="${esc(src)}" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><div class="ms-bars">${bars}</div><small>${fdur(F.d)}</small></div></div>`}
+      if(F.vo){kind='voice';const VR=msVoiceRange(m),vd=VR.b?VR.b-VR.a:F.d,unh=!mine&&m.i!=null&&!msHeard().has(c+':'+m.i);const bars=msWave(F.wf).map(v=>`<i style="height:${Math.max(3,v*2.4)}px"></i>`).join('');
+        media=`<div class="ms-voice" data-src="${esc(src)}" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><div class="ms-bars">${bars}</div><small>${fdur(vd)}${unh?'<i class="ms-unh"></i>':''}</small>${F.once?`<span class="ms-1">${ONEI}</span>`:''}<button type="button" class="ms-vrate" data-act="ms-vrate">${MS.rate}x</button></div></div>`}
       else if(F.ty.startsWith('image/')){kind='img';media=`<button type="button" class="ms-img" data-act="ms-view" data-k="${key}" style="${ar}${F.th?`background-image:url('${F.th}')`:''}"><img src="${esc(src)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ld')">${m.pend?`<span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:''}</button>`}
-      else if(F.rd){kind='rnd';media=`<div class="ms-rnd" data-k="${key}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} playsinline preload="metadata" data-act="ms-rplay" data-k="${key}" data-d="${F.d||0}"></video><svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><small>${fdur(F.d)}</small>`}</div>`}
+      else if(F.rd){kind='rnd';media=`<div class="ms-rnd" data-k="${key}">${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} playsinline preload="metadata" data-act="ms-rplay" data-k="${key}" data-d="${F.d||0}"></video><svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><small>${fdur(F.d)}</small>${F.once?`<span class="ms-1 rn">${ONEI}</span>`:''}`}</div>`}
       else if(F.ty.startsWith('video/')){kind='img';media=`<div class="ms-vid" style="${ar}" ${m.pend?'':`data-act="ms-vopen" data-k="${key}"`}>${m.pend?`<img src="${F.th||''}" alt=""><span class="ms-prog"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:`<video src="${esc(src)}" ${F.th?`poster="${F.th}"`:''} muted loop playsinline preload="metadata"></video><span class="ms-vdur">${F.d?fdur(F.d):'0:00'}</span><span class="ms-vmute">${ico('vol','s')}</span>`}</div>`}
       else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
       else media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-dl" data-k="${key}"`}><span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:ico('down')}</span><span><b>${esc(F.n)}</b><small>${fsz(F.sz)}</small></span></button>`}
-    const txt=m.x?`<div class="ms-tx">${linkify(esc(m.x))}</div>`:'';
+    const X=ed?ed.x:m.x;const txt=X?`<div class="ms-tx">${linkify(esc(X))}</div>`:'';
     const fw=m.fw!=null?`<a class="ms-fw" href="#msgp-${m.fw}">${ico('send','s')}<span>Переслано · От <b>${esc(String(m.fw)===String(MS.me)?(USR.name||'вас'):((MS.peers[m.fw]||{}).name||'ID '+m.fw))}</b></span></a>`:'';
-    body=fw+media+txt+meta}
-  const bare=(kind==='img'||kind==='rnd')&&!m.x;
+    body=fw+msRqHTML(c,m)+media+txt+msRxHTML(c,m)+meta}
+  const bare=(kind==='img'||kind==='rnd')&&!m.x&&m.r==null&&!(c&&m.i!=null&&MS.rx[c]&&MS.rx[c][m.i]);
   return `<div class="mb ${mine?'me':'th'}${grp?'':' tail'}${bare?' bare':''}${kind==='img'&&m.x?' cap':''}${kind==='voice'?' vo':''}${kind==='rnd'?' rd':''}${m.d?' del':''}" data-i="${m.i??''}" data-tmp="${m.tmp||''}">${body}</div>`}
 function msPaintMsgs(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;const L=MS.msgs[c]||[];
   const stick=toBottom||ml.scrollHeight-ml.scrollTop-ml.clientHeight<120;
-  if(!L.length){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
-  let h='',day='';L.forEach((m,k)=>{const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k+1])});
-  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync();msVidObserve()}
+  if(!L.some(m=>!m.d)){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
+  let h='',day='';const LV=L.filter(m=>!m.d);LV.forEach((m,k)=>{const L=LV;const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k+1])});
+  ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync();msVidObserve();msDownBtn()}
 function msAppend(ms){const ml=$('#msMsgs');if(!ml)return;const stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<160;msPaintMsgs();
   ms.forEach(m=>{const el=ml.querySelector(`.mb[data-i="${m.i}"]`)||ml.querySelector(`.mb[data-tmp="${m.tmp}"]`);if(el)el.classList.add('new')});if(stick)ml.scrollTop=ml.scrollHeight}
 const msFind=k=>(MS.msgs[MS.c]||[]).find(x=>String(x.i??x.tmp)===String(k));
 
 /* ---------- отправка ---------- */
-async function msSend(){const inp=$('#msIn');const x=(inp?inp.value:'').trim();if(!x||!MS.c)return;
+async function msSend(){const inp=$('#msIn');const x=(inp?inp.value:'').trim();if(!MS.c)return;if(MS.edit)return msEditSend(x);if(!x)return;
+  const rr=MS.reply?MS.reply.i:null;if(MS.reply){MS.reply=null;msBar()}
   inp.value='';inp.style.height='';$('#msComp').classList.remove('has');if(MS.draft)delete MS.draft[MS.c];
-  const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);
-  await msPost(m,{to:MS.peer,x})}
+  const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1,...(rr!=null?{r:rr}:{})};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);
+  await msPost(m,{to:MS.peer,x,...(rr!=null?{r:rr}:{})})}
 async function msPost(m,body,c0,p0){const c=c0||MS.c,peer=p0||MS.peer;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
     const real={...j.m};if(m.fl&&m.fl.local)real.fl={...real.fl,local:m.fl.local};
     if(L.some(x=>x.i===real.i)){if(k>=0)L.splice(k,1)}else if(k>=0)L[k]=real;
@@ -2777,7 +2843,7 @@ async function msRun(j,m){if(MQ.busy.has(j.tmp))return;MQ.busy.add(j.tmp);m._j=j
       j.id=r.id;j.next=i+1;mqPut(j);m.prog=Math.round((i+1)/n*100);
       const el=document.querySelector(`.mb[data-tmp="${m.tmp}"] .ms-prog i`);if(el)el.style.setProperty('--p',m.prog+'%')}
     if(m.cancel)throw Object.assign(new Error('cancel'),{cancel:1});
-    const {local:_l,...send}=m.fl;await msPost(m,{to:j.to,x:j.x||'',fl:{...send,id:j.id}},j.c,j.to);if(!m.err){mqDel(j.tmp);MQ.m.delete(j.tmp)}}
+    const {local:_l,...send}=m.fl;await msPost(m,{to:j.to,x:j.x||'',fl:{...send,id:j.id},...(j.r!=null?{r:j.r}:{})},j.c,j.to);if(!m.err){mqDel(j.tmp);MQ.m.delete(j.tmp)}}
   catch(e){const c=j.c;if(e.cancel||m.cancel){mqDel(j.tmp);MQ.m.delete(j.tmp);const L=MS.msgs[c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);if(MS.c===c)msPaintMsgs();toast('Отправка отменена','x')}
     else{m.pend=0;m.err=1;if(MS.c===c)msPaintMsgs();toast((e.message||'Ошибка')+' — отправлю, когда появится связь','x')}}
   finally{MQ.busy.delete(j.tmp)}}
@@ -2785,10 +2851,11 @@ async function msAttach(items){if(!MS.c)return;for(const it of items){
   const f=it.raw?it.f:await msShrink(it.f);if(f.size>12*1024*1024){toast(`«${f.name}» больше 12 МБ`,'x');continue}
   const ty=f.type||'application/octet-stream',local=URL.createObjectURL(f),isImg=ty.startsWith('image/'),isVid=ty.startsWith('video/');
   const meta=it.th||((isImg||isVid)&&!it.vo?await msThumb(local,isVid):{});
-  const fl={n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',...(it.vo?{vo:1,d:it.d,wf:it.wf}:{}),...(it.rd?{rd:1,d:it.d}:{})};
+  const fl={n:f.name,ty,sz:f.size,w:meta.w||0,h:meta.h||0,th:meta.th||'',...(it.vo?{vo:1,d:it.d,wf:it.wf}:{}),...(it.rd?{rd:1,d:it.d}:{}),...(it.once?{once:1}:{}),...(it.a>0?{a:it.a}:{}),...(it.b>0?{b:it.b}:{})};
   const tmp='f'+Date.now()+Math.random().toString(36).slice(2,6);
-  const j={tmp,me:MS.me,to:MS.peer,c:MS.c,f,x:it.x||'',fl,id:'',next:0,n:Math.max(1,Math.ceil(f.size/CH_SZ)),t:Date.now()};
-  const m={tmp,f:+MS.me,t:j.t,x:j.x,pend:1,prog:2,fl:{...fl,local}};m._j=j;MQ.m.set(tmp,m);
+  const rr=MS.reply?MS.reply.i:null;if(MS.reply){MS.reply=null;msBar()}
+  const j={tmp,me:MS.me,to:MS.peer,c:MS.c,f,x:it.x||'',fl,id:'',...(rr!=null?{r:rr}:{}),next:0,n:Math.max(1,Math.ceil(f.size/CH_SZ)),t:Date.now()};
+  const m={tmp,f:+MS.me,t:j.t,x:j.x,pend:1,prog:2,fl:{...fl,local},...(j.r!=null?{r:j.r}:{})};m._j=j;MQ.m.set(tmp,m);
   (MS.msgs[j.c]=MS.msgs[j.c]||[]).push(m);msAppend([m]);await mqPut(j);msRun(j,m)}}
 
 /* ---------- несколько файлов: превью, убрать лишнее, подпись ---------- */
@@ -2866,33 +2933,38 @@ const STOPI='<svg class="i" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" he
 const CAMI='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>';
 async function msRecStart(mode='voice'){if(MS.rec)return;const vid=mode==='video';
   const audio={echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1,sampleRate:48000,sampleSize:16};
-  let st;try{st=await navigator.mediaDevices.getUserMedia(vid?{audio,video:{facingMode:'user',width:{ideal:720},height:{ideal:720},aspectRatio:1,frameRate:{ideal:30}}}:{audio})}
+  let st;try{st=await navigator.mediaDevices.getUserMedia(vid?{audio,video:{facingMode:'user',width:{ideal:480},height:{ideal:480},aspectRatio:1,frameRate:{ideal:30}}}:{audio})}
   catch(e){toast(vid?'Нет доступа к камере или микрофону — разреши их в настройках браузера':'Нет доступа к микрофону — разреши его в настройках браузера','x');return}
-  const ch=await msVoiceChain(st);
+  const ch=await msVoiceChain(st);let cam=null;
+  if(vid){// кадр рисуем через холст: так можно сменить камеру прямо во время записи, не прерывая её
+    const cv=document.createElement('canvas');cv.width=cv.height=480;const g=cv.getContext('2d');const ve=document.createElement('video');ve.muted=true;ve.playsInline=true;ve.srcObject=new MediaStream(st.getVideoTracks());ve.play().catch(()=>{});
+    cam={cv,ve,vs:ve.srcObject,on:true};const draw=()=>{if(!cam.on)return;const w=ve.videoWidth,h=ve.videoHeight;if(w&&h){const k=Math.max(480/w,480/h);g.drawImage(ve,240-w*k/2,240-h*k/2,w*k,h*k)}cam.raf=requestAnimationFrame(draw)};draw();
+    cam.cs=cv.captureStream(30);ch.out=new MediaStream([...ch.out.getAudioTracks(),...cam.cs.getVideoTracks()])}
   const types=vid?['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']:['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/mp4;codecs=opus','audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm'];
   const mt=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
   const rec=new MediaRecorder(ch.out,{...(mt?{mimeType:mt}:{}),audioBitsPerSecond:128000,...(vid?{videoBitsPerSecond:2500000}:{})});const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
   const an=ch.an,buf=new Uint8Array(an.fftSize);
-  const R=MS.rec={rec,st,ch,chunks,ac:ch.ac,an,buf,lv:[],t0:Date.now(),seg0:Date.now(),acc:0,paused:false,pos:0,mt:rec.mimeType||mt||(vid?'video/webm':'audio/webm'),vid,locked:false,max:vid?60:600};rec.start(250);
+  const R=MS.rec={rec,st,ch,cam,face:'user',chunks,ac:ch.ac,an,buf,lv:[],t0:Date.now(),seg0:Date.now(),acc:0,paused:false,pos:0,mt:rec.mimeType||mt||(vid?'video/webm':'audio/webm'),vid,locked:false,max:vid?60:600};rec.start(250);
   const comp=$('#msComp');comp.classList.add('rec');if(vid)comp.classList.add('recv');$('#msRecBar').hidden=false;msRecBar();
   comp.insertAdjacentHTML('beforeend',`<button type="button" class="ms-lock lq" id="msLock">${LOCK}<i>${ico('chev','s')}</i></button>`);
-  if(vid){const v=document.createElement('div');v.className='ms-rnd-rec';v.id='msRnd';v.innerHTML=`<svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><video autoplay muted playsinline></video><span class="ms-rnd-pp" hidden>${PLAYI}</span>`;document.body.appendChild(v);const ve=v.querySelector('video');ve.srcObject=st;ve.play().catch(()=>{});msRndRecBind(v)}
+  if(vid){const v=document.createElement('div');v.className='ms-rnd-rec';v.id='msRnd';v.innerHTML=`<svg class="ms-rnd-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg><video autoplay muted playsinline></video><span class="ms-rnd-pp" hidden>${PLAYI}</span>`;const fl=document.createElement('button');fl.type='button';fl.className='ms-flip lq';fl.dataset.act='ms-rec-flip';fl.title='Сменить камеру';fl.innerHTML=FLIPI;document.body.appendChild(fl);document.body.appendChild(v);const ve=v.querySelector('video');ve.srcObject=cam?cam.cs:st;ve.play().catch(()=>{});msRndRecBind(v)}
   try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}
   R.iv=setInterval(()=>{if(R.paused)return;an.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}R.lv.push(Math.sqrt(s/buf.length));
     const sec=msRecEl(R);const tl=$('#msRecT');if(tl)tl.textContent=fdur(sec);const ring=$('#msRnd circle');if(ring)ring.style.strokeDashoffset=String(302*(1-Math.min(1,sec/R.max)));
     if(sec>=R.max){R.locked?msRecPause():msRecStop(false,sec*1000);return}msRecWave()},80)}
 function msRecBar(){const R=MS.rec,b=$('#msRecBar');if(!R||!b)return;
-  b.innerHTML=R.paused?`<button type="button" class="ms-rtrash" data-act="ms-rec-cancel" title="Удалить">${ico('trash')}</button><button type="button" class="ms-rpp" data-act="ms-rec-pp" title="Прослушать">${R.pl?PAUSEI:PLAYI}</button><canvas id="msRecWave" height="32"></canvas><span id="msRecT">${fdur(msRecEl(R))}</span>`
+  b.innerHTML=R.paused?`<button type="button" class="ms-rtrash" data-act="ms-rec-cancel" title="Удалить">${ico('trash')}</button><button type="button" class="ms-rpp" data-act="ms-rec-pp" title="Прослушать">${R.pl?PAUSEI:PLAYI}</button><canvas id="msRecWave" height="32"></canvas><span id="msRecT">${fdur(msRecEl(R))}</span><button type="button" class="ms-r1${R.once?' on':''}" id="msOnce" data-act="ms-rec-once" title="Одноразовое">${ONEI}</button>`
     :`<i class="ms-recdot"></i><span id="msRecT">${fdur(msRecEl(R))}</span><span class="ms-rechint" id="msRecHint">${ico('left','s')} влево — отмена</span><canvas id="msRecWave" height="28"></canvas><button type="button" class="ms-reccan" data-act="ms-rec-cancel">Отмена</button>`;
   $('#msComp').classList.toggle('paused',!!R.paused);const cv=$('#msRecWave');cv.width=(cv.clientWidth||160)*2;cv.height=(R.paused?32:28)*2;
-  if(R.paused){const seek=e=>{const r=cv.getBoundingClientRect();msRecSeek(Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)))};
-    cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);seek(e);const mv=ev=>seek(ev),up=()=>{cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up)};cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up)})}
+  if(R.paused){let drag=null;const fr=e=>{const r=cv.getBoundingClientRect();return Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))};const seek=e=>{const p=fr(e);if(drag==='a'){R.ta=Math.min(p,(R.tb??1)-.08);msRecSeek(R.ta)}else if(drag==='b'){R.tb=Math.max(p,(R.ta||0)+.08);msRecSeek(R.ta||0)}else msRecSeek(Math.min(R.tb??1,Math.max(R.ta||0,p)))};
+    cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);const p=fr(e),r=cv.getBoundingClientRect(),px=18/r.width;drag=!R.vid&&Math.abs(p-(R.ta||0))<px?'a':!R.vid&&Math.abs(p-(R.tb??1))<px?'b':null;const m=msRecMedia();if(drag&&m&&!m.paused)m.pause();seek(e);const mv=ev=>seek(ev),up=()=>{cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up)};cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up)})}
   msRecWave()}
 function msRecWave(){const R=MS.rec,cv=$('#msRecWave');if(!R||!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height;g.clearRect(0,0,W,H);
   if(!R.paused){const n=Math.floor(W/8),L=R.lv.slice(-n);g.fillStyle='#c4b5fd';L.forEach((v,i)=>{const h=Math.max(4,Math.min(H,v*H*4));g.fillRect(W-(L.length-i)*8,(H-h)/2,4,h)});return}
   // пауза: вся запись целиком, белым — прослушанное, ручка — откуда слушать
   const n=Math.max(8,Math.floor(W/9)),mx=Math.max(.02,...R.lv),p=R.pos||0;for(let i=0;i<n;i++){const seg=R.lv.slice(Math.floor(i*R.lv.length/n),Math.floor((i+1)*R.lv.length/n)+1);const v=seg.length?Math.max(...seg):0;const h=Math.max(5,Math.min(H-4,v/mx*(H-4)));g.fillStyle=i/n<p?'#fff':'rgba(196,181,253,.45)';g.beginPath();g.roundRect?g.roundRect(i*9,(H-h)/2,5,h,2.5):g.rect(i*9,(H-h)/2,5,h);g.fill()}
-  g.fillStyle='#fff';g.fillRect(Math.round(p*W)-2,0,4,H)}
+  g.fillStyle='#fff';g.fillRect(Math.round(p*W)-2,0,4,H);
+  if(!R.vid){const A=(R.ta||0)*W,Bx=(R.tb??1)*W;g.fillStyle='rgba(11,7,22,.62)';g.fillRect(0,0,A,H);g.fillRect(Bx,0,W-Bx,H);g.strokeStyle='#fbbf24';g.lineWidth=4;g.strokeRect(A+2,2,Bx-A-4,H-4);g.fillStyle='#fbbf24';[A,Bx-12].forEach(x=>{g.beginPath();g.roundRect?g.roundRect(x,0,12,H,5):g.rect(x,0,12,H);g.fill()});g.fillStyle='#111';[A+5,Bx-7].forEach(x=>g.fillRect(x,H/2-7,2,14))}}
 function msRecMedia(){const R=MS.rec;if(!R)return null;if(R.vid){const v=$('#msRnd video');return v}return R.au}
 function msRecSeek(p){const R=MS.rec;if(!R)return;R.pos=p;const m=msRecMedia(),D=R.dur||msRecEl(R);if(m&&m.src&&D){try{m.currentTime=p*D}catch(e){}}const tl=$('#msRecT');if(tl)tl.textContent=fdur(p*D)+' / '+fdur(D);msRecWave();msRndRing(p)}
 function msRndRing(p){const c=$('#msRnd circle');if(c)c.style.strokeDashoffset=String(302*(1-p))}
@@ -2903,13 +2975,19 @@ async function msRecPause(){const R=MS.rec;if(!R||R.paused)return;try{R.rec.paus
   const lk=$('#msLock');if(lk){lk.innerHTML=R.vid?CAMI:MIC;lk.title='Продолжить запись'}
   if(R.vid){const box=$('#msRnd'),v=box.querySelector('video');v.srcObject=null;v.src=R.pv;v.muted=false;v.loop=false;v.pause();box.classList.add('pv');await msFixDur(v);v.currentTime=0;msRndRing(0)}
   else{R.au=new Audio(R.pv);R.au.preload='auto';await msFixDur(R.au)}
-  const m=msRecMedia();if(m){m.ontimeupdate=()=>{const D=R.dur||1;R.pos=Math.min(1,m.currentTime/D);const tl=$('#msRecT');if(tl)tl.textContent=fdur(m.currentTime)+' / '+fdur(D);msRecWave();msRndRing(R.pos)};m.onended=()=>{R.pl=false;R.pos=0;msRecBar();msRndPP()};m.onpause=()=>{R.pl=false;const b=document.querySelector('.ms-rpp');if(b)b.innerHTML=PLAYI;msRndPP()};m.onplay=()=>{R.pl=true;const b=document.querySelector('.ms-rpp');if(b)b.innerHTML=PAUSEI;msRndPP()}}
+  const m=msRecMedia();if(m){m.ontimeupdate=()=>{const D=R.dur||1;R.pos=Math.min(1,m.currentTime/D);if(!R.vid&&R.tb!=null&&R.pos>=R.tb){m.pause();R.pos=R.ta||0}const tl=$('#msRecT');if(tl)tl.textContent=fdur(m.currentTime)+' / '+fdur(D);msRecWave();msRndRing(R.pos)};m.onended=()=>{R.pl=false;R.pos=0;msRecBar();msRndPP()};m.onpause=()=>{R.pl=false;const b=document.querySelector('.ms-rpp');if(b)b.innerHTML=PLAYI;msRndPP()};m.onplay=()=>{R.pl=true;const b=document.querySelector('.ms-rpp');if(b)b.innerHTML=PAUSEI;msRndPP()}}
   msRecBar();msRndPP();const tl=$('#msRecT');if(tl)tl.textContent=fdur(R.dur)}
 function msRndPP(){const R=MS.rec,b=document.querySelector('#msRnd .ms-rnd-pp');if(b&&R){b.hidden=!R.paused||R.pl;b.innerHTML=PLAYI}}
-function msRecPP(){const R=MS.rec;if(!R||!R.paused)return;const m=msRecMedia();if(!m)return;if(m.paused){const D=R.dur||0;if(R.pos>=.995)R.pos=0;try{m.currentTime=R.pos*D}catch(e){}m.play().catch(()=>{})}else m.pause()}
+function msRecPP(){const R=MS.rec;if(!R||!R.paused)return;const m=msRecMedia();if(!m)return;if(m.paused){const D=R.dur||0;if(R.pos>=(R.tb??1)-.005||R.pos<(R.ta||0))R.pos=R.ta||0;try{m.currentTime=R.pos*D}catch(e){}m.play().catch(()=>{})}else m.pause()}
 function msRecResume(){const R=MS.rec;if(!R||!R.paused)return;const m=msRecMedia();if(m){m.pause();m.ontimeupdate=m.onended=m.onplay=m.onpause=null}
-  if(R.vid){const box=$('#msRnd'),v=box.querySelector('video');v.removeAttribute('src');v.muted=true;v.srcObject=R.st;v.play().catch(()=>{});box.classList.remove('pv')}
-  R.au=null;R.paused=false;R.pl=false;R.seg0=Date.now();try{R.rec.resume()}catch(e){}const lk=$('#msLock');if(lk){lk.innerHTML=STOPI;lk.title='Пауза'}msRecBar();msRndPP();try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}}
+  if(R.vid){const box=$('#msRnd'),v=box.querySelector('video');v.removeAttribute('src');v.muted=true;v.srcObject=R.cam?R.cam.cs:R.st;v.style.transform=R.face==='user'?'':'none';v.play().catch(()=>{});box.classList.remove('pv')}
+  R.au=null;R.paused=false;R.pl=false;R.ta=0;R.tb=null;R.seg0=Date.now();try{R.rec.resume()}catch(e){}const lk=$('#msLock');if(lk){lk.innerHTML=STOPI;lk.title='Пауза'}msRecBar();msRndPP();try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}}
+const FLIPI='<svg class="i" viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2M20 4v4h-4M4 20v-4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+async function msRecFlip(){const R=MS.rec;if(!R||!R.vid||!R.cam||R.flipping)return;R.flipping=1;const face=R.face==='environment'?'user':'environment';
+  try{const ns=await navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:face},width:{ideal:480},height:{ideal:480},aspectRatio:1,frameRate:{ideal:30}}}).catch(()=>navigator.mediaDevices.getUserMedia({video:{facingMode:face}}));
+    const old=R.cam.vs;R.cam.vs=ns;R.cam.ve.srcObject=ns;await R.cam.ve.play().catch(()=>{});old.getTracks().forEach(t=>t.stop());R.st.getVideoTracks().forEach(t=>t.stop());R.face=face;
+    const v=$('#msRnd video');if(v&&!R.paused)v.style.transform=face==='user'?'':'none';try{navigator.vibrate&&navigator.vibrate(10)}catch(_){}}
+  catch(e){toast('Не удалось сменить камеру','x')}finally{R.flipping=0}}
 function msRecLock(){const R=MS.rec;if(!R||R.locked)return;R.locked=true;$('#msComp').classList.add('locked');const lk=$('#msLock');if(lk){lk.innerHTML=STOPI;lk.title='Пауза';lk.dataset.act='ms-rec-pause';lk.style.removeProperty('--d')}try{navigator.vibrate&&navigator.vibrate(10)}catch(_){}}
 // кружок на паузе: тап — слушать/стоп, тянуть по кольцу — откуда смотреть
 function msRndRecBind(box){let sk=0;const ang=e=>{const r=box.getBoundingClientRect();const a=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))+Math.PI/2;return((a/(2*Math.PI))%1+1)%1};
@@ -2917,14 +2995,15 @@ function msRndRecBind(box){let sk=0;const ang=e=>{const r=box.getBoundingClientR
     if(sk){const m=msRecMedia();if(m&&!m.paused)m.pause();msRecSeek(ang(e))}
     const mv=ev=>{if(sk)msRecSeek(ang(ev))},up=()=>{box.removeEventListener('pointermove',mv);box.removeEventListener('pointerup',up);if(!sk)msRecPP();sk=0};box.addEventListener('pointermove',mv);box.addEventListener('pointerup',up)})}
 async function msRecStop(cancel,held){const R=MS.rec;if(!R)return;MS.rec=null;clearInterval(R.iv);const c=$('#msComp');if(c)c.classList.remove('rec','recv','locked','paused');const b=$('#msRecBar');if(b)b.hidden=true;const lk=$('#msLock');if(lk)lk.remove();
-  const pm=R.vid?null:R.au;if(pm)pm.pause();const rnd=$('#msRnd');if(rnd){const v=rnd.querySelector('video');if(v)v.pause();rnd.classList.add('off');setTimeout(()=>rnd.remove(),220)}
-  const d=msRecEl(R);const done=new Promise(r=>R.rec.onstop=r);try{R.rec.stop()}catch(e){}await Promise.race([done,new Promise(r=>setTimeout(r,1500))]);R.st.getTracks().forEach(t=>t.stop());try{R.ch.nodes.forEach(n=>n.disconnect())}catch(e){}if(R.pv)URL.revokeObjectURL(R.pv);
+  const pm=R.vid?null:R.au;if(pm)pm.pause();const flb=$('.ms-flip');if(flb)flb.remove();const rnd=$('#msRnd');if(rnd){const v=rnd.querySelector('video');if(v)v.pause();rnd.classList.add('off');setTimeout(()=>rnd.remove(),220)}
+  const d=msRecEl(R);const done=new Promise(r=>R.rec.onstop=r);try{R.rec.stop()}catch(e){}await Promise.race([done,new Promise(r=>setTimeout(r,1500))]);R.st.getTracks().forEach(t=>t.stop());if(R.cam){R.cam.on=false;cancelAnimationFrame(R.cam.raf);R.cam.vs.getTracks().forEach(t=>t.stop());R.cam.cs.getTracks().forEach(t=>t.stop())}try{R.ch.nodes.forEach(n=>n.disconnect())}catch(e){}if(R.pv)URL.revokeObjectURL(R.pv);
   if(cancel)return;if(d<.7){toast(R.vid?'Зажми и держи, чтобы записать кружок':'Зажми и держи, чтобы записать голосовое','mic');return}
   const blob=new Blob(R.chunks,{type:R.mt.split(';')[0]});
-  if(R.vid){const ext=/mp4/.test(R.mt)?'mp4':'webm';const f=new File([blob],'circle.'+ext,{type:blob.type});const th=await msThumb(URL.createObjectURL(f),true);msAttach([{f,raw:true,rd:1,d:Math.round(d),th}]);return}
+  if(R.vid){const ext=/mp4/.test(R.mt)?'mp4':'webm';const f=new File([blob],'circle.'+ext,{type:blob.type});const th=await msThumb(URL.createObjectURL(f),true);msAttach([{f,raw:true,rd:1,d:Math.round(d),th,once:R.once?1:0}]);return}
   const ext=/mp4/.test(R.mt)?'m4a':/ogg/.test(R.mt)?'ogg':'webm';
   const mx=Math.max(.02,...R.lv);const wf=Array.from({length:48},(_,i)=>{const seg=R.lv.slice(Math.floor(i*R.lv.length/48),Math.floor((i+1)*R.lv.length/48)+1);const v=seg.length?Math.max(...seg):0;return Math.min(9,Math.round(v/mx*9)).toString(36)}).join('');
-  msAttach([{f:new File([blob],'voice.'+ext,{type:blob.type}),raw:true,vo:1,d:Math.round(d),wf}])}
+  const ta=(R.ta||0),tb=(R.tb??1),trim=ta>.005||tb<.995;const wf2=trim?wf.slice(Math.floor(ta*48),Math.ceil(tb*48))||wf:wf;
+  msAttach([{f:new File([blob],'voice.'+ext,{type:blob.type}),raw:true,vo:1,d:Math.max(1,Math.round(trim?(tb-ta)*d:d)),wf:wf2,once:R.once?1:0,...(trim?{a:ta*d,b:tb*d}:{})}])}
 
 /* ---------- кружок в галерею как в Telegram: тёмный фон, круг по центру, логотип и надпись по дуге ---------- */
 function msSaveBlob(blob,name){
@@ -2971,7 +3050,7 @@ function msRndSeekBind(ml){ml.addEventListener('pointerdown',e=>{const box=e.tar
 // проигрывание голосовых
 const MSV={a:null,k:null};
 function msVoiceSync(){if(!MSV.k)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(!el)return;el.classList.add('pl');const b=el.querySelector('.ms-vplay');if(b&&MSV.a&&!MSV.a.paused)b.innerHTML=PAUSEI}
-function msVoiceTick(){const a=MSV.a;if(!a)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(el){const p=a.duration?a.currentTime/a.duration:0;const ab=el.querySelector('.ms-abar i');if(ab)ab.style.width=(p*100)+'%';const bars=el.querySelectorAll('.ms-bars i');const n=Math.round(p*bars.length);bars.forEach((b,i)=>b.classList.toggle('on',i<n));const sm=el.querySelector('small');if(sm&&!el.classList.contains('ms-aud'))sm.textContent=fdur(a.paused&&!a.currentTime?a.duration:a.currentTime);else if(sm&&a.duration)sm.textContent=fdur(a.currentTime)+' / '+fdur(a.duration)}}
+function msVoiceTick(){const a=MSV.a;if(!a)return;const el=document.querySelector(`.ms-voice[data-k="${MSV.k}"]`);if(el){const R=MSV.R||{a:0,b:0},D=(R.b||a.duration||0)-R.a,p=D>0?Math.max(0,Math.min(1,(a.currentTime-R.a)/D)):0;const ab=el.querySelector('.ms-abar i');if(ab)ab.style.width=(p*100)+'%';const bars=el.querySelectorAll('.ms-bars i');const n=Math.round(p*bars.length);bars.forEach((b,i)=>b.classList.toggle('on',i<n));const sm=el.querySelector('small');if(sm&&!el.classList.contains('ms-aud'))sm.textContent=fdur(a.paused&&a.currentTime<=R.a?D:a.currentTime-R.a);else if(sm&&a.duration)sm.textContent=fdur(a.currentTime)+' / '+fdur(a.duration)}}
 
 /* ---------- видео как в Telegram: в чате играет без звука по кругу, по нажатию — полноэкранный плеер ---------- */
 const GEAR='<svg class="i" viewBox="0 0 24 24"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.7 7.7 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.7 7.7 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.7 7.7 0 0 0 1.7 1l.3 2.5h4l.4-2.5a7.7 7.7 0 0 0 1.7-1l2.4 1 2-3.4zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>';
@@ -3034,14 +3113,7 @@ function msForward(m){const L=MS.chats.map(c=>MS.peers[c.p]).filter(Boolean);con
 function msLong(ml){let t=0;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,.ms-vplay,.ms-save'))return;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>clearTimeout(t);
   ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&(Math.abs(e.movementY)>4||Math.abs(e.movementX)>4))stop()});
   ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
-function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
-  msSelClose();b.classList.add('sel');MS.sel=k;const mine=String(m.f)===String(MS.me),F=m.fl&&(m.fl.id||m.fl.local)&&m.i!=null;
-  const bar=document.createElement('div');bar.className='ms-selbar lq';bar.id='msSel';
-  const btn=(a,i,t,cls='')=>`<button class="${cls}" data-act="${a}" data-k="${k}">${i}<span>${t}</span></button>`;
-  bar.innerHTML=btn('ms-selx',ico('x'),'Закрыть')+(m.x?btn('ms-copy',ico('copy'),'Копировать'):'')+(F&&m.fl.rd?btn('ms-csave',ico('down'),'В галерею'):'')+(F?btn('ms-dl',ico('file'),'Скачать'):'')+(F||m.x?btn('ms-share',ico('ext'),'Поделиться'):'')+(m.i!=null?btn('ms-fwd',ico('send'),'Переслать'):'')+(mine&&m.i!=null?btn('ms-del',ico('trash'),'Удалить','red'):'')+(m.err&&m._j?btn('ms-retry',ico('refresh'),'Повторить'):'')+((m.pend||m.err)&&m.i==null?btn('ms-upcancel',ico('x'),'Отменить отправку','red'):'');
-  const box=$('#msMain');if(box)box.appendChild(bar)}
-function msSelClose(){const s=$('#msSel');if(s)s.remove();$$('.mb.sel').forEach(x=>x.classList.remove('sel'));MS.sel=null}
-document.addEventListener('pointerdown',e=>{if(MS.sel&&!e.target.closest('#msSel')&&!e.target.closest('.mb.sel'))msSelClose()},true);
+
 
 /* ---------- эмодзи ---------- */
 const EMO='😀😂🤣😊😍😘😎🤔😴😭😡🥳🤯😱🙏👍👎👏🔥💯❤️💜💔✨🎉🚀💰💸📈📉🪙💎🎵🎧🎤😅😉🙃😇🤝👀💪🥲😤🤑🤡👻💀🌚🌝⭐️🌈☕️🍕🍔🍺🎁⚡️✅❌'.match(/\p{Extended_Pictographic}️?/gu)||[];
@@ -3055,11 +3127,11 @@ async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
     const hb=!document.hidden&&(MS.n%15===1||!MS.on); // «я в сети» — раз в 15 с, пока сайт открыт
     const j=await msApi('poll',null,`&v=${MS.v}${hb?'&hb=1':''}${c&&L?`&c=${c}&s=${last?last.i:(MS.from[c]||0)-1}`:''}`);
     if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
-      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);const tw=MS.typing;MS.typing=j.typing;
+      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);msExtras(c,j);const tw=MS.typing;MS.typing=j.typing;
         clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
-        if(add.length){MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>m.fw!=null))msFwPeers(c);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
+        if(add.length){const ml0=$('#msMsgs');if(ml0&&ml0.scrollHeight-ml0.scrollTop-ml0.clientHeight>300)MS.newBelow=(MS.newBelow||0)+add.filter(m=>String(m.f)!==String(MS.me)).length;MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>m.fw!=null))msFwPeers(c);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
         else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}
-        const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}
+        msPinBar();const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}
       if(msUnread()>before&&LS.get('msSnd',true)&&!(MS.on&&c&&!document.hidden))msBeep();
       if(MS.on)msListPaint();else msBadge()}
     if(MS.on&&c)msPresence()}
@@ -3069,6 +3141,94 @@ let msBeepAC=null;function msBeep(){try{msBeepAC=msBeepAC||new AudioContext();co
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){MS.n=0;msLoop();if(MS.on)msMarkRead()}});
 addEventListener('pagehide',()=>{try{if(MS.tk)navigator.sendBeacon('/api/msg?a=off&tk='+encodeURIComponent(MS.tk))}catch(e){}});
 document.addEventListener('change',e=>{const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked)});
+
+/* ---------- как в Telegram для iOS 26: реакции, ответы свайпом, правка, закреп, одноразовые, обрезка голосовых, «пыль» при удалении ---------- */
+const RX_SET=['❤️','👍','🔥','😂','😮','😢','👎','🎉','🙏','💯','🤝','😍'];
+const REPLYI='<svg class="i" viewBox="0 0 24 24"><path fill="currentColor" d="M10 5 3 11.5 10 18v-4.1c5 0 8.4 1.4 11 5.1-1-5.3-4.2-10.3-11-11.2z"/></svg>';
+const PENI='<svg class="i" viewBox="0 0 24 24"><path fill="currentColor" d="M4 17.3V20h2.7l8.6-8.6-2.7-2.7zM19.7 7a1 1 0 0 0 0-1.4l-1.3-1.3a1 1 0 0 0-1.4 0l-1.6 1.6 2.7 2.7z"/></svg>';
+const PINI='<svg class="i" viewBox="0 0 24 24"><path fill="currentColor" d="M15 3l6 6-2 1-3.5 3.5L15 18l-2-2-4 4-1-1 4-4-2-2 4.5-.5L18 9z"/></svg>';
+const ONEI='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2.2"/><path fill="currentColor" d="M12.6 8h-1.4l-2 1.4v1.5l1.8-1.2V16h1.6z"/></svg>';
+const SELI='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12.3 2.6 2.6L16.2 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+MS.rx={};MS.ed={};MS.pin={};MS.reply=null;MS.edit=null;MS.rate=+LS.get('msRate',1)||1;
+const msHeard=()=>{try{return new Set(JSON.parse(localStorage.getItem('msHeard')||'[]'))}catch(e){return new Set()}};
+function msHeardAdd(k){try{const s=msHeard();s.add(k);localStorage.setItem('msHeard',JSON.stringify([...s].slice(-800)))}catch(e){}}
+function msExtras(c,j){if(!j)return;if(j.rx)MS.rx[c]=j.rx;if(j.ed)MS.ed[c]=j.ed;if(j.pin!=null)MS.pin[c]=j.pin}
+const msText=(c,m)=>{const e=MS.ed[c]&&m.i!=null&&MS.ed[c][m.i];return e?e.x:m.x};
+function msPrevText(c,m){if(!m)return 'Сообщение';if(m.d)return 'Сообщение удалено';const x=msText(c,m);if(x)return x.slice(0,90);const F=m.fl;if(!F)return '';return F.vo?'🎤 Голосовое сообщение':F.rd?'📹 Видеосообщение':F.ty&&F.ty.startsWith('image/')?'🖼 Фото':F.ty&&F.ty.startsWith('video/')?'🎬 Видео':'📎 '+F.n}
+const msWho=f=>String(f)===String(MS.me)?(USR.name||'Вы'):((MS.peers[f]||{}).name||'ID '+f);
+function msRxHTML(c,m){const R=MS.rx[c]&&m.i!=null&&MS.rx[c][m.i];if(!R)return '';const by={};Object.entries(R).forEach(([u,e])=>{(by[e]=by[e]||[]).push(u)});
+  return `<div class="ms-rx">${Object.entries(by).map(([e,us])=>`<button type="button" class="${us.includes(String(MS.me))?'my':''}" data-act="ms-react" data-k="${m.i}" data-e="${e}"><span>${e}</span>${us.length>1?`<b>${us.length}</b>`:`<img src="${avaSrc(String(us[0])===String(MS.me)?USR.avatar:(MS.peers[us[0]]||{}).avatar)}" alt="">`}</button>`).join('')}</div>`}
+function msRqHTML(c,m){if(m.r==null)return '';const t=(MS.msgs[c]||[]).find(x=>x.i===m.r);return `<button type="button" class="ms-rq" data-act="ms-goto" data-k="${m.r}"><b>${esc(t?msWho(t.f):'Сообщение')}</b><span>${esc(t?msPrevText(c,t):'Старое сообщение')}</span></button>`}
+async function msReact(i,e){const c=MS.c;if(i==null||!c)return;const R=MS.rx[c]=MS.rx[c]||{};const o={...(R[i]||{})};const me=String(MS.me);if(o[me]===e)delete o[me];else o[me]=e;if(Object.keys(o).length)R[i]=o;else delete R[i];
+  const y=$('#msMsgs')?.scrollTop;msPaintMsgs();const ml=$('#msMsgs');if(ml&&y!=null)ml.scrollTop=y;const ch=ml&&ml.querySelector(`.mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);if(ch)ch.classList.add('pop');
+  try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}try{const j=await msApi('react',{c,i,e});R[i]=j.rx;if(!Object.keys(j.rx).length)delete R[i]}catch(err){toast(err.message,'x')}}
+function msGoto(i){const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${i}"]`);if(!el){toast('Сообщение выше — пролистай чат','chat');return}el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.remove('hl');void el.offsetWidth;el.classList.add('hl')}
+// панель «ответ / правка» над полем ввода (само поле не меняется)
+function msBar(){const box=$('#msMain');if(!box)return;let b=$('#msRBar');const R=MS.reply,E=MS.edit;if(!R&&!E){if(b)b.remove();box.classList.remove('ms-hasbar');return}
+  const c=MS.c,m=(MS.msgs[c]||[]).find(x=>x.i===(E?E.i:R.i));if(!b){b=document.createElement('div');b.id='msRBar';b.className='ms-rbar lq';box.appendChild(b)}box.classList.add('ms-hasbar');
+  b.innerHTML=`<span class="ms-rbi">${E?PENI:REPLYI}</span><button type="button" class="ms-rbt" data-act="ms-goto" data-k="${m?m.i:''}"><b>${E?'Редактирование':'В ответ '+esc(m?msWho(m.f):'')}</b><span>${esc(msPrevText(c,m))}</span></button><button type="button" class="ib" data-act="ms-barx" title="Отмена">${ico('x')}</button>`}
+function msReplyTo(i){MS.edit=null;MS.reply={i};msBar();const inp=$('#msIn');if(inp)inp.focus();try{navigator.vibrate&&navigator.vibrate(10)}catch(_){}}
+function msEditStart(m){MS.reply=null;MS.edit={i:m.i,was:$('#msIn')?.value||''};msBar();const inp=$('#msIn');if(inp){inp.value=msText(MS.c,m)||'';inp.dispatchEvent(new Event('input'));inp.focus()}}
+function msBarClose(){if(MS.edit){const inp=$('#msIn');if(inp){inp.value=MS.edit.was||'';inp.dispatchEvent(new Event('input'))}}MS.reply=null;MS.edit=null;msBar()}
+async function msEditSend(x){const E=MS.edit,c=MS.c;MS.edit=null;msBar();const inp=$('#msIn');if(inp){inp.value=E.was||'';inp.dispatchEvent(new Event('input'))}
+  const m=(MS.msgs[c]||[]).find(z=>z.i===E.i);if(!m||x===msText(c,m))return;(MS.ed[c]=MS.ed[c]||{})[E.i]={x,t:Date.now()};msPaintMsgs();try{await msApi('edit',{c,i:E.i,x})}catch(e){toast(e.message,'x')}}
+// закреплённое сообщение — стеклянная плашка под шапкой
+function msPinBar(){const box=$('#msMain');if(!box||!MS.c)return;let b=$('#msPin');const i=MS.pin[MS.c];const m=i>=0&&(MS.msgs[MS.c]||[]).find(x=>x.i===i&&!x.d);
+  if(!m){if(b)b.remove();box.classList.remove('ms-haspin');return}if(!b){b=document.createElement('div');b.id='msPin';b.className='ms-pin lq';box.appendChild(b)}box.classList.add('ms-haspin');
+  b.innerHTML=`<button type="button" class="ms-pint" data-act="ms-goto" data-k="${m.i}"><i></i><span><b>Закреплённое сообщение</b><small>${esc(msPrevText(MS.c,m))}</small></span></button><button type="button" class="ib" data-act="ms-pin" data-k="-1" title="Открепить">${PINI}</button>`}
+// кнопка «вниз» со счётчиком новых
+function msDownBtn(){const ml=$('#msMsgs'),box=$('#msMain');if(!ml||!box)return;let b=$('#msDown');if(!b){b=document.createElement('button');b.type='button';b.id='msDown';b.className='ms-down lq';b.innerHTML=`${ico('chev','s')}<b hidden></b>`;b.onclick=()=>{ml.scrollTo({top:ml.scrollHeight,behavior:'smooth'});MS.newBelow=0};box.appendChild(b)}
+  const far=ml.scrollHeight-ml.scrollTop-ml.clientHeight>300;b.classList.toggle('on',far);if(!far)MS.newBelow=0;const n=b.querySelector('b');n.hidden=!MS.newBelow;n.textContent=MS.newBelow||''}
+// «пыль» как у Telegram при удалении
+function msDust(el){return new Promise(res=>{if(!el){res();return}const r=el.getBoundingClientRect();if(!r.width||matchMedia('(prefers-reduced-motion: reduce)').matches){res();return}
+  const cs=getComputedStyle(el);const col=el.classList.contains('me')?['#a78bfa','#8b5cf6','#7c3aed','#c4b5fd']:['#3b2a63','#4c3a78','#2a1d4a','#6b5a9a'];
+  const lay=document.createElement('div');lay.className='ms-dust';lay.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;document.body.appendChild(lay);
+  const N=Math.min(260,Math.round(r.width*r.height/70));for(let k=0;k<N;k++){const p=document.createElement('i');const x=Math.random()*r.width,y=Math.random()*r.height,s=1.5+Math.random()*2.5;p.style.cssText=`left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:${col[k%4]}`;lay.appendChild(p);
+    const d=x/r.width*380;p.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${30+Math.random()*90}px,${-40-Math.random()*90}px) scale(.3)`,opacity:0}],{duration:700+Math.random()*500,delay:d,easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})}
+  el.animate([{clipPath:'inset(0 0 0 0)',opacity:1},{clipPath:'inset(0 0 0 100%)',opacity:.6}],{duration:520,easing:'ease-in',fill:'forwards'});void cs;
+  setTimeout(()=>{lay.remove()},1500);setTimeout(res,560)})}
+async function msDelete(m){const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${m.i}"]`);await msDust(el);m.d=1;m.x='';delete m.fl;if(MS.pin[MS.c]===m.i)MS.pin[MS.c]=-1;msPaintMsgs();msPinBar();try{await msApi('del',{c:MS.c,i:m.i})}catch(e){toast(e.message,'x')}}
+// одноразовое: у получателя после просмотра — исчезает у обоих
+async function msOnceDone(m){if(!m||!m.fl||!m.fl.once||String(m.f)===String(MS.me)||m.i==null)return;const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${m.i}"]`);await msDust(el);m.d=1;m.o1=1;m.x='';delete m.fl;msPaintMsgs();msApi('once',{c:MS.c,i:m.i}).catch(()=>{})}
+// контекстное меню как в iOS 26: размытие, «приподнятое» сообщение, реакции сверху, действия снизу
+function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}msSelClose();
+  const c=MS.c,mine=String(m.f)===String(MS.me),F=m.fl&&(m.fl.id||m.fl.local)&&m.i!=null,sent=m.i!=null,x=msText(c,m);
+  const ov=document.createElement('div');ov.className='ms-ctx';ov.id='msSel';const r=b.getBoundingClientRect();
+  const clone=b.cloneNode(true);clone.classList.remove('new','hl');clone.classList.add('ms-ctxm');clone.querySelectorAll('video').forEach(v=>{v.removeAttribute('autoplay')});
+  const it=(a,i,t,cls='')=>`<button class="${cls}" data-act="${a}" data-k="${k}"><span>${t}</span>${i}</button>`;
+  const my=sent&&MS.rx[c]&&MS.rx[c][m.i]&&MS.rx[c][m.i][String(MS.me)];
+  const acts=(sent?it('ms-reply',REPLYI,'Ответить'):'')+(mine&&sent&&!m.fl?.vo&&!m.fl?.rd&&(x||m.fl)?it('ms-edit',PENI,'Изменить'):'')+(x?it('ms-copy',ico('copy'),'Копировать'):'')+(sent?it('ms-pin',PINI,MS.pin[c]===m.i?'Открепить':'Закрепить'):'')+(sent?it('ms-fwd',FWD,'Переслать'):'')
+    +(F&&m.fl.rd?it('ms-csave',ico('down'),'Сохранить в галерею'):'')+(F&&/^(image|video)\//.test(m.fl.ty)&&!m.fl.rd?it('ms-save',ico('down'),'Сохранить в галерею'):'')+(F?it('ms-dl',ico('file'),'Скачать файл'):'')+(F||x?it('ms-share',ico('ext'),'Поделиться'):'')
+    +(m.err&&m._j?it('ms-retry',ico('refresh'),'Повторить'):'')+((m.pend||m.err)&&m.i==null?it('ms-upcancel',ico('x'),'Отменить отправку','red'):'')+(mine&&sent?it('ms-del',ico('trash'),'Удалить','red'):'');
+  ov.innerHTML=`<div class="ms-ctxbg"></div>${sent?`<div class="ms-ctxr lq">${RX_SET.slice(0,7).map((e,n)=>`<button data-act="ms-react" data-k="${m.i}" data-e="${e}" class="${my===e?'on':''}" style="--n:${n}">${e}</button>`).join('')}<button class="more" data-act="ms-rxmore" data-k="${m.i}">${ico('chev','s')}</button></div>`:''}<div class="ms-ctxa lq">${acts}</div>`;
+  document.body.appendChild(ov);ov.appendChild(clone);
+  const W=innerWidth,H=(window.visualViewport?visualViewport.height:innerHeight),rx=ov.querySelector('.ms-ctxr'),ac=ov.querySelector('.ms-ctxa');
+  const aw=ac.offsetWidth,ah=ac.offsetHeight,rh=rx?rx.offsetHeight+10:0,rw=rx?rx.offsetWidth:0;
+  const maxH=Math.min(r.height,H-ah-rh-80);let top=Math.max(rh+20+(window.visualViewport?0:0),Math.min(r.top,H-ah-maxH-24));
+  clone.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;max-height:${Math.max(60,maxH)}px;overflow:hidden;margin:0`;
+  requestAnimationFrame(()=>{clone.style.transition='top .34s cubic-bezier(.2,1.2,.3,1),transform .34s cubic-bezier(.2,1.2,.3,1)';clone.style.top=top+'px';clone.style.transform='scale(1.02)';ov.classList.add('on')});
+  const right=mine;const ax=right?Math.max(10,Math.min(W-aw-10,r.right-aw)):Math.max(10,Math.min(W-aw-10,r.left));
+  ac.style.left=ax+'px';ac.style.top=(top+Math.max(60,maxH)+10)+'px';ac.style.transformOrigin=right?'top right':'top left';
+  if(rx){rx.style.left=Math.max(10,Math.min(W-rw-10,right?r.right-rw:r.left))+'px';rx.style.top=(top-rh)+'px';rx.style.transformOrigin=right?'bottom right':'bottom left'}
+  b.classList.add('ms-ghost');MS.sel=k;
+  ov.addEventListener('click',e=>{if(!e.target.closest('[data-act]'))msSelClose()})}
+function msSelClose(){const s=$('#msSel');if(s){s.classList.remove('on');s.classList.add('off');setTimeout(()=>s.remove(),200)}$$('.mb.ms-ghost').forEach(x=>x.classList.remove('ms-ghost'));MS.sel=null}
+function msRxMore(i){const ov=$('#msSel');const rx=ov&&ov.querySelector('.ms-ctxr');if(!rx)return;rx.classList.add('wide');rx.innerHTML=RX_SET.map((e,n)=>`<button data-act="ms-react" data-k="${i}" data-e="${e}" style="--n:${n}">${e}</button>`).join('')}
+// жесты: свайп влево — ответить, двойной тап — ❤️
+function msGestures(ml){let s=null,lastT=0,lastEl=null;
+  ml.addEventListener('pointerdown',e=>{const b=e.target.closest('.mb');if(!b||!b.dataset.i||e.target.closest('.ms-rnd.big,.ms-voice.pl .ms-bars,input,textarea'))return;s={b,x:e.clientX,y:e.clientY,dx:0,on:false}},{passive:true});
+  ml.addEventListener('pointermove',e=>{if(!s)return;const dx=e.clientX-s.x,dy=e.clientY-s.y;if(!s.on){if(Math.abs(dy)>10){s=null;return}if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.4){s.on=true;s.b.classList.add('sw');if(!s.ic){s.ic=document.createElement('span');s.ic.className='ms-swi';s.ic.innerHTML=REPLYI;s.b.appendChild(s.ic)}}else return}
+    s.dx=Math.max(-90,Math.min(0,dx));s.b.style.transform=`translateX(${s.dx}px)`;const p=Math.min(1,-s.dx/60);s.ic.style.opacity=p;s.ic.style.transform=`translateY(-50%) scale(${.5+p*.5})`;if(p>=1&&!s.vib){s.vib=1;try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}}},{passive:true});
+  const end=e=>{if(!s)return;const S=s;s=null;if(S.on){const go=S.dx<=-60;S.b.style.transition='transform .28s cubic-bezier(.2,1.3,.3,1)';S.b.style.transform='';setTimeout(()=>{S.b.style.transition='';S.b.classList.remove('sw');S.ic&&S.ic.remove()},300);if(go)msReplyTo(+S.b.dataset.i);return}
+    if(e.type!=='pointerup'||e.target.closest('button,a,video,.ms-vid,.ms-img,.ms-rnd,.ms-bars,.ms-rx'))return;const now=Date.now();if(lastEl===S.b&&now-lastT<320){lastT=0;msReact(+S.b.dataset.i,'❤️');const h=document.createElement('span');h.className='ms-heart';h.textContent='❤️';h.style.left=(e.clientX)+'px';h.style.top=(e.clientY)+'px';document.body.appendChild(h);setTimeout(()=>h.remove(),800)}else{lastT=now;lastEl=S.b}};
+  ml.addEventListener('pointerup',end);ml.addEventListener('pointercancel',end)}
+// голосовые: скорость, перемотка по волне, обрезка (a..b), «непрослушанное»
+function msVoiceRange(m){const F=m&&m.fl||{};const a=+F.a||0,b=+F.b||0;return{a,b:b>a?b:0}}
+function msVoiceSeekBind(ml){ml.addEventListener('pointerdown',e=>{const bars=e.target.closest('.ms-voice .ms-bars');if(!bars)return;const v=bars.closest('.ms-voice');const k=v.dataset.k;if(MSV.k!==k||!MSV.a)return;e.stopPropagation();
+  const set=ev=>{const r=bars.getBoundingClientRect();const p=Math.min(1,Math.max(0,(ev.clientX-r.left)/r.width));const a=MSV.a,R=MSV.R||{a:0,b:0};const D=(R.b||a.duration||0)-R.a;if(D>0)a.currentTime=R.a+p*D;msVoiceTick()};set(e);bars.setPointerCapture(e.pointerId);
+  const mv=ev=>set(ev),up=()=>{bars.removeEventListener('pointermove',mv);bars.removeEventListener('pointerup',up)};bars.addEventListener('pointermove',mv);bars.addEventListener('pointerup',up)})}
+// запись: «одноразовое» и обрезка на паузе
+function msRecOnce(){const R=MS.rec;if(!R)return;R.once=!R.once;const b=$('#msOnce');if(b)b.classList.toggle('on',R.once);toast(R.once?'Одноразовое: исчезнет после просмотра':'Обычное сообщение',R.once?'check':'chat')}
 
 const MS_ACT={
   'ms-go'(el){location.hash=el.dataset.h},
@@ -3089,24 +3249,35 @@ const MS_ACT={
   'ms-upcancel'(el,e){e&&e.stopPropagation();const m=msFind(el.dataset.k);if(!m||!(m.pend||m.err))return;m.cancel=1;if(m._j){mqDel(m.tmp);MQ.m.delete(m.tmp)}const L=MS.msgs[MS.c]||[],k=L.indexOf(m);if(k>=0)L.splice(k,1);msPaintMsgs()},
   'ms-retry'(el){const m=msFind(el.dataset.k);if(!m||!m._j)return;m.err=0;m.pend=1;msPaintMsgs();msRun(m._j,m)},
   'ms-rplay'(el){const v=el,box=v.closest('.ms-rnd');if(!box)return;if(box._sk&&Date.now()-box._sk<500)return;$$('.ms-rnd video').forEach(o=>{if(o!==v&&!o.paused){o.pause();o.closest('.ms-rnd').classList.remove('pl')}});
-    if(v.paused){v.muted=false;v.play().catch(()=>{});box.classList.add('pl','big');const ring=box.querySelector('circle');v.ontimeupdate=()=>{if(ring&&v.duration)ring.style.strokeDashoffset=String(302*(1-v.currentTime/v.duration));const sm=box.querySelector('small');if(sm)sm.textContent=fdur(v.currentTime)};v.onended=()=>{box.classList.remove('pl','big');if(ring)ring.style.strokeDashoffset='302'}}
+    if(v.paused){v.muted=false;v.play().catch(()=>{});box.classList.add('pl','big');const ring=box.querySelector('circle');v.ontimeupdate=()=>{if(ring&&v.duration)ring.style.strokeDashoffset=String(302*(1-v.currentTime/v.duration));const sm=box.querySelector('small');if(sm)sm.textContent=fdur(v.currentTime)};v.onended=()=>{box.classList.remove('pl','big');if(ring)ring.style.strokeDashoffset='302';const cm=msFind(box.dataset.k);if(cm&&cm.fl&&cm.fl.once)msOnceDone(cm)}}
     else{v.pause();box.classList.remove('pl')}},
   'ms-vplay'(el){const k=el.dataset.k,src=el.dataset.src;if(!src)return;
     if(MSV.k===k&&MSV.a){if(MSV.a.paused){MSV.a.play();el.innerHTML=PAUSEI}else{MSV.a.pause();el.innerHTML=PLAYI}return}
     if(MSV.a){MSV.a.pause();const pb=document.querySelector(`.ms-voice[data-k="${MSV.k}"] .ms-vplay`);if(pb)pb.innerHTML=PLAYI}
-    const a=new Audio(src);a.preload='auto';MSV.a=a;MSV.k=k;a.ontimeupdate=msVoiceTick;a.onended=()=>{el.innerHTML=PLAYI;MSV.k=null;msVoiceTick()};a.play().then(()=>{el.innerHTML=PAUSEI}).catch(()=>toast('Не удалось воспроизвести','x'))},
-  'ms-save'(el){closeSheet();const m=msFind(el.dataset.k);if(m)msSaveFile(m)},
+    const vm=msFind(k);const VR=msVoiceRange(vm);const a=new Audio(src);a.preload='auto';a.playbackRate=MS.rate;a.defaultPlaybackRate=MS.rate;MSV.a=a;MSV.k=k;MSV.R=VR;if(vm&&vm.i!=null){msHeardAdd(MS.c+':'+vm.i);const u=document.querySelector(`.ms-voice[data-k="${k}"] .ms-unh`);if(u)u.remove()}
+    const fin=()=>{a.pause();el.innerHTML=PLAYI;MSV.k=null;msVoiceTick();if(vm&&vm.fl&&vm.fl.once)msOnceDone(vm)};if(VR.a)a.addEventListener('loadedmetadata',()=>{a.currentTime=VR.a},{once:true});a.ontimeupdate=()=>{if(VR.b&&a.currentTime>=VR.b)return fin();msVoiceTick()};a.onended=fin;document.querySelector(`.ms-voice[data-k="${k}"]`)?.classList.add('pl');a.play().then(()=>{el.innerHTML=PAUSEI}).catch(()=>toast('Не удалось воспроизвести','x'))},
+  'ms-save'(el){closeSheet();msSelClose();const m=msFind(el.dataset.k);if(m)msSaveFile(m)},
   'ms-view'(el){const m=msFind(el.dataset.k);if(!m||!m.fl)return;const src=m.fl.local||msFile(m.fl.id);const v=document.createElement('div');v.className='ms-viewer';
     v.innerHTML=`<img src="${esc(src)}" alt=""><div class="ms-vtop"><button class="ms-gbtn lq" data-x>${ico('x')}<span>Закрыть</span></button><button class="ms-gbtn lq" data-s>${ico('down')}<span>Сохранить</span></button></div>${m.x?`<div class="ms-vcap">${esc(m.x)}</div>`:''}`;
     v.addEventListener('click',e=>{if(e.target.closest('[data-s]'))return msSaveFile(m);if(e.target.closest('[data-x]')||e.target===v){v.classList.add('off');setTimeout(()=>v.remove(),200)}});document.body.appendChild(v);requestAnimationFrame(()=>v.classList.add('on'))},
-  'ms-copy'(el){const m=msFind(el.dataset.k);msSelClose();closeSheet();if(m)copyText(m.x)},
+  'ms-copy'(el){const m=msFind(el.dataset.k);msSelClose();closeSheet();if(m)copyText(msText(MS.c,m))},
   'ms-selx'(){msSelClose()},
   'ms-vopen'(el){const m=msFind(el.dataset.k);if(m)msVideo(m)},
   'ms-dl'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msDownload(m)},
   'ms-share'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msShare(m)},
   'ms-fwd'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msForward(m)},
   async 'ms-fwto'(el){el.disabled=true;try{const to=el.dataset.to;await msApi('fwd',{c:MS.c,i:+el.dataset.i,to});closeSheet();toast('Переслано','check');const c2=msCid(to);delete MS.msgs[c2];location.hash='#msg-'+to}catch(e){toast(e.message,'x');el.disabled=false}},
-  async 'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);const i=m?m.i:-1;if(!m)return;m.d=1;m.x='';delete m.fl;msPaintMsgs();try{await msApi('del',{c:MS.c,i})}catch(e){toast(e.message,'x')}},
+  async 'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);if(!m||m.i==null)return;await new Promise(r=>setTimeout(r,180));msDelete(m)},
+  'ms-react'(el){const i=+el.dataset.k;msSelClose();msReact(i,el.dataset.e)},
+  'ms-rxmore'(el){msRxMore(+el.dataset.k)},
+  'ms-reply'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msReplyTo(m.i)},
+  'ms-edit'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msEditStart(m)},
+  'ms-barx'(){msBarClose()},
+  'ms-goto'(el){if(el.dataset.k!=='')msGoto(+el.dataset.k)},
+  async 'ms-pin'(el){const m=msFind(el.dataset.k);msSelClose();const c=MS.c,i=m&&MS.pin[c]!==m.i?m.i:-1;MS.pin[c]=i;msPinBar();toast(i>=0?'Сообщение закреплено':'Откреплено',i>=0?'check':'x');try{await msApi('pin',{c,i})}catch(e){toast(e.message,'x')}},
+  'ms-vrate'(el,e){e&&e.stopPropagation();const L=[1,1.5,2];MS.rate=L[(L.indexOf(MS.rate)+1)%L.length];LS.set('msRate',MS.rate);if(MSV.a)MSV.a.playbackRate=MS.rate;$$('.ms-vrate').forEach(b=>b.textContent=MS.rate+'x')},
+  'ms-rec-once'(){msRecOnce()},
+  'ms-rec-flip'(){msRecFlip()},
 };
 
 
