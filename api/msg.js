@@ -51,7 +51,8 @@ async function msgAt(c, i) { const [r] = await kvMulti([['LRANGE', 'cm:' + c, St
 async function chatList(me) {
   const [ci, cu] = await kvMulti([['HGETALL', 'ci:' + me], ['HGETALL', 'cu:' + me]]);
   const C = pairs(ci), U = pairs(cu);
-  const out = await Promise.all(Object.entries(C).map(async ([c, v]) => { let o = {}; try { o = JSON.parse(v); } catch (e) {} return { c, p: peerOf(c, me), t: o.t || 0, f: o.f, n: o.n || 0, pv: (await open(c, o.pv)) || '', u: +U[c] || 0 }; }));
+  const E = Object.entries(C); const RD = E.length ? await kvMulti(E.map(([c]) => ['HGET', 'cr:' + c, peerOf(c, me)])) : [];
+  const out = await Promise.all(E.map(async ([c, v], k) => { let o = {}; try { o = JSON.parse(v); } catch (e) {} return { c, p: peerOf(c, me), t: o.t || 0, f: o.f, n: o.n || 0, pv: (await open(c, o.pv)) || '', u: +U[c] || 0, r: RD[k] == null ? -1 : +RD[k] }; }));
   return out.sort((a, b) => b.t - a.t);
 }
 
@@ -108,7 +109,7 @@ export default async function handler(req) {
       const c = chatId(me, to);
       if (to !== me && !(await kv('GET', 'id:' + to))) return json({ error: 'Аккаунт не найден' }, 404);
       const x = String(body.x || '').slice(0, 4000);
-      const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000), wf: String(body.fl.wf || '').replace(/[^0-9a-z]/g, '').slice(0, 80), vo: body.fl.vo ? 1 : 0, rd: body.fl.rd ? 1 : 0, ...(body.fl.once ? { once: 1 } : {}), ...(+body.fl.a > 0 ? { a: Math.round(+body.fl.a * 100) / 100 } : {}), ...(+body.fl.b > 0 ? { b: Math.round(+body.fl.b * 100) / 100 } : {}) } : null;
+      const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000), wf: String(body.fl.wf || '').replace(/[^0-9a-z]/g, '').slice(0, 80), vo: body.fl.vo ? 1 : 0, rd: body.fl.rd ? 1 : 0, ...(body.fl.once ? { once: 1 } : {}), ...(body.fl.doc ? { doc: 1 } : {}), ...(+body.fl.a > 0 ? { a: Math.round(+body.fl.a * 100) / 100 } : {}), ...(+body.fl.b > 0 ? { b: Math.round(+body.fl.b * 100) / 100 } : {}) } : null;
       if (fl) { const m = await jget('mf:' + fl.id); if (!m || m.c !== c || m.o !== me) return json({ error: 'Файл не загружен' }, 400); }
       if (!x.trim() && !fl) return json({ error: 'Пустое сообщение' }, 400);
       const t = Date.now(), m = { f: +me, t, x, ...(fl ? { fl } : {}), ...(body.r != null ? { r: +body.r } : {}) };
@@ -133,7 +134,7 @@ export default async function handler(req) {
         for (let k = 0; k < parts.length; k++) await kv('SET', 'mfc:' + nid + ':' + k, await seal(c, await open(c0, parts[k], true)));
         fl = { ...m0.fl, id: nid };
       }
-      const t = Date.now(), m = { f: +me, t, x: m0.x || '', ...(fl ? { fl } : {}), fw: +(m0.fw ?? m0.f) };
+      const t = Date.now(), m = { f: +me, t, x: m0.x || '', ...(fl ? { fl } : {}), ...(body.plain ? {} : { fw: +(m0.fw ?? m0.f) }) };
       const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
       const pv = await seal(c, '↪ ' + (m.x ? m.x.slice(0, 70) : fl ? (fl.vo ? 'Голосовое' : fl.rd ? 'Видеосообщение' : fl.n) : ''));
       const meta = JSON.stringify({ t, f: +me, pv, n: len });

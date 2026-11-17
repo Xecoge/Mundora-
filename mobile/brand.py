@@ -67,7 +67,8 @@ if plat == 'android':
     edit(os.path.join(res, 'values', 'styles.xml'), styles)
     # камера и микрофон для голосовых и видеокружков (Capacitor сам спросит разрешение, когда сайт попросит)
     def perms(x):
-        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'CAMERA'] if f'permission.{p}"' not in x)
+        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'CAMERA', 'READ_MEDIA_IMAGES', 'READ_MEDIA_VIDEO', 'READ_MEDIA_AUDIO', 'READ_MEDIA_VISUAL_USER_SELECTED'] if f'permission.{p}"' not in x)
+        add += '' if 'READ_EXTERNAL_STORAGE' in x else '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />\n'
         add += '' if 'android.hardware.camera' in x else '    <uses-feature android:name="android.hardware.camera" android:required="false" />\n'
         return x.replace('</manifest>', add + '</manifest>')
     edit(os.path.join(root, 'app', 'src', 'main', 'AndroidManifest.xml'), perms)
@@ -96,6 +97,18 @@ import android.webkit.JavascriptInterface;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.InputStream;
+import android.Manifest;
+import android.content.ContentUris;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.util.Size;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.ByteArrayOutputStream;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -122,6 +135,101 @@ public class MainActivity extends BridgeActivity {
                 }
             });
             bridge.getWebView().addJavascriptInterface(new SaveBridge(), "MundoraNative");
+            bridge.getWebView().addJavascriptInterface(new MediaBridge(), "MundoraMedia");
+        }
+    }
+
+    // галерея и музыка телефона прямо в шторке «скрепки», как в Telegram
+    private String[] mediaPerms() {
+        if (Build.VERSION.SDK_INT >= 33) return new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO};
+        return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+    }
+    private boolean has(String p) { return ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED; }
+    private void js(String code) { runOnUiThread(() -> { if (bridge != null && bridge.getWebView() != null) bridge.getWebView().evaluateJavascript(code, null); }); }
+    @Override
+    public void onRequestPermissionsResult(int code, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(code, perms, res);
+        if (code == 7701) js("window.__mdPerm&&window.__mdPerm()");
+    }
+    public class MediaBridge {
+        @JavascriptInterface
+        public String perm() {
+            if (Build.VERSION.SDK_INT >= 33) {
+                boolean img = has(Manifest.permission.READ_MEDIA_IMAGES), vid = has(Manifest.permission.READ_MEDIA_VIDEO), aud = has(Manifest.permission.READ_MEDIA_AUDIO);
+                boolean part = Build.VERSION.SDK_INT >= 34 && has("android.permission.READ_MEDIA_VISUAL_USER_SELECTED");
+                return "{\"media\":\"" + (img || vid ? "all" : part ? "some" : "no") + "\",\"audio\":" + aud + "}";
+            }
+            boolean r = has(Manifest.permission.READ_EXTERNAL_STORAGE);
+            return "{\"media\":\"" + (r ? "all" : "no") + "\",\"audio\":" + r + "}";
+        }
+        @JavascriptInterface
+        public void ask() { runOnUiThread(() -> ActivityCompat.requestPermissions(MainActivity.this, mediaPerms(), 7701)); }
+        private Uri uriOf(String k, long id) {
+            Uri base = k.equals("v") ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI : k.equals("a") ? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            return ContentUris.withAppendedId(base, id);
+        }
+        @JavascriptInterface
+        public String list(String kind, int offset, int limit) {
+            JSONArray out = new JSONArray();
+            try {
+                Cursor c;
+                if (kind.equals("audio")) {
+                    c = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.MIME_TYPE, MediaStore.Audio.Media.SIZE, MediaStore.Audio.Media.DATE_ADDED, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST},
+                        null, null, MediaStore.Audio.Media.DATE_ADDED + " DESC");
+                } else {
+                    c = getContentResolver().query(MediaStore.Files.getContentUri("external"), new String[]{MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DISPLAY_NAME, MediaStore.Files.FileColumns.MIME_TYPE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE},
+                        MediaStore.Files.FileColumns.MEDIA_TYPE + " IN (" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE + "," + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")", null, MediaStore.Files.FileColumns.DATE_ADDED + " DESC");
+                }
+                if (c == null) return "[]";
+                int i = 0;
+                while (c.moveToNext()) {
+                    if (i++ < offset) continue;
+                    if (out.length() >= limit) break;
+                    JSONObject o = new JSONObject();
+                    o.put("id", c.getLong(0)); o.put("n", c.getString(1)); o.put("ty", c.getString(2)); o.put("sz", c.getLong(3)); o.put("t", c.getLong(4));
+                    if (kind.equals("audio")) { o.put("k", "a"); o.put("d", c.getLong(5) / 1000); o.put("title", c.getString(6)); o.put("artist", c.getString(7)); }
+                    else o.put("k", c.getInt(5) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO ? "v" : "i");
+                    out.put(o);
+                }
+                c.close();
+            } catch (Exception e) { return "[]"; }
+            return out.toString();
+        }
+        // обложки отдаются по одной, не блокируя страницу
+        @JavascriptInterface
+        public void thumbs(String keys) {
+            new Thread(() -> {
+                for (String key : keys.split(",")) {
+                    try {
+                        String[] kv = key.split(":"); String k = kv[0]; long id = Long.parseLong(kv[1]);
+                        Bitmap b;
+                        if (Build.VERSION.SDK_INT >= 29) b = getContentResolver().loadThumbnail(uriOf(k, id), new Size(320, 320), null);
+                        else if (k.equals("v")) b = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+                        else b = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+                        if (b == null) continue;
+                        ByteArrayOutputStream bo = new ByteArrayOutputStream(); b.compress(Bitmap.CompressFormat.JPEG, 72, bo);
+                        js("window.__mdThumb&&window.__mdThumb('" + key + "','data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP) + "')");
+                    } catch (Exception e) { }
+                }
+            }).start();
+        }
+        // сам файл — кусками в страницу
+        @JavascriptInterface
+        public void read(String req, String key) {
+            new Thread(() -> {
+                try {
+                    String[] kv = key.split(":");
+                    InputStream in = getContentResolver().openInputStream(uriOf(kv[0], Long.parseLong(kv[1])));
+                    byte[] buf = new byte[393216]; int n, part = 0;
+                    ByteArrayOutputStream acc = new ByteArrayOutputStream();
+                    while ((n = in.read(buf)) > 0) {
+                        acc.write(buf, 0, n);
+                        if (acc.size() >= 393216) { js("window.__mdChunk&&window.__mdChunk('" + req + "'," + (part++) + ",'" + Base64.encodeToString(acc.toByteArray(), Base64.NO_WRAP) + "',0)"); acc.reset(); }
+                    }
+                    in.close();
+                    js("window.__mdChunk&&window.__mdChunk('" + req + "'," + part + ",'" + Base64.encodeToString(acc.toByteArray(), Base64.NO_WRAP) + "',1)");
+                } catch (Exception e) { js("window.__mdChunk&&window.__mdChunk('" + req + "',-1,'',1)"); }
+            }).start();
         }
     }
 
