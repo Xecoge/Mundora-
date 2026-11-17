@@ -154,13 +154,13 @@ public class MainActivity extends BridgeActivity {
     public class MediaBridge {
         @JavascriptInterface
         public String perm() {
+            String media; boolean aud;
             if (Build.VERSION.SDK_INT >= 33) {
-                boolean img = has(Manifest.permission.READ_MEDIA_IMAGES), vid = has(Manifest.permission.READ_MEDIA_VIDEO), aud = has(Manifest.permission.READ_MEDIA_AUDIO);
+                boolean img = has(Manifest.permission.READ_MEDIA_IMAGES), vid = has(Manifest.permission.READ_MEDIA_VIDEO);
                 boolean part = Build.VERSION.SDK_INT >= 34 && has("android.permission.READ_MEDIA_VISUAL_USER_SELECTED");
-                return "{\"media\":\"" + (img || vid ? "all" : part ? "some" : "no") + "\",\"audio\":" + aud + "}";
-            }
-            boolean r = has(Manifest.permission.READ_EXTERNAL_STORAGE);
-            return "{\"media\":\"" + (r ? "all" : "no") + "\",\"audio\":" + r + "}";
+                media = img || vid ? "all" : part ? "some" : "no"; aud = has(Manifest.permission.READ_MEDIA_AUDIO);
+            } else { boolean r = has(Manifest.permission.READ_EXTERNAL_STORAGE); media = r ? "all" : "no"; aud = r; }
+            try { JSONObject o = new JSONObject(); o.put("media", media); o.put("audio", aud); return o.toString(); } catch (Exception e) { return "{}"; }
         }
         @JavascriptInterface
         public void ask() { runOnUiThread(() -> ActivityCompat.requestPermissions(MainActivity.this, mediaPerms(), 7701)); }
