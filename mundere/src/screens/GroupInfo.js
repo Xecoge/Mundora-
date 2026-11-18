@@ -43,7 +43,7 @@ export default function GroupInfo({ route, navigation }) {
     ]);
   };
   const Act = ({ ic, t, onPress, red }) => (
-    <Press onPress={onPress} style={{ flex: 1, marginHorizontal: 4 }}>
+    <Press onPress={onPress} pop round={16} amt={0.08} style={{ flex: 1, marginHorizontal: 4 }}>
       <Glass round={16} style={{ height: 64, alignItems: 'center', justifyContent: 'center' }}>
         <Ionicons name={ic} size={23} color={red ? C.red : C.blue} /><Text style={{ color: red ? C.red : C.blue, fontSize: 12.5, fontWeight: '600', marginTop: 3 }}>{t}</Text>
       </Glass>
@@ -54,7 +54,7 @@ export default function GroupInfo({ route, navigation }) {
       <LinearGradient colors={['#0e1621', '#000']} style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 400 }} />
       <ScrollView contentContainerStyle={{ paddingTop: ins.top + 60, paddingBottom: 60, paddingHorizontal: 16 }}>
         <View style={{ alignItems: 'center' }}>
-          <Press onPress={() => g.av && navigation.navigate('Viewer', { uri: gAvaUri(g), plain: 1 })}><GAvatar g={g} size={110} /></Press>
+          <Press pop round={55} amt={0.06} onPress={() => g.av && navigation.navigate('Viewer', { uri: gAvaUri(g), plain: 1 })}><GAvatar g={g} size={110} /></Press>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}><Text style={{ color: '#fff', fontSize: 25, fontWeight: '800' }}>{g.title}</Text><Vf on={g.vf} size={21} /></View>
           <Text style={{ color: C.mute, fontSize: 15, marginTop: 4 }}>{gN(g, info ? info.members.length : g.n)}</Text>
         </View>
@@ -64,7 +64,7 @@ export default function GroupInfo({ route, navigation }) {
           <Act ic="exit-outline" t="Выйти" red onPress={leave} />
         </View>
         {!!g.about && <Glass round={18} style={{ marginTop: 16, padding: 14 }}><Text style={{ color: C.mute, fontSize: 13 }}>описание</Text><Text style={{ color: '#fff', fontSize: 16, marginTop: 2 }}>{g.about}</Text></Glass>}
-        {!!link && <Press onPress={invite} scale={0.98}><Glass round={18} style={{ marginTop: 12, padding: 14, flexDirection: 'row', alignItems: 'center' }}><Ionicons name="link" size={22} color={C.blue} /><View style={{ flex: 1, marginLeft: 12 }}><Text style={{ color: C.mute, fontSize: 13 }}>ссылка-приглашение</Text><Text style={{ color: C.blue, fontSize: 15, marginTop: 2 }} numberOfLines={2}>{link.replace(/^https?:\/\//, '')}</Text></View></Glass></Press>}
+        {!!link && <Press onPress={invite} pop round={18} amt={0.03}><Glass round={18} style={{ marginTop: 12, padding: 14, flexDirection: 'row', alignItems: 'center' }}><Ionicons name="link" size={22} color={C.blue} /><View style={{ flex: 1, marginLeft: 12 }}><Text style={{ color: C.mute, fontSize: 13 }}>ссылка-приглашение</Text><Text style={{ color: C.blue, fontSize: 15, marginTop: 2 }} numberOfLines={2}>{link.replace(/^https?:\/\//, '')}</Text></View></Glass></Press>}
         {SUP() && (
           <Glass round={18} style={{ marginTop: 12, padding: 14, flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="checkmark-circle" size={22} color={C.blue} />
@@ -75,7 +75,7 @@ export default function GroupInfo({ route, navigation }) {
         <Text style={{ color: C.mute, fontSize: 13, fontWeight: '600', textTransform: 'uppercase', marginTop: 22, marginBottom: 8, marginLeft: 6 }}>{gN(g, mem.length || g.n)}</Text>
         <Glass round={18}>
           {(!ch || g.admin) && (
-            <Press scale={0.98} onPress={() => navigation.navigate('NewGroup', { type: g.type, add: c, have: mem })} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, height: 54 }}>
+            <Press pop round={14} amt={0.03} onPress={() => navigation.navigate('NewGroup', { type: g.type, add: c, have: mem })} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, height: 54 }}>
               <Ionicons name="person-add-outline" size={22} color={C.blue} /><Text style={{ color: C.blue, fontSize: 16, marginLeft: 14 }}>{ch ? 'Добавить подписчиков' : 'Добавить участников'}</Text>
             </Press>
           )}

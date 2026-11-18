@@ -12,6 +12,8 @@ import * as Haptics from 'expo-haptics';
 import { createAudioPlayer, setAudioModeAsync, useAudioRecorder, RecordingPresets, AudioModule } from 'expo-audio';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
+import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { S, useStore, isG, openChat, closeChat, older, sendText, loadPeers, poke, emit } from '../store';
 import { M, ms, fileUri, authed, upload } from '../api';
@@ -69,14 +71,14 @@ export default function Chat({ route, navigation }) {
   // общий отправитель файла: временный пузырь сразу, потом загрузка кусками и отправка
   async function sendFile(f, cap) {
     const tmp = 'p' + Date.now() + Math.random();
-    S.msgs[c] = [...(S.msgs[c] || []), { i: 2e12 + Date.now(), tmp, f: M.me, t: Date.now(), x: cap || '', fl: { local: f.uri, ty: f.type, n: f.name, w: f.w, h: f.h, d: f.d, vo: f.vo, wf: f.wf, sz: f.size } }]; emit();
+    S.msgs[c] = [...(S.msgs[c] || []), { i: 2e12 + Date.now(), tmp, f: M.me, t: Date.now(), x: cap || '', fl: { local: f.uri, ty: f.type, n: f.name, w: f.w, h: f.h, d: f.d, vo: f.vo, wf: f.wf, sz: f.size, rd: f.rd, th: f.th } }]; emit();
     setSending(n => n + 1);
     try {
       if (f.size > 12 * 1024 * 1024) throw new Error('Файл больше 12 МБ');
       const b64 = f.b64 || (await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.Base64 }));
       const size = Math.round(b64.length * 0.75);
       const id = await upload(to, b64, { name: f.name, type: f.type, size });
-      const j = await ms('send', { to, x: cap || '', ...(reply ? {} : {}), fl: { id, n: f.name, ty: f.type, sz: size, w: f.w || 0, h: f.h || 0, d: f.d || 0, ...(f.vo ? { vo: 1, wf: f.wf || '' } : {}) } });
+      const j = await ms('send', { to, x: cap || '', ...(reply ? {} : {}), fl: { id, n: f.name, ty: f.type, sz: size, w: f.w || 0, h: f.h || 0, d: f.d || 0, ...(f.vo ? { vo: 1, wf: f.wf || '' } : {}), ...(f.rd ? { rd: 1, th: f.th || '' } : {}) } });
       const Lm = S.msgs[c] || [];
       S.msgs[c] = Lm.some(z => z.i === j.m.i) ? Lm.filter(z => z.tmp !== tmp) : Lm.map(z => (z.tmp === tmp ? j.m : z));
       emit(); poke();
@@ -127,6 +129,55 @@ export default function Chat({ route, navigation }) {
   const rec = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
   const [recOn, setRecOn] = useState(0);
   const recT = useRef({ t0: 0, lv: [], iv: null, want: false });
+  // короткое нажатие — переключить голос/кружок, удержание — запись (как в Telegram)
+  const [mode, setMode] = useState('mic');
+  const [rnd, setRnd] = useState(null); // кружок: {ready, rec, t0}
+  const hold = useRef({ tm: null, long: false });
+  function holdIn() {
+    const H = hold.current; H.long = false;
+    H.tm = setTimeout(() => { H.long = true; H.tm = null; if (mode === 'mic') recStart(); else rndStart(); }, 200);
+  }
+  function holdOut() {
+    const H = hold.current;
+    if (H.tm) { clearTimeout(H.tm); H.tm = null; tap(); setMode(m => (m === 'mic' ? 'cam' : 'mic')); toast(mode === 'mic' ? 'Удерживай — записать кружок' : 'Удерживай — записать голосовое'); return; }
+    if (mode === 'mic') recStop(false); else rndStop();
+  }
+  const cam = useRef(null);
+  const [camPerm, askCam] = useCameraPermissions();
+  const [micPerm, askMic] = useMicrophonePermissions();
+  const rndWant = useRef(false);
+  async function rndStart() {
+    rndWant.current = true;
+    if (!camPerm || !camPerm.granted) { const r = await askCam(); if (!r.granted) { rndWant.current = false; return toast('Разреши доступ к камере', 1); } }
+    if (!micPerm || !micPerm.granted) { const r = await askMic(); if (!r.granted) { rndWant.current = false; return toast('Разреши доступ к микрофону', 1); } }
+    if (!rndWant.current) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    setRnd({ ready: false, t0: 0 });
+  }
+  async function rndReady() {
+    if (!rndWant.current || !cam.current) return;
+    const t0 = Date.now(); setRnd({ ready: true, t0 });
+    try {
+      const v = await cam.current.recordAsync({ maxDuration: 60 });
+      const d = Math.max(1, Math.round((Date.now() - t0) / 1000));
+      setRnd(null);
+      if (!v || !v.uri || Date.now() - t0 < 800) return;
+      let th = '';
+      try {
+        const t = await VideoThumbnails.getThumbnailAsync(v.uri, { time: 300 });
+        const sm = await ImageManipulator.manipulateAsync(t.uri, [{ resize: { width: 120 } }], { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true });
+        th = 'data:image/jpeg;base64,' + sm.base64; if (th.length > 6000) th = '';
+      } catch (e) {}
+      const info = await FileSystem.getInfoAsync(v.uri).catch(() => ({}));
+      await sendFile({ uri: v.uri, name: 'round_' + Date.now() + '.mp4', type: 'video/mp4', size: info.size || 0, w: 480, h: 480, d, rd: 1, th });
+    } catch (e) { setRnd(null); toast('Не удалось записать кружок', 1); }
+  }
+  function rndStop() {
+    rndWant.current = false;
+    try { cam.current && cam.current.stopRecording(); } catch (e) {}
+    setRnd(r => (r && !r.ready ? null : r));
+  }
+
   async function recStart() {
     const R0 = recT.current; R0.want = true;
     const pr = await AudioModule.requestRecordingPermissionsAsync();
@@ -225,17 +276,15 @@ export default function Chat({ route, navigation }) {
               </Glass>
               )}
               {txt.trim() ? <SendBtn on onPress={send} busy={sending > 0} /> : (
-                <Pressable onPressIn={recStart} onPressOut={() => recStop(false)} hitSlop={8}>
-                  <View style={{ width: recOn ? 56 : 44, height: recOn ? 56 : 44, borderRadius: 28, marginTop: recOn ? -12 : 0, backgroundColor: recOn ? C.blue : 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center' }}>
-                    {sending > 0 && !recOn ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="mic" size={recOn ? 28 : 23} color="#fff" />}
-                  </View>
+                <Pressable onPressIn={holdIn} onPressOut={holdOut} hitSlop={8}>
+                  <MicBtn on={!!recOn || !!rnd} mode={mode} busy={sending > 0 && !recOn} />
                 </Pressable>
               )}
             </View>
           </View>
         ) : (
           <View style={{ alignItems: 'center', paddingBottom: Math.max(ins.bottom, 8) + 4, paddingTop: 8 }}>
-            <Press onPress={() => toast('Канал без звука')}><Glass round={24} style={{ paddingHorizontal: 26, height: 48, flexDirection: 'row', alignItems: 'center' }}><Ionicons name="notifications-off-outline" size={20} color="#fff" /><Text style={{ color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>Выключить звук</Text></Glass></Press>
+            <Press onPress={() => toast('Канал без звука')} pop round={24} amt={0.08}><Glass round={24} style={{ paddingHorizontal: 26, height: 48, flexDirection: 'row', alignItems: 'center' }}><Ionicons name="notifications-off-outline" size={20} color="#fff" /><Text style={{ color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>Выключить звук</Text></Glass></Press>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -243,7 +292,7 @@ export default function Chat({ route, navigation }) {
       {/* шапка поверх списка — стекло */}
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: ins.top + 4, paddingHorizontal: 8, flexDirection: 'row', alignItems: 'center' }}>
         <GlassBtn icon="chevron-back" onPress={() => navigation.goBack()} />
-        <Press onPress={hdr} scale={0.95} style={{ flex: 1, marginHorizontal: 8 }}>
+        <Press onPress={hdr} pop round={22} amt={0.06} style={{ flex: 1, marginHorizontal: 8 }}>
           <Glass round={22} style={{ height: 44, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text numberOfLines={1} style={{ color: '#fff', fontWeight: '700', fontSize: 15.5, flexShrink: 1 }}>{G ? G.title : self ? 'Избранное' : p ? p.name : '…'}</Text>
@@ -252,14 +301,50 @@ export default function Chat({ route, navigation }) {
             {!!status && <Text numberOfLines={1} style={{ color: typing ? C.blue : C.mute, fontSize: 12 }}>{status}</Text>}
           </Glass>
         </Press>
-        <Press onPress={hdr}>{G ? <GAvatar g={G} size={44} /> : <Avatar p={p} size={44} />}</Press>
+        <Press onPress={hdr} pop round={22}>{G ? <GAvatar g={G} size={44} /> : <Avatar p={p} size={44} />}</Press>
       </View>
 
+      {rnd && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,.75)', alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
+          <PopCircle>
+            <CameraView ref={cam} style={{ width: 290, height: 290 }} facing="front" mode="video" videoQuality="480p" videoBitrate={1200000} mute={false} onCameraReady={rndReady} />
+          </PopCircle>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 22 }}>
+            <RecDot /><Text style={{ color: '#fff', fontSize: 17, marginLeft: 8, fontVariant: ['tabular-nums'] }}>{rnd.ready ? <RndTimer t0={rnd.t0} /> : 'камера…'}</Text>
+          </View>
+          <Text style={{ color: C.mute, marginTop: 8 }}>отпусти — отправить</Text>
+        </View>
+      )}
       {menu && <MsgMenu c={c} G={G} menu={menu} canW={canW} onClose={() => setMenu(null)} onReply={m => setReply(m)} />}
     </View>
   );
 }
 
+function MicBtn({ on, mode, busy }) {
+  const a = useRef(new Animated.Value(0)).current, f = useRef(new Animated.Value(mode === 'cam' ? 1 : 0)).current;
+  useEffect(() => { Animated.spring(a, { toValue: on ? 1 : 0, useNativeDriver: true, speed: 16, bounciness: 12 }).start(); }, [on]);
+  useEffect(() => { f.setValue(0); Animated.spring(f, { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 14 }).start(); }, [mode]);
+  return (
+    <Animated.View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: on ? C.blue : 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center', transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [1, 1.45] }) }] }}>
+      {busy ? <ActivityIndicator color="#fff" size="small" /> : (
+        <Animated.View style={{ transform: [{ scale: f.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { rotate: f.interpolate({ inputRange: [0, 1], outputRange: ['-90deg', '0deg'] }) }] }}>
+          <Ionicons name={mode === 'cam' ? 'videocam' : 'mic'} size={23} color="#fff" />
+        </Animated.View>
+      )}
+    </Animated.View>
+  );
+}
+function PopCircle({ children }) {
+  const a = useRef(new Animated.Value(0)).current;
+  useEffect(() => { Animated.spring(a, { toValue: 1, useNativeDriver: true, speed: 12, bounciness: 12 }).start(); }, []);
+  return <Animated.View style={{ width: 290, height: 290, borderRadius: 145, overflow: 'hidden', backgroundColor: '#111', transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }], opacity: a }}>{children}</Animated.View>;
+}
+function RndTimer({ t0 }) {
+  const [, f] = useState(0);
+  useEffect(() => { const iv = setInterval(() => f(x => x + 1), 250); return () => clearInterval(iv); }, []);
+  const t = Math.floor((Date.now() - t0) / 1000);
+  return <Text>{Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0')}</Text>;
+}
 function RecDot() {
   const a = useRef(new Animated.Value(1)).current;
   useEffect(() => { const l = Animated.loop(Animated.sequence([Animated.timing(a, { toValue: 0.2, duration: 500, useNativeDriver: true }), Animated.timing(a, { toValue: 1, duration: 500, useNativeDriver: true })])); l.start(); return () => l.stop(); }, []);
@@ -269,7 +354,7 @@ function SendBtn({ on, onPress, busy }) {
   const a = useRef(new Animated.Value(on ? 1 : 0)).current;
   useEffect(() => { Animated.spring(a, { toValue: on ? 1 : 0, useNativeDriver: true, speed: 20, bounciness: 12 }).start(); }, [on]);
   return (
-    <Press onPress={onPress} disabled={!on}>
+    <Press onPress={onPress} disabled={!on} pop round={22}>
       <Animated.View style={{ transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }], opacity: a.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) }}>
         <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: on ? C.blue : 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center' }}>
           {busy ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="arrow-up" size={24} color="#fff" />}
@@ -358,7 +443,7 @@ function Reacts({ rx, mine, c, i }) {
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: mine ? 'flex-end' : 'flex-start', marginTop: 3 }}>
       {list.map(r => (
-        <Press key={r.e} onPress={() => ms('react', { c, i, e: r.e }).then(poke).catch(() => {})} style={{ marginRight: 4, marginTop: 2 }}>
+        <Press key={r.e} onPress={() => ms('react', { c, i, e: r.e }).then(poke).catch(() => {})} pop round={14} amt={0.18} style={{ marginRight: 4, marginTop: 2 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: r.me ? C.blue : 'rgba(255,255,255,.14)', borderRadius: 14, paddingHorizontal: 8, height: 28 }}>
             <Text style={{ fontSize: 15 }}>{r.e}</Text>{r.n > 1 && <Text style={{ color: '#fff', fontSize: 13, marginLeft: 3, fontWeight: '600' }}>{r.n}</Text>}
           </View>
@@ -422,7 +507,7 @@ function Voice({ m, mine }) {
   const t = Math.round(st.play || st.pos ? st.pos : st.dur);
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 210, paddingVertical: 2 }}>
-      <Press onPress={toggle}>
+      <Press onPress={toggle} pop round={21} amt={0.15}>
         <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: mine ? '#fff' : C.blue, alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name={st.play ? 'pause' : 'play'} size={20} color={mine ? C.me : '#fff'} style={{ marginLeft: st.play ? 0 : 2 }} />
         </View>

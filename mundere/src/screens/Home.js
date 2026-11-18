@@ -60,7 +60,7 @@ export default function Home({ navigation, onLogout }) {
         <FlatList
           data={chats}
           keyExtractor={c => c.c}
-          ListHeaderComponent={head('Чаты', <Press onPress={newMenu}><Glass round={22} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="create-outline" size={22} color="#fff" /></Glass></Press>)}
+          ListHeaderComponent={head('Чаты', <Press onPress={newMenu} pop round={22}><Glass round={22} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="create-outline" size={22} color="#fff" /></Glass></Press>)}
           ListFooterComponent={<>{ql && found.length ? <PeopleList list={found} onOpen={openPeer} title="Люди" /> : null}<View style={{ height: 120 }} /></>}
           ListEmptyComponent={!ql ? <Empty icon="chatbubbles-outline" t="Пока нет чатов" s="Найди человека по нику или ID и напиши ему" /> : null}
           renderItem={({ item }) => <ChatRow c={item} onPress={() => openChat(item)} />}
@@ -87,11 +87,11 @@ export default function Home({ navigation, onLogout }) {
         <Glass round={32} intensity={50} style={{ width: W * 3 + 12, height: 64, flexDirection: 'row', padding: 6 }}>
           <Animated.View style={{ position: 'absolute', left: 6, top: 6, width: W, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,.12)', transform: [{ translateX: x.interpolate({ inputRange: [0, 2], outputRange: [0, W * 2] }) }] }} />
           {TABS.map(([k, ic, t], i) => (
-            <Pressable key={k} onPress={() => go(k, i)} style={{ width: W, alignItems: 'center', justifyContent: 'center' }}>
+            <Press key={k} onPress={() => go(k, i)} pop round={26} amt={0.1} style={{ width: W, height: 52, alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name={ic} size={24} color={tab === k ? '#b9a3ff' : '#fff'} />
               <Text style={{ color: tab === k ? '#b9a3ff' : '#fff', fontSize: 11, fontWeight: '600', marginTop: 1 }}>{t}</Text>
               {k === 'chats' && n > 0 && <View style={{ position: 'absolute', top: 2, left: W / 2 + 6, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: C.red, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 }}><Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>{n > 99 ? '99+' : n}</Text></View>}
-            </Pressable>
+            </Press>
           ))}
         </Glass>
       </View>
@@ -155,7 +155,7 @@ function MeTab({ head, navigation, onLogout }) {
   useEffect(() => { loadPeers([String(M.me)], true); }, []);
   const p = S.peers[M.me];
   const Row = ({ ic, t, s, onPress, red }) => (
-    <Press onPress={onPress} scale={0.97} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 54 }}>
+    <Press onPress={onPress} pop round={14} amt={0.03} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 54 }}>
       <Ionicons name={ic} size={22} color={red ? C.red : '#b9a3ff'} />
       <View style={{ flex: 1, marginLeft: 14 }}><Text style={{ color: red ? C.red : '#fff', fontSize: 16 }}>{t}</Text>{s ? <Text style={{ color: C.mute, fontSize: 13 }}>{s}</Text> : null}</View>
       {!red && <Ionicons name="chevron-forward" size={18} color={C.mute} />}

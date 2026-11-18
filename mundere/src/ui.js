@@ -18,15 +18,32 @@ const isAndroid = Platform.OS === 'android';
 
 export const tap = () => { Haptics.selectionAsync().catch(() => {}); };
 
-// Кнопка, которая пружинит при нажатии (как жидкое стекло iOS 26)
-export function Press({ onPress, onLongPress, style, children, scale = 0.9, disabled, hitSlop = 6, delayLongPress = 320 }) {
-  const v = useRef(new Animated.Value(1)).current;
-  const to = x => Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: x === 1 ? 14 : 0 }).start();
+// Кнопка-пузырёк (жидкое стекло iOS 26): при нажатии раздувается и чуть сплющивается,
+// по стеклу пробегает блик, при отпускании — пружинит с покачиванием.
+// pop=false — обычное «вдавливание» (для строк списков).
+export function Press({ onPress, onLongPress, style, children, scale = 0.9, disabled, hitSlop = 6, delayLongPress = 320, pop = false, round = 22, amt = 0.13 }) {
+  const sx = useRef(new Animated.Value(1)).current, sy = useRef(new Animated.Value(1)).current, gl = useRef(new Animated.Value(0)).current;
+  const sp = (v, to, b) => Animated.spring(v, { toValue: to, useNativeDriver: true, speed: b ? 14 : 40, bounciness: b || 0 });
+  const down = () => {
+    if (pop) { Animated.parallel([sp(sx, 1 + amt), sp(sy, 1 + amt * 0.4), Animated.timing(gl, { toValue: 1, duration: 120, useNativeDriver: true })]).start(); tap(); }
+    else Animated.parallel([sp(sx, scale), sp(sy, scale)]).start();
+  };
+  const up = () => Animated.parallel([sp(sx, 1, pop ? 18 : 12), sp(sy, 1, pop ? 16 : 12), Animated.timing(gl, { toValue: 0, duration: 380, useNativeDriver: true })]).start();
   return (
-    <Pressable disabled={disabled} hitSlop={hitSlop} onPressIn={() => to(scale)} onPressOut={() => to(1)} onPress={onPress} onLongPress={onLongPress} delayLongPress={delayLongPress}>
-      <Animated.View style={[style, { transform: [{ scale: v }] }, disabled && { opacity: 0.45 }]}>{children}</Animated.View>
+    <Pressable disabled={disabled} hitSlop={hitSlop} onPressIn={down} onPressOut={up} onPress={onPress} onLongPress={onLongPress} delayLongPress={delayLongPress}>
+      <Animated.View style={[style, { transform: [{ scaleX: sx }, { scaleY: sy }] }, disabled && { opacity: 0.45 }]}>
+        {children}
+        {pop && <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: round, backgroundColor: 'rgba(255,255,255,.16)', borderWidth: 1, borderColor: 'rgba(255,255,255,.35)', opacity: gl }]} />}
+      </Animated.View>
     </Pressable>
   );
+}
+
+// Пузырь, который появляется с пружиной (для кнопок, которые возникают на экране)
+export function PopIn({ children, delay = 0, style }) {
+  const a = useRef(new Animated.Value(0)).current;
+  useEffect(() => { Animated.spring(a, { toValue: 1, delay, useNativeDriver: true, speed: 12, bounciness: 12 }).start(); }, []);
+  return <Animated.View style={[style, { opacity: a.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }), transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }] }]}>{children}</Animated.View>;
 }
 
 // Стеклянная подложка. На Android размытие дороже — даём его чуть слабее.
@@ -42,7 +59,7 @@ export function Glass({ style, children, intensity = 40, round = 22, tint = 'dar
 
 export function GlassBtn({ icon, onPress, size = 44, color = '#fff', style, fill }) {
   return (
-    <Press onPress={onPress} style={style}>
+    <Press onPress={onPress} style={style} pop round={size / 2}>
       {fill ? (
         <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: fill, alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name={icon} size={size * 0.5} color={color} />
@@ -98,13 +115,15 @@ export function BubbleHost() {
       <Pressable style={StyleSheet.absoluteFill} onPress={() => close()}>
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,.25)', opacity: a }]} />
       </Pressable>
-      <Animated.View style={{ position: 'absolute', left, top, width: w, opacity: a.interpolate({ inputRange: [0, 0.3, 1], outputRange: [0, 1, 1] }), transform: [{ translateX: tx }, { translateY: ty }, { scale: sc }] }}>
+      <Animated.View style={{ position: 'absolute', left, top, width: w, opacity: a.interpolate({ inputRange: [0, 0.3, 1], outputRange: [0, 1, 1] }), transform: [{ translateX: tx }, { translateY: ty }, { scaleX: sc }, { scaleY: a.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0.1, 1.06, 1] }) }] }}>
         <Glass round={24} intensity={60} style={{ paddingVertical: 6, backgroundColor: isAndroid ? 'rgba(40,40,46,.92)' : undefined }}>
           {st.items.map((it, k) => it === '-' ? <View key={k} style={{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginVertical: 4, marginHorizontal: 14 }} /> : (
-            <Pressable key={k} onPress={() => close(it.fn)} style={({ pressed }) => [{ height: 48, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginHorizontal: 6, borderRadius: 16 }, pressed && { backgroundColor: 'rgba(255,255,255,.1)' }]}>
-              <Text style={{ flex: 1, color: it.red ? C.red : '#fff', fontSize: 16 }}>{it.t}</Text>
-              {it.ic ? <Ionicons name={it.ic} size={21} color={it.red ? C.red : '#fff'} /> : null}
-            </Pressable>
+            <Animated.View key={k} style={{ opacity: a.interpolate({ inputRange: [0, Math.min(0.9, 0.25 + k * 0.1), 1], outputRange: [0, 0, 1], extrapolate: 'clamp' }), transform: [{ translateY: a.interpolate({ inputRange: [0, 1], outputRange: [-8 - k * 2, 0] }) }] }}>
+              <Pressable onPress={() => close(it.fn)} style={({ pressed }) => [{ height: 48, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginHorizontal: 6, borderRadius: 16 }, pressed && { backgroundColor: 'rgba(255,255,255,.12)', transform: [{ scale: 1.03 }] }]}>
+                <Text style={{ flex: 1, color: it.red ? C.red : '#fff', fontSize: 16 }}>{it.t}</Text>
+                {it.ic ? <Ionicons name={it.ic} size={21} color={it.red ? C.red : '#fff'} /> : null}
+              </Pressable>
+            </Animated.View>
           ))}
         </Glass>
       </Animated.View>

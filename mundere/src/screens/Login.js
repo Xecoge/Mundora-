@@ -62,7 +62,7 @@ export default function Login({ onDone }) {
                 </>)}
             </Glass>
             {!!err && <Text style={{ color: C.red, marginTop: 12, textAlign: 'center' }}>{err}</Text>}
-            <Press onPress={go} disabled={busy} style={{ marginTop: 20 }}>
+            <Press onPress={go} disabled={busy} pop round={27} amt={0.06} style={{ marginTop: 20 }}>
               <LinearGradient colors={['#8b5cf6', '#6d28d9']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' }}>
                 {busy ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontSize: 17, fontWeight: '700' }}>{step === 'code' ? 'Подтвердить' : step === 'gate' ? 'Дальше' : mode === 'reg' ? 'Создать аккаунт' : 'Войти'}</Text>}
               </LinearGradient>

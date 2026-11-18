@@ -95,7 +95,7 @@ export default function NewGroup({ route, navigation }) {
         </Glass>}
       </View>
       {edit ? <GlassBtn icon="checkmark" fill={C.blue} onPress={next} /> : (
-        <Press onPress={next} disabled={!okNext || busy}>
+        <Press onPress={next} disabled={!okNext || busy} pop round={22}>
           <View style={{ height: 44, paddingHorizontal: 18, borderRadius: 22, backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{nextLabel}</Text></View>
         </Press>
       )}
@@ -108,7 +108,7 @@ export default function NewGroup({ route, navigation }) {
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: '#000' }}>
         {header}
         <View style={{ paddingHorizontal: 14 }}>
-          <Press onPress={avaMenu} style={{ alignSelf: 'center', alignItems: 'center', marginVertical: 14 }}>
+          <Press onPress={avaMenu} pop round={50} amt={0.07} style={{ alignSelf: 'center', alignItems: 'center', marginVertical: 14 }}>
             {src || (src === undefined && g0.av) ? <GAvatar g={g0} src={src} size={100} /> : (
               <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#16263b', alignItems: 'center', justifyContent: 'center' }}><Ionicons name="camera" size={42} color="#3e88f7" /></View>
             )}
@@ -134,7 +134,7 @@ export default function NewGroup({ route, navigation }) {
       <View style={{ paddingHorizontal: 12 }}>
         <Glass round={18} style={{ flexDirection: 'row', flexWrap: 'wrap', padding: 6, alignItems: 'center' }}>
           {[...sel.values()].map(p => (
-            <Press key={p.id} onPress={() => toggle(p)} style={{ margin: 3 }}>
+            <Press key={p.id} onPress={() => toggle(p)} pop round={16} amt={0.12} style={{ margin: 3 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(47,140,255,.25)', borderRadius: 16, paddingRight: 8 }}><Avatar p={p} size={28} /><Text style={{ color: '#fff', marginLeft: 6 }}>{p.name.split(' ')[0]}</Text><Ionicons name="close" size={14} color="#fff" style={{ marginLeft: 4 }} /></View>
             </Press>
           ))}

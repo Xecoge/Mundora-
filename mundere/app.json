@@ -33,7 +33,8 @@
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
       ]
     },
     "plugins": [
@@ -51,7 +52,15 @@
           "microphonePermission": "Mundere записывает голосовые сообщения"
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mundere снимает фото и кружки для чатов",
+          "microphonePermission": "Mundere записывает звук для кружков и голосовых",
+          "recordAudioAndroid": true
+        }
+      ]
     ]
   }
 }
