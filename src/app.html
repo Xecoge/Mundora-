@@ -3233,7 +3233,7 @@ function msForward(m){const L=MS.chats.map(c=>MS.peers[c.p]).filter(Boolean);con
 /* ---------- долгое нажатие: копировать / сохранить / удалить ---------- */
 function msLong(ml){let t=0;const start=e=>{const b=e.target.closest('.mb');if(!b||e.target.closest('a,.ms-vplay,.ms-save'))return;t=setTimeout(()=>{t=0;msMenu(b)},480)};const stop=()=>clearTimeout(t);
   ml.addEventListener('pointerdown',start);ml.addEventListener('pointerup',stop);ml.addEventListener('pointercancel',stop);ml.addEventListener('pointermove',e=>{if(t&&(Math.abs(e.movementY)>4||Math.abs(e.movementX)>4))stop()});
-  ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();msMenu(b)}})}
+  ml.addEventListener('contextmenu',e=>{const b=e.target.closest('.mb');if(b){e.preventDefault();if(t){clearTimeout(t);t=0}if(!e.target.closest('a,.ms-vplay,.ms-save'))msMenu(b)}})}
 
 
 /* ---------- эмодзи ---------- */
@@ -3337,7 +3337,7 @@ async function msDelete(m,all=true){const ml=$('#msMsgs');const el=ml&&ml.queryS
 // одноразовое: у получателя после просмотра — исчезает у обоих
 async function msOnceDone(m){if(!m||!m.fl||!m.fl.once||String(m.f)===String(MS.me)||m.i==null)return;const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${m.i}"]`);await msDust(el);m.d=1;m.o1=1;m.x='';delete m.fl;msPaintMsgs();msApi('once',{c:MS.c,i:m.i}).catch(()=>{})}
 // контекстное меню как в iOS 26: размытие, «приподнятое» сообщение, реакции сверху, действия снизу
-function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}msSelClose();
+function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m.d)return;const op=$('#msSel');if(op&&!op.classList.contains('off')&&MS.sel===k)return;MS.selAt=Date.now();try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}msSelClose();
   const c=MS.c,mine=String(m.f)===String(MS.me),F=m.fl&&(m.fl.id||m.fl.local)&&m.i!=null,sent=m.i!=null,x=msText(c,m);
   const ov=document.createElement('div');ov.className='ms-ctx';ov.id='msSel';const r=b.getBoundingClientRect();
   const clone=b.cloneNode(true);clone.classList.remove('new','hl');clone.classList.add('ms-ctxm');clone.querySelectorAll('video').forEach(v=>{v.removeAttribute('autoplay')});
@@ -3360,7 +3360,7 @@ function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m
   ac.style.left=ax+'px';ac.style.top=(top+maxH+10)+'px';ac.style.transformOrigin=right?'top right':'top left';
   if(rx){rx.style.left=Math.max(10,Math.min(W-rw-10,right?r.right-rw:r.left))+'px';rx.style.top=(top-rh)+'px';rx.style.transformOrigin=right?'bottom right':'bottom left'}
   b.classList.add('ms-ghost');MS.sel=k;
-  ov.addEventListener('click',e=>{if(!e.target.closest('[data-act]'))msSelClose()})}
+  ov.addEventListener('click',e=>{if(Date.now()-MS.selAt<450)return;if(!e.target.closest('[data-act]'))msSelClose()})}
 function msSelClose(){const s=$('#msSel');if(s){s.classList.remove('on');s.classList.add('off');setTimeout(()=>s.remove(),200)}$$('.mb.ms-ghost').forEach(x=>x.classList.remove('ms-ghost'));MS.sel=null}
 function msRxMore(i){const ov=$('#msSel');const rx=ov&&ov.querySelector('.ms-ctxr');if(!rx)return;rx.classList.add('wide');rx.innerHTML=RX_SET.map((e,n)=>`<button data-act="ms-react" data-k="${i}" data-e="${e}" style="--n:${n}">${e}</button>`).join('')}
 // жесты: свайп влево — ответить, двойной тап — ❤️
