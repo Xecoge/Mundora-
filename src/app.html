@@ -1314,6 +1314,23 @@ body.ms-open .tabs,body.ms-open .tab-all{display:none!important}
 .msgr button.lq,.msgr a.lq,.msgr .ib,.ms-vv button,.ms-ng button{transition:transform .45s cubic-bezier(.2,1.5,.35,1),background .2s,box-shadow .25s}
 .msgr button.lq:active,.msgr a.lq:active,.msgr .ib:active,.ms-vv button:active,.ms-ng .ib:active,.ms-giact>*:active,.ms-chbar button:active{transform:scale(.88);transition-duration:.12s;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 0 22px rgba(120,170,255,.25)}
 .ms-chbar button,.ms-giact>*{-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.1)}
+
+/* быстрые пузырьки: без анимации размытия, только transform/opacity */
+.ms-ctxbg{transition:opacity .25s!important;-webkit-backdrop-filter:blur(16px) saturate(1.2)!important;backdrop-filter:blur(16px) saturate(1.2)!important;background:rgba(0,0,0,.42)!important;opacity:0}
+.ms-ctx.on .ms-ctxbg{opacity:1}.ms-ctx.off .ms-ctxbg{opacity:0}
+html.and .ms-ctxbg{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:rgba(0,0,0,.62)!important}
+.ms-ctxa,.ms-ctxr{background:rgba(40,40,46,.66)!important;-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45)!important;border:0!important;will-change:transform,opacity}
+html.and .ms-ctxa,html.and .ms-ctxr,html.and .bub{background:rgba(44,44,50,.92)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.and .ms-ctx.done .ms-ctxa,html.and .ms-ctx.done .ms-ctxr,html.and .bub.done{background:rgba(40,40,46,.7)!important;-webkit-backdrop-filter:blur(18px) saturate(1.7)!important;backdrop-filter:blur(18px) saturate(1.7)!important}
+.ms-ctxa{border-radius:26px!important;transform:scale(.14)!important;transition:transform .5s cubic-bezier(.2,1.3,.32,1),opacity .16s!important}
+.ms-ctx.on .ms-ctxa{transform:none!important}.ms-ctx.off .ms-ctxa{transform:scale(.2)!important;transition:transform .2s cubic-bezier(.5,0,.75,.4),opacity .16s!important}
+.ms-ctxa button{opacity:0;transform:translateY(-6px);transition:opacity .22s,transform .38s cubic-bezier(.2,1.2,.3,1),background .15s}
+.ms-ctx.on .ms-ctxa button{opacity:1;transform:none}
+.ms-ctx.on .ms-ctxa button:nth-child(2){transition-delay:.03s}.ms-ctx.on .ms-ctxa button:nth-child(3){transition-delay:.06s}.ms-ctx.on .ms-ctxa button:nth-child(4){transition-delay:.08s}.ms-ctx.on .ms-ctxa button:nth-child(n+5){transition-delay:.1s}
+.ms-ctxr{transform:scale(.2)!important;transition:transform .48s cubic-bezier(.2,1.35,.32,1),opacity .16s!important}.ms-ctx.on .ms-ctxr{transform:none!important}.ms-ctx.off .ms-ctxr{transform:scale(.3)!important}
+.bub{filter:none!important;will-change:transform,opacity;-webkit-backdrop-filter:blur(20px) saturate(1.8);backdrop-filter:blur(20px) saturate(1.8);transition:transform .48s cubic-bezier(.2,1.3,.32,1),opacity .16s!important;border-radius:26px!important}
+.bub.off{transition:transform .22s cubic-bezier(.5,0,.75,.4),opacity .18s!important}
+@keyframes bubIn{0%{transform:scale(.14);opacity:0}40%{opacity:1}100%{transform:none;opacity:1}}
 /* меню-пузырёк */
 .bub-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0);transition:background .3s}.bub-ov.on{background:rgba(0,0,0,.18)}
 .bub{position:fixed;z-index:9999;min-width:220px;max-width:min(300px,calc(100vw - 16px));padding:6px;border-radius:26px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
@@ -1647,7 +1664,10 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 /* ===== мессенджер в тёмной теме Telegram: чёрный фон, тёмные обои с узором, синие пузыри, серое стекло ===== */
 .msgr{background:#000}
 .msgr .lq,.ms-ctx .lq,.ms-a2 .lq,.ms-note.lq,.ms-ready.lq,.ms-vv .lq,.ms-flip.lq,.ms-prep.lq{background:rgba(37,37,40,.62)!important;border-color:rgba(255,255,255,.09)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 28px rgba(0,0,0,.35)!important;-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}
-.ms-side{background:#000}
+.ms-side{background:radial-gradient(90% 45% at 0% 0%,rgba(124,58,237,.28),transparent 70%),radial-gradient(80% 40% at 100% 100%,rgba(168,85,247,.18),transparent 70%),#0d0819}
+.msgr[data-pane=prof] .ms-main{background:radial-gradient(90% 45% at 0% 0%,rgba(124,58,237,.28),transparent 70%),radial-gradient(80% 40% at 100% 100%,rgba(168,85,247,.18),transparent 70%),#0d0819}
+.msgr[data-pane=prof] .ms-main::before,.msgr[data-pane=prof] .ms-main::after{display:none}
+.ms-side .ms-it.on{background:rgba(139,92,246,.2)}.ms-side .ms-ub{background:#8b5cf6!important}.ms-tabs button.on{color:#a78bfa!important}
 .ms-main{background:#0b1015}
 .ms-main::before{opacity:1;background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 30l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z'/%3E%3Ccircle cx='160' cy='40' r='13'/%3E%3Cpath d='M147 40c-6-6 32-6 26 0'/%3E%3Cpath d='M90 90c0-8 12-8 12 0 0-8 12-8 12 0 0 9-12 15-12 15s-12-6-12-15z'/%3E%3Cpath d='M30 150v-26l22-5v26'/%3E%3Ccircle cx='25' cy='151' r='5'/%3E%3Ccircle cx='47' cy='146' r='5'/%3E%3Crect x='140' y='120' width='34' height='24' rx='5'/%3E%3Cpath d='M140 126l17 10 17-10'/%3E%3Cpath d='M95 175l18-14 5 22-8-6z'/%3E%3Ccircle cx='190' cy='190' r='4'/%3E%3Ccircle cx='70' cy='205' r='3'/%3E%3Cpath d='M185 85a10 10 0 1 1-10-10 8 8 0 0 0 10 10z'/%3E%3C/svg%3E") 0 0/220px 220px;
@@ -2036,6 +2056,7 @@ document.querySelector('#avaImg').src=IMG.crown;
 const CFG_FILE=!!(window.TEMPO_CONFIG&&window.TEMPO_CONFIG.ai&&window.TEMPO_CONFIG.ai.apiKey);
 const CFG=Object.assign({},window.TEMPO_CONFIG||{});
 try{['aiCfg','aiModel','noReasonParam','fastEffort'].forEach(k=>localStorage.removeItem('tempo:'+k))}catch(e){}
+if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('and');
 const ico=(n,c='')=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2971,7 +2992,8 @@ function msShell(){let m=$('#msgr');if(m)return m;m=document.createElement('div'
   m.innerHTML=`<div class="ms-panes"><section class="ms-side" id="msSide"></section><section class="ms-main" id="msMain"></section></div>
   <nav class="ms-tabs" id="msTabs"></nav><input type="file" id="msFileIn" multiple hidden>`;
   document.body.appendChild(m);
-  $('#msFileIn').addEventListener('change',e=>{const fs=[...e.target.files];e.target.value='';const raw=MS.rawPick&&Date.now()-MS.rawPick<600000;MS.rawPick=0;if(!fs.length)return;if(raw)return msAttach(fs.map(f=>({f,raw:true,asFile:true})));if(fs.length===1&&/^image\//.test(fs[0].type))msCompose(fs[0]);else msPreview(fs)});
+  $('#msFileIn').addEventListener('change',e=>{const fs=[...e.target.files];e.target.value='';const raw=MS.rawPick&&Date.now()-MS.rawPick<600000;MS.rawPick=0;if(!fs.length)return;
+    if(!raw&&MS.toSheet&&Date.now()-MS.toSheet<600000&&$('#msAtt')){MS.toSheet=0;const big=fs.filter(f=>f.size>12*1024*1024);if(big.length)toast(`Больше 12 МБ: ${big.length}`,'x');const add=locAdd(fs.filter(f=>/^(image|video)\//.test(f.type)&&f.size<=12*1024*1024));msAttTab('gal');AT.sel=add.map(it=>it.k+':'+it.id);apvSync();setTimeout(apvSync,150);return}MS.toSheet=0;if(raw)return msAttach(fs.map(f=>({f,raw:true,asFile:true})));if(fs.length===1&&/^image\//.test(fs[0].type))msCompose(fs[0]);else msPreview(fs)});
   return m}
 function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&String(MS.prof)===String(MS.me);
   t.innerHTML=`<button class="${MS.tab==='contacts'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msgc"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".9"/><circle cx="12" cy="9.5" r="3.3" fill="#000"/><path d="M5.8 18.2c1.4-2.5 3.6-3.7 6.2-3.7s4.8 1.2 6.2 3.7" fill="#000"/></svg><span>Контакты</span></button>
@@ -3629,14 +3651,14 @@ function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m
   // если меню + реакции + сообщение не помещаются — сначала ужимаем сообщение, потом список листается
   const room=B0-T0-rh-10;let maxH=Math.min(r.height,room-ah);if(maxH<56){maxH=Math.min(r.height,56);if(ah>room-maxH){ah=Math.max(150,room-maxH);ac.style.maxHeight=ah+'px';ac.style.overflowY='auto'}}
   let top=Math.max(T0+rh,Math.min(r.top,B0-ah-10-maxH));
-  clone.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;max-height:${maxH}px;overflow:hidden;margin:0`;
-  requestAnimationFrame(()=>{clone.style.transition='top .34s cubic-bezier(.2,1.2,.3,1),transform .34s cubic-bezier(.2,1.2,.3,1)';clone.style.top=top+'px';clone.style.transform='scale(1.02)';ov.classList.add('on')});
+  clone.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;max-height:${maxH}px;overflow:hidden;margin:0;will-change:transform`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{clone.style.transition='transform .4s cubic-bezier(.2,1.25,.3,1)';clone.style.transform=`translateY(${top-r.top}px) scale(1.02)`;ov.classList.add('on');setTimeout(()=>ov.classList.add('done'),480)}));
   const right=mine;const ax=right?Math.max(10,Math.min(W-aw-10,r.right-aw)):Math.max(10,Math.min(W-aw-10,r.left));
-  ac.style.left=ax+'px';ac.style.top=(top+maxH+10)+'px';ac.style.transformOrigin=right?'top right':'top left';
+  ac.style.left=ax+'px';ac.style.top=(top+maxH+10)+'px';ac.style.transformOrigin=`${(right?r.right-24:r.left+24)-ax}px -${maxH/2+10}px`;
   if(rx){rx.style.left=Math.max(10,Math.min(W-rw-10,right?r.right-rw:r.left))+'px';rx.style.top=(top-rh)+'px';rx.style.transformOrigin=right?'bottom right':'bottom left'}
   b.classList.add('ms-ghost');MS.sel=k;
   ov.addEventListener('click',e=>{if(Date.now()-MS.selAt<450)return;if(!e.target.closest('[data-act]'))msSelClose()})}
-function msSelClose(){const s=$('#msSel');if(s){s.classList.remove('on');s.classList.add('off');setTimeout(()=>s.remove(),200)}$$('.mb.ms-ghost').forEach(x=>x.classList.remove('ms-ghost'));MS.sel=null}
+function msSelClose(){const s=$('#msSel');if(s){s.classList.remove('on','done');s.classList.add('off');setTimeout(()=>s.remove(),200)}$$('.mb.ms-ghost').forEach(x=>x.classList.remove('ms-ghost'));MS.sel=null}
 function msRxMore(i){const ov=$('#msSel');const rx=ov&&ov.querySelector('.ms-ctxr');if(!rx)return;rx.classList.add('wide');rx.innerHTML=RX_SET.map((e,n)=>`<button data-act="ms-react" data-k="${i}" data-e="${e}" style="--n:${n}">${e}</button>`).join('')}
 // жесты: свайп влево — ответить, двойной тап — ❤️
 function msGestures(ml){let s=null,lastT=0,lastEl=null;
@@ -3723,8 +3745,7 @@ function tcMake(src,vid){return new Promise(res=>{const S=240;const fin=(el,w,h)
   if(vid){const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.src=src+'#t=0.1';v.onloadeddata=()=>{v.currentTime=Math.min(.1,v.duration||.1)};v.onseeked=()=>{fin(v,v.videoWidth,v.videoHeight);v.removeAttribute('src');v.load()};v.onerror=()=>res(null);setTimeout(()=>res(null),8000)}
   else{const i=new Image();i.decoding='async';i.onload=()=>fin(i,i.naturalWidth,i.naturalHeight);i.onerror=()=>res(null);i.src=src}})}
 /* ---------- просмотр перед отправкой (как в Telegram): листать, приближать, изменить, подпись, отправить ---------- */
-function apvItems(){const md=!!document.querySelector('.ms-a2it[data-md]');return md?[...document.querySelectorAll('.ms-a2it[data-md]')].map(b=>({key:b.dataset.md,md:1,it:MD.items.find(x=>x.k+':'+x.id===b.dataset.md)})).filter(x=>x.it)
-  :[...document.querySelectorAll('.ms-a2it[data-at=sel]')].map(b=>{const c=b.dataset.c,i=+b.dataset.i,m=(MS.msgs[c]||[]).find(x=>x.i===i);return{key:c+':'+i,c,i,m}}).filter(x=>x.m&&x.m.fl)}
+function apvItems(){return [...document.querySelectorAll('.ms-a2it[data-md],.ms-a2it[data-at=sel]')].map(b=>{if(b.dataset.md){const it=MD.items.find(x=>x.k+':'+x.id===b.dataset.md);return it?{key:b.dataset.md,md:1,it}:null}const c=b.dataset.c,i=+b.dataset.i,m=(MS.msgs[c]||[]).find(x=>x.i===i);return m&&m.fl?{key:c+':'+i,c,i,m}:null}).filter(Boolean)}
 const apvVid=x=>x.md?x.it.k==='v':/^video\//.test(x.m.fl.ty);
 async function apvSrc(x){if(!x.md)return msFile(x.m.fl.id);if(MD.full[x.key])return MD.full[x.key];const b=await mdRead(x.it);return MD.full[x.key]=URL.createObjectURL(b)}
 async function apvFile(x){if(!x.md){const r=await fetch(msFile(x.m.fl.id));if(!r.ok)throw new Error('Файл не загрузился');const b=await r.blob();return new File([b],x.m.fl.n||'photo.jpg',{type:x.m.fl.ty||b.type})}const b=await mdRead(x.it);return new File([b],x.it.n||'photo.jpg',{type:x.it.ty||b.type})}
@@ -3765,7 +3786,7 @@ function msAttTab0(t,B){
   if(t==='gal'&&MD.on()){mdGallery(B);return}
   if(t==='music'&&MD.on()){mdMusic(B);return}
   B.onscroll=null;
-  if(t==='gal'){const R=msRecentMedia('media');B.innerHTML=`<div class="ms-a2g"><button type="button" class="ms-a2cam" data-at="cam"><video muted playsinline autoplay></video><span>${CAM}</span></button><button type="button" class="ms-a2tile" data-at="pick" data-k="media">${ico('grid')}<b>Галерея</b><small>Фото и видео</small></button>${R.map(({c,m})=>{const v=m.fl.ty.startsWith('video/'),t=TC.get(m.fl.id);return `<button type="button" class="ms-a2it ld${t?'':' blur'}" data-at="sel" data-c="${c}" data-i="${m.i}" data-f="${m.fl.id}" data-v="${v?1:''}" style="background-image:url('${t||m.fl.th||''}')">${v?`<small>${m.fl.d?fdur(m.fl.d):''}</small>`:''}<i></i></button>`}).join('')}</div>${R.length?'':'<p class="ms-a2e">Здесь появятся фото и видео из твоих чатов</p>'}`;tcQueue();setTimeout(msAttCam,450)}
+  if(t==='gal'){const R=msRecentMedia('media');MD.items=LOC.slice();B.innerHTML=`<div class="ms-a2g"><button type="button" class="ms-a2cam" data-at="cam"><video muted playsinline autoplay></video><span>${CAM}</span></button><button type="button" class="ms-a2tile" data-at="pick" data-k="media">${ico('grid')}<b>Выбрать</b><small>Фото и видео</small></button>${LOC.map(mdTile).join('')}${R.map(({c,m})=>{const v=m.fl.ty.startsWith('video/'),t=TC.get(m.fl.id);return `<button type="button" class="ms-a2it ld${t?'':' blur'}" data-at="sel" data-c="${c}" data-i="${m.i}" data-f="${m.fl.id}" data-v="${v?1:''}" style="background-image:url('${t||m.fl.th||''}')">${v?`<small>${m.fl.d?fdur(m.fl.d):''}</small>`:''}<i></i></button>`}).join('')}</div>${R.length||LOC.length?'':'<p class="ms-a2e">Нажми «Выбрать», чтобы добавить фото и видео с устройства</p>'}`;tcQueue();setTimeout(msAttCam,450)}
   else if(t==='file'){const R=msRecentMedia('doc');B.innerHTML=`<div class="ms-a2l"><button type="button" data-at="pick" data-k="file"><span style="--c:#3e88f7">${ico('file')}</span><div><b>Выбрать файл</b><small>Любой файл до 12 МБ</small></div></button><button type="button" data-at="pick" data-k="raw"><span style="--c:#3e88f7">${ico('grid')}</span><div><b>Фото или видео без сжатия</b><small>Отправить как файл в исходном качестве</small></div></button></div>${R.length?`<div class="ms-a2cap">Недавние файлы</div><div class="ms-a2l">${R.map(({c,m})=>{const ext=((m.fl.n||'').match(/\.([a-z0-9]{1,5})$/i)||[])[1]||'';return `<button type="button" data-at="fwd" data-c="${c}" data-i="${m.i}"><span class="ms-fext" style="--c:${EXTC[ext.toLowerCase()]||'#3e88f7'}">${esc(ext.toUpperCase().slice(0,4)||'FILE')}</span><div><b>${esc(m.fl.n)}</b><small>${fsz(m.fl.sz)} · ${msWhen(m.t)}</small></div></button>`}).join('')}</div>`:''}`}
   else if(t==='music'){const R=msRecentMedia('audio');B.innerHTML=`<div class="ms-a2l"><button type="button" data-at="pick" data-k="audio"><span style="--c:#e93d82">${AT_TABS[4][3]}</span><div><b>Выбрать аудиофайл</b><small>MP3, M4A, WAV, OGG</small></div></button></div>${R.length?`<div class="ms-a2cap">Недавняя музыка</div><div class="ms-a2l">${R.map(({c,m})=>`<button type="button" data-at="fwd" data-c="${c}" data-i="${m.i}"><span class="ms-mpv" role="button" data-at="mprev" data-k="${c}:${m.i}" style="--c:#e93d82">${PLAYI}</span><div><b>${esc(m.fl.n.replace(/\.[a-z0-9]+$/i,''))}</b><small>${fsz(m.fl.sz)}</small></div></button>`).join('')}</div>`:''}`}
   else if(t==='contact'){const ids=[...new Set(MS.chats.map(c=>String(c.p)))].filter(id=>id!==String(MS.me)&&MS.peers[id]&&!MS.peers[id].gone);B.innerHTML=`<label class="ms-a2q lq">${ico('search','s')}<input id="msAtQ" placeholder="Поиск контактов"></label><div class="ms-a2l" id="msAtCt">${ids.map(id=>{const p=MS.peers[id];return `<button type="button" data-at="contact" data-id="${id}">${msAva(p,'sm')}<div><b>${msName(p)}</b><small>ID ${id}</small></div></button>`}).join('')||'<p class="ms-a2e">Пока нет контактов</p>'}</div>`;
@@ -3819,7 +3840,7 @@ function msAttSendBtn(){const bar=$('#msAtBar');if(!bar)return;const n=AT.sel.le
 async function msAttAct(a,e){const k=a.dataset.at;
   if((k==='sel'||k==='mdsel')&&e&&!e.target.closest('i'))return msAttPrev(k==='mdsel'?a.dataset.md:a.dataset.c+':'+a.dataset.i);
   if(k==='mprev')return mpvToggle(a);
-  if(k==='pick'){const i=$('#msFileIn'),t=a.dataset.k;i.removeAttribute('capture');i.multiple=true;i.accept=t==='media'?'image/*,video/*':t==='audio'?'audio/*':t==='raw'?'image/*,video/*':'';MS.rawPick=t==='raw'||t==='file'?Date.now():0;msAttClose();i.click();return}
+  if(k==='pick'){const i=$('#msFileIn'),t=a.dataset.k;i.removeAttribute('capture');i.multiple=true;i.accept=t==='media'?'image/*,video/*':t==='audio'?'audio/*':t==='raw'?'image/*,video/*':'';MS.rawPick=t==='raw'||t==='file'?Date.now():0;if(t==='media'&&$('#msAtt')){MS.toSheet=Date.now();i.click();return}msAttClose();i.click();return}
   if(k==='cam'){msAttClose();return msCamera()}
   if(k==='geoask'){AT.geoAsked=1;return msAttTabGeo($('#msAtBody'))}
   if(k==='mdask'){if(MD.on())MundoraMedia.ask();return}
@@ -3830,7 +3851,8 @@ async function msAttAct(a,e){const k=a.dataset.at;
   if(k==='contact'){const p=MS.peers[a.dataset.id];msAttClose();return msSendText(`👤 ${(p&&p.name||'Контакт').replace(/\n/g,' ')}\n${location.origin}/#msgp-${a.dataset.id}`)}
   if(k==='geopin'){const P=MAP.pin;if(!P)return;mapGeoStop();msAttClose();const la=P[0].toFixed(6),lo=P[1].toFixed(6);return msSendText(`📍 Место\nhttps://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=16/${la}/${lo}`)}
   if(k==='geo'){const c=AT.pos;if(!c)return;mapGeoStop();msAttClose();const la=c.latitude.toFixed(6),lo=c.longitude.toFixed(6);return msSendText(`📍 Геопозиция\nhttps://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=16/${la}/${lo}`)}}
-async function msAttSendSel(){const cap=(($('#msAtCap')||{}).value||'').trim();if(AT.sel.length&&/^[iva]:/.test(AT.sel[0]))return mdSend(AT.sel.slice(),cap);const L=AT.sel.slice(),to=MS.peer;msAttClose();let ok=0;for(const id of L){const [c,i]=id.split(':');try{await msApi('fwd',{c,i:+i,to,plain:1});ok++}catch(e){toast(e.message,'x')}}if(ok){MS.v='';msPoll()}if(cap)msSendText(cap)}
+async function msAttSendSel(){const cap=(($('#msAtCap')||{}).value||'').trim();const MDk=AT.sel.filter(k=>/^[iva]:/.test(k)),L=AT.sel.filter(k=>!/^[iva]:/.test(k));if(MDk.length&&!L.length)return mdSend(MDk,cap);const to=MS.peer;const its=MDk.map(k=>MD.items.find(x=>x.k+':'+x.id===k)).filter(Boolean);msAttClose();let ok=0;for(const id of L){const [c,i]=id.split(':');try{await msApi('fwd',{c,i:+i,to,plain:1});ok++}catch(e){toast(e.message,'x')}}if(ok){MS.v='';msPoll()}
+  if(its.length){const items=[];for(const it of its){try{const b=await mdRead(it);items.push({f:new File([b],it.n||'file',{type:it.ty||b.type}),...(cap&&!items.length?{x:cap}:{})})}catch(e){toast(e.message,'x')}}if(items.length)msAttach(items)}else if(cap)msSendText(cap)}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#msAtSend'))msAttSendSel()});
 async function msSendText(x){if(!MS.c)return;const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);await msPost(m,{to:MS.peer,x})}
 // встроенная камера: снять фото и сразу в редактор с подписью
@@ -3853,7 +3875,11 @@ window.__mdThumb=(k,src)=>{MD.thumbs[k]=src;const el=document.querySelector(`.ms
 window.__mdChunk=(req,i,b64,last)=>{const R=MD.req[req];if(!R)return;if(i<0){delete MD.req[req];R.rej(new Error('Не удалось прочитать файл'));return}if(b64){const bin=atob(b64),u=new Uint8Array(bin.length);for(let j=0;j<bin.length;j++)u[j]=bin.charCodeAt(j);R.parts[i]=u}if(last){delete MD.req[req];R.res(new Blob(R.parts,{type:R.ty}))}};
 window.__mdPerm=()=>{if($('#msAtt'))msAttTab(AT.tab)};
 function mdPerm(){try{return JSON.parse(MundoraMedia.perm())}catch(e){return{media:'no',audio:false}}}
-function mdRead(it){return new Promise((res,rej)=>{const req='r'+Date.now()+Math.random().toString(36).slice(2,6);MD.req[req]={parts:[],ty:it.ty||'application/octet-stream',res,rej};MundoraMedia.read(req,it.k+':'+it.id)})}
+// браузер: выбранные с устройства фото и видео живут в шторке, как галерея в приложении
+const LOC=[];let LOCn=0;
+function locAdd(fs){const add=[];for(const f of fs){const v=/^video\//.test(f.type);const it={k:v?'v':'i',id:'L'+(LOCn++),n:f.name,ty:f.type,sz:f.size,file:f};LOC.unshift(it);add.push(it);const key=it.k+':'+it.id;if(!v){MD.thumbs[key]=MD.full[key]=URL.createObjectURL(f)}else locVThumb(it,key)}return add}
+function locVThumb(it,key){const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.src=MD.full[key]=URL.createObjectURL(it.file);v.onloadeddata=()=>{try{v.currentTime=Math.min(.4,(v.duration||1)/3)}catch(e){}};v.onseeked=()=>{try{const k=320/Math.max(v.videoWidth,v.videoHeight)||1,c=document.createElement('canvas');c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);window.__mdThumb(key,c.toDataURL('image/jpeg',.72))}catch(e){}}}
+function mdRead(it){if(it.file)return Promise.resolve(it.file);return new Promise((res,rej)=>{const req='r'+Date.now()+Math.random().toString(36).slice(2,6);MD.req[req]={parts:[],ty:it.ty||'application/octet-stream',res,rej};MundoraMedia.read(req,it.k+':'+it.id)})}
 function mdAskHTML(what){return `<div class="ms-a2ask"><div class="ce-orb">${what==='audio'?AT_TABS[4][3]:AT_TABS[0][3]}</div><b>Предоставьте доступ к ${what==='audio'?'музыке':'фото и видео'}, чтобы пользоваться этим</b><button type="button" class="ms-a2btn" data-at="mdask">Предоставить доступ</button></div>`}
 function mdLoad(kind,more){if(!more){MD.items=[];MD.off=0;MD.done=false}if(MD.done)return[];let L=[];try{L=JSON.parse(MundoraMedia.list(kind,MD.off,90))}catch(e){}MD.off+=L.length;if(L.length<90)MD.done=true;MD.items=MD.items.concat(L);return L}
 function mdTile(it){const k=it.k+':'+it.id,t=MD.thumbs[k];return `<button type="button" class="ms-a2it${t?' ld':''}" data-at="mdsel" data-md="${k}" ${t?`style="background-image:url('${t}')"`:''}>${it.k==='v'?`<small>${ico('play','s')}</small>`:''}<i></i></button>`}
@@ -3896,13 +3922,13 @@ function bubMenu(anchor,items,o={}){bubClose(true);const r=anchor.getBoundingCli
   let x=o.left?r.left:r.right-W;x=Math.max(8,Math.min(x,vw-W-8));let y=o.up?r.top-H-8:r.bottom+8;if(y+H>vh-8)y=r.top-H-8;if(y<8)y=8;
   m.style.left=x+'px';m.style.top=y+'px';m.style.transformOrigin=`${r.left+r.width/2-x}px ${r.top+r.height/2-y}px`;
   anchor.classList.add('bub-src');BMENU={m,ov,anchor};
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{m.classList.add('on');ov.classList.add('on')}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{m.classList.add('on');ov.classList.add('on');setTimeout(()=>m.classList.add('done'),480)}));
   ov.addEventListener('pointerdown',e=>{e.preventDefault();bubClose()});
   m.addEventListener('click',e=>{const b=e.target.closest('.bub-it');if(!b)return;const it=items[+b.dataset.k];bubClose();if(it&&it.fn)setTimeout(()=>it.fn(),60)});
   try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}}
 let BMENU=null;
 function bubClose(now){const B=BMENU;if(!B)return;BMENU=null;B.anchor.classList.remove('bub-src');if(now){B.m.remove();B.ov.remove();return}
-  B.m.classList.remove('on');B.m.classList.add('off');B.ov.classList.remove('on');setTimeout(()=>{B.m.remove();B.ov.remove()},300)}
+  B.m.classList.remove('on','done');B.m.classList.add('off');B.ov.classList.remove('on');setTimeout(()=>{B.m.remove();B.ov.remove()},300)}
 addEventListener('keydown',e=>{if(e.key==='Escape'&&BMENU)bubClose()});
 
 /* ---------- группы и каналы: создание ---------- */
