@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { View, Animated, PanResponder, Dimensions, Text } from 'react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { authed } from '../api';
 import { GlassBtn } from '../ui';
 
@@ -25,7 +26,7 @@ export default function Viewer({ route, navigation }) {
   return (
     <Animated.View style={{ flex: 1, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' }} {...pan.panHandlers}>
       <Animated.View style={{ transform: [{ translateY: y }, { scale: sc }] }}>
-        <Image source={plain ? { uri } : authed(uri)} style={{ width: iw, height: ih }} contentFit="contain" transition={150} />
+        {route.params.video ? <Vid uri={uri} w={iw} h={Math.min(H * 0.85, W * (w && h ? h / w : 16 / 9))} /> : <Image source={plain ? { uri } : authed(uri)} style={{ width: iw, height: ih }} contentFit="contain" transition={150} />}
       </Animated.View>
       <View style={{ position: 'absolute', top: ins.top + 4, left: 8, right: 8, flexDirection: 'row', alignItems: 'center' }}>
         <GlassBtn icon="close" onPress={() => navigation.goBack()} />
@@ -33,4 +34,10 @@ export default function Viewer({ route, navigation }) {
       </View>
     </Animated.View>
   );
+}
+
+// видео: системный плеер (кнопки, перемотка, полный экран, картинка-в-картинке)
+function Vid({ uri, w, h }) {
+  const player = useVideoPlayer(authed(uri), p => { p.loop = false; p.play(); });
+  return <VideoView player={player} style={{ width: w, height: h }} nativeControls contentFit="contain" allowsFullscreen allowsPictureInPicture />;
 }

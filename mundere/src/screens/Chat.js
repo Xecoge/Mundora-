@@ -9,11 +9,13 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
-import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { createAudioPlayer, setAudioModeAsync, useAudioRecorder, RecordingPresets, AudioModule } from 'expo-audio';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { S, useStore, isG, openChat, closeChat, older, sendText, loadPeers, poke, emit } from '../store';
 import { M, ms, fileUri, authed, upload } from '../api';
-import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, hm, dayLabel, seen, gN, ucol, toast, tap } from '../ui';
+import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, hm, dayLabel, seen, gN, ucol, toast, tap, bubble } from '../ui';
 
 const REACT = ['❤️', '👍', '😂', '😮', '😢', '🔥'];
 const { width: SW } = Dimensions.get('window');
@@ -64,29 +66,92 @@ export default function Chat({ route, navigation }) {
     setTxt(''); const r = reply ? reply.i : null; setReply(null);
     try { await sendText(to, c, x, r); } catch (e) { toast(e.message, 1); }
   }
-  async function attach() {
+  // общий отправитель файла: временный пузырь сразу, потом загрузка кусками и отправка
+  async function sendFile(f, cap) {
+    const tmp = 'p' + Date.now() + Math.random();
+    S.msgs[c] = [...(S.msgs[c] || []), { i: 2e12 + Date.now(), tmp, f: M.me, t: Date.now(), x: cap || '', fl: { local: f.uri, ty: f.type, n: f.name, w: f.w, h: f.h, d: f.d, vo: f.vo, wf: f.wf, sz: f.size } }]; emit();
+    setSending(n => n + 1);
+    try {
+      if (f.size > 12 * 1024 * 1024) throw new Error('Файл больше 12 МБ');
+      const b64 = f.b64 || (await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.Base64 }));
+      const size = Math.round(b64.length * 0.75);
+      const id = await upload(to, b64, { name: f.name, type: f.type, size });
+      const j = await ms('send', { to, x: cap || '', ...(reply ? {} : {}), fl: { id, n: f.name, ty: f.type, sz: size, w: f.w || 0, h: f.h || 0, d: f.d || 0, ...(f.vo ? { vo: 1, wf: f.wf || '' } : {}) } });
+      const Lm = S.msgs[c] || [];
+      S.msgs[c] = Lm.some(z => z.i === j.m.i) ? Lm.filter(z => z.tmp !== tmp) : Lm.map(z => (z.tmp === tmp ? j.m : z));
+      emit(); poke();
+    } catch (e) { S.msgs[c] = (S.msgs[c] || []).filter(z => z.tmp !== tmp); emit(); toast(e.message, 1); }
+    setSending(n => n - 1);
+  }
+  async function pickMedia() {
     const pr = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!pr.granted) return toast('Разреши доступ к фото в настройках', 1);
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsMultipleSelection: true, selectionLimit: 10, quality: 1 });
+    if (!pr.granted) return toast('Разреши доступ к фото и видео в настройках', 1);
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images', 'videos'], allowsMultipleSelection: true, selectionLimit: 10, quality: 1, videoMaxDuration: 600 });
     if (res.canceled) return;
     const cap = txt.trim(); setTxt('');
     for (let k = 0; k < res.assets.length; k++) {
-      const a = res.assets[k];
-      const tmp = 'p' + Date.now() + k;
-      S.msgs[c] = [...(S.msgs[c] || []), { i: 2e12 + Date.now() + k, tmp, f: M.me, t: Date.now(), x: k === 0 ? cap : '', fl: { local: a.uri, ty: 'image/jpeg', w: a.width, h: a.height } }]; emit();
-      setSending(s => s + 1);
-      try {
-        const w = Math.min(a.width || 1600, 1600);
-        const r = await ImageManipulator.manipulateAsync(a.uri, [{ resize: { width: w } }], { compress: 0.82, format: ImageManipulator.SaveFormat.JPEG, base64: true });
-        const name = 'photo_' + Date.now() + '.jpg', size = Math.round(r.base64.length * 0.75);
-        const id = await upload(to, r.base64, { name, type: 'image/jpeg', size });
-        const j = await ms('send', { to, x: k === 0 ? cap : '', fl: { id, n: name, ty: 'image/jpeg', sz: size, w: r.width, h: r.height } });
-        const Lm = S.msgs[c] || [];
-        S.msgs[c] = Lm.some(z => z.i === j.m.i) ? Lm.filter(z => z.tmp !== tmp) : Lm.map(z => (z.tmp === tmp ? j.m : z));
-        emit(); poke();
-      } catch (e) { S.msgs[c] = (S.msgs[c] || []).filter(z => z.tmp !== tmp); emit(); toast(e.message, 1); }
-      setSending(s => s - 1);
+      const a = res.assets[k], cp = k === 0 ? cap : '';
+      if (a.type === 'video') {
+        await sendFile({ uri: a.uri, name: a.fileName || 'video_' + Date.now() + '.mp4', type: a.mimeType || 'video/mp4', size: a.fileSize || 0, w: a.width, h: a.height, d: Math.round((a.duration || 0) / 1000) }, cp);
+      } else {
+        try {
+          const w = Math.min(a.width || 1600, 1600);
+          const r = await ImageManipulator.manipulateAsync(a.uri, [{ resize: { width: w } }], { compress: 0.82, format: ImageManipulator.SaveFormat.JPEG, base64: true });
+          await sendFile({ uri: r.uri, b64: r.base64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.base64.length * 0.75), w: r.width, h: r.height }, cp);
+        } catch (e) { toast(e.message, 1); }
+      }
     }
+  }
+  async function takePhoto() {
+    const pr = await ImagePicker.requestCameraPermissionsAsync();
+    if (!pr.granted) return toast('Разреши доступ к камере', 1);
+    const res = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
+    if (res.canceled) return;
+    const a = res.assets[0], w = Math.min(a.width || 1600, 1600);
+    const r = await ImageManipulator.manipulateAsync(a.uri, [{ resize: { width: w } }], { compress: 0.82, format: ImageManipulator.SaveFormat.JPEG, base64: true });
+    const cap = txt.trim(); setTxt('');
+    await sendFile({ uri: r.uri, b64: r.base64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.base64.length * 0.75), w: r.width, h: r.height }, cap);
+  }
+  async function pickFile() {
+    const res = await DocumentPicker.getDocumentAsync({ multiple: true, copyToCacheDirectory: true });
+    if (res.canceled) return;
+    for (const a of res.assets) await sendFile({ uri: a.uri, name: a.name || 'файл', type: a.mimeType || 'application/octet-stream', size: a.size || 0 });
+  }
+  const attach = e => bubble({ x: e.nativeEvent.pageX, y: e.nativeEvent.pageY }, [
+    { t: 'Фото и видео', ic: 'images-outline', fn: pickMedia },
+    { t: 'Камера', ic: 'camera-outline', fn: takePhoto },
+    { t: 'Файл', ic: 'document-outline', fn: pickFile },
+  ]);
+
+  // голосовые: держи кнопку микрофона — запись, отпусти — отправка
+  const rec = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
+  const [recOn, setRecOn] = useState(0);
+  const recT = useRef({ t0: 0, lv: [], iv: null, want: false });
+  async function recStart() {
+    const R0 = recT.current; R0.want = true;
+    const pr = await AudioModule.requestRecordingPermissionsAsync();
+    if (!pr.granted) { R0.want = false; return toast('Разреши доступ к микрофону', 1); }
+    if (!R0.want) return;
+    try {
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      await rec.prepareToRecordAsync(); rec.record();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      R0.t0 = Date.now(); R0.lv = []; setRecOn(Date.now());
+      R0.iv = setInterval(() => { try { const st = rec.getStatus(); const db = st && st.metering != null ? st.metering : -60; R0.lv.push(Math.max(0, Math.min(35, Math.round((db + 60) / 60 * 35)))); } catch (e) {} setRecOn(x => x && Date.now()); }, 100);
+    } catch (e) { toast('Не удалось начать запись', 1); }
+  }
+  async function recStop(cancel) {
+    const R0 = recT.current; R0.want = false;
+    if (!R0.t0) return;
+    clearInterval(R0.iv); const dur = (Date.now() - R0.t0) / 1000; R0.t0 = 0; setRecOn(0);
+    try { await rec.stop(); } catch (e) {}
+    await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => {});
+    if (cancel || dur < 0.7) { if (!cancel) toast('Удерживай кнопку, чтобы записать голосовое', 1); return; }
+    const L = R0.lv, n = 40, wf = Array.from({ length: n }, (_, k) => { const a = L.slice(Math.floor(k * L.length / n), Math.floor((k + 1) * L.length / n) || undefined); return (a.length ? Math.max(...a) : 0).toString(36); }).join('');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    const uri = rec.uri; if (!uri) return toast('Запись не сохранилась', 1);
+    const info = await FileSystem.getInfoAsync(uri).catch(() => ({}));
+    await sendFile({ uri, name: 'voice_' + Date.now() + '.m4a', type: 'audio/mp4', size: info.size || 0, d: Math.max(1, Math.round(dur)), vo: 1, wf });
   }
 
   const onLong = useCallback((m, e) => {
@@ -94,7 +159,11 @@ export default function Chat({ route, navigation }) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     setMenu({ m, x: e.nativeEvent.pageX, y: e.nativeEvent.pageY });
   }, []);
-  const openImg = useCallback(m => navigation.navigate('Viewer', { uri: fileUri(m.fl.id), w: m.fl.w, h: m.fl.h, name: m.fl.n }), []);
+  const openImg = useCallback(m => {
+    const fl = m.fl, vid = (fl.ty || '').startsWith('video/') || fl.rd, img = (fl.ty || '').startsWith('image/') && !fl.rd;
+    if (img || vid) navigation.navigate('Viewer', { uri: fileUri(fl.id), w: fl.w, h: fl.h, name: fl.n, video: vid ? 1 : 0 });
+    else openDoc(fl);
+  }, []);
   const openUser = useCallback(id => navigation.navigate('Profile', { id: String(id) }), []);
 
   const findMsg = i => (S.msgs[c] || []).find(x => x.i === i);
@@ -144,10 +213,24 @@ export default function Chat({ route, navigation }) {
             )}
             <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
               <GlassBtn icon="attach" onPress={attach} />
+              {recOn ? (
+                <Glass round={22} style={{ flex: 1, marginHorizontal: 6, height: 44, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14 }}>
+                  <RecDot />
+                  <Text style={{ color: '#fff', fontSize: 16, marginLeft: 8, fontVariant: ['tabular-nums'] }}>{(() => { const t = Math.floor((Date.now() - recT.current.t0) / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); })()}</Text>
+                  <Text style={{ color: C.mute, fontSize: 14, marginLeft: 'auto' }}>отпусти — отправить</Text>
+                </Glass>
+              ) : (
               <Glass round={22} style={{ flex: 1, marginHorizontal: 6, minHeight: 44, justifyContent: 'center', paddingHorizontal: 14 }}>
                 <TextInput value={txt} onChangeText={onType} placeholder={G && G.type === 'channel' ? 'Публикация' : 'Сообщение'} placeholderTextColor={C.mute} multiline style={{ color: '#fff', fontSize: 16.5, maxHeight: 130, paddingTop: Platform.OS === 'ios' ? 11 : 8, paddingBottom: Platform.OS === 'ios' ? 11 : 8 }} selectionColor={C.blue} />
               </Glass>
-              <SendBtn on={!!txt.trim()} onPress={send} busy={sending > 0} />
+              )}
+              {txt.trim() ? <SendBtn on onPress={send} busy={sending > 0} /> : (
+                <Pressable onPressIn={recStart} onPressOut={() => recStop(false)} hitSlop={8}>
+                  <View style={{ width: recOn ? 56 : 44, height: recOn ? 56 : 44, borderRadius: 28, marginTop: recOn ? -12 : 0, backgroundColor: recOn ? C.blue : 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center' }}>
+                    {sending > 0 && !recOn ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="mic" size={recOn ? 28 : 23} color="#fff" />}
+                  </View>
+                </Pressable>
+              )}
             </View>
           </View>
         ) : (
@@ -177,6 +260,11 @@ export default function Chat({ route, navigation }) {
   );
 }
 
+function RecDot() {
+  const a = useRef(new Animated.Value(1)).current;
+  useEffect(() => { const l = Animated.loop(Animated.sequence([Animated.timing(a, { toValue: 0.2, duration: 500, useNativeDriver: true }), Animated.timing(a, { toValue: 1, duration: 500, useNativeDriver: true })])); l.start(); return () => l.stop(); }, []);
+  return <Animated.View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: C.red, opacity: a }} />;
+}
 function SendBtn({ on, onPress, busy }) {
   const a = useRef(new Animated.Value(on ? 1 : 0)).current;
   useEffect(() => { Animated.spring(a, { toValue: on ? 1 : 0, useNativeDriver: true, speed: 20, bounciness: 12 }).start(); }, [on]);
@@ -212,7 +300,8 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
   const x = ed != null ? (typeof ed === 'object' ? ed.x : ed) : m.x;
   const rd = mine && !m.tmp && (S.read[c] ?? -1) >= m.i;
   const fl = m.fl;
-  const isImg = fl && (fl.local || (fl.ty || '').startsWith('image/')) && !fl.rd;
+  const isImg = fl && (fl.ty || '').startsWith('image/') && !fl.rd;
+  const isVid = fl && !isImg && !fl.vo && ((fl.ty || '').startsWith('video/') || fl.rd);
   const rx = S.rx[c] && S.rx[c][m.i];
   const pop = useRef(new Animated.Value(m.tmp ? 0 : 1)).current;
   useEffect(() => { if (m.tmp) Animated.spring(pop, { toValue: 1, useNativeDriver: true, speed: 16, bounciness: 10 }).start(); }, []);
@@ -232,7 +321,7 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
   return (
     <Animated.View style={{ flexDirection: 'row', justifyContent: mine ? 'flex-end' : 'flex-start', marginTop: first ? 6 : 2, opacity: pop, transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }] }}>
       {gs && <View style={{ width: 38, justifyContent: 'flex-end' }}>{last && <Pressable onPress={() => onUser(m.f)}><Avatar p={S.peers[m.f]} size={32} /></Pressable>}</View>}
-      <Pressable onLongPress={e => onLong(m, e)} delayLongPress={280} onPress={isImg && !fl.local ? () => onImg(m) : undefined} style={{ maxWidth: MAXW }}>
+      <Pressable onLongPress={e => onLong(m, e)} delayLongPress={280} onPress={fl && !fl.local && (isImg || (fl.ty || '').startsWith('video/') || fl.rd || (!fl.vo)) ? () => onImg(m) : undefined} style={{ maxWidth: MAXW }}>
         <View style={[{ backgroundColor: bg, overflow: 'hidden' }, radius, isImg ? { padding: 3 } : { paddingHorizontal: 11, paddingVertical: 7 }]}>
           {gs && first && <Text onPress={() => onUser(m.f)} style={{ color: ucol(m.f), fontWeight: '700', fontSize: 13.5, marginBottom: 2, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }}>{(S.peers[m.f] || {}).name || 'ID ' + m.f}</Text>}
           {m.fw != null && <Text style={{ color: mine ? '#cfe0ff' : C.blue, fontSize: 13, marginBottom: 2 }}>Переслано от {(S.peers[m.fw] || {}).name || 'ID ' + m.fw}</Text>}
@@ -244,7 +333,13 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
           )}
           {isImg && <Image source={fl.local ? { uri: fl.local } : authed(fileUri(fl.id))} style={{ width: iw, height: ih, borderRadius: 15 }} contentFit="cover" transition={200} cachePolicy="memory-disk" recyclingKey={String(m.i)} />}
           {fl && !isImg && fl.vo && <Voice m={m} mine={mine} />}
-          {fl && !isImg && !fl.vo && <FileRow fl={fl} mine={mine} />}
+          {isVid && (fl.th || fl.local) ? (
+            <View style={{ margin: -8, marginBottom: x ? 0 : -4 }}>
+              <Image source={{ uri: fl.th || fl.local }} style={{ width: fl.rd ? 220 : Math.min(MAXW, 280), height: fl.rd ? 220 : Math.min(360, Math.max(140, Math.min(MAXW, 280) * ((fl.h || 9) / (fl.w || 16)))), borderRadius: fl.rd ? 110 : 15 }} contentFit="cover" />
+              <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}><View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(0,0,0,.45)', alignItems: 'center', justifyContent: 'center' }}>{m.tmp ? <ActivityIndicator color="#fff" /> : <Ionicons name="play" size={26} color="#fff" style={{ marginLeft: 3 }} />}</View></View>
+              {!!fl.d && <View style={{ position: 'absolute', left: 8, top: 8, backgroundColor: 'rgba(0,0,0,.45)', borderRadius: 9, paddingHorizontal: 6 }}><Text style={{ color: '#fff', fontSize: 12 }}>{Math.floor(fl.d / 60)}:{String(fl.d % 60).padStart(2, '0')}</Text></View>}
+            </View>
+          ) : fl && !isImg && !fl.vo && <FileRow fl={fl} mine={mine} />}
           {!!x && <Text style={{ color: '#fff', fontSize: 16.5, lineHeight: 22, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }} selectable={false}>{x}</Text>}
           <View style={isImg && !x ? { position: 'absolute', right: 10, bottom: 8, backgroundColor: 'rgba(0,0,0,.45)', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1 } : { marginHorizontal: isImg ? 8 : 0, marginBottom: isImg ? 4 : 0 }}>{meta}</View>
         </View>
@@ -273,6 +368,17 @@ function Reacts({ rx, mine, c, i }) {
   );
 }
 
+// файл: скачиваем в кэш и открываем через «Поделиться/Открыть в…»
+async function openDoc(fl) {
+  try {
+    toast('Скачиваю ' + fl.n);
+    const dst = FileSystem.cacheDirectory + encodeURIComponent(fl.id) + '_' + String(fl.n || 'file').replace(/[^\w.\-а-яА-ЯёЁ]/g, '_');
+    const r = await FileSystem.downloadAsync(fileUri(fl.id), dst, { headers: authed('').headers });
+    const Sharing = require('expo-sharing');
+    if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(r.uri, { mimeType: fl.ty || undefined, dialogTitle: fl.n });
+    else toast('Файл сохранён', 0);
+  } catch (e) { toast('Не удалось открыть файл', 1); }
+}
 function FileRow({ fl, mine }) {
   const kb = fl.sz > 1048576 ? (fl.sz / 1048576).toFixed(1) + ' МБ' : Math.max(1, Math.round((fl.sz || 0) / 1024)) + ' КБ';
   const vid = (fl.ty || '').startsWith('video/') || fl.rd;
@@ -295,6 +401,7 @@ function Voice({ m, mine }) {
   const pl = useRef(null);
   useEffect(() => () => { try { pl.current && pl.current.remove(); } catch (e) {} }, []);
   function toggle() {
+    if (m.tmp || !m.fl.id) return;
     tap();
     if (!pl.current) {
       const p = createAudioPlayer(authed(fileUri(m.fl.id)));
@@ -306,7 +413,11 @@ function Voice({ m, mine }) {
     }
     if (st.play) pl.current.pause(); else pl.current.play();
   }
-  const bars = useMemo(() => Array.from({ length: 28 }, (_, k) => 4 + Math.abs(Math.sin((m.i + 1) * 7.3 + k * 1.7)) * 16), [m.i]);
+  const bars = useMemo(() => {
+    const wf = m.fl.wf || '';
+    if (wf.length >= 8) { const v = [...wf].map(ch => parseInt(ch, 36) || 0), mx = Math.max(1, ...v); return Array.from({ length: 28 }, (_, k) => 3 + (v[Math.floor(k * v.length / 28)] / mx) * 18); }
+    return Array.from({ length: 28 }, (_, k) => 4 + Math.abs(Math.sin((m.i + 1) * 7.3 + k * 1.7)) * 16);
+  }, [m.i, m.fl.wf]);
   const fr = st.dur ? st.pos / st.dur : 0;
   const t = Math.round(st.play || st.pos ? st.pos : st.dur);
   return (

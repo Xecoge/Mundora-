@@ -30,7 +30,11 @@
     "expo-system-ui": "~5.0.10",
     "expo-font": "~13.3.2",
     "expo-asset": "~11.1.7",
-    "expo-constants": "~17.1.7"
+    "expo-constants": "~17.1.7",
+    "expo-file-system": "~18.1.11",
+    "expo-document-picker": "~13.1.6",
+    "expo-video": "~2.2.2",
+    "expo-sharing": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0"
