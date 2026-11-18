@@ -20,7 +20,7 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { S, useStore, isG, openChat, closeChat, older, sendText, loadPeers, poke, emit } from '../store';
 import { M, ms, fileUri, authed, upload } from '../api';
-import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, hm, dayLabel, seen, gN, ucol, toast, tap, bubble } from '../ui';
+import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, hm, dayLabel, seen, gN, ucol, toast, tap, bubble, Wallpaper } from '../ui';
 
 const REACT = ['❤️', '👍', '😂', '😮', '😢', '🔥'];
 const { width: SW } = Dimensions.get('window');
@@ -238,7 +238,7 @@ export default function Chat({ route, navigation }) {
   const findMsg = i => (S.msgs[c] || []).find(x => x.i === i);
 
   const renderItem = useCallback(({ item }) => {
-    if (item.day) return <View style={{ alignItems: 'center', marginVertical: 8 }}><Glass round={12} style={{ paddingHorizontal: 12, paddingVertical: 4 }}><Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>{dayLabel(item.day)}</Text></Glass></View>;
+    if (item.day) return <View style={{ alignItems: 'center', marginVertical: 8 }}><View style={{ borderRadius: 12, paddingHorizontal: 11, paddingVertical: 4, backgroundColor: 'rgba(30,30,32,.7)' }}><Text style={{ color: '#fff', fontSize: 12.5, fontWeight: '600' }}>{dayLabel(item.day)}</Text></View></View>;
     const m = item.m;
     if (m.sys) return <SysChip m={m} G={G} onUser={openUser} />;
     return <Bubble c={c} m={m} G={G} first={item.first} last={item.last} reply={m.r != null ? findMsg(m.r) : null} onLong={onLong} onImg={openImg} onUser={openUser} onReply={() => canW && setReply(m)} />;
@@ -248,7 +248,7 @@ export default function Chat({ route, navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#000' }}>
-      <LinearGradient colors={['#0e1621', '#0b0f17', '#000']} style={StyleSheet.absoluteFill} />
+      <Wallpaper />
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} keyboardVerticalOffset={0}>
         {!L ? <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color={C.blue} /></View> : (
           <FlatList
@@ -269,7 +269,7 @@ export default function Chat({ route, navigation }) {
         )}
 
         {canW ? (
-          <View style={{ paddingHorizontal: 8, paddingBottom: Math.max(ins.bottom, 8) + 2, paddingTop: 6 }}>
+          <View style={{ paddingHorizontal: 10, paddingBottom: Math.max(ins.bottom, 10), paddingTop: 6 }}>
             {editing && (
               <Glass round={16} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, marginBottom: 6 }}>
                 <Ionicons name="pencil" size={18} color={C.blue} />
@@ -293,14 +293,15 @@ export default function Chat({ route, navigation }) {
             <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
               <GlassBtn icon="attach" onPress={attach} />
               {recOn ? (
-                <Glass round={22} style={{ flex: 1, marginHorizontal: 6, height: 44, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14 }}>
+                <Glass round={25} style={{ flex: 1, marginHorizontal: 8, height: 50, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
                   <RecDot />
                   <Text style={{ color: '#fff', fontSize: 16, marginLeft: 8, fontVariant: ['tabular-nums'] }}>{(() => { const t = Math.floor((Date.now() - recT.current.t0) / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); })()}</Text>
                   <Text style={{ color: C.mute, fontSize: 14, marginLeft: 'auto' }}>отпусти — отправить</Text>
                 </Glass>
               ) : (
-              <Glass round={22} style={{ flex: 1, marginHorizontal: 6, minHeight: 44, justifyContent: 'center', paddingHorizontal: 14 }}>
-                <TextInput value={txt} onChangeText={onType} placeholder={G && G.type === 'channel' ? 'Публикация' : 'Сообщение'} placeholderTextColor={C.mute} multiline style={{ color: '#fff', fontSize: 16.5, maxHeight: 130, paddingTop: Platform.OS === 'ios' ? 11 : 8, paddingBottom: Platform.OS === 'ios' ? 11 : 8 }} selectionColor={C.blue} />
+              <Glass round={25} style={{ flex: 1, marginHorizontal: 8, minHeight: 50, flexDirection: 'row', alignItems: 'center', paddingLeft: 16, paddingRight: 10 }}>
+                <TextInput value={txt} onChangeText={onType} placeholder={G && G.type === 'channel' ? 'Публикация' : 'Сообщение'} placeholderTextColor="#8e8e93" multiline style={{ flex: 1, color: '#fff', fontSize: 17, maxHeight: 130, paddingTop: Platform.OS === 'ios' ? 14 : 10, paddingBottom: Platform.OS === 'ios' ? 14 : 10 }} selectionColor={C.blue} />
+                <Ionicons name="happy-outline" size={24} color="#cfcfd6" />
               </Glass>
               )}
               {txt.trim() ? <SendBtn on onPress={send} busy={sending > 0} /> : (
@@ -318,18 +319,18 @@ export default function Chat({ route, navigation }) {
       </KeyboardAvoidingView>
 
       {/* шапка поверх списка — стекло */}
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: ins.top + 4, paddingHorizontal: 8, flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: ins.top + 10, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center' }}>
         <GlassBtn icon="chevron-back" onPress={() => navigation.goBack()} />
         <Press onPress={hdr} pop round={22} amt={0.06} style={{ flex: 1, marginHorizontal: 8 }}>
-          <Glass round={22} style={{ height: 44, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 }}>
+          <Glass round={24} style={{ height: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text numberOfLines={1} style={{ color: '#fff', fontWeight: '700', fontSize: 15.5, flexShrink: 1 }}>{G ? G.title : self ? 'Избранное' : p ? p.name : '…'}</Text>
               <Vf on={G ? G.vf : p && p.verified} size={14} />
             </View>
-            {!!status && <Text numberOfLines={1} style={{ color: typing ? C.blue : C.mute, fontSize: 12 }}>{status}</Text>}
+            {!!status && <Text numberOfLines={1} style={{ color: typing ? C.blue : '#a49dc0', fontSize: 12.5 }}>{status}</Text>}
           </Glass>
         </Press>
-        <Press onPress={hdr} pop round={22}>{G ? <GAvatar g={G} size={44} /> : <Avatar p={p} size={44} />}</Press>
+        <Press onPress={hdr} pop round={24}>{G ? <GAvatar g={G} size={48} /> : <Avatar p={p} size={48} />}</Press>
       </View>
 
       {rnd && (
@@ -366,7 +367,7 @@ function MicBtn({ on, mode, busy }) {
   useEffect(() => { Animated.spring(a, { toValue: on ? 1 : 0, useNativeDriver: true, speed: 16, bounciness: 12 }).start(); }, [on]);
   useEffect(() => { f.setValue(0); Animated.spring(f, { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 14 }).start(); }, [mode]);
   return (
-    <Animated.View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: on ? C.blue : 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center', transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [1, 1.45] }) }] }}>
+    <Animated.View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: on ? C.blue : 'rgba(37,37,40,.62)', borderWidth: 1, borderColor: 'rgba(255,255,255,.09)', alignItems: 'center', justifyContent: 'center', transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [1, 1.45] }) }] }}>
       {busy ? <ActivityIndicator color="#fff" size="small" /> : (
         <Animated.View style={{ transform: [{ scale: f.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { rotate: f.interpolate({ inputRange: [0, 1], outputRange: ['-90deg', '0deg'] }) }] }}>
           <Ionicons name={mode === 'cam' ? 'videocam' : 'mic'} size={23} color="#fff" />
@@ -397,7 +398,7 @@ function SendBtn({ on, onPress, busy }) {
   return (
     <Press onPress={onPress} disabled={!on} pop round={22}>
       <Animated.View style={{ transform: [{ scale: a.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }], opacity: a.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) }}>
-        <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: on ? C.blue : 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: on ? C.blue : 'rgba(37,37,40,.62)', alignItems: 'center', justifyContent: 'center' }}>
           {busy ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="arrow-up" size={24} color="#fff" />}
         </View>
       </Animated.View>
@@ -432,7 +433,7 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
   const pop = useRef(new Animated.Value(m.tmp ? 0 : 1)).current;
   useEffect(() => { if (m.tmp) Animated.spring(pop, { toValue: 1, useNativeDriver: true, speed: 16, bounciness: 10 }).start(); }, []);
   const bg = mine ? C.me : C.th;
-  const r = 18, sm = 6;
+  const r = 19, sm = 6;
   // свайп влево — ответить (как в Telegram): пузырь едет за пальцем, появляется стрелка
   const sw = useRef(new Animated.Value(0)).current, fired = useRef(false);
   const pr = useRef(PanResponder.create({
@@ -459,7 +460,7 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
       </Animated.View>
       {gs && <View style={{ width: 38, justifyContent: 'flex-end' }}>{last && <Pressable onPress={() => onUser(m.f)}><Avatar p={S.peers[m.f]} size={32} /></Pressable>}</View>}
       <Pressable onLongPress={e => onLong(m, e)} delayLongPress={280} onPress={fl && !fl.local && (isImg || (fl.ty || '').startsWith('video/') || fl.rd || (!fl.vo)) ? () => onImg(m) : undefined} style={{ maxWidth: MAXW }}>
-        <View style={[{ backgroundColor: bg, overflow: 'hidden' }, radius, isImg ? { padding: 3 } : { paddingHorizontal: 11, paddingVertical: 7 }]}>
+        <LinearGradient colors={mine ? ['#4a95ff', '#2a6fe0'] : [C.th, C.th]} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[{ overflow: 'hidden' }, radius, isImg ? { padding: 3 } : { paddingLeft: 12, paddingRight: 10, paddingTop: 7, paddingBottom: 6 }]}>
           {gs && first && <Text onPress={() => onUser(m.f)} style={{ color: ucol(m.f), fontWeight: '700', fontSize: 13.5, marginBottom: 2, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }}>{(S.peers[m.f] || {}).name || 'ID ' + m.f}</Text>}
           {m.fw != null && <Text style={{ color: mine ? '#cfe0ff' : C.blue, fontSize: 13, marginBottom: 2 }}>Переслано от {(S.peers[m.fw] || {}).name || 'ID ' + m.fw}</Text>}
           {reply && (
@@ -477,9 +478,9 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
               {!!fl.d && <View style={{ position: 'absolute', left: 8, top: 8, backgroundColor: 'rgba(0,0,0,.45)', borderRadius: 9, paddingHorizontal: 6 }}><Text style={{ color: '#fff', fontSize: 12 }}>{Math.floor(fl.d / 60)}:{String(fl.d % 60).padStart(2, '0')}</Text></View>}
             </View>
           ) : fl && !isImg && !fl.vo && <FileRow fl={fl} mine={mine} />}
-          {!!x && <Text style={{ color: '#fff', fontSize: 16.5, lineHeight: 22, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }} selectable={false}>{x}</Text>}
+          {!!x && <Text style={{ color: '#fff', fontSize: 15.5, lineHeight: 21, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }} selectable={false}>{x}</Text>}
           <View style={isImg && !x ? { position: 'absolute', right: 10, bottom: 8, backgroundColor: 'rgba(0,0,0,.45)', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1 } : { marginHorizontal: isImg ? 8 : 0, marginBottom: isImg ? 4 : 0 }}>{meta}</View>
-        </View>
+        </LinearGradient>
         {rx && <Reacts rx={rx} mine={mine} c={c} i={m.i} />}
       </Pressable>
     </Animated.View>

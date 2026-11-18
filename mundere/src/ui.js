@@ -8,8 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { avaUri, gAvaUri, authed } from './api';
 
 export const C = {
-  bg: '#000', list: '#0d0819', card: '#1c1c1e', line: 'rgba(255,255,255,.08)', text: '#fff', mute: '#8e8e96',
-  blue: '#2f8cff', violet: '#8b5cf6', red: '#ff5b5b', green: '#34c759', me: '#2b6fd6', th: '#1f1f22',
+  bg: '#000', list: '#0d0819', card: 'rgba(255,255,255,.06)', line: 'rgba(255,255,255,.08)', text: '#fff', mute: '#8e8e93',
+  blue: '#3e88f7', violet: '#8b5cf6', red: '#ff5b5b', green: '#34c759', me: '#2a6fe0', th: '#262629', sub: '#9c94bb', lav: '#b9b0d6', chat: '#0b1015',
 };
 export const GCOL = ['#e17076', '#f5a35b', '#9f86e8', '#6cc35a', '#4fc3c6', '#5aa7e6', '#ec74a8'];
 export const UCOL = ['#ff8e86', '#ffc076', '#b9a3ff', '#8ee27a', '#6fdde0', '#7cc2ff', '#ff92c2'];
@@ -51,13 +51,14 @@ export function Glass({ style, children, intensity = 40, round = 22, tint = 'dar
   return (
     <View style={[{ borderRadius: round, overflow: 'hidden' }, style]}>
       <BlurView intensity={isAndroid ? Math.round(intensity * 0.8) : intensity} tint={tint} experimentalBlurMethod={isAndroid ? 'dimezisBlurView' : undefined} style={StyleSheet.absoluteFill} />
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(40,40,46,.35)', borderRadius: round, borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(255,255,255,.16)' }]} />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(37,37,40,.62)', borderRadius: round, borderWidth: 1, borderColor: 'rgba(255,255,255,.09)' }]} />
+      <View style={{ position: 'absolute', left: round * 0.6, right: round * 0.6, top: 0, height: 1, backgroundColor: 'rgba(255,255,255,.12)' }} />
       {children}
     </View>
   );
 }
 
-export function GlassBtn({ icon, onPress, size = 44, color = '#fff', style, fill }) {
+export function GlassBtn({ icon, onPress, size = 48, color = '#fff', style, fill }) {
   return (
     <Press onPress={onPress} style={style} pop round={size / 2}>
       {fill ? (
@@ -184,3 +185,26 @@ export function seen(p, on) {
   return 'был(а) ' + (Date.now() - p.seen < 864e5 ? 'в ' + hm(p.seen) : when(p.seen));
 }
 export const pvNice = s => String(s || '').replace(/\s+/g, ' ');
+
+// фон чата с сайта: тёмный + узор из иконок (тот же SVG, прозрачность 5.5%)
+import { SvgXml } from 'react-native-svg';
+const WALL = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><pattern id="p" width="220" height="220" patternUnits="userSpaceOnUse"><g fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 30l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z"/><circle cx="160" cy="40" r="13"/><path d="M147 40c-6-6 32-6 26 0"/><path d="M90 90c0-8 12-8 12 0 0-8 12-8 12 0 0 9-12 15-12 15s-12-6-12-15z"/><path d="M30 150v-26l22-5v26"/><circle cx="25" cy="151" r="5"/><circle cx="47" cy="146" r="5"/><rect x="140" y="120" width="34" height="24" rx="5"/><path d="M140 126l17 10 17-10"/><path d="M95 175l18-14 5 22-8-6z"/><circle cx="190" cy="190" r="4"/><circle cx="70" cy="205" r="3"/><path d="M185 85a10 10 0 1 1-10-10 8 8 0 0 0 10 10z"/></g></pattern></defs><rect width="100%" height="100%" fill="url(#p)"/></svg>`;
+export function Wallpaper() {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: C.chat }]} />
+      <SvgXml xml={WALL} width="100%" height="100%" opacity={0.055} />
+    </View>
+  );
+}
+// фон списка/профиля с сайта: #0d0819 + фиолетовые свечения по углам
+import { LinearGradient as LG } from 'expo-linear-gradient';
+export function ListBg() {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0d0819' }]} />
+      <LG colors={['rgba(124,58,237,.28)', 'rgba(124,58,237,0)']} start={{ x: 0, y: 0 }} end={{ x: 0.55, y: 0.4 }} style={StyleSheet.absoluteFill} />
+      <LG colors={['rgba(168,85,247,0)', 'rgba(168,85,247,.18)']} start={{ x: 0.45, y: 0.6 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+    </View>
+  );
+}

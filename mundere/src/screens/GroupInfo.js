@@ -7,7 +7,8 @@ import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { S, useStore, loadPeers, cidOf, emit } from '../store';
 import { M, ms, BASE, gAvaUri } from '../api';
-import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, gN, seen, bubble, toast } from '../ui';
+import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, gN, seen, bubble, toast, Wallpaper } from '../ui';
+import { TopBar } from './Profile';
 
 const SUP = () => ['0', '1'].includes(String(M.me));
 
@@ -51,8 +52,8 @@ export default function GroupInfo({ route, navigation }) {
   );
   return (
     <View style={{ flex: 1, backgroundColor: '#000' }}>
-      <LinearGradient colors={['#0e1621', '#000']} style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 400 }} />
-      <ScrollView contentContainerStyle={{ paddingTop: ins.top + 60, paddingBottom: 60, paddingHorizontal: 16 }}>
+      <Wallpaper />
+      <ScrollView contentContainerStyle={{ paddingTop: ins.top + 76, paddingBottom: 60, paddingHorizontal: 16 }}>
         <View style={{ alignItems: 'center' }}>
           <Press pop round={55} amt={0.06} onPress={() => g.av && navigation.navigate('Viewer', { uri: gAvaUri(g), plain: 1 })}><GAvatar g={g} size={110} /></Press>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}><Text style={{ color: '#fff', fontSize: 25, fontWeight: '800' }}>{g.title}</Text><Vf on={g.vf} size={21} /></View>
@@ -94,10 +95,7 @@ export default function GroupInfo({ route, navigation }) {
           })}
         </Glass>
       </ScrollView>
-      <View style={{ position: 'absolute', top: ins.top + 4, left: 8, right: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
-        <GlassBtn icon="chevron-back" onPress={() => navigation.goBack()} />
-        {g.admin && <GlassBtn icon="create-outline" onPress={() => navigation.navigate('NewGroup', { type: g.type, edit: c })} />}
-      </View>
+      <TopBar title={ch ? 'Канал' : 'Группа'} onBack={() => navigation.goBack()} right={g.admin ? 'pencil' : null} onRight={() => navigation.navigate('NewGroup', { type: g.type, edit: c })} />
     </View>
   );
 }
