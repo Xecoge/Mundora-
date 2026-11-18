@@ -76,7 +76,7 @@ async function handle(req) {
     // код из Telegram-бота: запоминаем, чей это Telegram, — при регистрации он привяжется к аккаунту
     const rid = rand(9);
     if (tgAcc && !me) await jset('gp:' + rid, tgAcc, 30 * 86400);
-    return jsonC({ ok: true, days, renewed }, [setCookie(req, 'tempo_g', await signed('g:' + rid + ':' + days), 3650)]);
+    return jsonC({ ok: true, days, renewed }, [setCookie(req, 'tempo_g', await signed('g:' + rid + ':' + days), 3650)], 200, req);
   }
 
   if (a === 'register' || a === 'login' || a === 'forgot') {
@@ -146,7 +146,7 @@ async function handle(req) {
     await kv('DEL', 'p:' + email);
     const cs = [await createSession(req, email)];
     if (!(await gatePassed(req))) cs.push(setCookie(req, 'tempo_g', await signed('g:' + rand(9)), 3650));
-    return jsonC({ ok: true, admin: email === ADMIN() }, cs);
+    return jsonC({ ok: true, admin: email === ADMIN() }, cs, 200, req);
   }
 
   if (a === 'check') { // проверить код до ввода нового пароля
@@ -186,7 +186,7 @@ async function handle(req) {
       ...(u.tg && u.tg.id ? [['SET', 'tg:uid:' + u.tg.id, nw]] : []), ...(u.name ? [['SET', 'nm:' + u.name.toLowerCase(), nw]] : [])]);
     const sids = (await kv('SMEMBERS', 'us:' + old)) || [];
     if (sids.length) await kvMulti([...sids.map(x => ['DEL', 's:' + x]), ['DEL', 'us:' + old]]);
-    return jsonC({ ok: true, email: nw }, [await createSession(req, nw)]);
+    return jsonC({ ok: true, email: nw }, [await createSession(req, nw)], 200, req);
   }
 
   if (a === 'name') {
@@ -198,7 +198,7 @@ async function handle(req) {
   if (a === 'logout') {
     const s = await sessionFromCookie(req);
     if (s) await kvMulti([['DEL', 's:' + s.sid], ['SREM', 'us:' + s.email, s.sid]]);
-    return jsonC({ ok: true }, [clearCookie(req, 'tempo_s')]);
+    return jsonC({ ok: true }, [clearCookie(req, 'tempo_s')], 200, req);
   }
 
   if (a === 'me') {

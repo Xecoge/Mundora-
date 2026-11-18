@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "Mundere",
+    "slug": "mundere",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#1e123b"
+    },
+    "ios": {
+      "bundleIdentifier": "com.mundere.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Mundere отправляет выбранные тобой фото и видео в чаты",
+        "NSCameraUsageDescription": "Mundere снимает фото для чатов и аватарок",
+        "NSMicrophoneUsageDescription": "Mundere записывает голосовые сообщения"
+      }
+    },
+    "android": {
+      "package": "com.mundere.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive.png",
+        "backgroundColor": "#1e123b"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mundere отправляет выбранные тобой фото и видео в чаты",
+          "cameraPermission": "Mundere снимает фото для чатов и аватарок"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Mundere записывает голосовые сообщения"
+        }
+      ]
+    ]
+  }
+}
