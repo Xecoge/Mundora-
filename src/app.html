@@ -1305,6 +1305,15 @@ body.ms-open .tabs,body.ms-open .tab-all{display:none!important}
 .ms-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px;padding:calc(76px + env(safe-area-inset-top)) 10px 92px;position:relative;z-index:1}
 .ms-load{margin:auto;color:#a49dc0}
 .ms-day{position:sticky;top:4px;z-index:2;display:flex;justify-content:center;margin:10px 0 6px;pointer-events:none}.ms-day span{padding:4px 11px;border-radius:12px;font-size:12.5px;font-weight:600;background:rgba(28,28,30,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+/* пузырьковое появление для всех всплывающих меню мессенджера */
+@keyframes bubIn{0%{transform:scale(.14);opacity:0;filter:blur(8px);border-radius:60px}45%{opacity:1}100%{transform:none;opacity:1;filter:none}}
+.ms-vvmenu{background:rgba(40,40,46,.6)!important;-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);border:0!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45)!important;border-radius:26px!important;transform-origin:92% -20px;animation:bubIn .5s cubic-bezier(.2,1.3,.32,1) both!important}
+.ms-vvmenu>button{animation:bubItem .4s cubic-bezier(.2,1.2,.3,1) both}.ms-vvmenu>button:nth-child(2){animation-delay:.03s}.ms-vvmenu>button:nth-child(3){animation-delay:.06s}.ms-vvmenu>button:nth-child(4){animation-delay:.09s}.ms-vvmenu>button:nth-child(n+5){animation-delay:.12s}
+@keyframes bubItem{from{opacity:0;transform:translateY(-6px) scale(.96)}}
+/* жидкое стекло: кнопки «пружинят» при нажатии */
+.msgr button.lq,.msgr a.lq,.msgr .ib,.ms-vv button,.ms-ng button{transition:transform .45s cubic-bezier(.2,1.5,.35,1),background .2s,box-shadow .25s}
+.msgr button.lq:active,.msgr a.lq:active,.msgr .ib:active,.ms-vv button:active,.ms-ng .ib:active,.ms-giact>*:active,.ms-chbar button:active{transform:scale(.88);transition-duration:.12s;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 0 22px rgba(120,170,255,.25)}
+.ms-chbar button,.ms-giact>*{-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.1)}
 /* меню-пузырёк */
 .bub-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0);transition:background .3s}.bub-ov.on{background:rgba(0,0,0,.18)}
 .bub{position:fixed;z-index:9999;min-width:220px;max-width:min(300px,calc(100vw - 16px));padding:6px;border-radius:26px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
