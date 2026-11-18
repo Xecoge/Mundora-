@@ -29,6 +29,9 @@ jobs:
             npm install --no-audit --no-fund
             npx expo install --fix
             CI=1 npx expo prebuild -p android --no-install
+            npx expo-modules-autolinking resolve --platform android --json > /tmp/al.json || true
+            node -e "const j=require('/tmp/al.json');j.modules.forEach((m,i)=>console.log(i,m.packageName,m.packageVersion,JSON.stringify((m.projects||[]).map(p=>p.publication||null))))" || true
+            npm ls expo-modules-autolinking expo-modules-core expo || true
             chmod +x android/gradlew
             (cd android; ./gradlew assembleRelease --no-daemon -q -PreactNativeArchitectures=arm64-v8a,armeabi-v7a)
             if [ -n "$KP" ]; then
