@@ -12,6 +12,9 @@ import * as Haptics from 'expo-haptics';
 import { createAudioPlayer, setAudioModeAsync, useAudioRecorder, RecordingPresets, AudioModule } from 'expo-audio';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
+import * as MediaLibrary from 'expo-media-library';
+import { EDIT } from './PhotoEdit';
+import { PanResponder } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,6 +58,7 @@ export default function Chat({ route, navigation }) {
   }, [L, S.rx[c], S.ed[c], S.read[c], Object.keys(S.peers).length]);
 
   const typing = S.typing[c];
+  const pinI = S.pin[c], pinM = pinI != null && pinI >= 0 && L ? L.find(m => m.i === pinI && !m.d) : null;
   const status = G ? (typing && G.type !== 'channel' ? ((S.peers[typing] || {}).name || 'Кто-то') + ' печатает…' : gN(G)) : self ? '' : typing ? 'печатает…' : seen(p);
 
   function onType(v) {
@@ -62,8 +66,15 @@ export default function Chat({ route, navigation }) {
     const now = Date.now();
     if (v && now - lastTy.current > 3000 && !self && !(G && G.type === 'channel')) { lastTy.current = now; ms('typing', { c }).catch(() => {}); }
   }
+  const [editing, setEditing] = useState(null);
   async function send() {
     const x = txt.trim(); if (!x) return;
+    if (editing) {
+      const m = editing; setEditing(null); setTxt('');
+      S.ed[c] = { ...(S.ed[c] || {}), [m.i]: { x } }; emit();
+      try { await ms('edit', { c, i: m.i, x }); poke(); } catch (e) { toast(e.message, 1); }
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setTxt(''); const r = reply ? reply.i : null; setReply(null);
     try { await sendText(to, c, x, r); } catch (e) { toast(e.message, 1); }
@@ -90,7 +101,15 @@ export default function Chat({ route, navigation }) {
     if (!pr.granted) return toast('Разреши доступ к фото и видео в настройках', 1);
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images', 'videos'], allowsMultipleSelection: true, selectionLimit: 10, quality: 1, videoMaxDuration: 600 });
     if (res.canceled) return;
-    const cap = txt.trim(); setTxt('');
+    const cap = txt.trim();
+    // одно фото — открываем предпросмотр с редактором и подписью, как в Telegram
+    if (res.assets.length === 1 && res.assets[0].type !== 'video') {
+      const a = res.assets[0];
+      EDIT.done = r => sendFile({ uri: r.uri, b64: r.b64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.b64.length * 0.75), w: r.w, h: r.h }, r.cap);
+      setTxt('');
+      return navigation.navigate('PhotoEdit', { uri: a.uri, w: a.width, h: a.height, cap });
+    }
+    setTxt('');
     for (let k = 0; k < res.assets.length; k++) {
       const a = res.assets[k], cp = k === 0 ? cap : '';
       if (a.type === 'video') {
@@ -109,10 +128,9 @@ export default function Chat({ route, navigation }) {
     if (!pr.granted) return toast('Разреши доступ к камере', 1);
     const res = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
     if (res.canceled) return;
-    const a = res.assets[0], w = Math.min(a.width || 1600, 1600);
-    const r = await ImageManipulator.manipulateAsync(a.uri, [{ resize: { width: w } }], { compress: 0.82, format: ImageManipulator.SaveFormat.JPEG, base64: true });
-    const cap = txt.trim(); setTxt('');
-    await sendFile({ uri: r.uri, b64: r.base64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.base64.length * 0.75), w: r.width, h: r.height }, cap);
+    const a = res.assets[0], cap = txt.trim(); setTxt('');
+    EDIT.done = r => sendFile({ uri: r.uri, b64: r.b64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.b64.length * 0.75), w: r.w, h: r.h }, r.cap);
+    navigation.navigate('PhotoEdit', { uri: a.uri, w: a.width, h: a.height, cap });
   }
   async function pickFile() {
     const res = await DocumentPicker.getDocumentAsync({ multiple: true, copyToCacheDirectory: true });
@@ -252,6 +270,16 @@ export default function Chat({ route, navigation }) {
 
         {canW ? (
           <View style={{ paddingHorizontal: 8, paddingBottom: Math.max(ins.bottom, 8) + 2, paddingTop: 6 }}>
+            {editing && (
+              <Glass round={16} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, marginBottom: 6 }}>
+                <Ionicons name="pencil" size={18} color={C.blue} />
+                <View style={{ flex: 1, marginLeft: 10, borderLeftWidth: 2, borderLeftColor: C.blue, paddingLeft: 8 }}>
+                  <Text style={{ color: C.blue, fontWeight: '700', fontSize: 13 }}>Редактирование</Text>
+                  <Text numberOfLines={1} style={{ color: '#ddd', fontSize: 14 }}>{editing.x}</Text>
+                </View>
+                <Pressable onPress={() => { setEditing(null); setTxt(''); }} hitSlop={10}><Ionicons name="close" size={20} color={C.mute} /></Pressable>
+              </Glass>
+            )}
             {reply && (
               <Glass round={16} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, marginBottom: 6 }}>
                 <Ionicons name="arrow-undo" size={18} color={C.blue} />
@@ -315,7 +343,20 @@ export default function Chat({ route, navigation }) {
           <Text style={{ color: C.mute, marginTop: 8 }}>отпусти — отправить</Text>
         </View>
       )}
-      {menu && <MsgMenu c={c} G={G} menu={menu} canW={canW} onClose={() => setMenu(null)} onReply={m => setReply(m)} />}
+      {menu && <MsgMenu c={c} G={G} menu={menu} canW={canW} onClose={() => setMenu(null)} onReply={m => setReply(m)}
+        onEdit={m => { setReply(null); setEditing(m); const e = S.ed[c] && S.ed[c][m.i]; setTxt(e != null ? (typeof e === 'object' ? e.x : e) : m.x); }}
+        onForward={m => navigation.navigate('Forward', { c, i: m.i })} />}
+      {pinM && (
+        <View style={{ position: 'absolute', top: ins.top + 56, left: 8, right: 8 }}>
+          <Press pop round={16} amt={0.03} onPress={() => toast('Закреплено: ' + (pinM.x || 'вложение').slice(0, 40))}>
+            <Glass round={16} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 7 }}>
+              <View style={{ width: 2, alignSelf: 'stretch', backgroundColor: C.blue, borderRadius: 1, marginRight: 10 }} />
+              <View style={{ flex: 1 }}><Text style={{ color: C.blue, fontSize: 13, fontWeight: '700' }}>Закреплённое сообщение</Text><Text numberOfLines={1} style={{ color: '#fff', fontSize: 14 }}>{pinM.x || (pinM.fl ? (pinM.fl.vo ? 'Голосовое' : pinM.fl.rd ? 'Кружок' : (pinM.fl.ty || '').startsWith('image/') ? 'Фото' : pinM.fl.n) : '')}</Text></View>
+              <Ionicons name="pin" size={18} color={C.mute} />
+            </Glass>
+          </Press>
+        </View>
+      )}
     </View>
   );
 }
@@ -392,6 +433,14 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
   useEffect(() => { if (m.tmp) Animated.spring(pop, { toValue: 1, useNativeDriver: true, speed: 16, bounciness: 10 }).start(); }, []);
   const bg = mine ? C.me : C.th;
   const r = 18, sm = 6;
+  // свайп влево — ответить (как в Telegram): пузырь едет за пальцем, появляется стрелка
+  const sw = useRef(new Animated.Value(0)).current, fired = useRef(false);
+  const pr = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_, g) => g.dx < -12 && Math.abs(g.dx) > Math.abs(g.dy) * 2.2,
+    onPanResponderMove: (_, g) => { const v = Math.max(-90, Math.min(0, g.dx)); sw.setValue(v); if (v < -60 && !fired.current) { fired.current = true; Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {}); } },
+    onPanResponderRelease: () => { if (fired.current) onReply(); fired.current = false; Animated.spring(sw, { toValue: 0, useNativeDriver: true, bounciness: 10 }).start(); },
+    onPanResponderTerminate: () => { fired.current = false; Animated.spring(sw, { toValue: 0, useNativeDriver: true }).start(); },
+  })).current;
   const radius = mine
     ? { borderTopLeftRadius: r, borderBottomLeftRadius: r, borderTopRightRadius: first ? r : sm, borderBottomRightRadius: last ? r : sm }
     : { borderTopRightRadius: r, borderBottomRightRadius: r, borderTopLeftRadius: first ? r : sm, borderBottomLeftRadius: last ? r : sm };
@@ -404,7 +453,10 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
     </View>
   );
   return (
-    <Animated.View style={{ flexDirection: 'row', justifyContent: mine ? 'flex-end' : 'flex-start', marginTop: first ? 6 : 2, opacity: pop, transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }] }}>
+    <Animated.View {...pr.panHandlers} style={{ flexDirection: 'row', justifyContent: mine ? 'flex-end' : 'flex-start', marginTop: first ? 6 : 2, opacity: pop, transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }, { translateX: sw }] }}>
+      <Animated.View pointerEvents="none" style={{ position: 'absolute', right: -40, top: 0, bottom: 0, justifyContent: 'center', opacity: sw.interpolate({ inputRange: [-70, -20, 0], outputRange: [1, 0, 0] }), transform: [{ scale: sw.interpolate({ inputRange: [-70, -20, 0], outputRange: [1, 0.4, 0.4], extrapolate: 'clamp' }) }] }}>
+        <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255,255,255,.15)', alignItems: 'center', justifyContent: 'center' }}><Ionicons name="arrow-undo" size={16} color="#fff" /></View>
+      </Animated.View>
       {gs && <View style={{ width: 38, justifyContent: 'flex-end' }}>{last && <Pressable onPress={() => onUser(m.f)}><Avatar p={S.peers[m.f]} size={32} /></Pressable>}</View>}
       <Pressable onLongPress={e => onLong(m, e)} delayLongPress={280} onPress={fl && !fl.local && (isImg || (fl.ty || '').startsWith('video/') || fl.rd || (!fl.vo)) ? () => onImg(m) : undefined} style={{ maxWidth: MAXW }}>
         <View style={[{ backgroundColor: bg, overflow: 'hidden' }, radius, isImg ? { padding: 3 } : { paddingHorizontal: 11, paddingVertical: 7 }]}>
@@ -453,6 +505,19 @@ function Reacts({ rx, mine, c, i }) {
   );
 }
 
+// сохранить фото/видео в галерею телефона
+async function saveToGallery(fl) {
+  try {
+    const p = await MediaLibrary.requestPermissionsAsync(true);
+    if (!p.granted) return toast('Разреши доступ к галерее', 1);
+    toast('Сохраняю…');
+    const ext = (fl.n || '').includes('.') ? fl.n.split('.').pop() : (fl.ty || '').startsWith('video/') ? 'mp4' : 'jpg';
+    const dst = FileSystem.cacheDirectory + 'mundere_' + Date.now() + '.' + ext;
+    const r = await FileSystem.downloadAsync(fileUri(fl.id), dst, { headers: authed('').headers });
+    await MediaLibrary.saveToLibraryAsync(r.uri);
+    toast('Сохранено в галерею');
+  } catch (e) { toast('Не удалось сохранить', 1); }
+}
 // файл: скачиваем в кэш и открываем через «Поделиться/Открыть в…»
 async function openDoc(fl) {
   try {
@@ -483,6 +548,8 @@ function FileRow({ fl, mine }) {
 // Голосовое: проигрыватель создаётся только при нажатии — список остаётся лёгким
 function Voice({ m, mine }) {
   const [st, setSt] = useState({ play: false, pos: 0, dur: (m.fl.d || 0) });
+  const [rate, setRate] = useState(1);
+  const nextRate = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); tap(); try { pl.current && pl.current.setPlaybackRate(r); } catch (e) {} };
   const pl = useRef(null);
   useEffect(() => () => { try { pl.current && pl.current.remove(); } catch (e) {} }, []);
   function toggle() {
@@ -494,7 +561,7 @@ function Voice({ m, mine }) {
         setSt(o => ({ play: !!s.playing, pos: s.currentTime || 0, dur: s.duration || o.dur }));
         if (s.didJustFinish) { try { p.seekTo(0); } catch (e) {} setSt(o => ({ ...o, play: false, pos: 0 })); }
       });
-      pl.current = p; p.play(); setSt(o => ({ ...o, play: true })); return;
+      pl.current = p; try { p.setPlaybackRate(rate); } catch (e) {} p.play(); setSt(o => ({ ...o, play: true })); return;
     }
     if (st.play) pl.current.pause(); else pl.current.play();
   }
@@ -516,14 +583,17 @@ function Voice({ m, mine }) {
         <View style={{ flexDirection: 'row', alignItems: 'center', height: 22 }}>
           {bars.map((h, k) => <View key={k} style={{ width: 3, height: h, borderRadius: 2, marginRight: 2, backgroundColor: k / bars.length <= fr ? (mine ? '#fff' : C.blue) : mine ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.3)' }} />)}
         </View>
-        <Text style={{ color: mine ? '#cfe0ff' : C.mute, fontSize: 12, marginTop: 2 }}>{Math.floor(t / 60)}:{String(t % 60).padStart(2, '0')}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+          <Text style={{ color: mine ? '#cfe0ff' : C.mute, fontSize: 12 }}>{Math.floor(t / 60)}:{String(t % 60).padStart(2, '0')}</Text>
+          {(st.play || st.pos > 0) && <Press onPress={nextRate} pop round={9} amt={0.2} style={{ marginLeft: 8 }}><View style={{ backgroundColor: mine ? 'rgba(255,255,255,.25)' : 'rgba(47,140,255,.25)', borderRadius: 9, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>{rate}x</Text></View></Press>}
+        </View>
       </View>
     </View>
   );
 }
 
 // Меню сообщения: затемнение, реакции и пункты выплывают пузырьком от пальца
-function MsgMenu({ c, G, menu, canW, onClose, onReply }) {
+function MsgMenu({ c, G, menu, canW, onClose, onReply, onEdit, onForward }) {
   const a = useRef(new Animated.Value(0)).current;
   const { m } = menu, mine = String(m.f) === String(M.me);
   const { width: W, height: H } = Dimensions.get('window');
@@ -533,7 +603,10 @@ function MsgMenu({ c, G, menu, canW, onClose, onReply }) {
   const items = [
     ...(canW ? [{ t: 'Ответить', ic: 'arrow-undo-outline', fn: () => onReply(m) }] : []),
     ...(m.x ? [{ t: 'Копировать', ic: 'copy-outline', fn: () => { Clipboard.setStringAsync(m.x); toast('Скопировано'); } }] : []),
-    ...(mine && m.x && !m.fl ? [] : []),
+    ...(mine && m.x && !m.fwd ? [{ t: 'Изменить', ic: 'pencil-outline', fn: () => onEdit(m) }] : []),
+    { t: 'Переслать', ic: 'arrow-redo-outline', fn: () => onForward(m) },
+    ...(!G || G.admin ? [{ t: S.pin[c] === m.i ? 'Открепить' : 'Закрепить', ic: 'pin-outline', fn: async () => { try { await ms('pin', { c, i: S.pin[c] === m.i ? -1 : m.i }); S.pin[c] = S.pin[c] === m.i ? -1 : m.i; emit(); poke(); } catch (e) { toast(e.message, 1); } } }] : []),
+    ...(m.fl && !m.fl.vo && ((m.fl.ty || '').startsWith('image/') || (m.fl.ty || '').startsWith('video/')) ? [{ t: 'Сохранить в галерею', ic: 'download-outline', fn: () => saveToGallery(m.fl) }] : []),
     { t: 'Удалить у меня', ic: 'trash-outline', red: 1, fn: () => del(0) },
     ...(canAll ? [{ t: 'Удалить у всех', ic: 'trash', red: 1, fn: () => del(1) }] : []),
   ];

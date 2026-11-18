@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { loadSession, dropSession } from './api';
 import { start } from './store';
+import { initNotify, nav } from './notify';
 import { BubbleHost, ToastHost, C } from './ui';
 import Login from './screens/Login';
 import Home from './screens/Home';
@@ -15,6 +16,9 @@ import Profile from './screens/Profile';
 import GroupInfo from './screens/GroupInfo';
 import NewGroup from './screens/NewGroup';
 import Viewer from './screens/Viewer';
+import PhotoEdit from './screens/PhotoEdit';
+import Forward from './screens/Forward';
+import EditMe from './screens/EditMe';
 
 const Stack = createNativeStackNavigator();
 const theme = { ...DarkTheme, colors: { ...DarkTheme.colors, background: '#000', card: '#000', primary: C.blue } };
@@ -26,11 +30,11 @@ export default function App() {
     (async () => {
       const has = await loadSession();
       if (!has) return setSt('auth');
-      try { await start(); setSt('app'); }
+      try { await start(); setSt('app'); initNotify(); }
       catch (e) { if (e.status === 401 || e.status === 403) { await dropSession(); setSt('auth'); } else { setSt('app'); setTimeout(() => start().catch(() => {}), 3000); } }
     })();
   }, []);
-  const onLogin = async () => { await start(); setSt('app'); };
+  const onLogin = async () => { await start(); setSt('app'); initNotify(); };
   const onLogout = async () => { await dropSession(); setSt('auth'); };
 
   return (
@@ -41,7 +45,7 @@ export default function App() {
       ) : st === 'auth' ? (
         <Login onDone={onLogin} />
       ) : (
-        <NavigationContainer theme={theme}>
+        <NavigationContainer theme={theme} ref={nav}>
           <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right', contentStyle: { backgroundColor: '#000' }, gestureEnabled: true, fullScreenGestureEnabled: true }}>
             <Stack.Screen name="Home">{p => <Home {...p} onLogout={onLogout} />}</Stack.Screen>
             <Stack.Screen name="Chat" component={Chat} />
@@ -49,6 +53,9 @@ export default function App() {
             <Stack.Screen name="GroupInfo" component={GroupInfo} />
             <Stack.Screen name="NewGroup" component={NewGroup} options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }} />
             <Stack.Screen name="Viewer" component={Viewer} options={{ animation: 'fade', presentation: 'transparentModal' }} />
+            <Stack.Screen name="PhotoEdit" component={PhotoEdit} options={{ animation: 'fade_from_bottom', presentation: 'fullScreenModal' }} />
+            <Stack.Screen name="Forward" component={Forward} options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+            <Stack.Screen name="EditMe" component={EditMe} options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }} />
           </Stack.Navigator>
         </NavigationContainer>
       )}

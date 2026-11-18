@@ -63,3 +63,12 @@ jobs:
           files: out/Mundere.apk
           body: |
             **Mundere для Android:** скачай `Mundere.apk` и установи (разреши установку из этого источника).
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mundere-latest
+          name: Mundere (последняя версия)
+          make_latest: false
+          overwrite_files: true
+          files: out/Mundere.apk
+          body: |
+            Всегда последняя сборка Mundere для Android. Ссылка не меняется: releases/download/mundere-latest/Mundere.apk

@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { avaUri, gAvaUri } from './api';
+import { avaUri, gAvaUri, authed } from './api';
 
 export const C = {
   bg: '#000', list: '#0d0819', card: '#1c1c1e', line: 'rgba(255,255,255,.08)', text: '#fff', mute: '#8e8e96',
@@ -74,7 +74,7 @@ export function GlassBtn({ icon, onPress, size = 44, color = '#fff', style, fill
 }
 
 export function Avatar({ p, size = 48 }) {
-  return <Image source={{ uri: avaUri(p ? p.avatar : 'planet') }} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: '#222' }} cachePolicy="memory-disk" transition={150} />;
+  return <Image source={authed(avaUri(p ? p.avatar : 'planet'))} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: '#222' }} cachePolicy="memory-disk" transition={150} />;
 }
 export function GAvatar({ g, size = 48, src }) {
   const u = src || gAvaUri(g);

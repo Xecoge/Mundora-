@@ -2,6 +2,7 @@
 import { useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
 import { ms, msInit, M } from './api';
+import { notify } from './notify';
 
 export const S = {
   ready: false, chats: [], peers: {}, msgs: {}, read: {}, typing: {}, G: {}, rx: {}, ed: {}, pin: {},
@@ -26,7 +27,24 @@ export async function loadPeers(ids, force) {
   if (need.length) emit();
 }
 
+let appActive = true;
 function applyChats(chats) {
+  // новое входящее сообщение не в открытом чате (или приложение свёрнуто) — уведомление
+  if (S.chats.length) {
+    const old = new Map(S.chats.map(c => [c.c, c.n || 0]));
+    for (const c of chats) {
+      const was = old.get(c.c);
+      if (was == null ? c.n > 0 && c.u > 0 : c.n > was) {
+        if (String(c.f) === String(M.me) || !c.u) continue;
+        if (appActive && S.open === c.c) continue;
+        if (c.g && S.muted && S.muted[c.c]) continue;
+        const who = (S.peers[c.f] || {}).name || 'Новое сообщение';
+        const title = c.g ? c.g.title : who;
+        const body = (c.g && c.g.type !== 'channel' ? who + ': ' : '') + String(c.pv || '');
+        notify(title, body, c.g ? { c: c.c } : { c: c.c, peer: String(c.p) });
+      }
+    }
+  }
   S.chats = chats;
   for (const c of chats) if (c.g) S.G[c.c] = c.g;
   loadPeers(chats.flatMap(c => (c.g ? [c.f] : [c.p])).filter(x => x != null));
@@ -39,7 +57,7 @@ export async function start() {
 }
 
 let timer = null, busy = false, active = true;
-AppState.addEventListener('change', s => { active = s === 'active'; if (active) poke(); });
+AppState.addEventListener('change', s => { active = s === 'active'; appActive = active; if (active) poke(); });
 export function poke() { clearTimeout(timer); timer = setTimeout(tick, 30); }
 function loop() { clearTimeout(timer); timer = setTimeout(tick, active ? 1100 : 8000); }
 

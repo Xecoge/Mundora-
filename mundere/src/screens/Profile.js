@@ -30,7 +30,7 @@ export default function Profile({ route, navigation }) {
     <LinearGradient colors={['#1b0d3d', '#0d0819', '#0a0614']} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingTop: ins.top + 60, paddingBottom: 60, paddingHorizontal: 16 }}>
         <View style={{ alignItems: 'center' }}>
-          <Press pop round={60} amt={0.06} onPress={() => p && navigation.navigate('Viewer', { uri: avaUri(p.avatar), plain: 1 })}><Avatar p={p} size={120} /></Press>
+          <Press pop round={60} amt={0.06} onPress={() => p && navigation.navigate('Viewer', { uri: avaUri(p.avatar) })}><Avatar p={p} size={120} /></Press>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}><Text style={{ color: '#fff', fontSize: 26, fontWeight: '800' }}>{p ? p.name : '…'}</Text><Vf on={p && p.verified} size={22} /></View>
           <Text style={{ color: (on && on.on) ? '#b9a3ff' : C.mute, fontSize: 15, marginTop: 4 }}>{me ? 'это вы' : seen(p, on && on.on)}</Text>
         </View>

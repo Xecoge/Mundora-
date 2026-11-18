@@ -170,6 +170,7 @@ function MeTab({ head, navigation, onLogout }) {
         <Text style={{ color: C.mute, fontSize: 15, marginTop: 4 }}>ID {M.me}</Text>
       </View>
       <Glass round={20} style={{ marginHorizontal: 16, marginTop: 26 }}>
+        <Row ic="create-outline" t="Изменить профиль" s="имя, аватарка, о себе" onPress={() => navigation.navigate('EditMe')} />
         <Row ic="person-outline" t="Мой профиль" onPress={() => navigation.navigate('Profile', { id: String(M.me) })} />
         <Row ic="bookmark-outline" t="Избранное" s="сообщения себе" onPress={() => navigation.navigate('Chat', { c: cidOf(M.me), peer: String(M.me) })} />
         <Row ic="log-out-outline" t="Выйти из аккаунта" red onPress={async () => { try { await auth('logout'); } catch (e) {} onLogout(); }} />

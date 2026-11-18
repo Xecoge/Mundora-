@@ -1346,6 +1346,10 @@ html.and .ms-ctx.done .ms-ctxa,html.and .ms-ctx.done .ms-ctxr,html.and .bub.done
 .ms-ng .ms-grp{margin-bottom:16px}.ms-erow{width:100%;border:0;background:none;color:#fff;font:inherit;font-size:16px;text-align:left;gap:12px}.ms-erow em{margin-left:auto;font-style:normal;color:#8e8e96}
 .ms-eic{width:30px;height:30px;border-radius:8px;background:var(--c);display:grid;place-items:center;flex:none}.ms-eic .i{width:18px;height:18px;color:#fff}
 .ms-ng .ms-grp.lq{background:#1c1c1e!important}
+.mu-get{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(90% 50% at 50% 0%,rgba(124,58,237,.35),transparent 70%),#0d0819}
+.mu-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:28px 22px;border-radius:28px;max-width:380px;width:100%}.mu-card img{width:96px;height:96px}.mu-card h2{margin:0;font-size:30px}.mu-card p{color:#cfc8e6;margin:0;line-height:1.45}
+.mu-btn{display:flex;align-items:center;justify-content:center;width:100%;height:52px;border-radius:26px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-weight:700;font-size:17px;text-decoration:none;margin-top:8px;transition:transform .45s cubic-bezier(.2,1.5,.35,1)}.mu-btn:active{transform:scale(1.06,1.02)}
+.mu-card small{color:#8f88ab}.mu-web{border:0;background:none;color:#b9a3ff;font:inherit;font-size:14px;padding:6px}
 /* меню-пузырёк */
 .bub-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0);transition:background .3s}.bub-ov.on{background:rgba(0,0,0,.18)}
 .bub{position:fixed;z-index:9999;min-width:220px;max-width:min(300px,calc(100vw - 16px));padding:6px;border-radius:26px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
@@ -3022,6 +3026,8 @@ function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&
   const m=$('#msgr');if(m){m.dataset.pane=MS.pane;m.dataset.own=own?'1':''}msBadge()}
 async function msShow(r){const m=msShell();const first=!MS.on;MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');if(first){m.classList.add('enter');setTimeout(()=>m.classList.remove('enter'),350);const pb=$('#view #pfBox');if(pb)pb.remove()}
   msVV();
+  // Android: мессенджер теперь в отдельном приложении Mundere (та же база, всё синхронизируется). iPhone и ПК — остаются здесь.
+  if(/Android/i.test(navigator.userAgent)&&!sessionStorage.getItem('msWeb')){m.innerHTML=`<div class="mu-get"><div class="mu-card lq"><img src="/img/planet.webp" alt=""><h2>Mundere</h2><p>Мессенджер Mundora для Android теперь отдельное приложение: быстрее, плавнее, с кружками, голосовыми и уведомлениями. Тот же аккаунт, все чаты, группы и каналы на месте.</p><a class="mu-btn" href="https://github.com/Xecoge/Mundora-/releases/download/mundere-latest/Mundere.apk">Скачать Mundere</a><small>После загрузки открой файл и разреши установку из этого источника</small><button class="mu-web" data-act="ms-web">Открыть в браузере всё равно</button><button class="mu-web" data-act="ms-exit">На сайт Mundora</button></div></div>`;return}
   try{await msInit()}catch(e){$('#msSide').innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`;return}
   let x;
   if((x=r.match(/^msg-(g\d+)$/))){const c=x[1];MS.peer=c;MS.c=c;MS.prof=null;MS.pane='chat';if(!msGr(c)){try{const j=await msApi('ginfo',null,'&c='+c);MS.G[c]=j.g}catch(e){toast(e.message,'x');location.hash='#msg';return}}msDrawSide();msOpenChat()}
@@ -4035,6 +4041,7 @@ function msGEdit(c){const g=msGr(c)||{},ch=g.type==='channel',link=g.inv?locatio
   requestAnimationFrame(()=>el.classList.add('on'))}
 
 const MS_ACT={
+  'ms-web'(){sessionStorage.setItem('msWeb','1');const m=$('#msgr');if(m)m.remove();MS.on=false;msShow(location.hash.slice(1)||'msg')},
   'ms-go'(el){location.hash=el.dataset.h},
   'ms-back'(){if(history.length>1&&MS.backOk)history.back();else location.hash=MS.tab==='contacts'?'#msgc':'#msg'},
   'ms-exit'(){location.hash='#home'},
