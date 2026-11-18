@@ -1335,6 +1335,17 @@ html.and .ms-ctx.done .ms-ctxa,html.and .ms-ctx.done .ms-ctxr,html.and .bub.done
 .ms-ngava>span{display:block;border-radius:50%;transition:transform .45s cubic-bezier(.2,1.5,.35,1)}.ms-ngava:active>span{transform:scale(.92)}.ms-ngava img.ms-ava{width:96px;height:96px}
 .ms-avcam{--gc:#1d3350!important;background:#16263b!important;color:#3e88f7}.ms-avcam svg{width:42px;height:42px}
 .ms-gihava{border:0;background:none;padding:0;border-radius:50%;cursor:pointer}img.ms-ava.xl{width:96px;height:96px}
+.av-view{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0);display:grid;place-items:center;transition:background .3s;touch-action:none}
+.av-view.on{background:#000}.av-view img{width:min(92vw,520px);aspect-ratio:1;object-fit:cover;border-radius:50%;transform:scale(.3);opacity:0;transition:transform .45s cubic-bezier(.2,1.2,.3,1),opacity .2s,border-radius .4s}
+.av-view.on img{transform:none;opacity:1;border-radius:0}.av-view.out{background:rgba(0,0,0,0)}.av-view.out img{transform:scale(.4);opacity:0;border-radius:50%}
+.av-x{position:absolute;left:12px;top:calc(12px + env(safe-area-inset-top));width:44px;height:44px;border-radius:50%;z-index:2}
+.ms-gihero h2{cursor:pointer}.ms-sys a{color:inherit;font-weight:700;text-decoration:none}
+.ms-pch{display:flex;align-items:center;gap:12px;padding:12px 14px;text-decoration:none;color:inherit}.ms-pch .ms-ava{width:56px;height:56px}.ms-pch div{flex:1;min-width:0}.ms-pch b{display:block;font-size:16px}.ms-pch small{display:block;color:#9a9aa2;font-size:13px}.ms-pch p{margin:4px 0 0;font-size:14px;color:#d5d5dc;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ms-row>span>small{display:block;font-size:12.5px;color:#9a9aa2;font-weight:500;margin-top:1px}.ms-gihero h2 .ms-vf,.ms-it b .ms-vf,.ms-cht b .ms-vf,.ms-pch b .ms-vf{margin-left:5px}
+.ms-eok{width:44px;height:44px;border-radius:50%;border:0;background:#2f8cff;color:#fff;display:grid;place-items:center;flex:none;transition:transform .45s cubic-bezier(.2,1.5,.35,1)}.ms-eok:active{transform:scale(.88)}.ms-eok .i{width:24px;height:24px}
+.ms-ng .ms-grp{margin-bottom:16px}.ms-erow{width:100%;border:0;background:none;color:#fff;font:inherit;font-size:16px;text-align:left;gap:12px}.ms-erow em{margin-left:auto;font-style:normal;color:#8e8e96}
+.ms-eic{width:30px;height:30px;border-radius:8px;background:var(--c);display:grid;place-items:center;flex:none}.ms-eic .i{width:18px;height:18px;color:#fff}
+.ms-ng .ms-grp.lq{background:#1c1c1e!important}
 /* меню-пузырёк */
 .bub-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0);transition:background .3s}.bub-ov.on{background:rgba(0,0,0,.18)}
 .bub{position:fixed;z-index:9999;min-width:220px;max-width:min(300px,calc(100vw - 16px));padding:6px;border-radius:26px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
@@ -1929,7 +1940,7 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></symbol>
 <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
-<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.6"/><path d="M2.8 20a6.3 6.3 0 0 1 12.4 0"/><path d="M15.5 4.6a3.4 3.4 0 0 1 0 6.6M17.6 14.2a6 6 0 0 1 3.6 5.8"/></symbol><symbol id="i-mega" viewBox="0 0 24 24"><path d="M3.5 10v4a1.5 1.5 0 0 0 1.5 1.5h2.5L14 19.5v-15L7.5 8.5H5A1.5 1.5 0 0 0 3.5 10z"/><path d="M8 15.5l1.3 4.2M17.5 9a4 4 0 0 1 0 6M20 6.5a7.5 7.5 0 0 1 0 11"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></symbol><symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16.5L5.5 12 10 7.5M5.5 12H15"/></symbol><symbol id="i-uadd" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.8"/><path d="M3 20a7 7 0 0 1 12.5-4.3M18.5 14v6M15.5 17h6"/></symbol><symbol id="i-share2" viewBox="0 0 24 24"><path d="M12 15V3.8M7.8 7.8L12 3.6l4.2 4.2"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
+<symbol id="i-cam2" viewBox="0 0 24 24"><path d="M9.2 4.5h5.6l1.4 2H19a2.5 2.5 0 0 1 2.5 2.5v8.5A2.5 2.5 0 0 1 19 20H5a2.5 2.5 0 0 1-2.5-2.5V9A2.5 2.5 0 0 1 5 6.5h2.8z"/><circle cx="12" cy="13" r="3.6"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.6"/><path d="M2.8 20a6.3 6.3 0 0 1 12.4 0"/><path d="M15.5 4.6a3.4 3.4 0 0 1 0 6.6M17.6 14.2a6 6 0 0 1 3.6 5.8"/></symbol><symbol id="i-mega" viewBox="0 0 24 24"><path d="M3.5 10v4a1.5 1.5 0 0 0 1.5 1.5h2.5L14 19.5v-15L7.5 8.5H5A1.5 1.5 0 0 0 3.5 10z"/><path d="M8 15.5l1.3 4.2M17.5 9a4 4 0 0 1 0 6M20 6.5a7.5 7.5 0 0 1 0 11"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></symbol><symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16.5L5.5 12 10 7.5M5.5 12H15"/></symbol><symbol id="i-uadd" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.8"/><path d="M3 20a7 7 0 0 1 12.5-4.3M18.5 14v6M15.5 17h6"/></symbol><symbol id="i-share2" viewBox="0 0 24 24"><path d="M12 15V3.8M7.8 7.8L12 3.6l4.2 4.2"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></symbol>
 <symbol id="i-loader" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/></symbol>
 <symbol id="i-headph" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3.5" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16" y="14" width="4.5" height="6.5" rx="1.6"/></symbol>
@@ -2984,6 +2995,8 @@ const msGAva=(g,cls='')=>{g=g||{};if(g.src||g.av)return `<img class="ms-ava ${cl
 const msGN=(g,n)=>{n=n??(g&&g.n)??0;return g&&g.type==='channel'?n+' '+plural(n,'подписчик','подписчика','подписчиков'):n+' '+plural(n,'участник','участника','участников')};
 const msUName=id=>String(id)===String(MS.me)?'Вы':esc((MS.peers[id]||{}).name||'ID '+id);
 function msGStat(){const g=msGr(MS.c);if(MS.typing&&g&&g.type!=='channel')return `<span class="ms-typ">${msUName(MS.typing)} печатает<i></i><i></i><i></i></span>`;return g?msGN(g):''}
+const msSUP=()=>['0','1'].includes(String(MS.me));
+const msGVf=g=>g&&g.vf?`<span class="ms-vf">${ico('check','s')}</span>`:'';
 const msCanW=()=>{if(!msIsG(MS.c))return true;const g=msGr(MS.c);return !g||g.type!=='channel'||g.admin};
 const fsz=n=>n>1048576?(n/1048576).toFixed(1).replace('.',',')+' МБ':n>1024?Math.round(n/1024)+' КБ':n+' Б';
 const fdur=s=>{s=Math.max(0,Math.round(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -3031,7 +3044,7 @@ function msListHTML(){const q=MS.q.trim().toLowerCase();
   const L=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
   if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
   return L.map(c=>{if(c.g){const g=c.g;MS.G[c.c]=g;const mine=String(c.f)===String(MS.me),rd=mine&&c.n&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,who=mine?'Вы':(MS.peers[c.f]||{}).name;
-      return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.c}"><span class="ms-avw">${msGAva(g)}</span><div class="ms-itx"><div class="ms-r1"><b>${g.type==='channel'?`<i class="ms-gic">${ico('mega','s')}</i>`:`<i class="ms-gic">${ico('users','s')}</i>`}${esc(g.title)}</b><span class="ms-tm">${mine&&g.type!=='channel'?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
+      return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.c}"><span class="ms-avw">${msGAva(g)}</span><div class="ms-itx"><div class="ms-r1"><b>${g.type==='channel'?`<i class="ms-gic">${ico('mega','s')}</i>`:`<i class="ms-gic">${ico('users','s')}</i>`}${esc(g.title)}${msGVf(g)}</b><span class="ms-tm">${mine&&g.type!=='channel'?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
       <div class="ms-r2"><span>${g.type!=='channel'&&who&&c.n>1?`<em class="ms-pvw">${esc(who)}: </em>`:''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:''}</div></div></a>`}
     const p=MS.peers[c.p],mine=String(c.f)===String(MS.me),rd=mine&&c.n&&String(c.p)!==String(MS.me)&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,on=MS.on2[c.p]&&MS.on2[c.p].on;
     return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
@@ -3048,9 +3061,11 @@ async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;bo
 /* ---------- профиль прямо в мессенджере (тот же, что на сайте) ---------- */
 async function msDrawProf(){const box=$('#msMain');if(!box)return;const id=MS.prof,own=String(id)===String(MS.me);
   box.innerHTML=`<header class="ms-ch ms-pfh ${own?'own':'lq'}">${own?'<span style="width:40px"></span>':`<button class="ib" data-act="ms-back">${ico('left')}</button>`}<div class="ms-cht"><b>${own?'':'Профиль'}</b></div>${own?`<button class="ib lq ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button>`:`<a class="ib" href="#msg-${id}" title="Написать">${ico('chat')}</a>`}</header>
-    <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id]):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div>${own?msOptsHTML():''}</div>`;
+    <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id]):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div><div id="msPch"></div>${own?msOptsHTML():''}</div>`;
+  msPchLoad(id,own);
   try{const j=await peopleApi('id='+id);PEOPLE.cache[id]=j.profile;if(MS.prof===id){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(j.profile)}}catch(e){const b=$('#msgr #pfBox');if(b)b.innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`}}
 function msOptsHTML(){return `<div class="h3">${ico('chat')}Мессенджер</div><div class="ms-grp lq">
+    <button class="ms-row" data-act="ms-pchpick">${ico('mega')}<span>Канал в профиле<small id="msPchName">не выбран</small></span>${ico('chev','s r')}</button>
     <label class="ms-row">${ico('vol')}<span>Звук новых сообщений</span><input type="checkbox" data-ms-opt="snd" ${LS.get('msSnd',true)?'checked':''}></label>
     <label class="ms-row ms-pc">${ico('send')}<span>Отправка по Enter</span><input type="checkbox" data-ms-opt="enter" ${LS.get('msEnter',true)?'checked':''}></label>
     <div class="ms-row ms-info">${ico('lock')}<span><b>Шифрование</b><small>Сообщения, фото, видео, голосовые и файлы хранятся зашифрованными (AES-256-GCM, у каждого чата свой ключ) и передаются только по HTTPS. Файлы видят только участники чата.</small></span></div>
@@ -3069,7 +3084,7 @@ function msDrawMain(){const box=$('#msMain');if(!box)return;
   if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
   const p=MS.peers[MS.peer],G=msIsG(MS.c)?msGr(MS.c):null,hl=G?'#msgi-'+MS.c:'#msgp-'+MS.peer;
   box.innerHTML=`<header class="ms-ch"><button class="ib ms-back lq" data-act="ms-back">${ico('left')}<b class="ms-badge" hidden></b></button>
-      <a class="ms-cht lq" href="${hl}"><b>${G?esc(G.title):String(MS.peer)===String(MS.me)?'Избранное':msName(p)}</b><small id="msStat">${msStatus(p)}</small></a>
+      <a class="ms-cht lq" href="${hl}"><b>${G?esc(G.title)+msGVf(G):String(MS.peer)===String(MS.me)?'Избранное':msName(p)}</b><small id="msStat">${msStatus(p)}</small></a>
       <a class="ms-chava" href="${hl}">${G?msGAva(G,'sm'):msAva(p,'sm')}</a></header>
     <div class="ms-msgs" id="msMsgs"><div class="ms-load">${ico('loader','s ldg')}</div></div>
     <div class="ms-emo" id="msEmo" hidden></div>
@@ -3124,7 +3139,7 @@ function msPaintMsgs0(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;c
   if(!L.some(m=>!m.d)&&!msIsG(c)){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
   let h='',day='';const LV=L.filter(m=>!m.d);LV.forEach((m,k)=>{const L=LV;const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=m.sys?msSysHTML(m):msMsgHTML(m,L[k+1]&&L[k+1].sys?null:L[k+1],L[k-1])});
   ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync();msVidObserve();msDownBtn()}
-function msSysHTML(m){const g=msGr(MS.c)||{},ch=g.type==='channel',who=msUName(m.f),us=(m.u||[]).map(msUName).join(', ');
+function msSysHTML(m){const g=msGr(MS.c)||{},ch=g.type==='channel',L=id=>`<a href="#msgp-${id}">${msUName(id)}</a>`,who=L(m.f),us=(m.u||[]).map(L).join(', ');
   const t=m.sys==='new'?(m.st==='channel'?`Канал «${esc(g.title||'')}» создан`:`${who} ${String(m.f)===String(MS.me)?'создали':'создал(а)'} группу «${esc(g.title||'')}»`):m.sys==='add'?`${who} ${String(m.f)===String(MS.me)?'добавили':'добавил(а)'} ${us}`:m.sys==='kick'?`${who} ${String(m.f)===String(MS.me)?'удалили':'удалил(а)'} ${us}`:m.sys==='left'?`${who} ${String(m.f)===String(MS.me)?'покинули':'покинул(а)'} группу`:m.sys==='join'?`${who} ${String(m.f)===String(MS.me)?(ch?'подписались':'вступили в группу по ссылке'):(ch?'подписался(ась)':'вступил(а) в группу по ссылке')}`:'';
   return t?`<div class="ms-sys" data-si="${m.i}"><span>${t}</span></div>`:''}
 function msAppend(ms){const ml=$('#msMsgs');if(!ml)return;const stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<160;msPaintMsgs();
@@ -3562,7 +3577,7 @@ async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
 let msBeepAC=null;function msBeep(){try{msBeepAC=msBeepAC||new AudioContext();const o=msBeepAC.createOscillator(),g=msBeepAC.createGain();o.type='sine';o.frequency.setValueAtTime(880,msBeepAC.currentTime);o.frequency.exponentialRampToValueAtTime(1320,msBeepAC.currentTime+.08);g.gain.setValueAtTime(.0001,msBeepAC.currentTime);g.gain.exponentialRampToValueAtTime(.12,msBeepAC.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,msBeepAC.currentTime+.25);o.connect(g).connect(msBeepAC.destination);o.start();o.stop(msBeepAC.currentTime+.26)}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){MS.n=0;msLoop();if(MS.on)msMarkRead()}});
 addEventListener('pagehide',()=>{try{if(MS.tk)navigator.sendBeacon('/api/msg?a=off&tk='+encodeURIComponent(MS.tk))}catch(e){}});
-document.addEventListener('change',e=>{const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked)});
+document.addEventListener('change',async e=>{const gv=e.target.dataset&&e.target.dataset.msGvf;if(gv){const on=e.target.checked;try{const j=await msApi('gverify',{c:gv,on:on?1:0});MS.G[gv]=j.g;MS.v='';toast(on?'Галочка выдана':'Галочка снята','check');msGInfo(gv)}catch(x){toast(x.message,'x');e.target.checked=!on}return}const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked)});
 
 /* ---------- как в Telegram для iOS 26: реакции, ответы свайпом, правка, закреп, одноразовые, обрезка голосовых, «пыль» при удалении ---------- */
 const RX_SET=['❤️','👍','🔥','😂','😮','😢','👎','🎉','🙏','💯','🤝','😍'];
@@ -3937,9 +3952,18 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&BMENU)bubClose()});
 
 /* ---------- группы и каналы: создание ---------- */
 const GCAM='<svg class="i" viewBox="0 0 24 24" fill="currentColor"><path d="M9.2 4.5h5.6l1.4 2H19a2.5 2.5 0 0 1 2.5 2.5v8.5A2.5 2.5 0 0 1 19 20H5a2.5 2.5 0 0 1-2.5-2.5V9A2.5 2.5 0 0 1 5 6.5h2.8z"/><circle cx="12" cy="13" r="3.6" fill="#16263b"/></svg>';
+// аватарка на весь экран: тянешь вниз — закрывается, как в Telegram
+function avView(src){const ov=document.createElement('div');ov.className='av-view';ov.innerHTML=`<button class="ib lq av-x" aria-label="Закрыть">${ico('x')}</button><img src="${src}" alt="">`;document.body.append(ov);const im=ov.querySelector('img');
+  requestAnimationFrame(()=>ov.classList.add('on'));const close=()=>{ov.classList.remove('on');ov.classList.add('out');setTimeout(()=>ov.remove(),300)};
+  ov.querySelector('.av-x').onclick=close;let y0=null,dy=0;ov.addEventListener('pointerdown',e=>{if(e.target.closest('.av-x'))return;y0=e.clientY;dy=0;im.style.transition='none'});
+  ov.addEventListener('pointermove',e=>{if(y0==null)return;dy=e.clientY-y0;im.style.transform=`translateY(${dy}px) scale(${1-Math.min(.25,Math.abs(dy)/1600)})`;ov.style.background=`rgba(0,0,0,${Math.max(.2,1-Math.abs(dy)/500)})`});
+  const up=()=>{if(y0==null)return;y0=null;im.style.transition='';if(Math.abs(dy)>110)return close();if(Math.abs(dy)<6)return close();im.style.transform='';ov.style.background=''};ov.addEventListener('pointerup',up);ov.addEventListener('pointercancel',up)}
+// канал в профиле, как в Telegram: карточка с аватаркой, подписчиками и последним постом
+async function msPchLoad(id,own){try{const j=await msApi('pch',null,'&u='+id);if(MS.prof!==id)return;const b=$('#msPch'),ch=j.ch;MS.pch=ch;const n=$('#msPchName');if(n)n.textContent=ch?ch.title:'не выбран';if(!b)return;
+  b.innerHTML=ch?`<div class="h3">${ico('mega')}Канал</div><div class="ms-grp lq"><a class="ms-pch" href="#${ch.member?'msg-'+ch.id:'msgj-'+ch.id+'-'+ch.inv}">${msGAva(ch)}<div><b>${esc(ch.title)}${msGVf(ch)}</b><small>${msGN(ch)}${ch.t?' · '+msWhen(ch.t):''}</small>${ch.pv?`<p>${esc(msPvNice(ch.pv))}</p>`:''}</div>${ico('chev','s r')}</a></div>`:''}catch(e){}}
 const NG={};
 // выбор аватарки: квадрат 320×320 из центра, JPEG
-function gAvaPick(cb){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const bm=await createImageBitmap(f);const s=Math.min(bm.width,bm.height),c=document.createElement('canvas');c.width=c.height=320;c.getContext('2d').drawImage(bm,(bm.width-s)/2,(bm.height-s)/2,s,s,0,0,320,320);cb(c.toDataURL('image/jpeg',.84))}catch(e){toast('Не удалось открыть фото','x')}};i.click()}
+function gAvaPick(cb,cam){const i=document.createElement('input');i.type='file';i.accept='image/*';if(cam)i.setAttribute('capture','user');i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const bm=await createImageBitmap(f);const s=Math.min(bm.width,bm.height),c=document.createElement('canvas');c.width=c.height=320;c.getContext('2d').drawImage(bm,(bm.width-s)/2,(bm.height-s)/2,s,s,0,0,320,320);cb(c.toDataURL('image/jpeg',.84))}catch(e){toast('Не удалось открыть фото','x')}};i.click()}
 function msNewMenu(btn){bubMenu(btn,[{t:'Новая группа',ic:'users',fn:()=>msNG('group')},{t:'Новый канал',ic:'mega',fn:()=>msNG('channel')},'-',{t:'Найти человека',ic:'search',fn:()=>{const q=$('#msQ');if(q){q.focus();q.placeholder='Ник или ID человека'}}}])}
 function msNG(type,add){Object.assign(NG,{ava:'',type,add:add||null,step:type==='channel'&&!add?'info':'pick',sel:new Map(),title:'',about:'',q:'',found:[]});
   let el=$('#msNG');if(!el){el=document.createElement('div');el.id='msNG';el.className='ms-ng';($('#msgr')||document.body).append(el)}
@@ -3980,7 +4004,7 @@ async function msGInfo(c){const box=$('#msMain');if(!box)return;const g0=msGr(c)
   const draw=(g,mem,adm)=>{if(MS.c!==c||MS.pane!=='ginfo')return;const ch=g.type==='channel',own=String(g.owner)===String(MS.me),link=g.inv?location.origin+'/#msgj-'+c+'-'+g.inv:'';
     const L=(mem||[]).map(String).sort((a,b)=>(b===String(g.owner))-(a===String(g.owner))||(adm||[]).map(String).includes(b)-(adm||[]).map(String).includes(a));
     box.innerHTML=`<header class="ms-ch ms-pfh lq"><button class="ib" data-act="ms-gi-back">${ico('left')}</button><div class="ms-cht"><b>${ch?'Канал':'Группа'}</b></div>${g.admin?`<button class="ib" data-act="ms-gedit" data-c="${c}" title="Изменить">${ico('edit')}</button>`:'<span style="width:40px"></span>'}</header>
-    <div class="ms-pfs ms-gis"><div class="ms-gihero">${g.admin?`<button type="button" class="ms-gihava" data-act="ms-gedit" data-c="${c}">${msGAva(g,'xl')}</button>`:msGAva(g,'xl')}<h2>${esc(g.title)}</h2><span>${msGN(g)}</span></div>
+    <div class="ms-pfs ms-gis"><div class="ms-gihero"><button type="button" class="ms-gihava" data-act="ms-gavview" data-c="${c}">${msGAva(g,'xl')}</button><h2 data-act="ms-gavview" data-c="${c}">${esc(g.title)}${msGVf(g)}</h2><span>${msGN(g)}</span></div>
       <div class="ms-giact"><a class="lq" href="#msg-${c}">${ico('chat')}<span>Чат</span></a><button class="lq" data-act="ms-gmute" data-c="${c}">${ico(LS.get('msMute_'+c,false)?'vol':'bell')}<span>${LS.get('msMute_'+c,false)?'Вкл. звук':'Без звука'}</span></button>${link?`<button class="lq" data-act="ms-ginv" data-l="${esc(link)}">${ico('share2')}<span>Пригласить</span></button>`:''}<button class="lq red" data-act="ms-gleave" data-c="${c}">${ico('out')}<span>Выйти</span></button></div>
       ${g.about?`<div class="ms-grp lq"><div class="ms-row ms-info"><span><small>описание</small><b class="ms-gab">${esc(g.about)}</b></span></div></div>`:''}
       ${link?`<div class="ms-grp lq"><button class="ms-row" data-act="ms-ginv" data-l="${esc(link)}">${ico('link')}<span><small>ссылка-приглашение</small><b class="ms-glink">${esc(link.replace(/^https?:\/\//,''))}</b></span>${ico('copy','s r')}</button></div>`:''}
@@ -3988,7 +4012,7 @@ async function msGInfo(c){const box=$('#msMain');if(!box)return;const g0=msGr(c)
       <div class="ms-grp lq">${!ch||g.admin?`<button class="ms-row ms-gadd" data-act="ms-gadd" data-c="${c}">${ico('uadd')}<span>${ch?'Добавить подписчиков':'Добавить участников'}</span></button>`:''}
         ${mem?L.map(u=>{const p=MS.peers[u],o=MS.on2[u],role=u===String(g.owner)?'владелец':(adm||[]).map(String).includes(u)?'админ':'';
           return `<button class="ms-it ms-gm" data-act="ms-gmem" data-c="${c}" data-u="${u}">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${u===String(MS.me)?'Вы':msName(p)}</b>${role?`<span class="ms-role">${role}</span>`:''}</div><div class="ms-r2"><span>${o&&o.on?'<span class="ms-on">в сети</span>':p&&p.seen?'был(а) '+msWhen(p.seen):'ID '+u}</span></div></div></button>`}).join(''):`<div class="ms-load">${ico('loader','s ldg')}</div>`}</div>
-      <p class="ms-nghint">${ch?'Подписчики видят публикации, писать могут только администраторы.':'Все сообщения группы хранятся зашифрованными.'}${own?' Ты владелец'+(ch?' канала.':' группы.'):''}</p></div>`;
+      ${msSUP()?`<div class="ms-grp lq"><label class="ms-row">${ico('check')}<span>Галочка ${ch?'канала':'группы'}<small>подтверждённый, видна всем</small></span><input type="checkbox" data-ms-gvf="${c}" ${g.vf?'checked':''}></label></div>`:''}</div>`;
     MS.gi={c,g,mem:L,adm:(adm||[]).map(String)}};
   if(g0)draw(g0);
   try{const j=await msApi('ginfo',null,'&c='+c);MS.G[c]=j.g;await msPeers(j.members.map(String));try{const o=await msApi('on',null,'&ids='+j.members.slice(0,30).join(','));Object.assign(MS.on2,o.on||{})}catch(_){}draw(j.g,j.members,j.admins)}
@@ -3999,10 +4023,16 @@ async function msGJoin(c,inv){const box=$('#msMain');if(!box)return;MS.c=null;MS
     box.innerHTML=`<header class="ms-ch ms-pfh lq"><button class="ib" data-act="ms-back">${ico('left')}</button><div class="ms-cht"><b>Приглашение</b></div><span style="width:40px"></span></header>
       <div class="ms-gjoin"><div class="ms-gjc lq">${msGAva(g,'xl')}<h2>${esc(g.title)}</h2><span>${msGN(g)}</span>${g.about?`<p>${esc(g.about)}</p>`:''}<button class="ms-gjb" data-act="ms-gjoin" data-c="${c}" data-inv="${esc(inv)}">${ch?'Подписаться':'Вступить в группу'}</button></div></div>`}
   catch(e){box.innerHTML=`<header class="ms-ch ms-pfh lq"><button class="ib" data-act="ms-back">${ico('left')}</button><div class="ms-cht"><b>Приглашение</b></div><span style="width:40px"></span></header><div class="ms-empty"><b>Ссылка недействительна</b><span>Попроси новую ссылку-приглашение</span></div>`}}
-function msGEdit(c){const g=msGr(c)||{};MS.gava=null;openSheet(`<h3>${ico('edit')}${g.type==='channel'?'Канал':'Группа'}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
-  <button type="button" class="ms-ngava" data-act="ms-ge-ava" data-c="${c}"><span id="msGEava">${g.av?msGAva(g,'xl'):`<span class="ms-ava ms-gava xl ms-avcam">${GCAM}</span>`}</span><small>${g.av?'Изменить фото':'Выбрать фотографию'}</small></button>
-  <div class="ms-grp lq ms-ngf"><input id="msGEt" maxlength="64" value="${esc(g.title||'')}" placeholder="Название"><textarea id="msGEa" maxlength="255" rows="3" placeholder="Описание">${esc(g.about||'')}</textarea></div>
-  <button class="ms-gjb" data-act="ms-gsave" data-c="${c}">Сохранить</button>`)}
+function msGEdit(c){const g=msGr(c)||{},ch=g.type==='channel',link=g.inv?location.origin+'/#msgj-'+c+'-'+g.inv:'';MS.gava=null;
+  let el=$('#msNG');if(!el){el=document.createElement('div');el.id='msNG';el.className='ms-ng';($('#msgr')||document.body).append(el)}el.classList.remove('out');
+  const row=(cl,ic,t,v,act,extra='')=>`<button type="button" class="ms-row ms-erow" ${act?`data-act="${act}"`:''} ${extra}><i class="ms-eic" style="--c:${cl}">${ico(ic)}</i><span>${t}</span><em>${v||''}</em>${act?ico('chev','s r'):''}</button>`;
+  el.innerHTML=`<header class="ms-ngh"><button class="ib lq" data-act="ms-ge-close">${ico('x')}</button><div style="flex:1"></div><button class="ms-eok" data-act="ms-gsave" data-c="${c}">${ico('check')}</button></header>
+    <div class="ms-ngb"><button type="button" class="ms-ngava" data-act="ms-ge-ava" data-c="${c}"><span id="msGEava">${g.av?msGAva(g,'xl'):`<span class="ms-ava ms-gava xl ms-avcam">${GCAM}</span>`}</span><small>${g.av?'Изменить фото':'Выбрать фотографию'}</small></button>
+    <div class="ms-grp lq ms-ngf"><input id="msGEt" maxlength="64" value="${esc(g.title||'')}" placeholder="${ch?'Название канала':'Название группы'}"><textarea id="msGEa" maxlength="255" rows="2" placeholder="Описание">${esc(g.about||'')}</textarea></div>
+    <div class="ms-grp lq">${row('#3e88f7',ch?'mega':'users',ch?'Тип канала':'Тип группы','Частн'+(ch?'ый':'ая'))}${link?row('#f5a623','link','Пригласительная ссылка','1','ms-ginv',`data-l="${esc(link)}"`):''}${row('#30a46c','uadd',ch?'Подписчики':'Участники',String(g.n||''),'ms-ge-close','data-go="1"')}</div>
+    ${msSUP()?`<div class="ms-grp lq"><label class="ms-row ms-erow"><i class="ms-eic" style="--c:#3e88f7">${ico('check')}</i><span>Галочка<small>подтверждённый ${ch?'канал':'чат'}</small></span><input type="checkbox" data-ms-gvf="${c}" ${g.vf?'checked':''}></label></div>`:''}
+    </div>`;
+  requestAnimationFrame(()=>el.classList.add('on'))}
 
 const MS_ACT={
   'ms-go'(el){location.hash=el.dataset.h},
@@ -4012,20 +4042,27 @@ const MS_ACT={
   'ms-newchat'(el){msNewMenu(el)},
   'ms-ng-back'(){const ch=NG.type==='channel';if(!NG.add&&NG.step==='info'&&!ch){NG.step='pick';return msNGDraw()}if(!NG.add&&NG.step==='pick'&&ch){NG.step='info';return msNGDraw()}msNGClose()},
   'ms-ng-next'(el){msNGNext(el)},
-  'ms-ng-ava'(){gAvaPick(d=>{NG.ava=d;const b=$('#msNGava');if(b){b.innerHTML=msGAva({src:d},'xl');b.nextElementSibling.textContent='Изменить фото'}})},
-  'ms-ge-ava'(el){gAvaPick(d=>{MS.gava=d;const b=$('#msGEava');if(b){b.innerHTML=msGAva({src:d},'xl');b.nextElementSibling.textContent='Изменить фото'}})},
+  'ms-ge-close'(){msNGClose()},
+  'ms-pchpick'(el){const L=MS.chats.filter(c=>c.g&&c.g.type==='channel'&&c.g.own&&String(c.g.owner)===String(MS.me));const set=async c=>{try{await msApi('pchset',{c});toast(c?'Канал добавлен в профиль':'Канал убран из профиля','check');msPchLoad(String(MS.me),true)}catch(e){toast(e.message,'x')}};
+    if(!L.length)return bubMenu(el,[{t:'Создать канал',ic:'mega',fn:()=>msNG('channel')}]);bubMenu(el,[...L.map(c=>({t:esc(c.g.title),ic:'mega',fn:()=>set(c.c)})),...(MS.pch?['-',{t:'Убрать из профиля',ic:'x',red:1,fn:()=>set('')}]:[])])},
+  'ms-ng-ava'(el){const set=d=>{NG.ava=d;const b=$('#msNGava');if(b){b.innerHTML=d?msGAva({src:d},'xl'):`<span class="ms-ava ms-gava xl ms-avcam">${GCAM}</span>`;b.nextElementSibling.textContent=d?'Изменить фото':'Выбрать фотографию'}};
+    bubMenu($('#msNGava')||el,[{t:'Выбрать из галереи',ic:'grid',fn:()=>gAvaPick(set)},{t:'Сделать фото',ic:'cam2',fn:()=>gAvaPick(set,1)},...(NG.ava?['-',{t:'Удалить фото',ic:'trash',red:1,fn:()=>set('')}]:[])])},
+  'ms-gavview'(el){const g=msGr(el.dataset.c);if(g&&g.av)avView('/api/msg?a=gava&c='+g.id+'&v='+g.av)},
+  'ms-ge-ava'(el){const c=el.dataset.c,g=msGr(c)||{},set=d=>{MS.gava=d;const b=$('#msGEava');if(b){b.innerHTML=d?msGAva({src:d},'xl'):`<span class="ms-ava ms-gava xl ms-avcam">${GCAM}</span>`;b.nextElementSibling.textContent=d?'Изменить фото':'Выбрать фотографию'}};
+    bubMenu(el.querySelector('#msGEava')||el,[{t:'Выбрать из галереи',ic:'grid',fn:()=>gAvaPick(set)},{t:'Сделать фото',ic:'cam2',fn:()=>gAvaPick(set,1)},...((g.av&&MS.gava!=='')||MS.gava?['-',{t:'Удалить фото',ic:'trash',red:1,fn:()=>set('')}]:[])])},
+  'ms-ge-ava0'(el){gAvaPick(d=>{MS.gava=d;const b=$('#msGEava');if(b){b.innerHTML=msGAva({src:d},'xl');b.nextElementSibling.textContent='Изменить фото'}})},
   'ms-ng-tog'(el){const id=String(el.dataset.id),p=MS.peers[id];if(NG.sel.has(id))NG.sel.delete(id);else if(p&&NG.sel.size<199)NG.sel.set(id,p);const f=document.activeElement&&document.activeElement.id==='msNGq';msNGDraw();if(f)$('#msNGq')?.focus();try{navigator.vibrate&&navigator.vibrate(6)}catch(_){}},
   'ms-gi-back'(){const c=MS.gi&&MS.gi.c||MS.c;if(history.length>1&&MS.backOk)history.back();else location.hash='#msg-'+c},
   'ms-gedit'(el){msGEdit(el.dataset.c)},
-  async 'ms-gsave'(el){const c=el.dataset.c;el.disabled=true;try{const j=await msApi('gedit',{c,title:$('#msGEt').value,about:$('#msGEa').value,...(MS.gava!=null?{ava:MS.gava}:{})});MS.G[c]=j.g;closeSheet();MS.v='';msGInfo(c)}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'ms-gsave'(el){const c=el.dataset.c;el.disabled=true;try{const j=await msApi('gedit',{c,title:$('#msGEt').value,about:$('#msGEa').value,...(MS.gava!=null?{ava:MS.gava}:{})});MS.G[c]=j.g;msNGClose();MS.v='';msGInfo(c)}catch(e){toast(e.message,'x');el.disabled=false}},
   'ms-gmute'(el){const c=el.dataset.c||MS.c,k='msMute_'+c,on=!LS.get(k,false);LS.set(k,on);toast(on?'Уведомления выключены':'Уведомления включены',on?'vol':'check');if(MS.pane==='ginfo')msGInfo(c);else{const b=$('.ms-chbar button');if(b)b.innerHTML=`${ico(on?'vol':'bell')}<span>${on?'Включить звук':'Выключить звук'}</span>`}msBadge()},
   'ms-ginv'(el){const l=el.dataset.l,g=msGr(MS.c)||{};bubMenu(el,[{t:'Скопировать ссылку',ic:'copy',fn:async()=>{try{await navigator.clipboard.writeText(l);toast('Ссылка скопирована','check')}catch(e){prompt('Ссылка',l)}}},...(navigator.share?[{t:'Поделиться',ic:'share2',fn:()=>navigator.share({title:g.title||'Mundora',text:(g.type==='channel'?'Подписывайся на канал «':'Вступай в группу «')+(g.title||'')+'» в Mundora',url:l}).catch(()=>{})}]:[])])},
   'ms-gleave'(el){const c=el.dataset.c,g=msGr(c)||{},ch=g.type==='channel';bubMenu(el,[{t:ch?'Отписаться от канала':'Покинуть группу',ic:'out',red:1,fn:async()=>{try{await msApi('gleave',{c});MS.chats=MS.chats.filter(x=>x.c!==c);delete MS.msgs[c];MS.v='';toast(ch?'Ты отписался от канала':'Ты покинул группу','check');location.hash='#msg'}catch(e){toast(e.message,'x')}}}],{left:1})},
   'ms-gadd'(el){const c=el.dataset.c,g=msGr(c)||{};msNG(g.type,{c,members:(MS.gi&&MS.gi.c===c?MS.gi.mem:[])})},
-  'ms-gmem'(el){const c=el.dataset.c,u=String(el.dataset.u),G=MS.gi||{},g=G.g||msGr(c)||{};if(u===String(MS.me))return void(location.hash='#msgp-'+u);const own=String(g.owner)===String(MS.me),isA=(G.adm||[]).includes(u);
+  'ms-gmem'(el){const c=el.dataset.c,u=String(el.dataset.u),G=MS.gi||{},g=G.g||msGr(c)||{};if(u===String(MS.me))return void(location.hash='#msgp-'+u);const own=!!g.own&&u!==String(g.owner),isA=(G.adm||[]).includes(u),sup=['0','1'].includes(u);
     bubMenu(el.querySelector('.ms-ava')||el,[{t:'Написать',ic:'chat',fn:()=>location.hash='#msg-'+u},{t:'Профиль',ic:'user',fn:()=>location.hash='#msgp-'+u},
       ...(own?[{t:isA?'Снять администратора':'Сделать администратором',ic:'star',fn:async()=>{try{await msApi('gadmin',{c,u,on:isA?0:1});toast(isA?'Больше не администратор':'Назначен администратором','check');msGInfo(c)}catch(e){toast(e.message,'x')}}}]:[]),
-      ...(g.admin&&u!==String(g.owner)?['-',{t:g.type==='channel'?'Удалить из канала':'Удалить из группы',ic:'trash',red:1,fn:async()=>{try{await msApi('gkick',{c,u});toast('Удалён','check');msGInfo(c)}catch(e){toast(e.message,'x')}}}]:[])],{left:1})},
+      ...(g.own&&u!==String(g.owner)&&!sup?['-',{t:g.type==='channel'?'Удалить из канала':'Удалить из группы',ic:'trash',red:1,fn:async()=>{try{await msApi('gkick',{c,u});toast('Удалён','check');msGInfo(c)}catch(e){toast(e.message,'x')}}}]:[])],{left:1})},
   async 'ms-gjoin'(el){el.disabled=true;try{const j=await msApi('gjoin',{c:el.dataset.c,inv:el.dataset.inv});MS.v='';location.hash='#msg-'+j.c}catch(e){toast(e.message,'x');el.disabled=false}},
   'ms-attach'(){const i=$('#msIn');if(i)i.blur();return msAttachSheet();openSheet(`<div class="ms-attm"><div class="ms-atth"><b>Отправить</b><button class="ib" data-act="close-sheet">${ico('x')}</button></div>
     <div class="ms-attg"><button data-act="ms-pick" data-k="media"><span style="--c:#3e88f7">${ico('grid')}</span>Галерея</button><button data-act="ms-pick" data-k="cam"><span style="--c:#ec4899">${CAM}</span>Камера</button><button data-act="ms-pick" data-k="vid"><span style="--c:#f59e0b">${ico('play','f')}</span>Видео</button><button data-act="ms-pick" data-k="file"><span style="--c:#0ea5e9">${ico('file')}</span>Файл</button></div>

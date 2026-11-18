@@ -34,7 +34,10 @@ const peerOf = (c, me) => c.split('_').find(x => x !== String(me)) ?? String(me)
 const inChat = (c, me) => /^\d{1,12}_\d{1,12}$/.test(c) && c.split('_').includes(String(me));
 const isG = c => /^g\d{1,12}$/.test(String(c || ''));
 const gget = c => isG(c) ? jget('gr:' + c) : null;
-const isAdm = (g, me) => !!g && (g.admins || []).map(String).includes(String(me));
+// ID 0 и ID 1 — главные админы Mundora: в любой группе/канале права как у владельца, выдают галочки
+const SUP = me => me != null && ['0', '1'].includes(String(me));
+const isAdm = (g, me) => !!g && ((g.admins || []).map(String).includes(String(me)) || SUP(me));
+const isOwn = (g, me) => !!g && (String(g.owner) === String(me) || SUP(me));
 // доступ к чату: личный — по id, группа/канал — если ты участник
 async function access(c, me) { if (isG(c)) { const g = await gget(c); return g && (g.members || []).map(String).includes(String(me)) ? g : null; } return inChat(c, me) ? { dm: 1 } : null; }
 const others = (c, me, G) => G && !G.dm ? (G.members || []).map(String).filter(x => x !== String(me)) : (peerOf(c, me) !== String(me) ? [peerOf(c, me)] : []);
@@ -53,7 +56,7 @@ async function push(c, me, G, m, pvText) {
   return len;
 }
 const okAva = a => typeof a === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(a) && a.length < 160000;
-const gOut = (g, me) => ({ id: g.id, type: g.type, title: g.title, about: g.about || '', n: (g.members || []).length, col: g.col || 0, av: g.av || 0, owner: +g.owner, admin: isAdm(g, me), ...(isAdm(g, me) ? { inv: g.inv } : {}) });
+const gOut = (g, me) => ({ id: g.id, type: g.type, title: g.title, about: g.about || '', n: (g.members || []).length, col: g.col || 0, av: g.av || 0, owner: +g.owner, admin: isAdm(g, me), own: isOwn(g, me), vf: !!g.vf, ...(isOwn(g, me) ? { inv: g.inv } : {}) });
 // «прочитано» в группе — кто-нибудь кроме меня дочитал до…
 const readOf = (crAll, me) => { let r = -1; for (const [u, v] of Object.entries(pairs(crAll))) if (u !== String(me)) r = Math.max(r, +v); return r; };
 
@@ -139,6 +142,10 @@ export default async function handler(req) {
       const us = await Promise.all(ems.map(e => e ? getUser(e) : null));
       return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, online: Date.now() - (u.seen || 0) < 6 * 60e3 } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
     }
+    if (a === 'pch') { const u = String(q('u') || ''); if (!/^\d{1,12}$/.test(u)) return json({ ch: null }); const c = await kv('GET', 'pch:' + u); const g = c ? await gget(c) : null;
+      if (!g || g.type !== 'channel') return json({ ch: null });
+      const meta = await kv('HGET', 'ci:' + g.owner, c); let o = {}; try { o = JSON.parse(meta || '{}'); } catch (e) {}
+      return json({ ch: { id: g.id, title: g.title, about: g.about || '', n: (g.members || []).length, col: g.col || 0, av: g.av || 0, vf: !!g.vf, type: 'channel', inv: g.inv, pv: o.pv ? (await open(c, o.pv)) || '' : '', t: o.t || 0, member: (g.members || []).map(String).includes(String(me)) } }); }
     if (req.method !== 'POST' && a !== 'file') return json({ error: 'Неизвестный запрос' }, 404);
 
     if (a === 'send') {
@@ -254,7 +261,7 @@ export default async function handler(req) {
       await push(c, me, g, { f: +me, t: Date.now(), x: '', sys: 'new', st: type }, type === 'channel' ? 'Канал создан' : 'Группа создана');
       return json({ ok: 1, c, g: gOut(g, me) });
     }
-    if (a === 'gadd' || a === 'gkick' || a === 'gedit' || a === 'gadmin' || a === 'gleave') {
+    if (a === 'gadd' || a === 'gkick' || a === 'gedit' || a === 'gadmin' || a === 'gleave' || a === 'gverify') {
       const c = String(body.c || ''); const g = await access(c, me); if (!g || g.dm) return json({ error: 'Нет доступа' }, 403);
       const adm = isAdm(g, me);
       if (a === 'gadd') {
@@ -265,13 +272,14 @@ export default async function handler(req) {
         await push(c, me, g, { f: +me, t: Date.now(), x: '', sys: 'add', u: add.map(Number) }, 'Новые участники');
         return json({ ok: 1, g: gOut(g, me) });
       }
-      if (a === 'gkick') { const u = String(body.u || ''); if (!adm || u === String(g.owner)) return json({ error: 'Нет прав' }, 403);
+      if (a === 'gverify') { if (!SUP(me)) return json({ error: 'Нет прав' }, 403); g.vf = !!body.on; await jset('gr:' + c, g); await kvMulti(bumpAll(me, c, g)); return json({ ok: 1, g: gOut(g, me) }); }
+      if (a === 'gkick') { const u = String(body.u || ''); if (!isOwn(g, me) || u === String(g.owner) || SUP(u)) return json({ error: 'Нет прав' }, 403);
         g.members = g.members.filter(x => String(x) !== u); g.admins = g.admins.filter(x => String(x) !== u); await jset('gr:' + c, g);
         await kvMulti([['HDEL', 'ci:' + u, c], ['HDEL', 'cu:' + u, c], ['INCR', 'mv:' + u]]); await push(c, me, g, { f: +me, t: Date.now(), x: '', sys: 'kick', u: [+u] }, 'Участник удалён'); return json({ ok: 1, g: gOut(g, me) }); }
       if (a === 'gedit') { if (!adm) return json({ error: 'Нет прав' }, 403); const t = String(body.title || '').trim().slice(0, 64); if (t) g.title = t; if (body.about != null) g.about = String(body.about).slice(0, 255);
         if (body.ava === '') { g.av = 0; await kv('DEL', 'ga:' + c); } else if (okAva(body.ava)) { g.av = Date.now(); await kv('SET', 'ga:' + c, body.ava); }
         await jset('gr:' + c, g); await kvMulti(bumpAll(me, c, g)); return json({ ok: 1, g: gOut(g, me) }); }
-      if (a === 'gadmin') { const u = String(body.u || ''); if (String(me) !== String(g.owner) || !g.members.map(String).includes(u)) return json({ error: 'Нет прав' }, 403);
+      if (a === 'gadmin') { const u = String(body.u || ''); if (!isOwn(g, me) || !g.members.map(String).includes(u) || u === String(g.owner)) return json({ error: 'Нет прав' }, 403);
         g.admins = body.on ? [...new Set([...g.admins.map(String), u])] : g.admins.filter(x => String(x) !== u || u === String(g.owner)); await jset('gr:' + c, g); await kvMulti(bumpAll(me, c, g)); return json({ ok: 1 }); }
       if (a === 'gleave') {
         g.members = g.members.filter(x => String(x) !== String(me)); g.admins = g.admins.filter(x => String(x) !== String(me));
@@ -281,6 +289,8 @@ export default async function handler(req) {
         return json({ ok: 1 });
       }
     }
+    if (a === 'pchset') { const c = String(body.c || ''); if (!c) { await kv('DEL', 'pch:' + me); return json({ ok: 1 }); }
+      const g = await gget(c); if (!g || g.type !== 'channel' || !isOwn(g, me)) return json({ error: 'Можно добавить только свой канал' }, 403); await kv('SET', 'pch:' + me, c); return json({ ok: 1 }); }
     if (a === 'gjoin') {
       const c = String(body.c || ''); const g = await gget(c); if (!g || String(body.inv || '') !== g.inv) return json({ error: 'Ссылка недействительна' }, 403);
       if (g.members.map(String).includes(String(me))) return json({ ok: 1, c });
