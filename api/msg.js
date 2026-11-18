@@ -40,11 +40,11 @@ async function decodeMsgs(c, raw, from) {
   return Promise.all((raw || []).map(async (r, k) => { const j = await open(c, r); let m = null; try { m = JSON.parse(j); } catch (e) {} return m ? { ...m, i: from + k } : { i: from + k, f: '?', t: 0, x: '', bad: 1 }; }));
 }
 // реакции, правки и закреп чата — отдают целиком при любом изменении (их мало)
-async function extras(c) {
-  const [rx, ed, pin] = await kvMulti([['HGETALL', 'cx:' + c], ['HGETALL', 'ce:' + c], ['GET', 'cp:' + c]]);
+async function extras(c, me) {
+  const [rx, ed, pin, hd] = await kvMulti([['HGETALL', 'cx:' + c], ['HGETALL', 'ce:' + c], ['GET', 'cp:' + c], ['HGETALL', 'ch:' + c + ':' + me]]);
   const R = {}; for (const [i, v] of Object.entries(pairs(rx))) { try { R[i] = JSON.parse(v); } catch (e) {} }
   const E = {}; for (const [i, v] of Object.entries(pairs(ed))) { const j = await open(c, v); if (j) { try { E[i] = JSON.parse(j); } catch (e) {} } }
-  return { rx: R, ed: E, pin: pin == null ? -1 : +pin };
+  return { rx: R, ed: E, pin: pin == null ? -1 : +pin, hid: Object.keys(pairs(hd)).map(Number) };
 }
 const bump = (me, c) => { const p = peerOf(c, me); return [['INCR', 'mv:' + me], ...(p !== String(me) ? [['INCR', 'mv:' + p]] : [])]; };
 async function msgAt(c, i) { const [r] = await kvMulti([['LRANGE', 'cm:' + c, String(i), String(i)]]); try { return JSON.parse((await open(c, r && r[0])) || 'null'); } catch (e) { return null; } }
@@ -79,7 +79,7 @@ export default async function handler(req) {
       if (c && inChat(c, me)) {
         const p = peerOf(c, me);
         const [raw, rd, ty, dl] = await kvMulti([['LRANGE', 'cm:' + c, String(Math.max(0, isFinite(s) ? s + 1 : 0)), '-1'], ['HGET', 'cr:' + c, p], ['GET', 'ty:' + c + ':' + p], ['HGETALL', 'cd:' + c]]);
-        out.msgs = await decodeMsgs(c, raw, Math.max(0, isFinite(s) ? s + 1 : 0)); out.read = rd == null ? -1 : +rd; out.typing = !!ty; out.del = Object.keys(pairs(dl)).map(Number); Object.assign(out, await extras(c));
+        out.msgs = await decodeMsgs(c, raw, Math.max(0, isFinite(s) ? s + 1 : 0)); out.read = rd == null ? -1 : +rd; out.typing = !!ty; out.del = Object.keys(pairs(dl)).map(Number); Object.assign(out, await extras(c, me));
       }
       return json(out);
     }
@@ -88,7 +88,7 @@ export default async function handler(req) {
       const len = await kv('LLEN', 'cm:' + c); const before = q('before') == null ? len : Math.min(len, +q('before')); const from = Math.max(0, before - 60);
       const p = peerOf(c, me);
       const [raw, rd, dl] = await kvMulti([['LRANGE', 'cm:' + c, String(from), String(before - 1)], ['HGET', 'cr:' + c, p], ['HGETALL', 'cd:' + c]]);
-      return json({ msgs: before > 0 ? await decodeMsgs(c, raw, from) : [], from, read: rd == null ? -1 : +rd, del: Object.keys(pairs(dl)).map(Number), ...(await extras(c)) });
+      return json({ msgs: before > 0 ? await decodeMsgs(c, raw, from) : [], from, read: rd == null ? -1 : +rd, del: Object.keys(pairs(dl)).map(Number), ...(await extras(c, me)) });
     }
     if (a === 'on') {
       const ids = String(q('ids') || '').split(',').filter(x => /^\d{1,12}$/.test(x)).slice(0, 30);
@@ -156,7 +156,9 @@ export default async function handler(req) {
     if (a === 'del') {
       const c = String(body.c || ''), i = +body.i; if (!inChat(c, me) || !(i >= 0)) return json({ error: 'Нет доступа' }, 403);
       const [r] = await kvMulti([['LRANGE', 'cm:' + c, String(i), String(i)]]); const m = JSON.parse((await open(c, r && r[0])) || 'null');
-      if (!m || String(m.f) !== me) return json({ error: 'Можно удалить только своё сообщение' }, 403);
+      if (!m) return json({ error: 'Сообщение не найдено' }, 404);
+      // «удалить только у меня» — сообщение прячется только для этого человека
+      if (body.all === 0 || body.all === false) { await kvMulti([['HSET', 'ch:' + c + ':' + me, String(i), '1'], ['INCR', 'mv:' + me]]); return json({ ok: 1 }); }
       const p = peerOf(c, me);
       await kvMulti([['LSET', 'cm:' + c, String(i), await seal(c, JSON.stringify({ f: m.f, t: m.t, x: '', d: 1 }))], ['HSET', 'cd:' + c, String(i), '1'], ['HDEL', 'cx:' + c, String(i)], ['HDEL', 'ce:' + c, String(i)], ['INCR', 'mv:' + me], ...(p !== me ? [['INCR', 'mv:' + p]] : [])]);
       if (m.fl && m.fl.id) { const fm = await jget('mf:' + m.fl.id); if (fm) await kvMulti([['DEL', 'mf:' + m.fl.id], ...Array.from({ length: fm.k }, (_, k) => ['DEL', 'mfc:' + m.fl.id + ':' + k])]); }

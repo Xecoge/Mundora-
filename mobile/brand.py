@@ -99,6 +99,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.InputStream;
 import android.Manifest;
+import android.webkit.GeolocationPermissions;
+import com.getcapacitor.BridgeWebChromeClient;
 import android.content.ContentUris;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -136,6 +138,14 @@ public class MainActivity extends BridgeActivity {
             });
             bridge.getWebView().addJavascriptInterface(new SaveBridge(), "MundoraNative");
             bridge.getWebView().addJavascriptInterface(new MediaBridge(), "MundoraMedia");
+            // геопозиция: если доступ уже дан — не спрашивать снова
+            bridge.getWebView().setWebChromeClient(new BridgeWebChromeClient(bridge) {
+                @Override
+                public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                    if (has(Manifest.permission.ACCESS_FINE_LOCATION) || has(Manifest.permission.ACCESS_COARSE_LOCATION)) { callback.invoke(origin, true, true); return; }
+                    super.onGeolocationPermissionsShowPrompt(origin, callback);
+                }
+            });
         }
     }
 

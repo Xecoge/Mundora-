@@ -1679,6 +1679,32 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 
 .ms-a2it.blur{filter:none}.ms-a2s{will-change:transform;contain:layout paint}.ms-a2bg{will-change:background}
 .ms-a2 .ms-a2t.lq{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:rgba(44,44,46,.96)!important}
+
+.ms-msgs .mb,.ms-msgs .mb *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ms-ctxa{max-height:calc(100dvh - 40px);overscroll-behavior:contain}
+.ms-dlg{position:fixed;inset:0;z-index:97;display:grid;place-items:center;padding:24px}
+.ms-dlgbg{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .22s}.ms-dlg.on .ms-dlgbg{background:rgba(0,0,0,.5)}
+.ms-dlgb{position:relative;width:min(320px,100%);border-radius:26px;padding:20px 16px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;transform:scale(1.12);opacity:0;transition:transform .3s cubic-bezier(.3,1.3,.4,1),opacity .2s}
+.ms-dlg.on .ms-dlgb{transform:none;opacity:1}
+.ms-dlgb>b{font-size:17.5px}.ms-dlgb>span{font-size:13.5px;color:#8e8e93;margin-bottom:6px}
+.ms-dlgck{display:flex;align-items:center;gap:10px;width:100%;border:0;background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:15px;text-align:left;padding:11px 12px;border-radius:14px;cursor:pointer;margin:4px 0 6px}
+.ms-dlgck i{width:24px;height:24px;flex:none;display:grid;place-items:center;border-radius:50%;border:2px solid rgba(255,255,255,.35);color:transparent;transition:all .18s}
+.ms-dlgck i .i{width:24px;height:24px}.ms-dlgck.on i{background:#3e88f7;border-color:#3e88f7;color:#fff}.ms-dlgck.on i .i circle{display:none}
+.ms-dlgbt{display:flex;gap:8px;width:100%;margin-top:6px}.ms-dlgbt button{flex:1;height:46px;border:0;border-radius:14px;background:rgba(255,255,255,.1);color:#fff;font:inherit;font-weight:650;font-size:16px;cursor:pointer}
+.ms-dlgbt .red{background:#e5484d}
+.ms-dlg .lq{background:rgba(37,37,40,.86)!important;border:1px solid rgba(255,255,255,.09);-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}
+.ms-dustc{position:fixed;z-index:89;pointer-events:none}
+
+.ms-a2map.map{height:min(40vh,340px);touch-action:none;cursor:grab}.ms-a2map.map:active{cursor:grabbing}
+.ms-a2map.map .ms-mapt{overflow:hidden}
+.ms-mapme{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#3e88f7;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);z-index:2}
+.ms-mapacc{position:absolute;transform:translate(-50%,-50%);border-radius:50%;background:rgba(62,136,247,.18);border:1px solid rgba(62,136,247,.5);z-index:1;pointer-events:none}
+.ms-a2map.map .ms-mappin{z-index:3}.ms-mappin.drop{animation:pinDrop .45s cubic-bezier(.3,1.5,.4,1)}@keyframes pinDrop{0%{transform:translate(-50%,-180%)}100%{transform:translate(-50%,-100%)}}
+.ms-mapz{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:rgba(28,28,30,.85);z-index:4}
+.ms-mapz button{width:42px;height:40px;border:0;background:none;color:#fff;font-size:22px;cursor:pointer}.ms-mapz button+button{border-top:1px solid rgba(255,255,255,.1)}
+.ms-mapmy{position:absolute;right:10px;bottom:24px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(28,28,30,.85);color:#3e88f7;display:grid;place-items:center;cursor:pointer;z-index:4}
+.ms-a2hint{text-align:center;font-size:13px;color:#8e8e93;margin:-2px 0 4px}
+.ms-a2map .ms-a2ml[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -2868,6 +2894,7 @@ function msDrawMain(){const box=$('#msMain');if(!box)return;
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&LS.get('msEnter',true)&&matchMedia('(min-width:761px)').matches){e.preventDefault();msSend()}});
   f.addEventListener('submit',e=>{e.preventDefault();if(MS.rec)return msRecStop(false,9e9);msSend();inp.focus()});
   const ml=$('#msMsgs');ml.addEventListener('scroll',()=>{msDownBtn();ml.dataset.stick=ml.scrollHeight-ml.scrollTop-ml.clientHeight<120?'1':'0';if(ml.scrollTop<80&&!MS.hl)msOlder()},{passive:true});
+  ml.addEventListener('contextmenu',e=>{if(e.target.closest('.mb'))e.preventDefault()});
   msLong(ml);msRndSeekBind(ml);msGestures(ml);msVoiceSeekBind(ml);msMicBind()}
 function msDel(c,del){if(!del||!MS.msgs[c])return;const D=new Set(del);MS.msgs[c].forEach(m=>{if(D.has(m.i)&&!m.d){m.d=1;m.x='';delete m.fl}})}
 async function msOlder(){const c=MS.c,from=MS.from[c];if(!c||!from)return;MS.hl=1;
@@ -2893,7 +2920,9 @@ function msMsgHTML(m,next){const mine=String(m.f)===String(MS.me),c=MS.c,rd=mine
     body=fw+msRqHTML(c,m)+media+txt+msRxHTML(c,m)+meta}
   const bare=(kind==='img'||kind==='rnd')&&!m.x&&m.r==null&&!(c&&m.i!=null&&MS.rx[c]&&MS.rx[c][m.i]);
   return `<div class="mb ${mine?'me':'th'}${card?' card':''}${grp?'':' tail'}${bare?' bare':''}${kind==='img'&&m.x?' cap':''}${kind==='voice'?' vo':''}${kind==='rnd'?' rd':''}${m.d?' del':''}" data-i="${m.i??''}" data-tmp="${m.tmp||''}">${body}</div>`}
-function msPaintMsgs(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;const L=MS.msgs[c]||[];
+function msPaintMsgs(...A){if(!MS.flipNext)return msPaintMsgs0(...A);MS.flipNext=0;const ml=$('#msMsgs');if(!ml)return msPaintMsgs0(...A);const y=ml.scrollTop,B={};ml.querySelectorAll('.mb[data-i]').forEach(e=>B[e.dataset.i]=e.getBoundingClientRect().top);
+  msPaintMsgs0(...A);ml.scrollTop=y;ml.querySelectorAll('.mb[data-i]').forEach(e=>{const b=B[e.dataset.i];if(b==null)return;const d=b-e.getBoundingClientRect().top;if(Math.abs(d)>1)e.animate([{transform:`translateY(${d}px)`},{transform:'none'}],{duration:340,easing:'cubic-bezier(.25,.9,.3,1)'})})}
+function msPaintMsgs0(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;const L=MS.msgs[c]||[];
   const stick=toBottom||ml.scrollHeight-ml.scrollTop-ml.clientHeight<120;
   if(!L.some(m=>!m.d)){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
   let h='',day='';const LV=L.filter(m=>!m.d);LV.forEach((m,k)=>{const L=LV;const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=msMsgHTML(m,L[k+1])});
@@ -3219,7 +3248,7 @@ async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
     const hb=!document.hidden&&(MS.n%15===1||!MS.on); // «я в сети» — раз в 15 с, пока сайт открыт
     const j=await msApi('poll',null,`&v=${MS.v}${hb?'&hb=1':''}${c&&L?`&c=${c}&s=${last?last.i:(MS.from[c]||0)-1}`:''}`);
     if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
-      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDel(c,j.del);msExtras(c,j);const tw=MS.typing;MS.typing=j.typing;
+      if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDelFx(c,[...(j.del||[]),...(j.hid||[])]);msDel(c,j.del);msExtras(c,j);const tw=MS.typing;MS.typing=j.typing;
         clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
         if(add.length){const ml0=$('#msMsgs');if(ml0&&ml0.scrollHeight-ml0.scrollTop-ml0.clientHeight>300)MS.newBelow=(MS.newBelow||0)+add.filter(m=>String(m.f)!==String(MS.me)).length;MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>m.fw!=null))msFwPeers(c);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
         else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}
@@ -3244,7 +3273,7 @@ const SELI='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fil
 MS.rx={};MS.ed={};MS.pin={};MS.reply=null;MS.edit=null;MS.rate=+LS.get('msRate',1)||1;
 const msHeard=()=>{try{return new Set(JSON.parse(localStorage.getItem('msHeard')||'[]'))}catch(e){return new Set()}};
 function msHeardAdd(k){try{const s=msHeard();s.add(k);localStorage.setItem('msHeard',JSON.stringify([...s].slice(-800)))}catch(e){}}
-function msExtras(c,j){if(!j)return;if(j.rx)MS.rx[c]=j.rx;if(j.ed)MS.ed[c]=j.ed;if(j.pin!=null)MS.pin[c]=j.pin}
+function msExtras(c,j){if(!j)return;if(j.hid&&j.hid.length)msDel(c,j.hid);if(j.rx)MS.rx[c]=j.rx;if(j.ed)MS.ed[c]=j.ed;if(j.pin!=null)MS.pin[c]=j.pin}
 const msText=(c,m)=>{const e=MS.ed[c]&&m.i!=null&&MS.ed[c][m.i];return e?e.x:m.x};
 function msPrevText(c,m){if(!m)return 'Сообщение';if(m.d)return 'Сообщение удалено';const x=msText(c,m);if(x)return x.slice(0,90);const F=m.fl;if(!F)return '';return F.vo?'🎤 Голосовое сообщение':F.rd?'📹 Видеосообщение':F.ty&&F.ty.startsWith('image/')?'🖼 Фото':F.ty&&F.ty.startsWith('video/')?'🎬 Видео':'📎 '+F.n}
 const msWho=f=>String(f)===String(MS.me)?(USR.name||'Вы'):((MS.peers[f]||{}).name||'ID '+f);
@@ -3272,14 +3301,39 @@ function msPinBar(){const box=$('#msMain');if(!box||!MS.c)return;let b=$('#msPin
 function msDownBtn(){const ml=$('#msMsgs'),box=$('#msMain');if(!ml||!box)return;let b=$('#msDown');if(!b){b=document.createElement('button');b.type='button';b.id='msDown';b.className='ms-down lq';b.innerHTML=`${ico('chev','s')}<b hidden></b>`;b.onclick=()=>{ml.scrollTo({top:ml.scrollHeight,behavior:'smooth'});MS.newBelow=0};box.appendChild(b)}
   const far=ml.scrollHeight-ml.scrollTop-ml.clientHeight>300;b.classList.toggle('on',far);if(!far)MS.newBelow=0;const n=b.querySelector('b');n.hidden=!MS.newBelow;n.textContent=MS.newBelow||''}
 // «пыль» как у Telegram при удалении
-function msDust(el){return new Promise(res=>{if(!el){res();return}const r=el.getBoundingClientRect();if(!r.width||matchMedia('(prefers-reduced-motion: reduce)').matches){res();return}
-  const cs=getComputedStyle(el);const col=el.classList.contains('me')?['#6aa8ff','#3e88f7','#2f74e8','#9cc6ff']:['#3a3a3c','#48484a','#2c2c2e','#636366'];
-  const lay=document.createElement('div');lay.className='ms-dust';lay.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;document.body.appendChild(lay);
-  const N=Math.min(260,Math.round(r.width*r.height/70));for(let k=0;k<N;k++){const p=document.createElement('i');const x=Math.random()*r.width,y=Math.random()*r.height,s=1.5+Math.random()*2.5;p.style.cssText=`left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:${col[k%4]}`;lay.appendChild(p);
-    const d=x/r.width*380;p.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${30+Math.random()*90}px,${-40-Math.random()*90}px) scale(.3)`,opacity:0}],{duration:700+Math.random()*500,delay:d,easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})}
-  el.animate([{clipPath:'inset(0 0 0 0)',opacity:1},{clipPath:'inset(0 0 0 100%)',opacity:.6}],{duration:520,easing:'ease-in',fill:'forwards'});void cs;
-  setTimeout(()=>{lay.remove()},1500);setTimeout(res,560)})}
-async function msDelete(m){const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${m.i}"]`);await msDust(el);m.d=1;m.x='';delete m.fl;if(MS.pin[MS.c]===m.i)MS.pin[MS.c]=-1;msPaintMsgs();msPinBar();try{await msApi('del',{c:MS.c,i:m.i})}catch(e){toast(e.message,'x')}}
+// «пыль» как в Telegram: сообщение рассыпается на частицы своих настоящих цветов и текста, волной слева направо
+function msSnap(el){const r=el.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);const cv=document.createElement('canvas');cv.width=Math.max(1,Math.ceil(r.width*dpr));cv.height=Math.max(1,Math.ceil(r.height*dpr));const g=cv.getContext('2d');g.scale(dpr,dpr);
+  const rr=(x,y,w,h,rad)=>{g.beginPath();g.roundRect?g.roundRect(x,y,w,h,Math.min(rad,w/2,h/2)):g.rect(x,y,w,h)};const same=s=>/^(data|blob):/.test(s)||(()=>{try{return new URL(s,location.href).origin===location.origin}catch(e){return false}})();
+  [el,...el.querySelectorAll('*')].forEach(n=>{const cs=getComputedStyle(n);if(cs.visibility==='hidden'||cs.display==='none'||+cs.opacity===0)return;const b=n.getBoundingClientRect();if(!b.width||!b.height)return;const x=b.left-r.left,y=b.top-r.top,rad=parseFloat(cs.borderTopLeftRadius)||0;
+    const bi=cs.backgroundImage||'';if(/gradient/.test(bi)&&n===el){const gr=g.createLinearGradient(x,y,x+b.width,y+b.height);gr.addColorStop(0,'#4a95ff');gr.addColorStop(1,'#2a6fe0');g.fillStyle=gr;rr(x,y,b.width,b.height,rad);g.fill()}
+    else{const bc=cs.backgroundColor;if(bc&&!/rgba\(0, 0, 0, 0\)|transparent/.test(bc)){g.fillStyle=bc;rr(x,y,b.width,b.height,rad);g.fill()}}
+    if(/^(IMG|VIDEO|CANVAS)$/.test(n.tagName)&&(n.tagName==='CANVAS'||same(n.currentSrc||n.src||''))){try{g.save();const pr=n.closest('.ms-rnd')?b.width/2:rad;rr(x,y,b.width,b.height,pr);g.clip();g.drawImage(n,x,y,b.width,b.height);g.restore()}catch(e){g.restore()}}});
+  const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT),rg=document.createRange();let tn;
+  while((tn=tw.nextNode())){const s=tn.textContent;if(!s.trim())continue;const pe=tn.parentElement,cs=getComputedStyle(pe);if(cs.visibility==='hidden'||cs.display==='none')continue;g.fillStyle=cs.color;g.font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;g.textBaseline='bottom';
+    for(let i=0;i<s.length;){const cp=s.codePointAt(i),len=cp>0xffff?2:1,ch=s.slice(i,i+len);if(ch.trim()){rg.setStart(tn,i);rg.setEnd(tn,i+len);const b=rg.getBoundingClientRect();if(b.width)g.fillText(ch,b.left-r.left,b.bottom-r.top-b.height*.12)}i+=len}}
+  return{cv,r,dpr}}
+function msDustFx(el){if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches){if(el)el.style.visibility='hidden';return}let S;try{S=msSnap(el)}catch(e){el.style.visibility='hidden';return}
+  const {cv,r,dpr}=S;let D;try{D=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data}catch(e){el.style.visibility='hidden';return}el.style.visibility='hidden';
+  const area=r.width*r.height,st=Math.max(2,Math.round(Math.sqrt(area/2600)));const P=[];
+  for(let y=0;y<r.height;y+=st)for(let x=0;x<r.width;x+=st){const k=(Math.floor(y*dpr)*cv.width+Math.floor(x*dpr))*4;if(D[k+3]<30)continue;
+    P.push({x,y,c:`rgb(${D[k]},${D[k+1]},${D[k+2]})`,a:D[k+3]/255,d:x/r.width*.42+Math.random()*.12,l:.7+Math.random()*.55,vx:25+Math.random()*80,vy:-(30+Math.random()*110),w:Math.random()*6.28,s:st*(.9+Math.random()*.4)})}
+  const PADX=40,PADT=190,PADR=170,PADB=30;const o=document.createElement('canvas');o.className='ms-dustc';o.width=Math.ceil((r.width+PADX+PADR)*dpr);o.height=Math.ceil((r.height+PADT+PADB)*dpr);
+  o.style.cssText=`left:${r.left-PADX}px;top:${r.top-PADT}px;width:${r.width+PADX+PADR}px;height:${r.height+PADT+PADB}px`;document.body.appendChild(o);const g=o.getContext('2d');g.scale(dpr,dpr);
+  const t0=performance.now(),END=.42+.12+1.25;const fr=now=>{const t=(now-t0)/1000;g.clearRect(0,0,o.width,o.height);let live=0;
+    for(const p of P){const u=(t-p.d)/p.l;if(u>=1)continue;live++;if(u<=0){g.globalAlpha=p.a;g.fillStyle=p.c;g.fillRect(PADX+p.x,PADT+p.y,st,st);continue}
+      const e=u*u*(3-2*u),tt=t-p.d;const x=PADX+p.x+p.vx*tt+Math.sin(p.w+tt*7)*6*u,y=PADT+p.y+p.vy*tt-28*tt*tt;const sz=p.s*(1-.75*e);g.globalAlpha=p.a*(1-e);g.fillStyle=p.c;g.fillRect(x,y,sz,sz)}
+    if(live&&t<END)requestAnimationFrame(fr);else o.remove()};requestAnimationFrame(fr)}
+function msDust(el){return new Promise(res=>{msDustFx(el);MS.flipNext=1;setTimeout(res,140)})}
+// удалённое собеседником, пока ты в чате, — тоже рассыпается
+function msDelFx(c,list){if(MS.c!==c||!list||!list.length)return;const L=MS.msgs[c]||[];list.forEach(i=>{const m=L.find(x=>x.i===i);if(m&&!m.d){const el=document.querySelector(`#msMsgs .mb[data-i="${i}"]`);if(el){msDustFx(el);MS.flipNext=1}}})}
+function msSafe(){let p=$('#msSafeProbe');if(!p){p=document.createElement('div');p.id='msSafeProbe';p.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';document.body.appendChild(p)}const cs=getComputedStyle(p);return{t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0}}
+// подтверждение удаления, как в Telegram: по центру, галочка «Удалить у всех», внизу «Отмена» и «Удалить»
+function msDelAsk(m){$$('.ms-dlg').forEach(x=>x.remove());const p=MS.peers[MS.peer]||{};const self=String(MS.peer)===String(MS.me);let all=true;
+  const ov=document.createElement('div');ov.className='ms-dlg';ov.innerHTML=`<div class="ms-dlgbg"></div><div class="ms-dlgb lq"><b>Удалить сообщение?</b><span>Это действие нельзя отменить.</span>${self?'':`<button type="button" class="ms-dlgck on" data-d="ck"><i>${SELI}</i><span>Удалить у всех</span></button>`}<div class="ms-dlgbt"><button type="button" data-d="no">Отмена</button><button type="button" class="red" data-d="yes">Удалить</button></div></div>`;
+  document.body.appendChild(ov);requestAnimationFrame(()=>ov.classList.add('on'));const close=()=>{ov.classList.remove('on');setTimeout(()=>ov.remove(),220)};
+  ov.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b){if(e.target.classList.contains('ms-dlgbg'))close();return}const d=b.dataset.d;
+    if(d==='ck'){all=!all;b.classList.toggle('on',all);return}if(d==='no')return close();if(d==='yes'){close();msDelete(m,self||all)}})}
+async function msDelete(m,all=true){const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${m.i}"]`);await msDust(el);m.d=1;m.x='';delete m.fl;if(MS.pin[MS.c]===m.i)MS.pin[MS.c]=-1;msPaintMsgs();msPinBar();try{await msApi('del',{c:MS.c,i:m.i,all:all?1:0})}catch(e){toast(e.message,'x')}}
 // одноразовое: у получателя после просмотра — исчезает у обоих
 async function msOnceDone(m){if(!m||!m.fl||!m.fl.once||String(m.f)===String(MS.me)||m.i==null)return;const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${m.i}"]`);await msDust(el);m.d=1;m.o1=1;m.x='';delete m.fl;msPaintMsgs();msApi('once',{c:MS.c,i:m.i}).catch(()=>{})}
 // контекстное меню как в iOS 26: размытие, «приподнятое» сообщение, реакции сверху, действия снизу
@@ -3291,16 +3345,19 @@ function msMenu(b){const k=b.dataset.i||b.dataset.tmp;const m=msFind(k);if(!m||m
   const my=sent&&MS.rx[c]&&MS.rx[c][m.i]&&MS.rx[c][m.i][String(MS.me)];
   const acts=(sent?it('ms-reply',REPLYI,'Ответить'):'')+(mine&&sent&&!m.fl?.vo&&!m.fl?.rd&&(x||m.fl)?it('ms-edit',PENI,'Изменить'):'')+(x?it('ms-copy',ico('copy'),'Копировать'):'')+(sent?it('ms-pin',PINI,MS.pin[c]===m.i?'Открепить':'Закрепить'):'')+(sent?it('ms-fwd',FWD,'Переслать'):'')
     +(F&&m.fl.rd?it('ms-csave',ico('down'),'Сохранить в галерею'):'')+(F&&/^(image|video)\//.test(m.fl.ty)&&!m.fl.rd?it('ms-save',ico('down'),'Сохранить в галерею'):'')+(F?it('ms-dl',ico('file'),'Скачать файл'):'')+(F||x?it('ms-share',ico('ext'),'Поделиться'):'')
-    +(m.err&&m._j?it('ms-retry',ico('refresh'),'Повторить'):'')+((m.pend||m.err)&&m.i==null?it('ms-upcancel',ico('x'),'Отменить отправку','red'):'')+(mine&&sent?it('ms-del',ico('trash'),'Удалить','red'):'');
+    +(m.err&&m._j?it('ms-retry',ico('refresh'),'Повторить'):'')+((m.pend||m.err)&&m.i==null?it('ms-upcancel',ico('x'),'Отменить отправку','red'):'')+(sent?it('ms-del',ico('trash'),'Удалить','red'):'');
   ov.innerHTML=`<div class="ms-ctxbg"></div>${sent?`<div class="ms-ctxr lq">${RX_SET.slice(0,7).map((e,n)=>`<button data-act="ms-react" data-k="${m.i}" data-e="${e}" class="${my===e?'on':''}" style="--n:${n}">${e}</button>`).join('')}<button class="more" data-act="ms-rxmore" data-k="${m.i}">${ico('chev','s')}</button></div>`:''}<div class="ms-ctxa lq">${acts}</div>`;
   document.body.appendChild(ov);ov.appendChild(clone);
   const W=innerWidth,H=(window.visualViewport?visualViewport.height:innerHeight),rx=ov.querySelector('.ms-ctxr'),ac=ov.querySelector('.ms-ctxa');
-  const aw=ac.offsetWidth,ah=ac.offsetHeight,rh=rx?rx.offsetHeight+10:0,rw=rx?rx.offsetWidth:0;
-  const maxH=Math.min(r.height,H-ah-rh-80);let top=Math.max(rh+20+(window.visualViewport?0:0),Math.min(r.top,H-ah-maxH-24));
-  clone.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;max-height:${Math.max(60,maxH)}px;overflow:hidden;margin:0`;
+  const sa=msSafe(),T0=sa.t+12,B0=H-sa.b-16;
+  let aw=ac.offsetWidth,ah=ac.offsetHeight;const rh=rx?rx.offsetHeight+10:0,rw=rx?rx.offsetWidth:0;
+  // если меню + реакции + сообщение не помещаются — сначала ужимаем сообщение, потом список листается
+  const room=B0-T0-rh-10;let maxH=Math.min(r.height,room-ah);if(maxH<56){maxH=Math.min(r.height,56);if(ah>room-maxH){ah=Math.max(150,room-maxH);ac.style.maxHeight=ah+'px';ac.style.overflowY='auto'}}
+  let top=Math.max(T0+rh,Math.min(r.top,B0-ah-10-maxH));
+  clone.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;max-height:${maxH}px;overflow:hidden;margin:0`;
   requestAnimationFrame(()=>{clone.style.transition='top .34s cubic-bezier(.2,1.2,.3,1),transform .34s cubic-bezier(.2,1.2,.3,1)';clone.style.top=top+'px';clone.style.transform='scale(1.02)';ov.classList.add('on')});
   const right=mine;const ax=right?Math.max(10,Math.min(W-aw-10,r.right-aw)):Math.max(10,Math.min(W-aw-10,r.left));
-  ac.style.left=ax+'px';ac.style.top=(top+Math.max(60,maxH)+10)+'px';ac.style.transformOrigin=right?'top right':'top left';
+  ac.style.left=ax+'px';ac.style.top=(top+maxH+10)+'px';ac.style.transformOrigin=right?'top right':'top left';
   if(rx){rx.style.left=Math.max(10,Math.min(W-rw-10,right?r.right-rw:r.left))+'px';rx.style.top=(top-rh)+'px';rx.style.transformOrigin=right?'bottom right':'bottom left'}
   b.classList.add('ms-ghost');MS.sel=k;
   ov.addEventListener('click',e=>{if(!e.target.closest('[data-act]'))msSelClose()})}
@@ -3390,7 +3447,7 @@ async function tcQueue(){if(TCB)return;TCB=true;try{for(;;){const el=[...documen
 function tcMake(src,vid){return new Promise(res=>{const S=240;const fin=(el,w,h)=>{try{const k=Math.max(S/w,S/h),cv=document.createElement('canvas');cv.width=cv.height=S;cv.getContext('2d').drawImage(el,(S-w*k)/2,(S-h*k)/2,w*k,h*k);res(cv.toDataURL('image/jpeg',.72))}catch(e){res(null)}};
   if(vid){const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.src=src+'#t=0.1';v.onloadeddata=()=>{v.currentTime=Math.min(.1,v.duration||.1)};v.onseeked=()=>{fin(v,v.videoWidth,v.videoHeight);v.removeAttribute('src');v.load()};v.onerror=()=>res(null);setTimeout(()=>res(null),8000)}
   else{const i=new Image();i.decoding='async';i.onload=()=>fin(i,i.naturalWidth,i.naturalHeight);i.onerror=()=>res(null);i.src=src}})}
-function msAttClose(now){const ov=$('#msAtt');if(AT.cam){AT.cam.getTracks().forEach(t=>t.stop());AT.cam=null}if(!ov)return;if(now){ov.remove();return}ov.classList.remove('on');setTimeout(()=>ov.remove(),320)}
+function msAttClose(now){mapGeoStop();const ov=$('#msAtt');if(AT.cam){AT.cam.getTracks().forEach(t=>t.stop());AT.cam=null}if(!ov)return;if(now){ov.remove();return}ov.classList.remove('on');setTimeout(()=>ov.remove(),320)}
 function msAttTab(t){AT.tab=t;AT.sel=[];msAttSendBtn();const tabs=$('#msAtTabs');if(!tabs)return;tabs.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));const on=tabs.querySelector('.on'),d=tabs.querySelector('.ms-drop');
   if(on&&d){d.style.transform=`translateX(${on.offsetLeft}px)`;d.style.width=on.offsetWidth+'px';d.classList.remove('jelly');void d.offsetWidth;d.classList.add('jelly')}
   if(t!=='gal'&&AT.cam){AT.cam.getTracks().forEach(x=>x.stop());AT.cam=null}
@@ -3409,10 +3466,45 @@ function msAttTab0(t,B){
     if(!navigator.geolocation){$('#msAtMap').innerHTML='<div class="ms-a2ml">Геопозиция недоступна в этом браузере</div>';return}
     navigator.geolocation.getCurrentPosition(p=>{AT.pos=p.coords;const m=$('#msAtMap');if(!m)return;m.innerHTML=msMapHTML(p.coords.latitude,p.coords.longitude,16);$('#msAtGeo').disabled=false;$('#msAtAcc').textContent='Точность '+Math.round(p.coords.accuracy)+' м'},
       e=>{const m=$('#msAtMap');if(m)m.innerHTML=`<div class="ms-a2ml">${e.code===1?'Нет доступа к геопозиции — разреши её в настройках':'Не удалось определить место'}</div>`},{enableHighAccuracy:true,timeout:15000,maximumAge:60000})}}
+/* ---------- карта в «Геопозиции»: двигается пальцем, +/−, нажатие ставит метку на любое место; точность уточняется по GPS ---------- */
+const MAP={z:16,cx:0,cy:0,me:null,acc:0,pin:null,watch:null,tiles:{}};
+const mWX=(lon,z)=>(lon+180)/360*256*2**z,mWY=(lat,z)=>{const s=Math.sin(lat*Math.PI/180);return(.5-Math.log((1+s)/(1-s))/(4*Math.PI))*256*2**z};
+const mLon=(x,z)=>x/(256*2**z)*360-180,mLat=(y,z)=>{const n=Math.PI-2*Math.PI*y/(256*2**z);return 180/Math.PI*Math.atan(.5*(Math.exp(n)-Math.exp(-n)))};
+function mapDraw(){const box=$('#msAtMap');if(!box)return;const T=box.querySelector('.ms-mapt'),W=box.clientWidth,H=box.clientHeight,z=MAP.z,n=2**z;const x0=MAP.cx-W/2,y0=MAP.cy-H/2;const need={};
+  for(let tx=Math.floor(x0/256);tx<=Math.floor((x0+W)/256);tx++)for(let ty=Math.floor(y0/256);ty<=Math.floor((y0+H)/256);ty++){if(ty<0||ty>=n)continue;const wx=((tx%n)+n)%n,k=z+'/'+wx+'/'+ty;need[k]=1;let im=MAP.tiles[k];
+    if(!im){im=document.createElement('img');im.alt='';im.draggable=false;im.onerror=()=>{im.style.visibility='hidden'};im.src=`https://tile.openstreetmap.org/${k}.png`;MAP.tiles[k]=im;T.appendChild(im)}im.style.left=(tx*256-x0)+'px';im.style.top=(ty*256-y0)+'px'}
+  for(const k in MAP.tiles)if(!need[k]){MAP.tiles[k].remove();delete MAP.tiles[k]}
+  const put=(el,lat,lon)=>{if(!el)return;if(lat==null){el.hidden=true;return}el.hidden=false;el.style.left=(mWX(lon,z)-x0)+'px';el.style.top=(mWY(lat,z)-y0)+'px'};
+  put(box.querySelector('.ms-mapme'),MAP.me&&MAP.me[0],MAP.me&&MAP.me[1]);put(box.querySelector('.ms-mapacc'),MAP.me&&MAP.me[0],MAP.me&&MAP.me[1]);put(box.querySelector('.ms-mappin'),MAP.pin&&MAP.pin[0],MAP.pin&&MAP.pin[1]);
+  if(MAP.me){const mpp=156543.03*Math.cos(MAP.me[0]*Math.PI/180)/n,r=Math.max(8,MAP.acc/mpp);const a=box.querySelector('.ms-mapacc');a.style.width=a.style.height=2*r+'px'}}
+function mapCenter(lat,lon){MAP.cx=mWX(lon,MAP.z);MAP.cy=mWY(lat,MAP.z);mapDraw()}
+function mapZoom(d){const z=Math.max(3,Math.min(19,MAP.z+d));if(z===MAP.z)return;const lat=mLat(MAP.cy,MAP.z),lon=mLon(MAP.cx,MAP.z);MAP.z=z;for(const k in MAP.tiles){MAP.tiles[k].remove();delete MAP.tiles[k]}mapCenter(lat,lon)}
+function mapBind(){const box=$('#msAtMap');let s=null;
+  box.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;box.setPointerCapture(e.pointerId);s={x:e.clientX,y:e.clientY,cx:MAP.cx,cy:MAP.cy,mv:false}});
+  box.addEventListener('pointermove',e=>{if(!s)return;const dx=e.clientX-s.x,dy=e.clientY-s.y;if(!s.mv&&Math.hypot(dx,dy)<6)return;s.mv=true;MAP.cx=s.cx-dx;MAP.cy=s.cy-dy;mapDraw()});
+  box.addEventListener('pointerup',e=>{if(!s)return;const S=s;s=null;if(S.mv)return;const r=box.getBoundingClientRect();const x=MAP.cx+(e.clientX-r.left-r.width/2),y=MAP.cy+(e.clientY-r.top-r.height/2);MAP.pin=[mLat(y,MAP.z),mLon(x,MAP.z)];mapDraw();
+    const p=box.querySelector('.ms-mappin');p.classList.remove('drop');void p.offsetWidth;p.classList.add('drop');try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}const b=$('#msAtPin');if(b){b.hidden=false;b.querySelector('small').textContent=MAP.pin[0].toFixed(5)+', '+MAP.pin[1].toFixed(5)}});
+  box.addEventListener('pointercancel',()=>{s=null});box.addEventListener('wheel',e=>{e.preventDefault();mapZoom(e.deltaY<0?1:-1)},{passive:false})}
+function mapGeoStop(){if(MAP.watch!=null&&navigator.geolocation)navigator.geolocation.clearWatch(MAP.watch);MAP.watch=null}
+// точность: следим за GPS несколько секунд и берём самое точное значение
+function mapGeoStart(){mapGeoStop();if(!navigator.geolocation)return;const t0=Date.now();let first=true;
+  MAP.watch=navigator.geolocation.watchPosition(p=>{const c=p.coords;if(MAP.me&&c.accuracy>MAP.acc&&!first)return;LS.set('msGeoOk',1);MAP.me=[c.latitude,c.longitude];MAP.acc=c.accuracy;AT.pos=c;
+      if(first){first=false;mapCenter(c.latitude,c.longitude)}else mapDraw();const b=$('#msAtGeo');if(b){b.disabled=false;b.querySelector('small').textContent=`Точность ${Math.round(c.accuracy)} м${c.accuracy>25&&Date.now()-t0<20000?' · уточняю…':''}`}
+      if(c.accuracy<=10||Date.now()-t0>25000)mapGeoStop()},
+    e=>{const m=$('#msAtMap .ms-a2ml');if(MAP.me)return;if(m){m.hidden=false;m.innerHTML=e.code===1?'Нет доступа к геопозиции — разреши её в настройках':'Не удалось определить место. Можно выбрать точку на карте.'}if(e.code===1)LS.set('msGeoOk',0)},{enableHighAccuracy:true,timeout:30000,maximumAge:0})}
+function mapTabHTML(){return `<div class="ms-a2map map" id="msAtMap"><div class="ms-mapt"></div><span class="ms-mapacc" hidden></span><span class="ms-mapme" hidden></span><span class="ms-mappin" hidden>${AT_TABS[2][3]}</span>
+  <div class="ms-a2ml">${ico('loader','s ldg')}<span>Определяю место…</span></div><div class="ms-mapz"><button type="button" data-z="1">+</button><button type="button" data-z="-1">−</button></div><button type="button" class="ms-mapmy" data-z="me"><svg class="i" viewBox="0 0 24 24"><path d="M12 2.5 19.5 20 12 16.2 4.5 20z" fill="currentColor" transform="rotate(45 12 12)"/></svg></button><small class="ms-mapcr">© OpenStreetMap</small></div>
+  <div class="ms-a2hint">Нажми на карту, чтобы выбрать любое место</div>
+  <div class="ms-a2l"><button type="button" data-at="geopin" id="msAtPin" hidden><span style="--c:#e5484d">${AT_TABS[2][3]}</span><div><b>Отправить выбранное место</b><small></small></div></button><button type="button" data-at="geo" id="msAtGeo" disabled><span style="--c:#30a46c">${AT_TABS[2][3]}</span><div><b>Отправить мою геопозицию</b><small>Ждём координаты</small></div></button></div>`}
+function mapOpen(B){B.innerHTML=mapTabHTML();for(const k in MAP.tiles)delete MAP.tiles[k];MAP.pin=null;const box=$('#msAtMap');
+  if(MAP.me)mapCenter(MAP.me[0],MAP.me[1]);else mapCenter(55.7558,37.6173);mapBind();
+  box.addEventListener('click',e=>{const b=e.target.closest('[data-z]');if(!b)return;if(b.dataset.z==='me'){if(MAP.me)mapCenter(MAP.me[0],MAP.me[1]);mapGeoStart();return}mapZoom(+b.dataset.z)});
+  if(MAP.me){const m=box.querySelector('.ms-a2ml');m.hidden=true}mapGeoStart();
+  const hide=()=>{const m=$('#msAtMap .ms-a2ml');if(m&&MAP.me)m.hidden=true};const iv=setInterval(()=>{if(!$('#msAtMap')){clearInterval(iv);mapGeoStop();return}hide()},400)}
 async function geoTab(B){let st='prompt';try{st=(await navigator.permissions.query({name:'geolocation'})).state}catch(e){}if(AT.tab!=='geo')return;
-  if(st==='granted'||AT.geoAsked)return msAttTabGeo(B);
+  if(st==='granted'||AT.geoAsked||(+LS.get('msGeoOk',0)&&st!=='denied'))return msAttTabGeo(B);
   B.innerHTML=`<div class="ms-a2ask"><div class="ce-orb" style="color:#30a46c">${AT_TABS[2][3]}</div><b>Предоставьте доступ к геопозиции, чтобы пользоваться этим</b>${st==='denied'?'<span>Доступ запрещён. Разреши геопозицию для Mundora в настройках браузера или телефона.</span>':''}<button type="button" class="ms-a2btn" data-at="geoask">Предоставить доступ</button></div>`}
-function msAttTabGeo(B){AT.tab='geo0';msAttTab0('geo0',B);AT.tab='geo'}
+function msAttTabGeo(B){mapOpen(B)}
 async function msAttCam(){const v=document.querySelector('.ms-a2cam video');if(!v||!navigator.mediaDevices)return;try{AT.cam=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:640}}});if(AT.tab!=='gal'||!$('#msAtt')){AT.cam.getTracks().forEach(t=>t.stop());AT.cam=null;return}v.srcObject=AT.cam;v.play().catch(()=>{});v.parentNode.classList.add('oncam')}catch(e){}}
 function msAttSendBtn(){const b=$('#msAtSend');if(!b)return;const n=AT.sel.length;b.hidden=!n;b.innerHTML=`${ico('send')}<span>Отправить</span><b>${n}</b>`}
 async function msAttAct(a){const k=a.dataset.at;
@@ -3425,7 +3517,8 @@ async function msAttAct(a){const k=a.dataset.at;
   if(k==='sel'){const id=a.dataset.c+':'+a.dataset.i;const n=AT.sel.indexOf(id);if(n>=0)AT.sel.splice(n,1);else AT.sel.push(id);$$('.ms-a2it').forEach(b=>{const j=AT.sel.indexOf(b.dataset.c+':'+b.dataset.i);b.classList.toggle('on',j>=0);b.querySelector('i').textContent=j>=0?j+1:''});msAttSendBtn();return}
   if(k==='fwd'){AT.sel=[a.dataset.c+':'+a.dataset.i];return msAttSendSel()}
   if(k==='contact'){const p=MS.peers[a.dataset.id];msAttClose();return msSendText(`👤 ${(p&&p.name||'Контакт').replace(/\n/g,' ')}\n${location.origin}/#msgp-${a.dataset.id}`)}
-  if(k==='geo'){const c=AT.pos;if(!c)return;msAttClose();const la=c.latitude.toFixed(6),lo=c.longitude.toFixed(6);return msSendText(`📍 Геопозиция\nhttps://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=16/${la}/${lo}`)}}
+  if(k==='geopin'){const P=MAP.pin;if(!P)return;mapGeoStop();msAttClose();const la=P[0].toFixed(6),lo=P[1].toFixed(6);return msSendText(`📍 Место\nhttps://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=16/${la}/${lo}`)}
+  if(k==='geo'){const c=AT.pos;if(!c)return;mapGeoStop();msAttClose();const la=c.latitude.toFixed(6),lo=c.longitude.toFixed(6);return msSendText(`📍 Геопозиция\nhttps://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=16/${la}/${lo}`)}}
 async function msAttSendSel(){if(AT.sel.length&&AT.sel[0].includes(':')&&/^[iva]:/.test(AT.sel[0]))return mdSend(AT.sel.slice());const L=AT.sel.slice(),to=MS.peer;msAttClose();let ok=0;for(const id of L){const [c,i]=id.split(':');try{await msApi('fwd',{c,i:+i,to,plain:1});ok++}catch(e){toast(e.message,'x')}}if(ok){MS.v='';msPoll()}}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#msAtSend'))msAttSendSel()});
 async function msSendText(x){if(!MS.c)return;const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);await msPost(m,{to:MS.peer,x})}
@@ -3503,7 +3596,7 @@ const MS_ACT={
   'ms-share'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msShare(m)},
   'ms-fwd'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msForward(m)},
   async 'ms-fwto'(el){el.disabled=true;try{const to=el.dataset.to;await msApi('fwd',{c:MS.c,i:+el.dataset.i,to});closeSheet();toast('Переслано','check');const c2=msCid(to);delete MS.msgs[c2];location.hash='#msg-'+to}catch(e){toast(e.message,'x');el.disabled=false}},
-  async 'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);if(!m||m.i==null)return;await new Promise(r=>setTimeout(r,180));msDelete(m)},
+  'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);if(!m||m.i==null)return;setTimeout(()=>msDelAsk(m),180)},
   'ms-react'(el){const i=+el.dataset.k;msSelClose();msReact(i,el.dataset.e)},
   'ms-rxmore'(el){msRxMore(+el.dataset.k)},
   'ms-reply'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msReplyTo(m.i)},
