@@ -24,7 +24,7 @@
     },
     "android": {
       "package": "com.mundere.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive.png",
         "backgroundColor": "#1e123b"
@@ -35,7 +35,12 @@
         "android.permission.VIBRATE",
         "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
       ]
     },
     "plugins": [
@@ -74,6 +79,12 @@
           "photosPermission": "Mundere сохраняет фото и видео из чатов в галерею",
           "savePhotosPermission": "Mundere сохраняет фото и видео из чатов в галерею",
           "isAccessMediaLocationEnabled": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Mundere отправляет твою геопозицию в чат, только когда ты сам нажимаешь «Отправить»"
         }
       ]
     ]

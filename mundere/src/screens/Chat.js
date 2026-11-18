@@ -1,6 +1,7 @@
 // Переписка: перевёрнутый список (быстрый на длинных чатах), стеклянная шапка и поле ввода,
 // меню сообщения-пузырёк с реакциями, ответы, фото, голосовые, группы и каналы.
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Linking } from 'react-native';
 import { View, Text, TextInput, FlatList, KeyboardAvoidingView, Platform, Animated, Pressable, Modal, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,11 +15,13 @@ import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { EDIT } from './PhotoEdit';
+import AttachSheet, { MapTiles } from '../AttachSheet';
+import { BASE } from '../api';
 import { PanResponder } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { S, useStore, isG, openChat, closeChat, older, sendText, loadPeers, poke, emit } from '../store';
+import { S, useStore, isG, openChat, closeChat, older, sendText, loadPeers, poke, emit, toggleMute } from '../store';
 import { M, ms, fileUri, authed, upload } from '../api';
 import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, hm, dayLabel, seen, gN, ucol, toast, tap, bubble, Wallpaper } from '../ui';
 
@@ -137,11 +140,40 @@ export default function Chat({ route, navigation }) {
     if (res.canceled) return;
     for (const a of res.assets) await sendFile({ uri: a.uri, name: a.name || 'файл', type: a.mimeType || 'application/octet-stream', size: a.size || 0 });
   }
-  const attach = e => bubble({ x: e.nativeEvent.pageX, y: e.nativeEvent.pageY }, [
-    { t: 'Фото и видео', ic: 'images-outline', fn: pickMedia },
-    { t: 'Камера', ic: 'camera-outline', fn: takePhoto },
-    { t: 'Файл', ic: 'document-outline', fn: pickFile },
-  ]);
+  const [att, setAtt] = useState(false);
+  const attach = () => { tap(); setAtt(true); };
+  async function pickRaw() {
+    const pr = await ImagePicker.requestMediaLibraryPermissionsAsync(); if (!pr.granted) return toast('Нет доступа к фото', 1);
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images', 'videos'], allowsMultipleSelection: true, selectionLimit: 10, quality: 1 });
+    if (res.canceled) return;
+    for (const a of res.assets) await sendFile({ uri: a.uri, name: a.fileName || ((a.type === 'video' ? 'video_' : 'photo_') + Date.now() + (a.type === 'video' ? '.mp4' : '.jpg')), type: a.mimeType || (a.type === 'video' ? 'video/mp4' : 'image/jpeg'), size: a.fileSize || 0 });
+  }
+  async function pickAudio() {
+    const res = await DocumentPicker.getDocumentAsync({ type: 'audio/*', multiple: true, copyToCacheDirectory: true });
+    if (res.canceled) return;
+    for (const a of res.assets) await sendFile({ uri: a.uri, name: a.name || 'audio', type: a.mimeType || 'audio/mpeg', size: a.size || 0 });
+  }
+  async function assetFile(as) { const info = await MediaLibrary.getAssetInfoAsync(as); return info.localUri || info.uri || as.uri; }
+  async function sendAssets(L, cap) {
+    for (let k = 0; k < L.length; k++) {
+      const as = L[k], cp = k === 0 ? cap : '';
+      try {
+        const uri = await assetFile(as);
+        if (as.mediaType === 'video') await sendFile({ uri, name: as.filename || 'video_' + Date.now() + '.mp4', type: 'video/mp4', size: 0, w: as.width, h: as.height, d: Math.round(as.duration || 0) }, cp);
+        else {
+          const w = Math.min(as.width || 1600, 1600);
+          const r = await ImageManipulator.manipulateAsync(uri, [{ resize: { width: w } }], { compress: 0.82, format: ImageManipulator.SaveFormat.JPEG, base64: true });
+          await sendFile({ uri: r.uri, b64: r.base64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.base64.length * 0.75), w: r.width, h: r.height }, cp);
+        }
+      } catch (e) { toast(e.message, 1); }
+    }
+  }
+  async function openAsset(as) {
+    if (as.mediaType === 'video') return sendAssets([as], txt.trim());
+    const uri = await assetFile(as), cap = txt.trim();
+    EDIT.done = r => sendFile({ uri: r.uri, b64: r.b64, name: 'photo_' + Date.now() + '.jpg', type: 'image/jpeg', size: Math.round(r.b64.length * 0.75), w: r.w, h: r.h }, r.cap);
+    setTxt(''); navigation.navigate('PhotoEdit', { uri, w: as.width, h: as.height, cap });
+  }
 
   // голосовые: держи кнопку микрофона — запись, отпусти — отправка
   const rec = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
@@ -313,7 +345,7 @@ export default function Chat({ route, navigation }) {
           </View>
         ) : (
           <View style={{ alignItems: 'center', paddingBottom: Math.max(ins.bottom, 8) + 4, paddingTop: 8 }}>
-            <Press onPress={() => toast('Канал без звука')} pop round={24} amt={0.08}><Glass round={24} style={{ paddingHorizontal: 26, height: 48, flexDirection: 'row', alignItems: 'center' }}><Ionicons name="notifications-off-outline" size={20} color="#fff" /><Text style={{ color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>Выключить звук</Text></Glass></Press>
+            <Press onPress={() => toast(toggleMute(c) ? 'Уведомления выключены' : 'Уведомления включены')} pop round={24} amt={0.08}><Glass round={24} style={{ paddingHorizontal: 26, height: 48, flexDirection: 'row', alignItems: 'center' }}><Ionicons name={S.muted && S.muted[c] ? 'volume-high-outline' : 'notifications-off-outline'} size={20} color="#fff" /><Text style={{ color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>{S.muted && S.muted[c] ? 'Включить звук' : 'Выключить звук'}</Text></Glass></Press>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -344,6 +376,9 @@ export default function Chat({ route, navigation }) {
           <Text style={{ color: C.mute, marginTop: 8 }}>отпусти — отправить</Text>
         </View>
       )}
+      {att && <AttachSheet chatId={c} onClose={() => setAtt(false)} onCamera={takePhoto} onPickMedia={pickMedia} onPickFile={pickFile} onPickRaw={pickRaw} onPickAudio={pickAudio}
+        onSendAssets={sendAssets} onOpenAsset={openAsset} onSendText={t => sendText(to, c, t).catch(e => toast(e.message, 1))}
+        onForward={f => ms('fwd', { c: f.c, i: f.i, to, plain: 1 }).then(poke).catch(e => toast(e.message, 1))} />}
       {menu && <MsgMenu c={c} G={G} menu={menu} canW={canW} onClose={() => setMenu(null)} onReply={m => setReply(m)}
         onEdit={m => { setReply(null); setEditing(m); const e = S.ed[c] && S.ed[c][m.i]; setTxt(e != null ? (typeof e === 'object' ? e.x : e) : m.x); }}
         onForward={m => navigation.navigate('Forward', { c, i: m.i })} />}
@@ -478,7 +513,17 @@ const Bubble = React.memo(function Bubble({ c, m, G, first, last, reply, onLong,
               {!!fl.d && <View style={{ position: 'absolute', left: 8, top: 8, backgroundColor: 'rgba(0,0,0,.45)', borderRadius: 9, paddingHorizontal: 6 }}><Text style={{ color: '#fff', fontSize: 12 }}>{Math.floor(fl.d / 60)}:{String(fl.d % 60).padStart(2, '0')}</Text></View>}
             </View>
           ) : fl && !isImg && !fl.vo && <FileRow fl={fl} mine={mine} />}
-          {!!x && <Text style={{ color: '#fff', fontSize: 15.5, lineHeight: 21, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }} selectable={false}>{x}</Text>}
+          {!!x && /^📍 /.test(x) && (() => { const g = /mlat=(-?[\d.]+)&mlon=(-?[\d.]+)/.exec(x); if (!g) return null; return (
+            <Pressable onPress={() => Linking.openURL(`geo:${g[1]},${g[2]}?q=${g[1]},${g[2]}`).catch(() => Linking.openURL(x.split('\n')[1]))} style={{ margin: -4, marginBottom: 4 }}>
+              <MapTiles lat={+g[1]} lon={+g[2]} w={240} h={150} round={14} />
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15, marginTop: 6, marginLeft: 4 }}>{x.split('\n')[0].replace('📍 ', '')}</Text>
+            </Pressable>); })()}
+          {!!x && /^👤 /.test(x) && (() => { const id = (/#msgp-(\d+)/.exec(x) || [])[1]; return (
+            <Pressable onPress={() => id && onUser(id)} style={{ flexDirection: 'row', alignItems: 'center', minWidth: 200, paddingVertical: 2 }}>
+              <Avatar p={S.peers[id]} size={42} />
+              <View style={{ marginLeft: 10 }}><Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>{x.split('\n')[0].replace('👤 ', '')}</Text><Text style={{ color: mine ? '#cfe0ff' : C.blue, fontSize: 13 }}>Контакт · открыть профиль</Text></View>
+            </Pressable>); })()}
+          {!!x && !/^(📍|👤) /.test(x) && <Text style={{ color: '#fff', fontSize: 15.5, lineHeight: 21, marginHorizontal: isImg ? 8 : 0, marginTop: isImg ? 4 : 0 }} selectable={false}>{x}</Text>}
           <View style={isImg && !x ? { position: 'absolute', right: 10, bottom: 8, backgroundColor: 'rgba(0,0,0,.45)', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1 } : { marginHorizontal: isImg ? 8 : 0, marginBottom: isImg ? 4 : 0 }}>{meta}</View>
         </LinearGradient>
         {rx && <Reacts rx={rx} mine={mine} c={c} i={m.i} />}

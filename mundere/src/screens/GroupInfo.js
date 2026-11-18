@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { S, useStore, loadPeers, cidOf, emit } from '../store';
+import { S, useStore, loadPeers, cidOf, emit, toggleMute } from '../store';
 import { M, ms, BASE, gAvaUri } from '../api';
 import { C, Glass, GlassBtn, Press, Avatar, GAvatar, Vf, gN, seen, bubble, toast, Wallpaper } from '../ui';
 import { TopBar } from './Profile';
@@ -60,7 +60,8 @@ export default function GroupInfo({ route, navigation }) {
           <Text style={{ color: C.mute, fontSize: 15, marginTop: 4 }}>{gN(g, info ? info.members.length : g.n)}</Text>
         </View>
         <View style={{ flexDirection: 'row', marginTop: 20, marginHorizontal: -4 }}>
-          <Act ic="chatbubble" t="Чат" onPress={() => navigation.goBack()} />
+          <Act ic="chatbubble-ellipses-outline" t="Чат" onPress={() => navigation.goBack()} />
+          <Act ic={S.muted && S.muted[c] ? 'volume-high-outline' : 'notifications-outline'} t={S.muted && S.muted[c] ? 'Вкл. звук' : 'Без звука'} onPress={() => toast(toggleMute(c) ? 'Уведомления выключены' : 'Уведомления включены')} />
           {!!link && <Act ic="share-outline" t="Пригласить" onPress={invite} />}
           <Act ic="exit-outline" t="Выйти" red onPress={leave} />
         </View>

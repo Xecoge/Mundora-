@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
 import { ms, msInit, M } from './api';
 import { notify } from './notify';
+import * as SecureStore from 'expo-secure-store';
 
 export const S = {
   ready: false, chats: [], peers: {}, msgs: {}, read: {}, typing: {}, G: {}, rx: {}, ed: {}, pin: {},
@@ -37,7 +38,7 @@ function applyChats(chats) {
       if (was == null ? c.n > 0 && c.u > 0 : c.n > was) {
         if (String(c.f) === String(M.me) || !c.u) continue;
         if (appActive && S.open === c.c) continue;
-        if (c.g && S.muted && S.muted[c.c]) continue;
+        if (S.muted && S.muted[c.c]) continue;
         const who = (S.peers[c.f] || {}).name || 'Новое сообщение';
         const title = c.g ? c.g.title : who;
         const body = (c.g && c.g.type !== 'channel' ? who + ': ' : '') + String(c.pv || '');
@@ -50,7 +51,10 @@ function applyChats(chats) {
   loadPeers(chats.flatMap(c => (c.g ? [c.f] : [c.p])).filter(x => x != null));
 }
 
+export async function loadMuted() { try { S.muted = JSON.parse((await SecureStore.getItemAsync('muted')) || '{}') || {}; } catch (e) { S.muted = {}; } }
+export function toggleMute(c) { S.muted = S.muted || {}; if (S.muted[c]) delete S.muted[c]; else S.muted[c] = 1; SecureStore.setItemAsync('muted', JSON.stringify(S.muted)).catch(() => {}); emit(); return !!S.muted[c]; }
 export async function start() {
+  await loadMuted();
   const j = await msInit();
   S.me = j.me; S.v = j.v; applyChats(j.chats || []); S.ready = true; emit();
   loop();
