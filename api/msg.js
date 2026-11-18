@@ -52,7 +52,8 @@ async function push(c, me, G, m, pvText) {
     ...O.flatMap(u => [['HSET', 'ci:' + u, c, meta], ['HINCRBY', 'cu:' + u, c, '1'], ['INCR', 'mv:' + u]])]);
   return len;
 }
-const gOut = (g, me) => ({ id: g.id, type: g.type, title: g.title, about: g.about || '', n: (g.members || []).length, col: g.col || 0, owner: +g.owner, admin: isAdm(g, me), ...(isAdm(g, me) ? { inv: g.inv } : {}) });
+const okAva = a => typeof a === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(a) && a.length < 160000;
+const gOut = (g, me) => ({ id: g.id, type: g.type, title: g.title, about: g.about || '', n: (g.members || []).length, col: g.col || 0, av: g.av || 0, owner: +g.owner, admin: isAdm(g, me), ...(isAdm(g, me) ? { inv: g.inv } : {}) });
 // «прочитано» в группе — кто-нибудь кроме меня дочитал до…
 const readOf = (crAll, me) => { let r = -1; for (const [u, v] of Object.entries(pairs(crAll))) if (u !== String(me)) r = Math.max(r, +v); return r; };
 
@@ -95,6 +96,7 @@ export default async function handler(req) {
       const [v, list] = await Promise.all([kv('GET', 'mv:' + me.id), chatList(me.id)]);
       return json({ tk, me: me.id, v: v || '0', chats: list });
     }
+    if (a === 'gava') { const d = isG(q('c')) ? await kv('GET', 'ga:' + q('c')) : null; if (!d) return new Response('', { status: 404 }); const [h, b64] = String(d).split(','); return new Response(ub64(b64), { headers: { 'content-type': h.slice(5, h.indexOf(';')), 'cache-control': 'public, max-age=31536000, immutable' } }); }
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const W = await who(req, body.tk || q('tk')); if (!W) return json({ error: 'Нужно войти заново', relogin: true }, 401);
     const me = W.id;
@@ -247,6 +249,7 @@ export default async function handler(req) {
       const members = [String(me), ...ids.filter((_, k) => ok[k])];
       const n = await kv('INCR', 'gseq'); const c = 'g' + n;
       const g = { id: c, type, title, about: String(body.about || '').slice(0, 255), owner: String(me), admins: [String(me)], members, inv: rand(8), t: Date.now(), col: n % 7 };
+      if (okAva(body.ava)) { g.av = Date.now(); await kv('SET', 'ga:' + c, body.ava); }
       await jset('gr:' + c, g);
       await push(c, me, g, { f: +me, t: Date.now(), x: '', sys: 'new', st: type }, type === 'channel' ? 'Канал создан' : 'Группа создана');
       return json({ ok: 1, c, g: gOut(g, me) });
@@ -266,6 +269,7 @@ export default async function handler(req) {
         g.members = g.members.filter(x => String(x) !== u); g.admins = g.admins.filter(x => String(x) !== u); await jset('gr:' + c, g);
         await kvMulti([['HDEL', 'ci:' + u, c], ['HDEL', 'cu:' + u, c], ['INCR', 'mv:' + u]]); await push(c, me, g, { f: +me, t: Date.now(), x: '', sys: 'kick', u: [+u] }, 'Участник удалён'); return json({ ok: 1, g: gOut(g, me) }); }
       if (a === 'gedit') { if (!adm) return json({ error: 'Нет прав' }, 403); const t = String(body.title || '').trim().slice(0, 64); if (t) g.title = t; if (body.about != null) g.about = String(body.about).slice(0, 255);
+        if (body.ava === '') { g.av = 0; await kv('DEL', 'ga:' + c); } else if (okAva(body.ava)) { g.av = Date.now(); await kv('SET', 'ga:' + c, body.ava); }
         await jset('gr:' + c, g); await kvMulti(bumpAll(me, c, g)); return json({ ok: 1, g: gOut(g, me) }); }
       if (a === 'gadmin') { const u = String(body.u || ''); if (String(me) !== String(g.owner) || !g.members.map(String).includes(u)) return json({ error: 'Нет прав' }, 403);
         g.admins = body.on ? [...new Set([...g.admins.map(String), u])] : g.admins.filter(x => String(x) !== u || u === String(g.owner)); await jset('gr:' + c, g); await kvMulti(bumpAll(me, c, g)); return json({ ok: 1 }); }

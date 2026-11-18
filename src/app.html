@@ -1331,6 +1331,10 @@ html.and .ms-ctx.done .ms-ctxa,html.and .ms-ctx.done .ms-ctxr,html.and .bub.done
 .bub{filter:none!important;will-change:transform,opacity;-webkit-backdrop-filter:blur(20px) saturate(1.8);backdrop-filter:blur(20px) saturate(1.8);transition:transform .48s cubic-bezier(.2,1.3,.32,1),opacity .16s!important;border-radius:26px!important}
 .bub.off{transition:transform .22s cubic-bezier(.5,0,.75,.4),opacity .18s!important}
 @keyframes bubIn{0%{transform:scale(.14);opacity:0}40%{opacity:1}100%{transform:none;opacity:1}}
+.ms-ngava{display:flex;flex-direction:column;align-items:center;width:100%;gap:8px;margin:14px auto 18px;border:0;background:none;color:#4aa3ff;font:inherit;font-size:15px;cursor:pointer}
+.ms-ngava>span{display:block;border-radius:50%;transition:transform .45s cubic-bezier(.2,1.5,.35,1)}.ms-ngava:active>span{transform:scale(.92)}.ms-ngava img.ms-ava{width:96px;height:96px}
+.ms-avcam{--gc:#1d3350!important;background:#16263b!important;color:#3e88f7}.ms-avcam svg{width:42px;height:42px}
+.ms-gihava{border:0;background:none;padding:0;border-radius:50%;cursor:pointer}img.ms-ava.xl{width:96px;height:96px}
 /* меню-пузырёк */
 .bub-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0);transition:background .3s}.bub-ov.on{background:rgba(0,0,0,.18)}
 .bub{position:fixed;z-index:9999;min-width:220px;max-width:min(300px,calc(100vw - 16px));padding:6px;border-radius:26px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
@@ -2976,7 +2980,7 @@ const msGr=c=>MS.G[c]||((MS.chats.find(x=>x.c===c)||{}).g)||null;
 const GCOL=['#e17076','#f5a35b','#9f86e8','#6cc35a','#4fc3c6','#5aa7e6','#ec74a8'];
 const UCOL=['#ff8e86','#ffc076','#b9a3ff','#8ee27a','#6fdde0','#7cc2ff','#ff92c2'];
 const msUcol=id=>UCOL[Math.abs(+id||0)%7];
-const msGAva=(g,cls='')=>{g=g||{};const t=String(g.title||'?').trim();return `<span class="ms-ava ms-gava ${cls}" style="--gc:${GCOL[g.col||0]}">${g.type==='channel'&&!t?ico('mega'):esc([...t][0]||'?').toUpperCase()}</span>`};
+const msGAva=(g,cls='')=>{g=g||{};if(g.src||g.av)return `<img class="ms-ava ${cls}" src="${g.src||'/api/msg?a=gava&c='+g.id+'&v='+g.av}" alt="">`;const t=String(g.title||'?').trim();return `<span class="ms-ava ms-gava ${cls}" style="--gc:${GCOL[g.col||0]}">${g.type==='channel'&&!t?ico('mega'):esc([...t][0]||'?').toUpperCase()}</span>`};
 const msGN=(g,n)=>{n=n??(g&&g.n)??0;return g&&g.type==='channel'?n+' '+plural(n,'подписчик','подписчика','подписчиков'):n+' '+plural(n,'участник','участника','участников')};
 const msUName=id=>String(id)===String(MS.me)?'Вы':esc((MS.peers[id]||{}).name||'ID '+id);
 function msGStat(){const g=msGr(MS.c);if(MS.typing&&g&&g.type!=='channel')return `<span class="ms-typ">${msUName(MS.typing)} печатает<i></i><i></i><i></i></span>`;return g?msGN(g):''}
@@ -3541,7 +3545,7 @@ function msPresence(force){if(!MS.peer||String(MS.peer)===String(MS.me))return;c
   msApi('on',null,'&ids='+MS.peer).then(j=>{Object.assign(MS.on2,j.on||{});const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}).catch(()=>{})}
 function msLoop(){clearTimeout(MS.timer);if(!USR||USR.id==null)return;MS.timer=setTimeout(msPoll,MS.on?(document.hidden?6000:1000):(document.hidden?60000:15000))}
 async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
-  try{if(!MS.ok)await msInit();MS.n++;const c=MS.on?MS.c:null,L=c?MS.msgs[c]:null,last=L?[...L].reverse().find(m=>m.i!=null):null;
+  try{if(!MS.ok)await msInit();MS.n++;const c=MS.on&&MS.pane==='chat'?MS.c:null,L=c?MS.msgs[c]:null,last=L?[...L].reverse().find(m=>m.i!=null):null;
     const hb=!document.hidden&&(MS.n%15===1||!MS.on); // «я в сети» — раз в 15 с, пока сайт открыт
     const j=await msApi('poll',null,`&v=${MS.v}${hb?'&hb=1':''}${c&&L?`&c=${c}&s=${last?last.i:(MS.from[c]||0)-1}`:''}`);
     if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
@@ -3932,9 +3936,12 @@ function bubClose(now){const B=BMENU;if(!B)return;BMENU=null;B.anchor.classList.
 addEventListener('keydown',e=>{if(e.key==='Escape'&&BMENU)bubClose()});
 
 /* ---------- группы и каналы: создание ---------- */
+const GCAM='<svg class="i" viewBox="0 0 24 24" fill="currentColor"><path d="M9.2 4.5h5.6l1.4 2H19a2.5 2.5 0 0 1 2.5 2.5v8.5A2.5 2.5 0 0 1 19 20H5a2.5 2.5 0 0 1-2.5-2.5V9A2.5 2.5 0 0 1 5 6.5h2.8z"/><circle cx="12" cy="13" r="3.6" fill="#16263b"/></svg>';
 const NG={};
+// выбор аватарки: квадрат 320×320 из центра, JPEG
+function gAvaPick(cb){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const bm=await createImageBitmap(f);const s=Math.min(bm.width,bm.height),c=document.createElement('canvas');c.width=c.height=320;c.getContext('2d').drawImage(bm,(bm.width-s)/2,(bm.height-s)/2,s,s,0,0,320,320);cb(c.toDataURL('image/jpeg',.84))}catch(e){toast('Не удалось открыть фото','x')}};i.click()}
 function msNewMenu(btn){bubMenu(btn,[{t:'Новая группа',ic:'users',fn:()=>msNG('group')},{t:'Новый канал',ic:'mega',fn:()=>msNG('channel')},'-',{t:'Найти человека',ic:'search',fn:()=>{const q=$('#msQ');if(q){q.focus();q.placeholder='Ник или ID человека'}}}])}
-function msNG(type,add){Object.assign(NG,{type,add:add||null,step:type==='channel'&&!add?'info':'pick',sel:new Map(),title:'',about:'',q:'',found:[]});
+function msNG(type,add){Object.assign(NG,{ava:'',type,add:add||null,step:type==='channel'&&!add?'info':'pick',sel:new Map(),title:'',about:'',q:'',found:[]});
   let el=$('#msNG');if(!el){el=document.createElement('div');el.id='msNG';el.className='ms-ng';($('#msgr')||document.body).append(el)}
   el.classList.remove('out');msNGDraw();requestAnimationFrame(()=>el.classList.add('on'))}
 function msNGClose(){const el=$('#msNG');if(!el)return;el.classList.remove('on');el.classList.add('out');setTimeout(()=>el.remove(),340)}
@@ -3948,11 +3955,11 @@ function msNGDraw(){const el=$('#msNG');if(!el)return;const ch=NG.type==='channe
   const nextT=NG.add?'Добавить':NG.step==='info'&&(!ch)?'Создать':NG.step==='pick'&&ch?'Создать':'Далее';
   const head=`<header class="ms-ngh"><button class="ib lq" data-act="ms-ng-back">${NG.step==='info'&&!ch&&!NG.add||NG.step==='pick'&&ch&&!NG.add?ico('left'):ico('x')}</button><div class="ms-ngt lq"><b>${ttl}</b>${NG.step==='pick'?`<small>${n?n+' из 200':ch?'можно пропустить':'до 200 участников'}</small>`:''}</div><button class="ms-ngnext lq${nextOk?'':' dis'}" data-act="ms-ng-next">${nextT}</button></header>`;
   if(NG.step==='info'){
-    el.innerHTML=head+`<div class="ms-ngb"><div class="ms-ngava" id="msNGava">${msGAva({title:NG.title,type:NG.type,col:(MS.chats.length+1)%7},'xl')}</div>
+    el.innerHTML=head+`<div class="ms-ngb"><button type="button" class="ms-ngava" data-act="ms-ng-ava"><span id="msNGava">${NG.ava?msGAva({src:NG.ava},'xl'):`<span class="ms-ava ms-gava xl ms-avcam">${GCAM}</span>`}</span><small>${NG.ava?'Изменить фото':'Выбрать фотографию'}</small></button>
       <div class="ms-grp lq ms-ngf"><input id="msNGt" maxlength="64" placeholder="${ch?'Название канала':'Название группы'}" value="${esc(NG.title)}" autocomplete="off"><textarea id="msNGa" maxlength="255" rows="2" placeholder="Описание (необязательно)">${esc(NG.about)}</textarea></div>
       <p class="ms-nghint">${ch?'Каналы — для трансляции сообщений большой аудитории. Писать в канал могут только администраторы.':'Участники смогут писать, отправлять фото, голосовые и кружки. Ссылку-приглашение найдёшь в информации о группе.'}</p>
       ${n?`<div class="ms-sec">${msGN({type:NG.type},n)}</div><div class="ms-grp lq">${[...NG.sel.values()].map(p=>`<div class="ms-it">${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>ID ${p.id}</span></div></div></div>`).join('')}</div>`:''}</div>`;
-    const t=$('#msNGt'),a=$('#msNGa');t.addEventListener('input',()=>{NG.title=t.value;$('#msNGava').innerHTML=msGAva({title:NG.title,type:NG.type,col:(MS.chats.length+1)%7},'xl');el.querySelector('.ms-ngnext').classList.toggle('dis',!NG.title.trim())});
+    const t=$('#msNGt'),a=$('#msNGa');t.addEventListener('input',()=>{NG.title=t.value;el.querySelector('.ms-ngnext').classList.toggle('dis',!NG.title.trim())});
     a.addEventListener('input',()=>{NG.about=a.value});setTimeout(()=>t.focus(),360);return}
   const L=msNGCands();
   el.innerHTML=head+`<div class="ms-ngb"><div class="ms-ngchips lq">${[...NG.sel.values()].map(p=>`<button class="ms-chip" data-act="ms-ng-tog" data-id="${p.id}">${msAva(p)}<span>${esc(p.name.split(' ')[0])}</span><i>${ico('x','s')}</i></button>`).join('')}<input id="msNGq" placeholder="Кого добавить? Ник или ID" value="${esc(NG.q)}" autocomplete="off"></div>
@@ -3966,14 +3973,14 @@ async function msNGNext(btn){const ch=NG.type==='channel';
   if(NG.step==='pick'&&!ch){NG.step='info';return msNGDraw()}
   if(NG.step==='info'&&ch){if(!NG.title.trim())return;NG.step='pick';return msNGDraw()}
   if(!NG.title.trim()){NG.step='info';return msNGDraw()}
-  btn.classList.add('dis');try{const j=await msApi('gnew',{type:NG.type,title:NG.title.trim(),about:NG.about.trim(),ids:[...NG.sel.keys()]});MS.G[j.c]=j.g;msNGClose();MS.v='';location.hash='#msg-'+j.c}catch(e){toast(e.message,'x');btn.classList.remove('dis')}}
+  btn.classList.add('dis');try{const j=await msApi('gnew',{type:NG.type,title:NG.title.trim(),about:NG.about.trim(),ids:[...NG.sel.keys()],...(NG.ava?{ava:NG.ava}:{})});MS.G[j.c]=j.g;msNGClose();MS.v='';location.hash='#msg-'+j.c}catch(e){toast(e.message,'x');btn.classList.remove('dis')}}
 
 /* ---------- информация о группе / канале ---------- */
 async function msGInfo(c){const box=$('#msMain');if(!box)return;const g0=msGr(c);
   const draw=(g,mem,adm)=>{if(MS.c!==c||MS.pane!=='ginfo')return;const ch=g.type==='channel',own=String(g.owner)===String(MS.me),link=g.inv?location.origin+'/#msgj-'+c+'-'+g.inv:'';
     const L=(mem||[]).map(String).sort((a,b)=>(b===String(g.owner))-(a===String(g.owner))||(adm||[]).map(String).includes(b)-(adm||[]).map(String).includes(a));
     box.innerHTML=`<header class="ms-ch ms-pfh lq"><button class="ib" data-act="ms-gi-back">${ico('left')}</button><div class="ms-cht"><b>${ch?'Канал':'Группа'}</b></div>${g.admin?`<button class="ib" data-act="ms-gedit" data-c="${c}" title="Изменить">${ico('edit')}</button>`:'<span style="width:40px"></span>'}</header>
-    <div class="ms-pfs ms-gis"><div class="ms-gihero">${msGAva(g,'xl')}<h2>${esc(g.title)}</h2><span>${msGN(g)}</span></div>
+    <div class="ms-pfs ms-gis"><div class="ms-gihero">${g.admin?`<button type="button" class="ms-gihava" data-act="ms-gedit" data-c="${c}">${msGAva(g,'xl')}</button>`:msGAva(g,'xl')}<h2>${esc(g.title)}</h2><span>${msGN(g)}</span></div>
       <div class="ms-giact"><a class="lq" href="#msg-${c}">${ico('chat')}<span>Чат</span></a><button class="lq" data-act="ms-gmute" data-c="${c}">${ico(LS.get('msMute_'+c,false)?'vol':'bell')}<span>${LS.get('msMute_'+c,false)?'Вкл. звук':'Без звука'}</span></button>${link?`<button class="lq" data-act="ms-ginv" data-l="${esc(link)}">${ico('share2')}<span>Пригласить</span></button>`:''}<button class="lq red" data-act="ms-gleave" data-c="${c}">${ico('out')}<span>Выйти</span></button></div>
       ${g.about?`<div class="ms-grp lq"><div class="ms-row ms-info"><span><small>описание</small><b class="ms-gab">${esc(g.about)}</b></span></div></div>`:''}
       ${link?`<div class="ms-grp lq"><button class="ms-row" data-act="ms-ginv" data-l="${esc(link)}">${ico('link')}<span><small>ссылка-приглашение</small><b class="ms-glink">${esc(link.replace(/^https?:\/\//,''))}</b></span>${ico('copy','s r')}</button></div>`:''}
@@ -3992,7 +3999,8 @@ async function msGJoin(c,inv){const box=$('#msMain');if(!box)return;MS.c=null;MS
     box.innerHTML=`<header class="ms-ch ms-pfh lq"><button class="ib" data-act="ms-back">${ico('left')}</button><div class="ms-cht"><b>Приглашение</b></div><span style="width:40px"></span></header>
       <div class="ms-gjoin"><div class="ms-gjc lq">${msGAva(g,'xl')}<h2>${esc(g.title)}</h2><span>${msGN(g)}</span>${g.about?`<p>${esc(g.about)}</p>`:''}<button class="ms-gjb" data-act="ms-gjoin" data-c="${c}" data-inv="${esc(inv)}">${ch?'Подписаться':'Вступить в группу'}</button></div></div>`}
   catch(e){box.innerHTML=`<header class="ms-ch ms-pfh lq"><button class="ib" data-act="ms-back">${ico('left')}</button><div class="ms-cht"><b>Приглашение</b></div><span style="width:40px"></span></header><div class="ms-empty"><b>Ссылка недействительна</b><span>Попроси новую ссылку-приглашение</span></div>`}}
-function msGEdit(c){const g=msGr(c)||{};openSheet(`<h3>${ico('edit')}${g.type==='channel'?'Канал':'Группа'}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+function msGEdit(c){const g=msGr(c)||{};MS.gava=null;openSheet(`<h3>${ico('edit')}${g.type==='channel'?'Канал':'Группа'}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  <button type="button" class="ms-ngava" data-act="ms-ge-ava" data-c="${c}"><span id="msGEava">${g.av?msGAva(g,'xl'):`<span class="ms-ava ms-gava xl ms-avcam">${GCAM}</span>`}</span><small>${g.av?'Изменить фото':'Выбрать фотографию'}</small></button>
   <div class="ms-grp lq ms-ngf"><input id="msGEt" maxlength="64" value="${esc(g.title||'')}" placeholder="Название"><textarea id="msGEa" maxlength="255" rows="3" placeholder="Описание">${esc(g.about||'')}</textarea></div>
   <button class="ms-gjb" data-act="ms-gsave" data-c="${c}">Сохранить</button>`)}
 
@@ -4004,10 +4012,12 @@ const MS_ACT={
   'ms-newchat'(el){msNewMenu(el)},
   'ms-ng-back'(){const ch=NG.type==='channel';if(!NG.add&&NG.step==='info'&&!ch){NG.step='pick';return msNGDraw()}if(!NG.add&&NG.step==='pick'&&ch){NG.step='info';return msNGDraw()}msNGClose()},
   'ms-ng-next'(el){msNGNext(el)},
+  'ms-ng-ava'(){gAvaPick(d=>{NG.ava=d;const b=$('#msNGava');if(b){b.innerHTML=msGAva({src:d},'xl');b.nextElementSibling.textContent='Изменить фото'}})},
+  'ms-ge-ava'(el){gAvaPick(d=>{MS.gava=d;const b=$('#msGEava');if(b){b.innerHTML=msGAva({src:d},'xl');b.nextElementSibling.textContent='Изменить фото'}})},
   'ms-ng-tog'(el){const id=String(el.dataset.id),p=MS.peers[id];if(NG.sel.has(id))NG.sel.delete(id);else if(p&&NG.sel.size<199)NG.sel.set(id,p);const f=document.activeElement&&document.activeElement.id==='msNGq';msNGDraw();if(f)$('#msNGq')?.focus();try{navigator.vibrate&&navigator.vibrate(6)}catch(_){}},
   'ms-gi-back'(){const c=MS.gi&&MS.gi.c||MS.c;if(history.length>1&&MS.backOk)history.back();else location.hash='#msg-'+c},
   'ms-gedit'(el){msGEdit(el.dataset.c)},
-  async 'ms-gsave'(el){const c=el.dataset.c;el.disabled=true;try{const j=await msApi('gedit',{c,title:$('#msGEt').value,about:$('#msGEa').value});MS.G[c]=j.g;closeSheet();MS.v='';msGInfo(c)}catch(e){toast(e.message,'x');el.disabled=false}},
+  async 'ms-gsave'(el){const c=el.dataset.c;el.disabled=true;try{const j=await msApi('gedit',{c,title:$('#msGEt').value,about:$('#msGEa').value,...(MS.gava!=null?{ava:MS.gava}:{})});MS.G[c]=j.g;closeSheet();MS.v='';msGInfo(c)}catch(e){toast(e.message,'x');el.disabled=false}},
   'ms-gmute'(el){const c=el.dataset.c||MS.c,k='msMute_'+c,on=!LS.get(k,false);LS.set(k,on);toast(on?'Уведомления выключены':'Уведомления включены',on?'vol':'check');if(MS.pane==='ginfo')msGInfo(c);else{const b=$('.ms-chbar button');if(b)b.innerHTML=`${ico(on?'vol':'bell')}<span>${on?'Включить звук':'Выключить звук'}</span>`}msBadge()},
   'ms-ginv'(el){const l=el.dataset.l,g=msGr(MS.c)||{};bubMenu(el,[{t:'Скопировать ссылку',ic:'copy',fn:async()=>{try{await navigator.clipboard.writeText(l);toast('Ссылка скопирована','check')}catch(e){prompt('Ссылка',l)}}},...(navigator.share?[{t:'Поделиться',ic:'share2',fn:()=>navigator.share({title:g.title||'Mundora',text:(g.type==='channel'?'Подписывайся на канал «':'Вступай в группу «')+(g.title||'')+'» в Mundora',url:l}).catch(()=>{})}]:[])])},
   'ms-gleave'(el){const c=el.dataset.c,g=msGr(c)||{},ch=g.type==='channel';bubMenu(el,[{t:ch?'Отписаться от канала':'Покинуть группу',ic:'out',red:1,fn:async()=>{try{await msApi('gleave',{c});MS.chats=MS.chats.filter(x=>x.c!==c);delete MS.msgs[c];MS.v='';toast(ch?'Ты отписался от канала':'Ты покинул группу','check');location.hash='#msg'}catch(e){toast(e.message,'x')}}}],{left:1})},
