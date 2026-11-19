@@ -2011,6 +2011,13 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .ms-dayf{position:absolute;left:50%;top:calc(66px + env(safe-area-inset-top));z-index:3;transform:translate(-50%,-6px) scale(.9);opacity:0;pointer-events:none;transition:opacity .25s,transform .35s cubic-bezier(.2,1.3,.3,1)}
 .ms-dayf.on{opacity:1;transform:translate(-50%,0)}
 .ms-dayf span{display:block;padding:4px 11px;border-radius:12px;font-size:12.5px;font-weight:600;color:#fff;background:rgba(30,30,32,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.rx-fly{position:fixed;left:0;top:0;z-index:400;font-size:22px;line-height:1;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.rx-fx{position:fixed;inset:0;z-index:399;pointer-events:none}.rx-fx i{position:absolute;font-style:normal;line-height:1}
+.rx-big{font-size:22px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.3))}.rx-pe{font-size:13px}.rx-pd{width:6px;height:6px;border-radius:50%}
+.ms-pfh.pfx{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;justify-content:flex-start}.ms-pfh.pfx .ms-cht{display:none}
+.ms-pfback{width:44px;height:44px;border-radius:50%}
+@media(min-width:761px){.ms-pfh.pfx{display:none}}
+@media(max-width:760px){.msgr .ms-ch .ms-callb{position:absolute;right:0;top:0}.msgr .ms-ch .ms-cht{max-width:calc(100% - 124px)!important}}
 </style>
 </head>
 <body>
@@ -3181,7 +3188,7 @@ async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;bo
 
 /* ---------- профиль прямо в мессенджере (тот же, что на сайте) ---------- */
 async function msDrawProf(){const box=$('#msMain');if(!box)return;const id=MS.prof,own=String(id)===String(MS.me);
-  box.innerHTML=`<header class="ms-ch ms-pfh ${own?'own':'lq'}">${own?'<span style="width:40px"></span>':`<button class="ib" data-act="ms-back">${ico('left')}</button>`}<div class="ms-cht"><b>${own?'':'Профиль'}</b></div>${own?`<button class="ib lq ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button>`:`<a class="ib" href="#msg-${id}" title="Написать">${ico('chat')}</a>`}</header>
+  box.innerHTML=`<header class="ms-ch ms-pfh own${own?'':' pfx'}">${own?'<span style="width:40px"></span>':`<button class="ib lq ms-pfback" data-act="ms-back">${ico('left')}</button>`}<div class="ms-cht"><b></b></div>${own?`<button class="ib lq ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button>`:''}</header>
     <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id]):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div><div id="msPch"></div>${own?msOptsHTML():''}</div>`;
   msPchLoad(id,own);
   try{const j=await peopleApi('id='+id);PEOPLE.cache[id]=j.profile;if(MS.prof===id){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(j.profile)}}catch(e){const b=$('#msgr #pfBox');if(b)b.innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`}}
@@ -3719,15 +3726,33 @@ const SELI='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fil
 MS.rx={};MS.ed={};MS.pin={};MS.reply=null;MS.edit=null;MS.rate=+LS.get('msRate',1)||1;
 const msHeard=()=>{try{return new Set(JSON.parse(localStorage.getItem('msHeard')||'[]'))}catch(e){return new Set()}};
 function msHeardAdd(k){try{const s=msHeard();s.add(k);localStorage.setItem('msHeard',JSON.stringify([...s].slice(-800)))}catch(e){}}
-function msExtras(c,j){if(!j)return;if(j.hid&&j.hid.length)msDel(c,j.hid);if(j.rx)MS.rx[c]=j.rx;if(j.ed)MS.ed[c]=j.ed;if(j.pin!=null)MS.pin[c]=j.pin}
+function msExtras(c,j){if(!j)return;if(j.hid&&j.hid.length)msDel(c,j.hid);
+  if(j.rx){const old=MS.rx[c];if(old&&c===MS.c&&MS.on){const me=String(MS.me),fx=[];for(const [i,us] of Object.entries(j.rx))for(const [u,e] of Object.entries(us))if(u!==me&&(!old[i]||old[i][u]!==e))fx.push([i,e]);
+      if(fx.length)setTimeout(()=>fx.slice(0,6).forEach(([i,e],k)=>{const ch=document.querySelector(`#msMsgs .mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);if(ch)setTimeout(()=>{ch.classList.remove('pop');void ch.offsetWidth;ch.classList.add('pop');rxBurst(ch,e)},k*120)}),120)}
+    MS.rx[c]=j.rx}if(j.ed)MS.ed[c]=j.ed;if(j.pin!=null)MS.pin[c]=j.pin}
 const msText=(c,m)=>{const e=MS.ed[c]&&m.i!=null&&MS.ed[c][m.i];return e?e.x:m.x};
 function msPrevText(c,m){if(!m)return 'Сообщение';if(m.d)return 'Сообщение удалено';const x=msText(c,m);if(x)return x.slice(0,90);const F=m.fl;if(!F)return '';return F.vo?'🎤 Голосовое сообщение':F.rd?'📹 Видеосообщение':F.ty&&F.ty.startsWith('image/')?'🖼 Фото':F.ty&&F.ty.startsWith('video/')?'🎬 Видео':'📎 '+F.n}
 const msWho=f=>String(f)===String(MS.me)?(USR.name||'Вы'):((MS.peers[f]||{}).name||'ID '+f);
 function msRxHTML(c,m){const R=MS.rx[c]&&m.i!=null&&MS.rx[c][m.i];if(!R)return '';const by={};Object.entries(R).forEach(([u,e])=>{(by[e]=by[e]||[]).push(u)});
   return `<div class="ms-rx">${Object.entries(by).map(([e,us])=>`<button type="button" class="${us.includes(String(MS.me))?'my':''}" data-act="ms-react" data-k="${m.i}" data-e="${e}"><span>${e}</span>${us.length>1?`<b>${us.length}</b>`:`<img src="${avaSrc(String(us[0])===String(MS.me)?USR.avatar:(MS.peers[us[0]]||{}).avatar)}" alt="">`}</button>`).join('')}</div>`}
+// реакция летит из меню к сообщению и разлетается искрами (как в Telegram)
+function rxFly(from,to,e){const t=to.getBoundingClientRect(),f=document.createElement('div');f.className='rx-fly';f.textContent=e;document.body.append(f);
+  const x0=from.left+from.width/2,y0=from.top+from.height/2,x1=t.left+15,y1=t.top+t.height/2,dx=x1-x0,dy=y1-y0;
+  to.style.visibility='hidden';
+  const an=f.animate([{transform:`translate(${x0}px,${y0}px) translate(-50%,-50%) scale(1.6)`},{transform:`translate(${x0+dx*.5}px,${y0+dy*.5-Math.min(120,Math.abs(dx)*.4+60)}px) translate(-50%,-50%) scale(2.2)`,offset:.45},{transform:`translate(${x1}px,${y1}px) translate(-50%,-50%) scale(.9)`}],{duration:520,easing:'cubic-bezier(.3,.1,.3,1)'});
+  an.onfinish=()=>{f.remove();to.style.visibility='';to.classList.remove('pop');void to.offsetWidth;to.classList.add('pop');rxBurst(to,e)}}
+function rxBurst(el,e){const r=el.getBoundingClientRect(),cx=r.left+15,cy=r.top+r.height/2,box=document.createElement('div');box.className='rx-fx';document.body.append(box);
+  const big=document.createElement('i');big.className='rx-big';big.textContent=e;big.style.left=cx+'px';big.style.top=cy+'px';box.append(big);
+  big.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:.95},{transform:'translate(-50%,-50%) scale(3.2)',opacity:.85,offset:.35},{transform:'translate(-50%,-60%) scale(4.2)',opacity:0}],{duration:900,easing:'cubic-bezier(.2,.8,.3,1)'});
+  const cols=['#ffd166','#ff6b9a','#7cc4ff','#b9a3ff','#4ade80','#ff8e3c'];
+  for(let k=0;k<16;k++){const p=document.createElement('i'),em=k%3===0,a=Math.PI*2*k/16+Math.random()*.5,d=50+Math.random()*70;
+    p.className=em?'rx-pe':'rx-pd';if(em)p.textContent=e;else p.style.background=cols[k%cols.length];p.style.left=cx+'px';p.style.top=cy+'px';box.append(p);
+    p.animate([{transform:'translate(-50%,-50%) scale(.3) rotate(0)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d}px)) scale(${em?1.1:1}) rotate(${(Math.random()-.5)*360}deg)`,opacity:1,offset:.6},{transform:`translate(calc(-50% + ${Math.cos(a)*d*1.25}px),calc(-50% + ${Math.sin(a)*d*1.25+25}px)) scale(.2)`,opacity:0}],{duration:700+Math.random()*300,easing:'cubic-bezier(.15,.8,.3,1)'})}
+  setTimeout(()=>box.remove(),1200)}
 function msRqHTML(c,m){if(m.r==null)return '';const t=(MS.msgs[c]||[]).find(x=>x.i===m.r);return `<button type="button" class="ms-rq" data-act="ms-goto" data-k="${m.r}"><b>${esc(t?msWho(t.f):'Сообщение')}</b><span>${esc(t?msPrevText(c,t):'Старое сообщение')}</span></button>`}
-async function msReact(i,e){const c=MS.c;if(i==null||!c)return;const R=MS.rx[c]=MS.rx[c]||{};const o={...(R[i]||{})};const me=String(MS.me);if(o[me]===e)delete o[me];else o[me]=e;if(Object.keys(o).length)R[i]=o;else delete R[i];
-  const y=$('#msMsgs')?.scrollTop;msPaintMsgs();const ml=$('#msMsgs');if(ml&&y!=null)ml.scrollTop=y;const ch=ml&&ml.querySelector(`.mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);if(ch)ch.classList.add('pop');
+async function msReact(i,e,from){const c=MS.c;if(i==null||!c)return;const R=MS.rx[c]=MS.rx[c]||{};const o={...(R[i]||{})};const me=String(MS.me);const add=o[me]!==e;if(!add)delete o[me];else o[me]=e;if(Object.keys(o).length)R[i]=o;else delete R[i];
+  const y=$('#msMsgs')?.scrollTop;msPaintMsgs();const ml=$('#msMsgs');if(ml&&y!=null)ml.scrollTop=y;const ch=ml&&ml.querySelector(`.mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);
+  if(ch&&add){if(from)rxFly(from,ch,e);else{ch.classList.add('pop');rxBurst(ch,e)}}
   try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}try{const j=await msApi('react',{c,i,e});R[i]=j.rx;if(!Object.keys(j.rx).length)delete R[i]}catch(err){toast(err.message,'x')}}
 function msGoto(i){const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${i}"]`);if(!el){toast('Сообщение выше — пролистай чат','chat');return}el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.remove('hl');void el.offsetWidth;el.classList.add('hl')}
 // панель «ответ / правка» над полем ввода (само поле не меняется)
@@ -4449,7 +4474,7 @@ const MS_ACT={
   'ms-fwd'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msForward(m)},
   async 'ms-fwto'(el){el.disabled=true;try{const to=el.dataset.to;await msApi('fwd',{c:MS.c,i:+el.dataset.i,to});closeSheet();toast('Переслано','check');const c2=msCid(to);delete MS.msgs[c2];location.hash='#msg-'+to}catch(e){toast(e.message,'x');el.disabled=false}},
   'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);if(!m||m.i==null)return;setTimeout(()=>msDelAsk(m),180)},
-  'ms-react'(el){const i=+el.dataset.k;msSelClose();msReact(i,el.dataset.e)},
+  'ms-react'(el){const i=+el.dataset.k,from=el.closest('.ms-ctxr')?el.getBoundingClientRect():null;msSelClose();msReact(i,el.dataset.e,from)},
   'ms-rxmore'(el){msRxMore(+el.dataset.k)},
   'ms-reply'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msReplyTo(m.i)},
   'ms-edit'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msEditStart(m)},
