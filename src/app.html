@@ -1402,6 +1402,11 @@ html.and .ms-ctx.done .ms-ctxa,html.and .ms-ctx.done .ms-ctxr,html.and .bub.done
 .ms-calm small svg{width:12px;height:12px}.ms-calm.miss small{color:#ff6b6b;opacity:1}
 .ms-calm button{margin-left:auto;width:40px;height:40px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.16)}.ms-calm button svg{width:20px;height:20px}
 .mb.th .ms-calm button{background:#3e88f7}
+.ms-push{display:flex;align-items:center;gap:10px;margin:2px 10px 8px;padding:10px 10px 10px 12px;border-radius:18px;position:relative;animation:bubIn .5s cubic-bezier(.2,1.3,.32,1) both}
+.ms-push-i{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;background:#34c759;color:#fff}.ms-push-i .i{width:20px;height:20px}
+.ms-push b{display:block;font-size:14px;line-height:1.25}.ms-push small{display:block;font-size:12px;color:#9c94bb;margin-top:2px}
+.ms-push-on{flex:none;border:0;border-radius:16px;padding:8px 12px;background:#3e88f7;color:#fff;font:inherit;font-size:13.5px;font-weight:700;transition:transform .45s cubic-bezier(.2,1.5,.35,1)}.ms-push-on:active{transform:scale(1.1,1.04)}
+.ms-push-x{position:absolute;top:-6px;right:-4px;width:22px;height:22px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(60,60,70,.9);color:#fff}.ms-push-x .i{width:12px;height:12px}
 /* меню-пузырёк */
 .bub-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0);transition:background .3s}.bub-ov.on{background:rgba(0,0,0,.18)}
 .bub{position:fixed;z-index:9999;min-width:220px;max-width:min(300px,calc(100vw - 16px));padding:6px;border-radius:26px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
@@ -3096,7 +3101,8 @@ function msDrawSide(){const s=$('#msSide');if(!s)return;const ct=MS.tab==='conta
     <div class="ms-list" id="msList">${ct?msContactsHTML():msListHTML()}</div>`;
   const q=$('#msQ');let t;q.addEventListener('input',()=>{MS.q=q.value;clearTimeout(t);t=setTimeout(msSearch,250)});if(MS.q)msSearch()}
 const msPvNice=pv=>{pv=String(pv||'');if(/^📍 /.test(pv))return '📍 Геопозиция';const r=/^👤 ([^\n]+)/.exec(pv);if(r)return '👤 Контакт: '+r[1].replace(/<[^>]*>/g,'').replace(/\s+https?:.*$/,'');return pv};
-function msListHTML(){const q=MS.q.trim().toLowerCase();
+function msListHTML(){return (MS.q?'':pushCard())+msListHTML0()}
+function msListHTML0(){const q=MS.q.trim().toLowerCase();
   const L=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
   if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
   return L.map(c=>{if(c.g){const g=c.g;MS.G[c.c]=g;const mine=String(c.f)===String(MS.me),rd=mine&&c.n&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,who=mine?'Вы':(MS.peers[c.f]||{}).name;
@@ -4119,7 +4125,7 @@ function callPC(){
   pc.ontrack=e=>{rs.addTrack(e.track);const a=$('#clRA'),v=$('#clRV');if(a&&e.track.kind==='audio'){a.srcObject=rs;a.play().catch(()=>{})}if(v&&e.track.kind==='video'){v.srcObject=rs;v.play().catch(()=>{});e.track.onunmute=()=>callPaint();e.track.onmute=()=>callPaint()}};
   pc.oniceconnectionstatechange=()=>{if(pc.iceConnectionState==='checking'&&!CALL.wd){CALL.wd=setTimeout(()=>{if(CALL.pc===pc&&pc.connectionState!=='connected'){CALL.why='net';callEnd('fail')}},20000)}};
   pc.onconnectionstatechange=()=>{const s=pc.connectionState;if(s==='connected'){clearTimeout(CALL.wd);CALL.wd=0}
-    if(s==='connected'&&CALL.st!=='on'){CALL.st='on';CALL.t0=CALL.t0||Date.now();callToneStop();callBeep(660,.12);callPaint();callTick()}
+    if(s==='connected'&&CALL.st!=='on'){callNative(true);CALL.st='on';CALL.t0=CALL.t0||Date.now();callToneStop();callBeep(660,.12);callPaint();callTick()}
     if(s==='failed'){CALL.why='net';callEnd('fail')}
     if(s==='disconnected'&&CALL.st==='on'){CALL.recon=1;callPaint();setTimeout(()=>{if(CALL.pc===pc&&pc.connectionState!=='connected'){CALL.why='net';callEnd('fail')}},9000)}
     if(s==='connected')CALL.recon=0};
@@ -4129,6 +4135,8 @@ function callTracks(stream){const pc=CALL.pc;const a=stream.getAudioTracks()[0];
   if(!vt)vt=pc.addTransceiver('video',{direction:'sendrecv'});else vt.direction='sendrecv';
   CALL.vt=vt;const v=stream.getVideoTracks()[0];if(v)vt.sender.replaceTrack(v)}
 
+// в приложении Mundora для Android: звук в разговорный динамик (у уха), «Динамик» — громкая связь, датчик приближения гасит экран
+function callNative(on){try{if(!window.MundoraCall)return;if(on){CALL.spk=CALL.kind==='video'||CALL.video;MundoraCall.start(!!CALL.spk)}else MundoraCall.stop()}catch(e){}}
 async function callStart(peer,kind){
   if(CALL.st)return toast('Сначала заверши текущий звонок','x');
   if(!navigator.mediaDevices||!window.RTCPeerConnection)return toast('Этот браузер не поддерживает звонки','x');
@@ -4169,13 +4177,13 @@ async function callEnd(why){const id=CALL.id,st=CALL.st;if(!st)return;
   if(why!=='remote'&&id)msApi('cend',{id,why:why==='noans'?'noans':st==='in'?'decline':'hang'}).catch(()=>{});
   callToneStop();if(st==='on'||st==='conn')callBeep(440,.25);
   CALL.st='end';callPaint();setTimeout(callClose,CALL.why==='net'?3500:CALL.why==='noans'||CALL.why==='decline'||CALL.why==='busy'?1800:900);MS.v='';msPoll()}
-function callClose(){clearTimeout(CALL.poll);clearTimeout(CALL.wd);CALL.wd=0;clearInterval(CALL.tm);callToneStop();
+function callClose(){callNative(false);clearTimeout(CALL.poll);clearTimeout(CALL.wd);CALL.wd=0;clearInterval(CALL.tm);callToneStop();
   try{CALL.pc&&CALL.pc.close()}catch(e){}CALL.pc=null;[CALL.loc,CALL.cam].forEach(s=>s&&s.getTracks().forEach(t=>t.stop()));CALL.loc=CALL.cam=null;
   const el=$('#cl');if(el){el.classList.add('out');setTimeout(()=>el.remove(),420)}$('#clMini')?.remove();CALL.st=null;CALL.id=null}
 function callTick(){clearInterval(CALL.tm);CALL.tm=setInterval(()=>{const s=$('#clStat'),m=$('#clMiniT');const t=callDur();if(s&&CALL.st==='on'&&!CALL.recon)s.textContent=t;if(m)m.textContent=t},1000)}
 const callDur=()=>{const d=Math.max(0,Math.floor((Date.now()-CALL.t0)/1000));return Math.floor(d/60)+':'+String(d%60).padStart(2,'0')};
 
-async function callCam(){if(!CALL.pc)return;
+async function callCam(){if(!CALL.pc)return;setTimeout(()=>{if(window.MundoraCall&&CALL.video&&!CALL.spk){CALL.spk=true;try{MundoraCall.speaker(true)}catch(e){}callPaint()}},400);
   if(CALL.video){const t=CALL.loc&&CALL.loc.getVideoTracks()[0];if(t){t.stop();CALL.loc.removeTrack(t)}CALL.vt&&CALL.vt.sender.replaceTrack(null);CALL.video=false}
   else{try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:CALL.face,width:{ideal:720},height:{ideal:1280}}});const t=s.getVideoTracks()[0];CALL.loc.addTrack(t);CALL.vt&&await CALL.vt.sender.replaceTrack(t);CALL.video=true}catch(e){return toast('Разреши доступ к камере','x')}}
   msApi('cvid',{id:CALL.id,on:CALL.video}).catch(()=>{});callPaint()}
@@ -4206,7 +4214,7 @@ function callPaint(){const el=$('#cl'),ui=$('#clUI');if(!el||!ui)return;const p=
     <div class="cl-bar">${st==='in'?
       `<div class="cl-inc">${B('cl-decline',I.end,'Отклонить','red')}${vid?B('cl-accept-v',I.cam,'С видео','green'):''}${B('cl-accept',I.ok,'Принять','green wig')}</div>`
       :st==='end'?'':
-      `${B('cl-cam',I.cam,CALL.video?'Камера':'Видео',CALL.video?'on':'')}${CALL.video?B('cl-flip',I.flip,'Перевернуть'):''}${B('cl-mic',CALL.mic?I.mic:I.micx,CALL.mic?'Микрофон':'Без звука',CALL.mic?'':'on')}${B('cl-end',I.end,'Завершить','red')}`}</div>`;
+      `${window.MundoraCall?B('cl-spk','<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>','Динамик',CALL.spk?'on':''):''}${B('cl-cam',I.cam,CALL.video?'Камера':'Видео',CALL.video?'on':'')}${CALL.video?B('cl-flip',I.flip,'Перевернуть'):''}${B('cl-mic',CALL.mic?I.mic:I.micx,CALL.mic?'Микрофон':'Без звука',CALL.mic?'':'on')}${B('cl-end',I.end,'Завершить','red')}`}</div>`;
   const rv=$('#clRV');if(rv)rv.classList.toggle('show',rvOn)}
 function clDrag(v){if(!v)return;let sx,sy,ox,oy,dn=false;
   v.addEventListener('pointerdown',e=>{if(!v.classList.contains('show2')&&!$('#cl.lv.rv'))return;dn=true;sx=e.clientX;sy=e.clientY;const r=v.getBoundingClientRect();ox=r.left;oy=r.top;v.setPointerCapture(e.pointerId);v.style.transition='none'});
@@ -4216,7 +4224,28 @@ function callMini(){const el=$('#cl');if(!el)return;el.classList.add('mini');let
   m.innerHTML=`<i></i><b>${esc(callName(CALL.peer))}</b><span id="clMiniT">${CALL.st==='on'?callDur():'вызов…'}</span>`}
 function callMenu(btn){const id=MS.peer;bubMenu(btn,[{t:'Аудиозвонок',ic:'phone',fn:()=>callStart(id,'audio')},{t:'Видеозвонок',ic:'video',fn:()=>callStart(id,'video')}])}
 
+
+/* ---------- уведомления, даже когда сайт закрыт (Web Push + service worker) ---------- */
+const PUSH={ok:'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window};
+const u8=b=>{b=b.replace(/-/g,'+').replace(/_/g,'/');b+='='.repeat((4-b.length%4)%4);return Uint8Array.from(atob(b),c=>c.charCodeAt(0))};
+async function pushSub(ask){if(!PUSH.ok||IS_APP)return false;
+  try{if(ask){const p=await Notification.requestPermission();if(p!=='granted'){toast('Уведомления запрещены в браузере','x');return false}}else if(Notification.permission!=='granted')return false;
+    const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){const k=(await msApi('vapid')).key;sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(k)})}
+    await msApi('psub',{sub:sub.toJSON()});return true}catch(e){if(ask)toast('Не удалось включить уведомления','x');return false}}
+const pushCard=()=>PUSH.ok&&!IS_APP&&Notification.permission==='default'&&!LS.get('pushNo',false)?`<div class="ms-push lq"><div class="ms-push-i">${ico('phone')}</div><div><b>Звонки и сообщения, даже когда сайт закрыт</b><small>Включи уведомления — звонок придёт как в Telegram</small></div><button class="ms-push-on" data-act="push-on">Включить</button><button class="ms-push-x" data-act="push-no">${ico('x','s')}</button></div>`:'';
+// открыли из уведомления о звонке: ?call=ID(&ans=1)
+async function callFromLink(id,ans){if(!id)return;try{await msInit();const k=await msApi('cget',null,'&id='+id);if(k.st!=='ring')return toast(k.st==='on'?'Звонок уже идёт':'Звонок уже завершён','x');
+  callIncoming({id,from:k.from,kind:k.kind});if(ans)setTimeout(()=>callAccept(false),300)}catch(e){}}
+(()=>{const P=new URLSearchParams(location.search),id=P.get('call');if(id){history.replaceState(null,'',location.pathname+location.hash);setTimeout(()=>callFromLink(id,P.get('ans')==='1'),800)}
+  if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.mundora!=='open')return;if(d.call)callFromLink(d.call.id,d.ans);else if(d.url){const h=d.url.split('#')[1];if(h)location.hash='#'+h}});
+  setTimeout(()=>{if(USR&&USR.id!=null)pushSub(false)},4000)})();
+
 const MS_ACT={
+  async 'push-on'(el){el.disabled=true;if(await pushSub(true)){toast('Уведомления включены','check');msListPaint()}else el.disabled=false},
+  'push-no'(){LS.set('pushNo',true);msListPaint()},
+  'cl-spk'(){CALL.spk=!CALL.spk;try{MundoraCall.speaker(!!CALL.spk)}catch(e){}callPaint()},
   'ms-callmenu'(el){callMenu(el)},
   'ms-call'(el){callStart(el.dataset.p||MS.peer,el.dataset.k||'audio')},
   'cl-accept'(){callAccept(false)},'cl-accept-v'(){callAccept(true)},'cl-decline'(){callEnd('decline')},'cl-end'(){callEnd('hang')},

@@ -28,6 +28,7 @@ const H = {
   admin: () => import('./api/admin.js').then(m => m.default),
   people: () => import('./api/people.js').then(m => m.default),
   msg: () => import('./api/msg.js').then(m => m.default),
+  sw: () => import('./api/sw.js').then(m => m.default),
   asset: () => import('./api/asset.js').then(m => m.default),
   tg: () => import('./api/tg.js').then(m => m.handler),
   ping: () => import('./api/ping.js').then(m => m.default),
@@ -55,6 +56,7 @@ function route(u) {
   if (p === '/api/admin') return ['admin', u];
   if (p === '/api/people') return ['people', u];
   if (p === '/api/msg') return ['msg', u];
+  if (p === '/sw.js' || p === '/api/sw') return ['sw', u];
   if (p === '/api/asset') return ['asset', u];
   if (p === '/api/tg') return ['tg', u];
   if (p === '/tempo-ping') return ['ping', u];

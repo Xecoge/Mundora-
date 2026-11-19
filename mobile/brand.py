@@ -67,7 +67,7 @@ if plat == 'android':
     edit(os.path.join(res, 'values', 'styles.xml'), styles)
     # камера и микрофон для голосовых и видеокружков (Capacitor сам спросит разрешение, когда сайт попросит)
     def perms(x):
-        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'CAMERA', 'READ_MEDIA_IMAGES', 'READ_MEDIA_VIDEO', 'READ_MEDIA_AUDIO', 'READ_MEDIA_VISUAL_USER_SELECTED', 'ACCESS_FINE_LOCATION', 'ACCESS_COARSE_LOCATION'] if f'permission.{p}"' not in x)
+        add = ''.join(f'    <uses-permission android:name="android.permission.{p}" />\n' for p in ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'WAKE_LOCK', 'CAMERA', 'READ_MEDIA_IMAGES', 'READ_MEDIA_VIDEO', 'READ_MEDIA_AUDIO', 'READ_MEDIA_VISUAL_USER_SELECTED', 'ACCESS_FINE_LOCATION', 'ACCESS_COARSE_LOCATION'] if f'permission.{p}"' not in x)
         add += '' if 'READ_EXTERNAL_STORAGE' in x else '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />\n'
         add += '' if 'android.hardware.camera' in x else '    <uses-feature android:name="android.hardware.camera" android:required="false" />\n'
         return x.replace('</manifest>', add + '</manifest>')
@@ -100,6 +100,9 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import android.Manifest;
 import android.webkit.GeolocationPermissions;
+import android.media.AudioManager;
+import android.media.AudioDeviceInfo;
+import android.os.PowerManager;
 import com.getcapacitor.BridgeWebChromeClient;
 import android.content.ContentUris;
 import android.content.pm.PackageManager;
@@ -138,6 +141,7 @@ public class MainActivity extends BridgeActivity {
             });
             bridge.getWebView().addJavascriptInterface(new SaveBridge(), "MundoraNative");
             bridge.getWebView().addJavascriptInterface(new MediaBridge(), "MundoraMedia");
+            bridge.getWebView().addJavascriptInterface(new CallBridge(), "MundoraCall");
             // геопозиция: если доступ уже дан — не спрашивать снова
             bridge.getWebView().setWebChromeClient(new BridgeWebChromeClient(bridge) {
                 @Override
@@ -244,6 +248,30 @@ public class MainActivity extends BridgeActivity {
     }
 
     // сохранить видео/фото, собранное на странице (кружок в рамке), прямо в галерею
+    // звонки: разговорный динамик (у уха) по умолчанию, громкая связь по кнопке, датчик приближения гасит экран у уха
+    private PowerManager.WakeLock proxLock;
+    private void prox(boolean on) {
+        try {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (on) { if (proxLock == null) proxLock = pm.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "mundora:prox"); if (!proxLock.isHeld()) proxLock.acquire(3 * 60 * 60 * 1000L); }
+            else if (proxLock != null && proxLock.isHeld()) proxLock.release();
+        } catch (Exception e) { }
+    }
+    private void route(AudioManager am, boolean speaker) {
+        try {
+            if (Build.VERSION.SDK_INT >= 31) {
+                int want = speaker ? AudioDeviceInfo.TYPE_BUILTIN_SPEAKER : AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
+                for (AudioDeviceInfo d : am.getAvailableCommunicationDevices()) if (d.getType() == want) { am.setCommunicationDevice(d); return; }
+                if (!speaker) am.clearCommunicationDevice();
+            } else am.setSpeakerphoneOn(speaker);
+        } catch (Exception e) { }
+    }
+    public class CallBridge {
+        @JavascriptInterface public void start(boolean speaker) { runOnUiThread(() -> { AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE); am.setMode(AudioManager.MODE_IN_COMMUNICATION); route(am, speaker); prox(!speaker); }); }
+        @JavascriptInterface public void speaker(boolean on) { runOnUiThread(() -> { AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE); route(am, on); prox(!on); }); }
+        @JavascriptInterface public void stop() { runOnUiThread(() -> { AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE); route(am, false); if (Build.VERSION.SDK_INT >= 31) { try { am.clearCommunicationDevice(); } catch (Exception e) { } } am.setMode(AudioManager.MODE_NORMAL); prox(false); }); }
+    }
+
     public class SaveBridge {
         @JavascriptInterface
         public boolean saveMedia(String name, String mime, String b64) {

@@ -46,6 +46,34 @@ const bumpAll = (me, c, G) => [['INCR', 'mv:' + me], ...others(c, me, G).map(u =
 async function dest(to, me) { to = String(to ?? '');
   if (isG(to)) { const g = await access(to, me); if (!g) return { err: 'Нет доступа' }; if (g.type === 'channel' && !isAdm(g, me)) return { err: 'В канале пишут только администраторы' }; return { c: to, G: g }; }
   if (!/^\d{1,12}$/.test(to)) return { err: 'Кому?' }; if (to !== me && !(await kv('GET', 'id:' + to))) return { err: 'Аккаунт не найден' }; return { c: chatId(me, to), G: { dm: 1 }, to }; }
+// ---- Web Push: уведомления, даже когда сайт закрыт. Ключи VAPID создаются один раз и хранятся в базе (в коде их нет). ----
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+let VAP = null;
+async function vapid() {
+  if (VAP) return VAP;
+  let v = await jget('vapid');
+  if (!v) {
+    const k = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    v = { pub: b64u(await crypto.subtle.exportKey('raw', k.publicKey)), jwk: await crypto.subtle.exportKey('jwk', k.privateKey) };
+    const ok = await kv('SET', 'vapid', JSON.stringify(v), 'NX'); if (!ok) v = await jget('vapid');
+  }
+  VAP = { pub: v.pub, key: await crypto.subtle.importKey('jwk', v.jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']) };
+  return VAP;
+}
+async function pushTo(uid, urgent) {
+  const subs = pairs(await kv('HGETALL', 'ps:' + uid)); const L = Object.entries(subs); if (!L.length) return;
+  const V = await vapid(), enc = o => b64u(new TextEncoder().encode(JSON.stringify(o)));
+  await Promise.allSettled(L.map(async ([h, raw]) => {
+    let sub; try { sub = JSON.parse(raw); } catch (e) { return; }
+    const aud = new URL(sub.endpoint).origin, head = enc({ typ: 'JWT', alg: 'ES256' }) + '.' + enc({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: 'mailto:support@mundora.app' });
+    const sig = b64u(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, V.key, new TextEncoder().encode(head)));
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 3500);
+    try {
+      const r = await fetch(sub.endpoint, { method: 'POST', headers: { TTL: urgent ? '50' : '3600', Urgency: urgent ? 'high' : 'normal', Authorization: `vapid t=${head}.${sig}, k=${V.pub}`, 'Content-Length': '0' }, signal: ctl.signal });
+      if (r.status === 404 || r.status === 410) await kv('HDEL', 'ps:' + uid, h);
+    } catch (e) {} clearTimeout(t);
+  }));
+}
 // сообщение в чат + обновление списков чатов у всех участников
 async function push(c, me, G, m, pvText) {
   const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
@@ -53,6 +81,7 @@ async function push(c, me, G, m, pvText) {
   const O = others(c, me, G);
   await kvMulti([['HSET', 'ci:' + me, c, meta], ['HSET', 'cu:' + me, c, '0'], ['HSET', 'cr:' + c, me, String(len - 1)], ['INCR', 'mv:' + me], ...(isG(c) ? [['DEL', 'tyg:' + c]] : [['DEL', 'ty:' + c + ':' + me]]),
     ...O.flatMap(u => [['HSET', 'ci:' + u, c, meta], ['HINCRBY', 'cu:' + u, c, '1'], ['INCR', 'mv:' + u]])]);
+  if (O.length && O.length <= 30 && !m.cl) { const on = await kvMulti(O.map(u => ['GET', 'on:' + u])); await Promise.allSettled(O.filter((u, i) => !on[i]).map(u => pushTo(u, false))); }
   return len;
 }
 const okAva = a => typeof a === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(a) && a.length < 160000;
@@ -98,6 +127,18 @@ export default async function handler(req) {
       const tk = me.id + '.' + (await sign('mp:' + me.id + ':' + me.email)).slice(0, 32);
       const [v, list] = await Promise.all([kv('GET', 'mv:' + me.id), chatList(me.id)]);
       return json({ tk, me: me.id, v: v || '0', chats: list });
+    }
+    if (a === 'vapid') return json({ key: (await vapid()).pub });
+    if (a === 'pend') { // для service worker: что случилось — звонок, пропущенный или сообщение
+      const g = await guard(req, true); if (g.res) return g.res; const me = String(g.user.id);
+      const card = async id => { const e = await kv('GET', 'id:' + id); const u = e ? await getUser(e) : null; const av = u ? avatarOf(u) : 'planet'; return { name: u ? displayName(u) : 'ID ' + id, ava: typeof av === 'string' && av.startsWith('/') ? av : '/img/' + (av || 'planet') + '.webp' }; };
+      const cin = await kv('GET', 'cin:' + me);
+      if (cin) { const k = await jget('call:' + cin); if (k && k.st === 'ring' && Date.now() - k.t < 50000) return json({ call: { id: k.id, from: k.from, kind: k.kind, ...(await card(k.from)) } }); }
+      const mi = await kv('GET', 'cmiss:' + me);
+      if (mi) { await kv('DEL', 'cmiss:' + me); const k = JSON.parse(mi); return json({ end: 1, miss: { id: k.id, from: k.from, ...(await card(k.from)) } }); }
+      const L = (await chatList(me)).filter(c => c.u > 0).sort((x, y) => y.t - x.t)[0];
+      if (L) { const from = L.g ? L.f : L.p, cd = await card(from); return json({ msg: { c: L.c, name: L.g ? L.g.title : cd.name, pv: (L.g && L.g.type !== 'channel' ? cd.name + ': ' : '') + (L.pv || 'Новое сообщение') + (L.u > 1 ? ' (+' + (L.u - 1) + ')' : ''), ava: L.g ? null : cd.ava, url: '/#msg-' + (L.g ? L.c : from) } }); }
+      return json({ end: 1 });
     }
     if (a === 'gava') { const d = isG(q('c')) ? await kv('GET', 'ga:' + q('c')) : null; if (!d) return new Response('', { status: 404 }); const [h, b64] = String(d).split(','); return new Response(ub64(b64), { headers: { 'content-type': h.slice(5, h.indexOf(';')), 'cache-control': 'public, max-age=31536000, immutable' } }); }
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
@@ -162,6 +203,12 @@ export default async function handler(req) {
       return json({ st: k.st, kind: k.kind, from: k.from, to: k.to, t0: k.t0 || 0, why: k.why || '', ...(mine ? { answer: k.answer || null } : { offer: k.offer }), vid: mine ? k.vb : k.va });
     }
     if (req.method !== 'POST' && a !== 'file') return json({ error: 'Неизвестный запрос' }, 404);
+    if (a === 'psub') {
+      const sub = body.sub; if (!sub || typeof sub.endpoint !== 'string' || !/^https:\/\//.test(sub.endpoint) || sub.endpoint.length > 1000) return json({ error: 'Плохая подписка' }, 400);
+      const h = (await sign('ps:' + sub.endpoint)).slice(0, 16);
+      await kv('HSET', 'ps:' + me, h, JSON.stringify({ endpoint: sub.endpoint }));
+      return json({ ok: 1 });
+    }
     if (a === 'call') {
       const to = String(body.to || ''), kind = body.kind === 'video' ? 'video' : 'audio';
       if (!/^\d{1,12}$/.test(to) || to === String(me)) return json({ error: 'Кому звонить?' }, 400);
@@ -172,6 +219,7 @@ export default async function handler(req) {
       const k = { id, from: +me, to: +to, kind, st: 'ring', t: Date.now(), offer: body.sdp, va: kind === 'video' };
       await jset('call:' + id, k);
       await kvMulti([['EXPIRE', 'call:' + id, '21600'], ['SET', 'cin:' + to, id, 'EX', '60'], ['INCR', 'mv:' + to]]);
+      await pushTo(to, true);
       return json({ id });
     }
     if (a === 'cans' || a === 'cend' || a === 'cvid') {
@@ -188,6 +236,7 @@ export default async function handler(req) {
       if (k.st === 'end') return json({ ok: 1 });
       const was = k.st; k.st = 'end'; k.why = callee && was === 'ring' ? 'decline' : String(body.why || 'hang').slice(0, 12); k.t1 = Date.now(); await jset('call:' + id, k);
       await kvMulti([['DEL', 'cin:' + k.to], ['INCR', 'mv:' + k.from], ['INCR', 'mv:' + k.to]]);
+      if (!k.t0 && !callee) { await kv('SET', 'cmiss:' + k.to, JSON.stringify({ id: k.id, from: k.from }), 'EX', '600'); await pushTo(String(k.to), true); }
       // запись о звонке в переписке — от звонившего
       const c = chatId(k.from, k.to), d = k.t0 ? Math.round((k.t1 - k.t0) / 1000) : 0, miss = !k.t0;
       const pv = (k.kind === 'video' ? 'Видеозвонок' : 'Звонок') + (miss ? (k.why === 'decline' ? ' · отклонён' : ' · пропущен') : ' · ' + Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0'));
