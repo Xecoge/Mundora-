@@ -4101,7 +4101,7 @@ function msGEdit(c){const g=msGr(c)||{},ch=g.type==='channel',link=g.inv?locatio
 const CALL={st:null,id:null,peer:null,kind:'audio',pc:null,loc:null,cam:null,mic:true,video:false,face:'user',t0:0,tm:null,poll:null,ring:null,min:false,inc:null,rv:false,ice:null};
 async function callIce(){if(CALL.ice)return CALL.ice;try{CALL.ice=(await msApi('ice')).ice}catch(e){CALL.ice=[{urls:['stun:stun.l.google.com:19302']}]}return CALL.ice}
 const callName=id=>{const p=MS.peers[id];return p?p.name:'ID '+id};
-function callWaitIce(pc){return new Promise(res=>{if(pc.iceGatheringState==='complete')return res();const t=setTimeout(res,2500);pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);res()}})})}
+function callWaitIce(pc){return new Promise(res=>{if(pc.iceGatheringState==='complete')return res();const t=setTimeout(res,1800);pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);res()}})})}
 // звук: гудки при исходящем, мелодия при входящем (WebAudio, без файлов)
 function callTone(type){callToneStop();let ac;try{ac=new(window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume()}catch(e){return}
   const beep=(f,t0,d,v=.12)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime+t0);g.gain.linearRampToValueAtTime(v,ac.currentTime+t0+.02);g.gain.setValueAtTime(v,ac.currentTime+t0+d-.05);g.gain.linearRampToValueAtTime(0,ac.currentTime+t0+d);o.connect(g).connect(ac.destination);o.start(ac.currentTime+t0);o.stop(ac.currentTime+t0+d+.05)};
@@ -4117,7 +4117,8 @@ function callPC(){
   const pc=new RTCPeerConnection({iceServers:CALL.ice||[]});CALL.pc=pc;
   const rs=new MediaStream();
   pc.ontrack=e=>{rs.addTrack(e.track);const a=$('#clRA'),v=$('#clRV');if(a&&e.track.kind==='audio'){a.srcObject=rs;a.play().catch(()=>{})}if(v&&e.track.kind==='video'){v.srcObject=rs;v.play().catch(()=>{});e.track.onunmute=()=>callPaint();e.track.onmute=()=>callPaint()}};
-  pc.onconnectionstatechange=()=>{const s=pc.connectionState;
+  pc.oniceconnectionstatechange=()=>{if(pc.iceConnectionState==='checking'&&!CALL.wd){CALL.wd=setTimeout(()=>{if(CALL.pc===pc&&pc.connectionState!=='connected'){CALL.why='net';callEnd('fail')}},20000)}};
+  pc.onconnectionstatechange=()=>{const s=pc.connectionState;if(s==='connected'){clearTimeout(CALL.wd);CALL.wd=0}
     if(s==='connected'&&CALL.st!=='on'){CALL.st='on';CALL.t0=CALL.t0||Date.now();callToneStop();callBeep(660,.12);callPaint();callTick()}
     if(s==='failed'){CALL.why='net';callEnd('fail')}
     if(s==='disconnected'&&CALL.st==='on'){CALL.recon=1;callPaint();setTimeout(()=>{if(CALL.pc===pc&&pc.connectionState!=='connected'){CALL.why='net';callEnd('fail')}},9000)}
@@ -4167,8 +4168,8 @@ async function callAccept(video){const id=CALL.id;callToneStop();CALL.st='conn';
 async function callEnd(why){const id=CALL.id,st=CALL.st;if(!st)return;
   if(why!=='remote'&&id)msApi('cend',{id,why:why==='noans'?'noans':st==='in'?'decline':'hang'}).catch(()=>{});
   callToneStop();if(st==='on'||st==='conn')callBeep(440,.25);
-  CALL.st='end';callPaint();setTimeout(callClose,CALL.why==='noans'||CALL.why==='decline'||CALL.why==='busy'?1800:900);MS.v='';msPoll()}
-function callClose(){clearTimeout(CALL.poll);clearInterval(CALL.tm);callToneStop();
+  CALL.st='end';callPaint();setTimeout(callClose,CALL.why==='net'?3500:CALL.why==='noans'||CALL.why==='decline'||CALL.why==='busy'?1800:900);MS.v='';msPoll()}
+function callClose(){clearTimeout(CALL.poll);clearTimeout(CALL.wd);CALL.wd=0;clearInterval(CALL.tm);callToneStop();
   try{CALL.pc&&CALL.pc.close()}catch(e){}CALL.pc=null;[CALL.loc,CALL.cam].forEach(s=>s&&s.getTracks().forEach(t=>t.stop()));CALL.loc=CALL.cam=null;
   const el=$('#cl');if(el){el.classList.add('out');setTimeout(()=>el.remove(),420)}$('#clMini')?.remove();CALL.st=null;CALL.id=null}
 function callTick(){clearInterval(CALL.tm);CALL.tm=setInterval(()=>{const s=$('#clStat'),m=$('#clMiniT');const t=callDur();if(s&&CALL.st==='on'&&!CALL.recon)s.textContent=t;if(m)m.textContent=t},1000)}
@@ -4191,7 +4192,7 @@ function callPaint(){const el=$('#cl'),ui=$('#clUI');if(!el||!ui)return;const p=
   el.className='cl on s-'+st+(rvOn?' rv':'')+(lvOn?' lv':'')+(CALL.recon?' recon':'');
   const lv=$('#clLV');if(lv){if(lvOn&&lv.srcObject!==CALL.loc){lv.srcObject=CALL.loc;lv.play().catch(()=>{})}lv.classList.toggle('mirror',CALL.face==='user');lv.classList.toggle('clfull',!!lvOn&&!rvOn&&st!=='on')}
   const status=st==='out'?(CALL.id?'Вызов…':'Подключение…'):st==='in'?(vid?'Входящий видеозвонок':'Входящий звонок'):st==='conn'?'Соединение…':st==='on'?(CALL.recon?'Переподключение…':callDur()):
-    CALL.why==='decline'?'Звонок отклонён':CALL.why==='noans'?'Нет ответа':CALL.why==='busy'?'Абонент занят':CALL.why==='net'?'Нет соединения':CALL.why==='missed'?'Звонок отменён':'Звонок завершён';
+    CALL.why==='decline'?'Звонок отклонён':CALL.why==='noans'?'Нет ответа':CALL.why==='busy'?'Абонент занят':CALL.why==='net'?'Не удалось соединиться — попробуй через Wi-Fi или без VPN':CALL.why==='missed'?'Звонок отменён':'Звонок завершён';
   const B=(act,ic,t,cls='')=>`<button class="cl-b ${cls}" data-act="${act}"><span>${ic}</span><small>${t}</small></button>`;
   const I={mic:'<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
     micx:'<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M4 4l16 16" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
