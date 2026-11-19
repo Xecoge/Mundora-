@@ -74,6 +74,8 @@ async function pushTo(uid, urgent) {
     } catch (e) {} clearTimeout(t);
   }));
 }
+const inCall = (k, me) => !!k && (k.members.includes(+me) || k.inv.includes(+me) || +k.from === +me);
+const ringing = (k, me) => { if (!k || k.st === 'end' || !k.inv.includes(+me)) return null; const t = (k.invT || {})[me] || k.t; if (Date.now() - t > 50000) return null; return { by: (k.invBy || {})[me] || k.from, group: k.members.length + k.inv.length > 2 }; };
 // сообщение в чат + обновление списков чатов у всех участников
 async function push(c, me, G, m, pvText) {
   const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
@@ -133,7 +135,7 @@ export default async function handler(req) {
       const g = await guard(req, true); if (g.res) return g.res; const me = String(g.user.id);
       const card = async id => { const e = await kv('GET', 'id:' + id); const u = e ? await getUser(e) : null; const av = u ? avatarOf(u) : 'planet'; return { name: u ? displayName(u) : 'ID ' + id, ava: typeof av === 'string' && av.startsWith('/') ? av : '/img/' + (av || 'planet') + '.webp' }; };
       const cin = await kv('GET', 'cin:' + me);
-      if (cin) { const k = await jget('call:' + cin); if (k && k.st === 'ring' && Date.now() - k.t < 50000) return json({ call: { id: k.id, from: k.from, kind: k.kind, ...(await card(k.from)) } }); }
+      if (cin) { const k = await jget('call:' + cin); const r = ringing(k, me); if (r) return json({ call: { id: k.id, from: r.by, kind: k.kind, group: r.group, ...(await card(r.by)) } }); }
       const mi = await kv('GET', 'cmiss:' + me);
       if (mi) { await kv('DEL', 'cmiss:' + me); const k = JSON.parse(mi); return json({ end: 1, miss: { id: k.id, from: k.from, ...(await card(k.from)) } }); }
       const L = (await chatList(me)).filter(c => c.u > 0).sort((x, y) => y.t - x.t)[0];
@@ -152,7 +154,7 @@ export default async function handler(req) {
       const c = q('c'), s = +q('s');
       const out = { v, chats: await chatList(me) };
       const cin = await kv('GET', 'cin:' + me);
-      if (cin) { const k = await jget('call:' + cin); if (k && k.st === 'ring' && Date.now() - k.t < 50000) out.call = { id: k.id, from: k.from, kind: k.kind, t: k.t }; }
+      if (cin) { const k = await jget('call:' + cin); const r = ringing(k, me); if (r) out.call = { id: k.id, from: r.by, kind: k.kind, group: r.group, t: k.t }; }
       const G = c ? await access(c, me) : null;
       if (c && G) {
         const p = isG(c) ? null : peerOf(c, me);
@@ -183,7 +185,8 @@ export default async function handler(req) {
       const ids = String(q('ids') || '').split(',').filter(x => /^\d{1,12}$/.test(x)).slice(0, 60);
       const ems = ids.length ? await kvMulti(ids.map(id => ['GET', 'id:' + id])) : [];
       const us = await Promise.all(ems.map(e => e ? getUser(e) : null));
-      return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, online: Date.now() - (u.seen || 0) < 6 * 60e3 } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
+      const pr = ids.length ? await kvMulti(ids.flatMap(id => [['GET', 'on:' + id], ['GET', 'ls:' + id]])) : [];
+      return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
     }
     if (a === 'pch') { const u = String(q('u') || ''); if (!/^\d{1,12}$/.test(u)) return json({ ch: null }); const c = await kv('GET', 'pch:' + u); const g = c ? await gget(c) : null;
       if (!g || g.type !== 'channel') return json({ ch: null });
@@ -198,9 +201,10 @@ export default async function handler(req) {
       return json({ ice: L });
     }
     if (a === 'cget') {
-      const k = await jget('call:' + String(q('id') || '')); if (!k || (String(k.from) !== String(me) && String(k.to) !== String(me))) return json({ st: 'end' });
-      const mine = String(k.from) === String(me);
-      return json({ st: k.st, kind: k.kind, from: k.from, to: k.to, t0: k.t0 || 0, why: k.why || '', ...(mine ? { answer: k.answer || null } : { offer: k.offer }), vid: mine ? k.vb : k.va });
+      const id = String(q('id') || ''), k = await jget('call:' + id);
+      if (!k || !inCall(k, me)) return json({ st: 'end', why: k ? k.why || '' : '' });
+      const n = Math.max(0, +q('n') || 0), L = (await kv('LRANGE', 'cq:' + id + ':' + me, String(n), '-1')) || [];
+      return json({ st: k.st, kind: k.kind, from: k.from, members: k.members, inv: k.inv, t0: k.t0 || 0, why: k.why || '', vid: k.vid || {}, mic: k.mic || {}, msgs: L.map(x => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean), n: n + L.length });
     }
     if (req.method !== 'POST' && a !== 'file') return json({ error: 'Неизвестный запрос' }, 404);
     if (a === 'psub') {
@@ -209,38 +213,60 @@ export default async function handler(req) {
       await kv('HSET', 'ps:' + me, h, JSON.stringify({ endpoint: sub.endpoint }));
       return json({ ok: 1 });
     }
-    if (a === 'call') {
+    // ---- звонок = комната: members — в разговоре, inv — кому звонят. Каждый новый участник сам соединяется со всеми (сетка WebRTC). ----
+    if (a === 'call' || a === 'cadd') {
       const to = String(body.to || ''), kind = body.kind === 'video' ? 'video' : 'audio';
       if (!/^\d{1,12}$/.test(to) || to === String(me)) return json({ error: 'Кому звонить?' }, 400);
       if (!(await kv('GET', 'id:' + to))) return json({ error: 'Аккаунт не найден' }, 404);
-      if (typeof body.sdp !== 'string' || body.sdp.length > 60000) return json({ error: 'Плохие данные звонка' }, 400);
-      const busy = await kv('GET', 'cin:' + to); if (busy) { const b = await jget('call:' + busy); if (b && (b.st === 'ring' || b.st === 'on') && Date.now() - b.t < 3 * 3600e3) return json({ error: 'Абонент разговаривает' }, 409); }
-      const id = String(await kv('INCR', 'callseq')) + Math.random().toString(36).slice(2, 7);
-      const k = { id, from: +me, to: +to, kind, st: 'ring', t: Date.now(), offer: body.sdp, va: kind === 'video' };
-      await jset('call:' + id, k);
-      await kvMulti([['EXPIRE', 'call:' + id, '21600'], ['SET', 'cin:' + to, id, 'EX', '60'], ['INCR', 'mv:' + to]]);
-      await pushTo(to, true);
-      return json({ id });
-    }
-    if (a === 'cans' || a === 'cend' || a === 'cvid') {
-      const id = String(body.id || ''); const k = await jget('call:' + id);
-      if (!k || (String(k.from) !== String(me) && String(k.to) !== String(me))) return json({ error: 'Звонок не найден' }, 404);
-      const callee = String(k.to) === String(me);
-      if (a === 'cvid') { if (callee) k.vb = !!body.on; else k.va = !!body.on; await jset('call:' + id, k); return json({ ok: 1 }); }
-      if (a === 'cans') {
-        if (!callee || k.st !== 'ring') return json({ error: 'Звонок уже завершён' }, 409);
-        if (typeof body.sdp !== 'string' || body.sdp.length > 60000) return json({ error: 'Плохие данные звонка' }, 400);
-        k.st = 'on'; k.answer = body.sdp; k.t0 = Date.now(); k.vb = !!body.video; await jset('call:' + id, k); await kv('SET', 'cin:' + me, id, 'EX', '21600');
-        return json({ ok: 1 });
+      const busy = await kv('GET', 'cin:' + to); if (busy) { const b = await jget('call:' + busy); if (b && b.st !== 'end' && Date.now() - b.t < 3 * 3600e3 && (b.members.includes(+to) || ringing(b, to))) return json({ error: 'Абонент разговаривает' }, 409); }
+      let k;
+      if (a === 'call') {
+        const id = String(await kv('INCR', 'callseq')) + Math.random().toString(36).slice(2, 7);
+        k = { id, from: +me, first: +to, kind, st: 'ring', t: Date.now(), members: [+me], inv: [+to], invT: { [to]: Date.now() }, invBy: { [to]: +me }, vid: { [me]: kind === 'video' }, mic: {} };
+      } else {
+        k = await jget('call:' + String(body.id || '')); if (!k || k.st === 'end' || !k.members.includes(+me)) return json({ error: 'Звонок не найден' }, 404);
+        if (k.members.includes(+to) || k.inv.includes(+to)) return json({ ok: 1 });
+        if (k.members.length + k.inv.length >= 8) return json({ error: 'В звонке максимум 8 человек' }, 400);
+        k.inv.push(+to); k.invT = { ...(k.invT || {}), [to]: Date.now() }; k.invBy = { ...(k.invBy || {}), [to]: +me };
       }
-      if (k.st === 'end') return json({ ok: 1 });
-      const was = k.st; k.st = 'end'; k.why = callee && was === 'ring' ? 'decline' : String(body.why || 'hang').slice(0, 12); k.t1 = Date.now(); await jset('call:' + id, k);
-      await kvMulti([['DEL', 'cin:' + k.to], ['INCR', 'mv:' + k.from], ['INCR', 'mv:' + k.to]]);
-      if (!k.t0 && !callee) { await kv('SET', 'cmiss:' + k.to, JSON.stringify({ id: k.id, from: k.from }), 'EX', '600'); await pushTo(String(k.to), true); }
-      // запись о звонке в переписке — от звонившего
-      const c = chatId(k.from, k.to), d = k.t0 ? Math.round((k.t1 - k.t0) / 1000) : 0, miss = !k.t0;
-      const pv = (k.kind === 'video' ? 'Видеозвонок' : 'Звонок') + (miss ? (k.why === 'decline' ? ' · отклонён' : ' · пропущен') : ' · ' + Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0'));
-      await push(c, String(k.from), { dm: 1 }, { f: +k.from, t: Date.now(), x: '', cl: { k: k.kind, d, miss: miss ? 1 : 0, why: k.why } }, pv);
+      await jset('call:' + k.id, k);
+      await kvMulti([['EXPIRE', 'call:' + k.id, '21600'], ['SET', 'cin:' + to, k.id, 'EX', '60'], ['INCR', 'mv:' + to]]);
+      await pushTo(to, true);
+      return json({ id: k.id });
+    }
+    if (a === 'cjoin' || a === 'csig' || a === 'cstate' || a === 'cend') {
+      const id = String(body.id || ''); const k = await jget('call:' + id);
+      if (!k || !inCall(k, me)) return json({ error: 'Звонок уже завершён' }, 409);
+      if (a === 'csig') {
+        const to = String(body.to || ''); if (!k.members.includes(+to) && !k.inv.includes(+to)) return json({ ok: 1 });
+        const d = JSON.stringify({ from: +me, d: body.d }); if (d.length > 70000) return json({ error: 'Слишком большие данные' }, 400);
+        await kvMulti([['RPUSH', 'cq:' + id + ':' + to, d], ['EXPIRE', 'cq:' + id + ':' + to, '21600']]); return json({ ok: 1 });
+      }
+      if (a === 'cstate') { k.vid = { ...(k.vid || {}), [me]: !!body.vid }; k.mic = { ...(k.mic || {}), [me]: body.mic === false ? false : true }; await jset('call:' + id, k); return json({ ok: 1 }); }
+      if (k.st === 'end') return json({ error: 'Звонок уже завершён' }, 409);
+      if (a === 'cjoin') {
+        if (!k.inv.includes(+me)) return json({ others: k.members.filter(x => x !== +me) });
+        const others = k.members.slice();
+        k.inv = k.inv.filter(x => x !== +me); k.members.push(+me); k.st = 'on'; k.t0 = k.t0 || Date.now(); k.vid = { ...(k.vid || {}), [me]: !!body.video };
+        await jset('call:' + id, k); await kv('SET', 'cin:' + me, id, 'EX', '21600');
+        return json({ others });
+      }
+      // cend: отклонить приглашение или выйти из звонка
+      const wasInv = k.inv.includes(+me);
+      k.inv = k.inv.filter(x => x !== +me); k.members = k.members.filter(x => x !== +me);
+      const ops = [['DEL', 'cin:' + me]];
+      const alive = k.members.length + (k.members.length ? k.inv.filter(x => Date.now() - ((k.invT || {})[x] || 0) < 50000).length : 0);
+      if (alive <= 1 || !k.members.length) {
+        k.st = 'end'; k.t1 = Date.now(); k.why = wasInv ? 'decline' : k.t0 ? 'hang' : String(body.why || 'hang').slice(0, 12);
+        for (const u of [...k.members, ...k.inv]) ops.push(['DEL', 'cin:' + u]);
+        for (const u of new Set([k.from, k.first, ...k.members, ...k.inv, +me])) ops.push(['INCR', 'mv:' + u]);
+        await jset('call:' + id, k); await kvMulti(ops);
+        // запись о звонке в переписке звонившего и первого собеседника
+        const c = chatId(k.from, k.first), d = k.t0 ? Math.round((k.t1 - k.t0) / 1000) : 0, miss = !k.t0;
+        const pv = (k.kind === 'video' ? 'Видеозвонок' : 'Звонок') + (miss ? (k.why === 'decline' ? ' · отклонён' : ' · пропущен') : ' · ' + Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0'));
+        await push(c, String(k.from), { dm: 1 }, { f: +k.from, t: Date.now(), x: '', cl: { k: k.kind, d, miss: miss ? 1 : 0, why: k.why } }, pv);
+        if (miss && !wasInv) { await kv('SET', 'cmiss:' + k.first, JSON.stringify({ id: k.id, from: k.from }), 'EX', '600'); await pushTo(String(k.first), true); }
+      } else { await jset('call:' + id, k); await kvMulti(ops); }
       return json({ ok: 1 });
     }
 

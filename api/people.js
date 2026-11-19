@@ -157,13 +157,15 @@ async function card(email, viewer, full) {
   const [uj, adm0, sh] = await kvMulti([['GET', 'u:' + email], ['SISMEMBER', 'admins', email], ['SISMEMBER', 'shadow_admins', email]]);
   const u = parse(uj); if (!u) return null;
   await ensureId(u);
+  const [onK, lsK] = u.id != null ? await kvMulti([['GET', 'on:' + u.id], ['GET', 'ls:' + u.id]]) : [null, null];
+  const lastSeen = Math.max(u.seen || 0, +lsK || 0);
   const owner = email === ADMIN(), self = viewer.email === email;
   const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
     id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null,
     verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
-    online: Date.now() - (u.seen || 0) < 6 * 60e3, seen: u.seen ? Math.floor(u.seen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
+    online: !!onK, seen: lastSeen ? Math.floor(lastSeen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
     gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), anim: ['orbit', 'bubbles'].includes(u.giftAnim) ? u.giftAnim : (u.giftOrbit ? 'orbit' : 'none'), wallets: walletsOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
