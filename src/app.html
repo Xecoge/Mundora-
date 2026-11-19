@@ -2011,7 +2011,7 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .ms-dayf{position:absolute;left:50%;top:calc(66px + env(safe-area-inset-top));z-index:3;transform:translate(-50%,-6px) scale(.9);opacity:0;pointer-events:none;transition:opacity .25s,transform .35s cubic-bezier(.2,1.3,.3,1)}
 .ms-dayf.on{opacity:1;transform:translate(-50%,0)}
 .ms-dayf span{display:block;padding:4px 11px;border-radius:12px;font-size:12.5px;font-weight:600;color:#fff;background:rgba(30,30,32,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.rx-fly{position:fixed;left:0;top:0;z-index:400;font-size:22px;line-height:1;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.rx-fly{position:fixed;left:0;top:0;opacity:0;z-index:400;font-size:22px;line-height:1;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
 .rx-fx{position:fixed;inset:0;z-index:399;pointer-events:none}.rx-fx i{position:absolute;font-style:normal;line-height:1}
 .rx-big{font-size:22px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.3))}.rx-pe{font-size:13px}.rx-pd{width:6px;height:6px;border-radius:50%}
 .ms-pfh.pfx{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;justify-content:flex-start}.ms-pfh.pfx .ms-cht{display:none}
@@ -3244,7 +3244,7 @@ function msMsgHTML(m,next,prev){const mine=String(m.f)===String(MS.me),c=MS.c,rd
   const ed=c&&m.i!=null&&MS.ed[c]&&MS.ed[c][m.i];let card='';const meta=`<span class="ms-mt">${ed?'<em>изменено</em>':''}${msTime(m.t)}${tick}</span>`;let body='',kind='';
   if(!m.d&&m.cl){const out=mine,miss=m.cl.miss,vid=m.cl.k==='video',d=m.cl.d||0,arrow=`<svg viewBox="0 0 24 24"><path d="${out?'M7 17L17 7M9 7h8v8':'M17 7L7 17M15 17H7V9'}" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const t=miss?(out?(m.cl.why==='decline'?'Отклонённый звонок':'Отменённый звонок'):'Пропущенный звонок'):(out?'Исходящий':'Входящий')+(vid?' видеозвонок':' звонок');
-    body=`<div class="ms-calm${miss&&!out?' miss':''}"><div><b>${t}</b><small>${arrow}${msTime(m.t)}${!miss?', '+Math.floor(d/60)+':'+String(d%60).padStart(2,'0'):''}</small></div><button data-act="ms-call" data-p="${out?MS.peer:m.f}" data-k="${m.cl.k}" title="Перезвонить">${ico(vid?'video':'phone')}</button></div>${meta}`}
+    body=`<div class="ms-calm${miss&&!out?' miss':''}"><div><b>${t}</b><small>${arrow}${msTime(m.t)}${!miss?', '+Math.floor(d/60)+':'+String(d%60).padStart(2,'0'):''}</small></div><button data-act="ms-call" data-p="${out?MS.peer:m.f}" data-k="${m.cl.k}" title="Перезвонить">${ico(vid?'video':'phone')}</button></div>${msRxHTML(c,m)}${meta}`}
   else if(m.d)body=`<span class="ms-delm">${m.o1?ONEI:ico('trash','s')}${m.o1?'Одноразовое сообщение просмотрено':'Сообщение удалено'}</span>${meta}`;
   else{const F=m.fl;let media='';
     if(F){const src=F.local||(F.id?msFile(F.id):''),ar=F.w&&F.h?`aspect-ratio:${F.w}/${F.h};`:'',key=m.i??m.tmp;
@@ -3726,8 +3726,8 @@ MS.rx={};MS.ed={};MS.pin={};MS.reply=null;MS.edit=null;MS.rate=+LS.get('msRate',
 const msHeard=()=>{try{return new Set(JSON.parse(localStorage.getItem('msHeard')||'[]'))}catch(e){return new Set()}};
 function msHeardAdd(k){try{const s=msHeard();s.add(k);localStorage.setItem('msHeard',JSON.stringify([...s].slice(-800)))}catch(e){}}
 function msExtras(c,j){if(!j)return;if(j.hid&&j.hid.length)msDel(c,j.hid);
-  if(j.rx){const old=MS.rx[c];if(old&&c===MS.c&&MS.on){const me=String(MS.me),fx=[];for(const [i,us] of Object.entries(j.rx))for(const [u,e] of Object.entries(us))if(u!==me&&(!old[i]||old[i][u]!==e))fx.push([i,e]);
-      if(fx.length)setTimeout(()=>fx.slice(0,6).forEach(([i,e],k)=>{const ch=document.querySelector(`#msMsgs .mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);if(ch)setTimeout(()=>{ch.classList.remove('pop');void ch.offsetWidth;ch.classList.add('pop');rxBurst(ch,e)},k*120)}),120)}
+  if(j.rx&&!(c===MS.c&&MS.rxHold&&Date.now()<MS.rxHold)){const old=MS.rx[c];if(old&&c===MS.c&&MS.on){const me=String(MS.me),fx=[];for(const [i,us] of Object.entries(j.rx))for(const [u,e] of Object.entries(us))if(u!==me&&(!old[i]||old[i][u]!==e))fx.push([i,e]);
+      if(fx.length)setTimeout(()=>fx.slice(0,6).forEach(([i,e],k)=>{const ch=document.querySelector(`#msMsgs .mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);if(ch)setTimeout(()=>{const cc=rxLive(ch);if(!cc)return;cc.classList.remove('pop');void cc.offsetWidth;cc.classList.add('pop');rxBurst(cc,e)},k*120)}),120)}
     MS.rx[c]=j.rx}if(j.ed)MS.ed[c]=j.ed;if(j.pin!=null)MS.pin[c]=j.pin}
 const msText=(c,m)=>{const e=MS.ed[c]&&m.i!=null&&MS.ed[c][m.i];return e?e.x:m.x};
 function msPrevText(c,m){if(!m)return 'Сообщение';if(m.d)return 'Сообщение удалено';const x=msText(c,m);if(x)return x.slice(0,90);const F=m.fl;if(!F)return '';return F.vo?'🎤 Голосовое сообщение':F.rd?'📹 Видеосообщение':F.ty&&F.ty.startsWith('image/')?'🖼 Фото':F.ty&&F.ty.startsWith('video/')?'🎬 Видео':'📎 '+F.n}
@@ -3735,12 +3735,15 @@ const msWho=f=>String(f)===String(MS.me)?(USR.name||'Вы'):((MS.peers[f]||{}).n
 function msRxHTML(c,m){const R=MS.rx[c]&&m.i!=null&&MS.rx[c][m.i];if(!R)return '';const by={};Object.entries(R).forEach(([u,e])=>{(by[e]=by[e]||[]).push(u)});
   return `<div class="ms-rx">${Object.entries(by).map(([e,us])=>`<button type="button" class="${us.includes(String(MS.me))?'my':''}" data-act="ms-react" data-k="${m.i}" data-e="${e}"><span>${e}</span>${us.length>1?`<b>${us.length}</b>`:`<img src="${avaSrc(String(us[0])===String(MS.me)?USR.avatar:(MS.peers[us[0]]||{}).avatar)}" alt="">`}</button>`).join('')}</div>`}
 // реакция летит из меню к сообщению и разлетается искрами (как в Telegram)
+const rxEl=(i,e)=>document.querySelector(`#msMsgs .mb[data-i="${i}"] .ms-rx button[data-e="${CSS.escape(e)}"]`);
+function rxLive(to){if(to&&to.isConnected)return to;const i=to&&to.dataset.k,e=to&&to.dataset.e;return i!=null&&e?rxEl(i,e):null}
 function rxFly(from,to,e){const t=to.getBoundingClientRect(),f=document.createElement('div');f.className='rx-fly';f.textContent=e;document.body.append(f);
   const x0=from.left+from.width/2,y0=from.top+from.height/2,x1=t.left+15,y1=t.top+t.height/2,dx=x1-x0,dy=y1-y0;
   to.style.visibility='hidden';
-  const an=f.animate([{transform:`translate(${x0}px,${y0}px) translate(-50%,-50%) scale(1.6)`},{transform:`translate(${x0+dx*.5}px,${y0+dy*.5-Math.min(120,Math.abs(dx)*.4+60)}px) translate(-50%,-50%) scale(2.2)`,offset:.45},{transform:`translate(${x1}px,${y1}px) translate(-50%,-50%) scale(.9)`}],{duration:520,easing:'cubic-bezier(.3,.1,.3,1)'});
-  an.onfinish=()=>{f.remove();to.style.visibility='';to.classList.remove('pop');void to.offsetWidth;to.classList.add('pop');rxBurst(to,e)}}
-function rxBurst(el,e){const r=el.getBoundingClientRect(),cx=r.left+15,cy=r.top+r.height/2,box=document.createElement('div');box.className='rx-fx';document.body.append(box);
+  if(!from||(!from.left&&!from.top)||!t.width){f.remove();rxBurst(to,e);return}
+  const an=f.animate([{transform:`translate(${x0}px,${y0}px) translate(-50%,-50%) scale(1.6)`,opacity:1},{transform:`translate(${x0+dx*.5}px,${y0+dy*.5-Math.min(120,Math.abs(dx)*.4+60)}px) translate(-50%,-50%) scale(2.2)`,opacity:1,offset:.45},{transform:`translate(${x1}px,${y1}px) translate(-50%,-50%) scale(.9)`,opacity:1}],{duration:520,easing:'cubic-bezier(.3,.1,.3,1)'});
+  an.onfinish=an.oncancel=()=>{f.remove();to.style.visibility='';const cur=rxLive(to);if(!cur)return;cur.style.visibility='';cur.classList.remove('pop');void cur.offsetWidth;cur.classList.add('pop');rxBurst(cur,e)}}
+function rxBurst(el,e){el=rxLive(el);if(!el)return;const r=el.getBoundingClientRect();if(!r.width||r.bottom<0||r.top>innerHeight)return;const cx=r.left+15,cy=r.top+r.height/2,box=document.createElement('div');box.className='rx-fx';document.body.append(box);
   const big=document.createElement('i');big.className='rx-big';big.textContent=e;big.style.left=cx+'px';big.style.top=cy+'px';box.append(big);
   big.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:.95},{transform:'translate(-50%,-50%) scale(3.2)',opacity:.85,offset:.35},{transform:'translate(-50%,-60%) scale(4.2)',opacity:0}],{duration:900,easing:'cubic-bezier(.2,.8,.3,1)'});
   const cols=['#ffd166','#ff6b9a','#7cc4ff','#b9a3ff','#4ade80','#ff8e3c'];
@@ -3749,10 +3752,11 @@ function rxBurst(el,e){const r=el.getBoundingClientRect(),cx=r.left+15,cy=r.top+
     p.animate([{transform:'translate(-50%,-50%) scale(.3) rotate(0)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d}px)) scale(${em?1.1:1}) rotate(${(Math.random()-.5)*360}deg)`,opacity:1,offset:.6},{transform:`translate(calc(-50% + ${Math.cos(a)*d*1.25}px),calc(-50% + ${Math.sin(a)*d*1.25+25}px)) scale(.2)`,opacity:0}],{duration:700+Math.random()*300,easing:'cubic-bezier(.15,.8,.3,1)'})}
   setTimeout(()=>box.remove(),1200)}
 function msRqHTML(c,m){if(m.r==null)return '';const t=(MS.msgs[c]||[]).find(x=>x.i===m.r);return `<button type="button" class="ms-rq" data-act="ms-goto" data-k="${m.r}"><b>${esc(t?msWho(t.f):'Сообщение')}</b><span>${esc(t?msPrevText(c,t):'Старое сообщение')}</span></button>`}
-async function msReact(i,e,from){const c=MS.c;if(i==null||!c)return;const R=MS.rx[c]=MS.rx[c]||{};const o={...(R[i]||{})};const me=String(MS.me);const add=o[me]!==e;if(!add)delete o[me];else o[me]=e;if(Object.keys(o).length)R[i]=o;else delete R[i];
+async function msReact(i,e,from){const c=MS.c;if(i==null||!c)return;MS.rxHold=Date.now()+4000;const R=MS.rx[c]=MS.rx[c]||{};const o={...(R[i]||{})};const me=String(MS.me);const add=o[me]!==e;if(!add)delete o[me];else o[me]=e;if(Object.keys(o).length)R[i]=o;else delete R[i];
   const y=$('#msMsgs')?.scrollTop;msPaintMsgs();const ml=$('#msMsgs');if(ml&&y!=null)ml.scrollTop=y;const ch=ml&&ml.querySelector(`.mb[data-i="${i}"] .ms-rx button[data-e="${e}"]`);
   if(ch&&add){if(from)rxFly(from,ch,e);else{ch.classList.add('pop');rxBurst(ch,e)}}
-  try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}try{const j=await msApi('react',{c,i,e});R[i]=j.rx;if(!Object.keys(j.rx).length)delete R[i]}catch(err){toast(err.message,'x')}}
+  try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}try{const j=await msApi('react',{c,i,e});const RR=MS.rx[c]=MS.rx[c]||{};RR[i]=j.rx;if(!Object.keys(j.rx).length)delete RR[i];MS.rxHold=Date.now()+1500;
+    if(MS.c===c){setTimeout(()=>{if(MS.c!==c)return;const ml2=$('#msMsgs'),y2=ml2&&ml2.scrollTop;msPaintMsgs();const m3=$('#msMsgs');if(m3&&y2!=null)m3.scrollTop=y2},650)}}catch(err){toast(err.message,'x')}}
 function msGoto(i){const ml=$('#msMsgs');const el=ml&&ml.querySelector(`.mb[data-i="${i}"]`);if(!el){toast('Сообщение выше — пролистай чат','chat');return}el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.remove('hl');void el.offsetWidth;el.classList.add('hl')}
 // панель «ответ / правка» над полем ввода (само поле не меняется)
 function msBar(){const box=$('#msMain');if(!box)return;let b=$('#msRBar');const R=MS.reply,E=MS.edit;if(!R&&!E){if(b)b.remove();box.classList.remove('ms-hasbar');return}
