@@ -2018,6 +2018,7 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .ms-pfback{width:44px;height:44px;border-radius:50%}
 @media(min-width:761px){.ms-pfh.pfx{display:none}}
 @media(max-width:760px){.msgr .ms-ch .ms-callb{position:absolute;right:0;top:0}.msgr .ms-ch .ms-cht{max-width:calc(100% - 124px)!important}}
+html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{width:0!important;height:0!important;display:none}
 </style>
 </head>
 <body>
@@ -3490,26 +3491,24 @@ function msMicBind(){const b=$('#msMic');if(!b)return;msMicIcon();
       if(gone||!MS.rec)return;if(MS.rec.locked)return;msRecStop(false,Date.now()-t0)};
     b.addEventListener('pointermove',mv);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)})}
 /* ---------- звук как в Telegram: Opus 48 кГц моно, шумодав, автоуровень + обработка: срез гула, разборчивость, компрессор, лимитер ---------- */
-function msGetAC(){if(!MS.ac||MS.ac.state==='closed'){try{MS.ac=new (window.AudioContext||window.webkitAudioContext)({sampleRate:48000})}catch(e){MS.ac=new (window.AudioContext||window.webkitAudioContext)()}}if(MS.ac.state!=='running')MS.ac.resume().catch(()=>{});return MS.ac}
+function msGetAC(){if(!MS.ac||MS.ac.state==='closed'){try{MS.ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'playback'})}catch(e){MS.ac=new (window.AudioContext||window.webkitAudioContext)()}}if(MS.ac.state!=='running')MS.ac.resume().catch(()=>{});return MS.ac}
 ['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{if(MS.on&&MS.ac&&MS.ac.state!=='running')MS.ac.resume().catch(()=>{})},{passive:true,capture:true}));
 async function msVoiceChain(st){const ac=msGetAC();try{await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,400))])}catch(e){}
   const src=ac.createMediaStreamSource(new MediaStream(st.getAudioTracks()));const an=ac.createAnalyser();an.fftSize=512;
   if(ac.state!=='running'){src.connect(an);return{ac,an,src,out:st,nodes:[src]}}// звук не обработать — пишем как есть, без тишины
-  const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=85;hp.Q.value=.7;            // гул, ветер, стуки
-  const mud=ac.createBiquadFilter();mud.type='peaking';mud.frequency.value=300;mud.Q.value=1;mud.gain.value=-2; // «бубнёж»
-  const pres=ac.createBiquadFilter();pres.type='peaking';pres.frequency.value=3200;pres.Q.value=.9;pres.gain.value=3.5; // разборчивость голоса
-  const air=ac.createBiquadFilter();air.type='highshelf';air.frequency.value=9000;air.gain.value=1.5;
-  const cmp=ac.createDynamicsCompressor();cmp.threshold.value=-28;cmp.knee.value=10;cmp.ratio.value=3.5;cmp.attack.value=.004;cmp.release.value=.18;
-  const mk=ac.createGain();mk.gain.value=2.1;                                                            // тихий голос — громче
-  const lim=ac.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.06;
+  // как в Telegram: чистый голос без «пережатия» — лёгкий срез гула, мягкий компрессор, запас от перегруза
+  const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=75;hp.Q.value=.7;
+  const cmp=ac.createDynamicsCompressor();cmp.threshold.value=-22;cmp.knee.value=12;cmp.ratio.value=2;cmp.attack.value=.01;cmp.release.value=.25;
+  const mk=ac.createGain();mk.gain.value=1.5;
+  const lim=ac.createDynamicsCompressor();lim.threshold.value=-1.5;lim.knee.value=2;lim.ratio.value=12;lim.attack.value=.002;lim.release.value=.12;
   const dst=ac.createMediaStreamDestination();dst.channelCount=1;
-  src.connect(hp);hp.connect(mud);mud.connect(pres);pres.connect(air);air.connect(cmp);cmp.connect(mk);mk.connect(lim);lim.connect(dst);lim.connect(an);
-  return{ac,an,src,out:new MediaStream([...dst.stream.getAudioTracks(),...st.getVideoTracks()]),nodes:[src,hp,mud,pres,air,cmp,mk,lim,dst]}}
+  src.connect(hp);hp.connect(cmp);cmp.connect(mk);mk.connect(lim);lim.connect(dst);lim.connect(an);
+  return{ac,an,src,out:new MediaStream([...dst.stream.getAudioTracks(),...st.getVideoTracks()]),nodes:[src,hp,cmp,mk,lim,dst]}}
 const msRecEl=R=>(R.acc+(R.paused?0:Date.now()-R.seg0))/1000;
 const STOPI='<svg class="i" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg>';
 const CAMI='<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>';
 async function msRecStart(mode='voice'){if(MS.rec)return;const vid=mode==='video';
-  const audio={echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1,sampleRate:48000,sampleSize:16};
+  const audio={echoCancellation:false,noiseSuppression:true,autoGainControl:false,channelCount:1,sampleRate:{ideal:48000},sampleSize:16};
   let st;try{st=await navigator.mediaDevices.getUserMedia(vid?{audio,video:{facingMode:'user',width:{ideal:480},height:{ideal:480},aspectRatio:1,frameRate:{ideal:30}}}:{audio})}
   catch(e){toast(vid?'Нет доступа к камере или микрофону — разреши их в настройках браузера':'Нет доступа к микрофону — разреши его в настройках браузера','x');return}
   const ch=await msVoiceChain(st);let cam=null;
@@ -3519,7 +3518,7 @@ async function msRecStart(mode='voice'){if(MS.rec)return;const vid=mode==='video
     cam.cs=cv.captureStream(30);ch.out=new MediaStream([...ch.out.getAudioTracks(),...cam.cs.getVideoTracks()])}
   const types=vid?['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']:['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/mp4;codecs=opus','audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm'];
   const mt=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
-  const rec=new MediaRecorder(ch.out,{...(mt?{mimeType:mt}:{}),audioBitsPerSecond:128000,...(vid?{videoBitsPerSecond:2500000}:{})});const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  const rec=new MediaRecorder(ch.out,{...(mt?{mimeType:mt}:{}),audioBitsPerSecond:vid?96000:64000,...(vid?{videoBitsPerSecond:2500000}:{})});const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
   const an=ch.an,buf=new Uint8Array(an.fftSize);
   const R=MS.rec={rec,st,ch,cam,face:'user',chunks,ac:ch.ac,an,buf,lv:[],t0:Date.now(),seg0:Date.now(),acc:0,paused:false,pos:0,mt:rec.mimeType||mt||(vid?'video/webm':'audio/webm'),vid,locked:false,max:vid?60:600};rec.start(250);
   const comp=$('#msComp');comp.classList.add('rec');if(vid)comp.classList.add('recv');$('#msRecBar').hidden=false;msRecBar();
@@ -3605,7 +3604,7 @@ async function msCircleSave(m){const F=m&&m.fl;if(!F)return;if(!F.id&&!F.local){
     const vs=cv.captureStream(30);let at=[];
     try{const ac=msGetAC();await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,400))]);if(ac.state==='running'){const s=ac.createMediaElementSource(v),dst=ac.createMediaStreamDestination();s.connect(dst);at=dst.stream.getAudioTracks();v._s=s}}catch(e){}
     const mt=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1.42E01E,opus','video/mp4;codecs=avc1,opus','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported(t))||'';
-    const rec=new MediaRecorder(new MediaStream([...vs.getVideoTracks(),...at]),{...(mt?{mimeType:mt}:{}),videoBitsPerSecond:4000000,audioBitsPerSecond:128000});const ch=[];rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+    const rec=new MediaRecorder(new MediaStream([...vs.getVideoTracks(),...at]),{...(mt?{mimeType:mt}:{}),videoBitsPerSecond:4000000,audioBitsPerSecond:96000});const ch=[];rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
     const fin=new Promise(r=>rec.onstop=r);
     if(!at.length)v.muted=true;
     await v.play().catch(async()=>{v.muted=true;await v.play()});rec.start(500);
