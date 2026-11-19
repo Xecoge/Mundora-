@@ -1998,6 +1998,19 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .ms-vvsk{display:flex;align-items:center;gap:10px}.ms-vvsk input{flex:1}.ms-vvtm,.ms-vvrm{font-size:12.5px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.85);min-width:38px}.ms-vvrm{text-align:right}
 .ms-vvctl{display:flex;align-items:center;justify-content:space-between;margin-top:2px}.ms-vvctl .ib{width:48px;height:48px;color:#fff;border-radius:50%}.ms-vvctl .ib .i{width:24px;height:24px}
 .ms-vvctl .ms-vvpp .i{width:30px;height:30px}
+
+/* шапка чата: узкая плашка с именем и статусом по центру, рядом отдельный кружок звонка; аватарки сверху нет */
+.msgr .ms-ch{justify-content:center}
+.msgr .ms-ch .ms-chava{display:none!important}
+.msgr .ms-ch .ms-back{position:absolute;left:0;top:0}
+.msgr .ms-ch .ms-cht{display:block!important;flex:0 1 auto!important;width:auto!important;min-width:min(200px,calc(100% - 128px));max-width:min(440px,calc(100% - 128px))!important;margin:0!important;padding:7px 22px!important;white-space:nowrap}
+.msgr .ms-ch .ms-cht b{display:inline-flex;align-items:center;gap:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.msgr .ms-ch .ms-callb{position:static;flex:none}
+/* даты: не липнут друг на друга; при прокрутке сверху всплывает одна плашка с датой */
+.msgr .ms-day{position:relative!important;top:auto!important}
+.ms-dayf{position:absolute;left:50%;top:calc(66px + env(safe-area-inset-top));z-index:3;transform:translate(-50%,-6px) scale(.9);opacity:0;pointer-events:none;transition:opacity .25s,transform .35s cubic-bezier(.2,1.3,.3,1)}
+.ms-dayf.on{opacity:1;transform:translate(-50%,0)}
+.ms-dayf span{display:block;padding:4px 11px;border-radius:12px;font-size:12.5px;font-weight:600;color:#fff;background:rgba(30,30,32,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 </style>
 </head>
 <body>
@@ -4356,6 +4369,13 @@ async function callFromLink(id,ans){if(!id)return;try{await msInit();const k=awa
 (()=>{const P=new URLSearchParams(location.search),id=P.get('call');if(id){history.replaceState(null,'',location.pathname+location.hash);setTimeout(()=>callFromLink(id,P.get('ans')==='1'),800)}
   if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.mundora!=='open')return;if(d.call)callFromLink(d.call.id,d.ans);else if(d.url){const h=d.url.split('#')[1];if(h)location.hash='#'+h}});
   setTimeout(()=>{if(USR&&USR.id!=null)pushSub(false)},4000)})();
+
+// плавающая дата при прокрутке переписки (как в Telegram)
+document.addEventListener('scroll',e=>{const ml=e.target;if(!ml||ml.id!=='msMsgs')return;const box=ml.parentElement;if(!box)return;
+  let f=box.querySelector('.ms-dayf');if(!f){f=document.createElement('div');f.className='ms-dayf';f.innerHTML='<span></span>';box.append(f)}
+  const top=ml.getBoundingClientRect().top+70;let cur=null;for(const d of ml.querySelectorAll('.ms-day')){if(d.getBoundingClientRect().top<=top)cur=d;else break}
+  if(!cur){f.classList.remove('on');return}f.firstChild.textContent=cur.textContent.trim();const first=ml.querySelector('.ms-day');
+  const vis=cur.getBoundingClientRect().top>top-60&&cur.getBoundingClientRect().top<=top;f.classList.toggle('on',!vis);clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove('on'),1300)},true);
 
 const MS_ACT={
   async 'push-on'(el){el.disabled=true;if(await pushSub(true)){toast('Уведомления включены','check');msListPaint()}else el.disabled=false},
