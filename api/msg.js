@@ -110,6 +110,8 @@ export default async function handler(req) {
       if (v === q('v')) return json({ v, same: 1 });
       const c = q('c'), s = +q('s');
       const out = { v, chats: await chatList(me) };
+      const cin = await kv('GET', 'cin:' + me);
+      if (cin) { const k = await jget('call:' + cin); if (k && k.st === 'ring' && Date.now() - k.t < 50000) out.call = { id: k.id, from: k.from, kind: k.kind, t: k.t }; }
       const G = c ? await access(c, me) : null;
       if (c && G) {
         const p = isG(c) ? null : peerOf(c, me);
@@ -146,7 +148,50 @@ export default async function handler(req) {
       if (!g || g.type !== 'channel') return json({ ch: null });
       const meta = await kv('HGET', 'ci:' + g.owner, c); let o = {}; try { o = JSON.parse(meta || '{}'); } catch (e) {}
       return json({ ch: { id: g.id, title: g.title, about: g.about || '', n: (g.members || []).length, col: g.col || 0, av: g.av || 0, vf: !!g.vf, type: 'channel', inv: g.inv, pv: o.pv ? (await open(c, o.pv)) || '' : '', t: o.t || 0, member: (g.members || []).map(String).includes(String(me)) } }); }
+    // ---- звонки (WebRTC): сервер только передаёт описания соединения, сам звук и видео идут напрямую между людьми ----
+    if (a === 'ice') {
+      const L = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }];
+      if (process.env.TURN_URL) L.push({ urls: process.env.TURN_URL.split(','), username: process.env.TURN_USER || '', credential: process.env.TURN_PASS || '' });
+      return json({ ice: L });
+    }
+    if (a === 'cget') {
+      const k = await jget('call:' + String(q('id') || '')); if (!k || (String(k.from) !== String(me) && String(k.to) !== String(me))) return json({ st: 'end' });
+      const mine = String(k.from) === String(me);
+      return json({ st: k.st, kind: k.kind, from: k.from, to: k.to, t0: k.t0 || 0, why: k.why || '', ...(mine ? { answer: k.answer || null } : { offer: k.offer }), vid: mine ? k.vb : k.va });
+    }
     if (req.method !== 'POST' && a !== 'file') return json({ error: 'Неизвестный запрос' }, 404);
+    if (a === 'call') {
+      const to = String(body.to || ''), kind = body.kind === 'video' ? 'video' : 'audio';
+      if (!/^\d{1,12}$/.test(to) || to === String(me)) return json({ error: 'Кому звонить?' }, 400);
+      if (!(await kv('GET', 'id:' + to))) return json({ error: 'Аккаунт не найден' }, 404);
+      if (typeof body.sdp !== 'string' || body.sdp.length > 60000) return json({ error: 'Плохие данные звонка' }, 400);
+      const busy = await kv('GET', 'cin:' + to); if (busy) { const b = await jget('call:' + busy); if (b && (b.st === 'ring' || b.st === 'on') && Date.now() - b.t < 3 * 3600e3) return json({ error: 'Абонент разговаривает' }, 409); }
+      const id = String(await kv('INCR', 'callseq')) + Math.random().toString(36).slice(2, 7);
+      const k = { id, from: +me, to: +to, kind, st: 'ring', t: Date.now(), offer: body.sdp, va: kind === 'video' };
+      await jset('call:' + id, k);
+      await kvMulti([['EXPIRE', 'call:' + id, '21600'], ['SET', 'cin:' + to, id, 'EX', '60'], ['INCR', 'mv:' + to]]);
+      return json({ id });
+    }
+    if (a === 'cans' || a === 'cend' || a === 'cvid') {
+      const id = String(body.id || ''); const k = await jget('call:' + id);
+      if (!k || (String(k.from) !== String(me) && String(k.to) !== String(me))) return json({ error: 'Звонок не найден' }, 404);
+      const callee = String(k.to) === String(me);
+      if (a === 'cvid') { if (callee) k.vb = !!body.on; else k.va = !!body.on; await jset('call:' + id, k); return json({ ok: 1 }); }
+      if (a === 'cans') {
+        if (!callee || k.st !== 'ring') return json({ error: 'Звонок уже завершён' }, 409);
+        if (typeof body.sdp !== 'string' || body.sdp.length > 60000) return json({ error: 'Плохие данные звонка' }, 400);
+        k.st = 'on'; k.answer = body.sdp; k.t0 = Date.now(); k.vb = !!body.video; await jset('call:' + id, k); await kv('SET', 'cin:' + me, id, 'EX', '21600');
+        return json({ ok: 1 });
+      }
+      if (k.st === 'end') return json({ ok: 1 });
+      const was = k.st; k.st = 'end'; k.why = callee && was === 'ring' ? 'decline' : String(body.why || 'hang').slice(0, 12); k.t1 = Date.now(); await jset('call:' + id, k);
+      await kvMulti([['DEL', 'cin:' + k.to], ['INCR', 'mv:' + k.from], ['INCR', 'mv:' + k.to]]);
+      // запись о звонке в переписке — от звонившего
+      const c = chatId(k.from, k.to), d = k.t0 ? Math.round((k.t1 - k.t0) / 1000) : 0, miss = !k.t0;
+      const pv = (k.kind === 'video' ? 'Видеозвонок' : 'Звонок') + (miss ? (k.why === 'decline' ? ' · отклонён' : ' · пропущен') : ' · ' + Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0'));
+      await push(c, String(k.from), { dm: 1 }, { f: +k.from, t: Date.now(), x: '', cl: { k: k.kind, d, miss: miss ? 1 : 0, why: k.why } }, pv);
+      return json({ ok: 1 });
+    }
 
     if (a === 'send') {
       const D = await dest(body.to, me); if (D.err) return json({ error: D.err }, 403); const c = D.c;
