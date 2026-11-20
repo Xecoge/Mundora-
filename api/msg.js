@@ -44,9 +44,11 @@ async function access(c, me) { if (isG(c)) { const g = await gget(c); return g &
 const others = (c, me, G) => G && !G.dm ? (G.members || []).map(String).filter(x => x !== String(me)) : (peerOf(c, me) !== String(me) ? [peerOf(c, me)] : []);
 const bumpAll = (me, c, G) => [['INCR', 'mv:' + me], ...others(c, me, G).map(u => ['INCR', 'mv:' + u])];
 // куда пишем: личный чат с человеком или группа/канал
+const IDC = new Map();
+async function idEmail(id) { const h = IDC.get(id); if (h && Date.now() - h.t < 600000) return h.e; const e = await kv('GET', 'id:' + id); if (e) IDC.set(id, { e, t: Date.now() }); return e; }
 async function dest(to, me) { to = String(to ?? '');
   if (isG(to)) { const g = await access(to, me); if (!g) return { err: 'Нет доступа' }; if (g.type === 'channel' && !isAdm(g, me)) return { err: 'В канале пишут только администраторы' }; return { c: to, G: g }; }
-  if (!/^\d{1,12}$/.test(to)) return { err: 'Кому?' }; const em = to !== me ? await kv('GET', 'id:' + to) : null; if (to !== me && !em) return { err: 'Аккаунт не найден' };
+  if (!/^\d{1,12}$/.test(to)) return { err: 'Кому?' }; const em = to !== me ? await idEmail(to) : null; if (to !== me && !em) return { err: 'Аккаунт не найден' };
   if (isBotEmail(em)) { const b = await getUser(em); if (!b || b.status === 'deleted' || !b.bot) return { err: 'Бот удалён' }; return { c: chatId(me, to), G: { dm: 1 }, to, bot: b }; }
   return { c: chatId(me, to), G: { dm: 1 }, to }; }
 // ---- Web Push: уведомления, даже когда сайт закрыт. Ключи VAPID создаются один раз и хранятся в базе (в коде их нет). ----
@@ -80,10 +82,28 @@ async function pushTo(uid, urgent) {
 const inCall = (k, me) => !!k && (k.members.includes(+me) || k.inv.includes(+me) || +k.from === +me);
 const ringing = (k, me) => { if (!k || k.st === 'end' || !k.inv.includes(+me)) return null; const t = (k.invT || {})[me] || k.t; if (Date.now() - t > 50000) return null; return { by: (k.invBy || {})[me] || k.from, group: k.members.length + k.inv.length > 2 }; };
 // сообщение в чат + обновление списков чатов у всех участников
+// всё сообщение — одним запросом к базе (Lua на сервере базы): быстрее, чем RPUSH и затем пакет обновлений
+const PUSH_LUA = `local len = redis.call('RPUSH', KEYS[1], ARGV[1])
+local meta = ARGV[2] .. len .. '}'
+local c, me = ARGV[3], ARGV[4]
+redis.call('HSET', KEYS[2], c, meta) redis.call('HSET', KEYS[3], c, '0') redis.call('HSET', KEYS[4], me, tostring(len - 1)) redis.call('INCR', KEYS[5]) redis.call('DEL', KEYS[6])
+local i = 7
+while KEYS[i] do redis.call('HSET', KEYS[i], c, meta) redis.call('HINCRBY', KEYS[i + 1], c, 1) redis.call('INCR', KEYS[i + 2]) i = i + 3 end
+return len`;
+let LUA_OK = true;
 async function push(c, me, G, m, pvText) {
-  const len = await kv('RPUSH', 'cm:' + c, await seal(c, JSON.stringify(m)));
-  const meta = JSON.stringify({ t: m.t, f: +me, pv: await seal(c, pvText), n: len });
   const O = others(c, me, G);
+  const [sm, spv] = await Promise.all([seal(c, JSON.stringify(m)), seal(c, pvText)]);
+  if (LUA_OK) {
+    try {
+      const pre = JSON.stringify({ t: m.t, f: +me, pv: spv }).slice(0, -1) + ',"n":';
+      const K = ['cm:' + c, 'ci:' + me, 'cu:' + me, 'cr:' + c, 'mv:' + me, isG(c) ? 'tyg:' + c : 'ty:' + c + ':' + me, ...O.flatMap(u => ['ci:' + u, 'cu:' + u, 'mv:' + u])];
+      const len = +(await kv('EVAL', PUSH_LUA, String(K.length), ...K, sm, pre, c, String(me)));
+      if (len > 0) { if (O.length && O.length <= 30 && !m.cl) bg(kvMulti(O.map(u => ['GET', 'on:' + u])).then(on => Promise.allSettled(O.filter((u, i) => !on[i]).map(u => pushTo(u, false))))); return len; }
+    } catch (e) { LUA_OK = false; }
+  }
+  const len = await kv('RPUSH', 'cm:' + c, sm);
+  const meta = JSON.stringify({ t: m.t, f: +me, pv: spv, n: len });
   await kvMulti([['HSET', 'ci:' + me, c, meta], ['HSET', 'cu:' + me, c, '0'], ['HSET', 'cr:' + c, me, String(len - 1)], ['INCR', 'mv:' + me], ...(isG(c) ? [['DEL', 'tyg:' + c]] : [['DEL', 'ty:' + c + ':' + me]]),
     ...O.flatMap(u => [['HSET', 'ci:' + u, c, meta], ['HINCRBY', 'cu:' + u, c, '1'], ['INCR', 'mv:' + u]])]);
   if (O.length && O.length <= 30 && !m.cl) bg(kvMulti(O.map(u => ['GET', 'on:' + u])).then(on => Promise.allSettled(O.filter((u, i) => !on[i]).map(u => pushTo(u, false)))));
@@ -162,6 +182,7 @@ async function botApi(req, url) {
     b.bot.cmds = cm.slice(0, 50).map(o => ({ c: String(o.command || '').replace(/^\//, '').toLowerCase().slice(0, 32), d: String(o.description || '').slice(0, 256) })).filter(o => /^[a-z0-9_]+$/.test(o.c));
     await kv('SET', 'u:' + b.email, JSON.stringify(b)); return R(true);
   }
+  if (mt === 'deleteMyCommands') { b.bot.cmds = []; await kv('SET', 'u:' + b.email, JSON.stringify(b)); return R(true); }
   if (mt === 'getMyCommands') return R((b.bot.cmds || []).map(o => ({ command: o.c, description: o.d })));
   return R([404, 'Not Found: метод ' + mt], false);
 }

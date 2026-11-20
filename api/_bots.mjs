@@ -62,7 +62,11 @@ ${tok}
 Как пользоваться (как Bot API в Telegram):
 ${SITE}/bot${tok}/getMe
 ${SITE}/bot${tok}/getUpdates?timeout=25
-${SITE}/bot${tok}/sendMessage?chat_id=ID&text=Привет`;
+${SITE}/bot${tok}/sendMessage?chat_id=ID&text=Привет
+
+Команды бота можно задать кодом (появятся в «Меню» у всех):
+${SITE}/bot${tok}/setMyCommands — POST {"commands":[{"command":"start","description":"Начать"}]}
+также getMyCommands и deleteMyCommands`;
 const pick = (L, verb) => L.length ? `Выбери бота, чтобы ${verb}: пришли его юзернейм.\n\n` + L.map(b => '@' + b.bot.uname).join('\n') : 'У тебя пока нет ботов. Создай: /newbot';
 
 // Ответ конструктора на сообщение пользователя me. Возвращает текст ответа.
