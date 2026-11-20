@@ -2097,7 +2097,22 @@ html.mu .ms-home,html.mu .ms-lhead [data-act="ms-exit"],html.mu header [data-act
 .be-ava img{width:96px;height:96px;border-radius:50%;object-fit:cover;box-shadow:0 10px 28px rgba(0,0,0,.4)}
 .be-ava i{position:absolute;right:0;bottom:0;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;box-shadow:0 0 0 3px #15111f}.be-ava i svg{width:16px;height:16px}
 .be-ava small{color:rgba(255,255,255,.5)}
-.ms-un{color:#b79bff!important;font-weight:600;cursor:pointer;text-decoration:none!important}.mb.me .ms-un{color:#fff;text-decoration:underline}.ms-un:active{opacity:.6}
+.ms-un{color:#b79bff;font-weight:600;cursor:pointer;text-decoration:none!important}.mb.me .ms-un,.mb.me .ms-bc{color:#fff!important;text-decoration:underline!important;text-underline-offset:2px}.mb.th .ms-un{color:#b79bff!important}.ms-un:active{opacity:.6}
+.un-in{display:flex;align-items:center;gap:2px;color:rgba(255,255,255,.55);font-weight:600}.un-in input{flex:1;min-width:0}
+.un-err{display:block;font-style:normal;font-size:12.5px;min-height:16px;margin-top:4px;color:rgba(255,255,255,.45)}.un-err.bad{color:#ff8a95}.un-err.good{color:#6be3a0}
+.un-ov{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:20px;background:rgba(6,4,14,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:unFade .3s ease both}
+.un-ov.out{animation:unFade .25s ease reverse both}.un-ov.out .un-card{animation:unPop .25s ease reverse both}
+@keyframes unFade{from{opacity:0}}@keyframes unPop{from{transform:scale(.6) translateY(30px);opacity:0}}
+.un-card{width:min(360px,100%);border-radius:30px;padding:26px 22px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;animation:unPop .5s cubic-bezier(.3,1.5,.5,1) both}
+.un-ic{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font:800 34px/1 inherit;color:#fff;background:radial-gradient(circle at 35% 30%,#b79bff,#7c3aed 60%,#4c1d95);box-shadow:0 12px 30px rgba(124,58,237,.45),inset 0 2px 0 rgba(255,255,255,.35);margin-bottom:14px;animation:unPop .6s .08s cubic-bezier(.3,1.7,.5,1) both}
+.un-card b{font-size:21px}.un-card p{margin:8px 0 16px;color:rgba(255,255,255,.65);font-size:14.5px;line-height:1.45}
+.un-in.big{width:100%;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:18px}
+.un-in.big input{background:none;border:0;outline:0;color:#fff;font:600 18px/1 inherit}
+.un-card .un-err{width:100%;text-align:left;padding-left:6px}
+.un-card .btn{width:100%;justify-content:center;margin-top:12px}.un-card .btn:disabled{opacity:.45}
+.un-later{margin-top:10px;border:0;background:none;color:rgba(255,255,255,.5);font:inherit;font-size:14px;cursor:pointer}
+.ms-pfs.from-chat{animation:pfDown .42s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pfDown{from{transform:translateY(-36px);opacity:0;clip-path:inset(0 0 100% 0 round 0 0 28px 28px)}to{clip-path:inset(0 0 0 0)}}
 </style>
 </head>
 <body>
@@ -3184,7 +3199,7 @@ const PLAYI='<svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill
 const msCid=p=>/^g\d+$/.test(String(p))?String(p):[String(MS.me),String(p)].sort((a,b)=>+a-+b).join('_');
 const msFile=(id,dl)=>`/api/msg?a=file&id=${encodeURIComponent(id)}&tk=${encodeURIComponent(MS.tk)}${dl?'&dl=1':''}`;
 async function msApi(a,body,qs=''){const r=await fetch('/api/msg?a='+a+qs+(body?'':'&tk='+encodeURIComponent(MS.tk)),body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,tk:MS.tk})}:{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j}
-async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers();mqResume()}
+async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.un=j.un||'';MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers();mqResume()}
 async function msPeers(extra=[],force){const ids=[...new Set([...MS.chats.flatMap(c=>c.g?[c.f]:[c.p]),...extra].filter(x=>x!=null&&!/^g/.test(String(x))).map(String))].filter(id=>force||!MS.peers[id]||MS.peers[id]._part);if(!ids.length)return;
   try{const j=await msApi('peers',null,'&ids='+ids.join(','));j.peers.forEach(p=>MS.peers[p.id]=p)}catch(e){}}
 const msUnread=()=>MS.chats.reduce((n,c)=>n+(LS.get('msMute_'+c.c,false)?0:(c.u||0)),0);
@@ -3233,15 +3248,15 @@ function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&
 async function msShow(r){const m=msShell();const first=!MS.on;MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');if(first){m.classList.add('enter');setTimeout(()=>m.classList.remove('enter'),350);const pb=$('#view #pfBox');if(pb)pb.remove()}
   msVV();
   try{await msInit()}catch(e){$('#msSide').innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`;return}
-  if(!MS.pfL){MS.pfL=1;msPfLoad()}
+  if(!MS.pfL){MS.pfL=1;msPfLoad();setTimeout(msUnAsk,600)}
   let x;
   if((x=r.match(/^msg-(g\d+)$/))){const c=x[1];MS.peer=c;MS.c=c;MS.prof=null;MS.pane='chat';if(!msGr(c)){try{const j=await msApi('ginfo',null,'&c='+c);MS.G[c]=j.g}catch(e){toast(e.message,'x');location.hash='#msg';return}}msDrawSide();msOpenChat()}
   else if((x=r.match(/^msgi-(g\d+)$/))){MS.c=x[1];MS.peer=x[1];MS.prof=null;MS.pane='ginfo';msDrawSide();msGInfo(x[1])}
   else if((x=r.match(/^msgj-(g\d+)-([\w-]+)$/))){MS.prof=null;MS.pane='ginfo';msDrawSide();msGJoin(x[1],x[2])}
   else if((x=r.match(/^msg-(\d+)$/))){MS.peer=x[1];MS.c=msCid(x[1]);MS.prof=null;await msPeers([x[1]]);MS.pane='chat';msDrawSide();msOpenChat()}
-  else if((x=r.match(/^msgp-(\d+)$/))){MS.prof=x[1];MS.pane='prof';if(String(x[1])===String(MS.me)){MS.c=null}msDrawSide();msDrawProf()}
+  else if((x=r.match(/^msgp-(\d+)$/))){if(!/^msgp-/.test(MS.lastR||''))MS.profBack=/^msgi?-g?\d+$/.test(MS.lastR||'')?'#'+MS.lastR:null;MS.prof=x[1];MS.pane='prof';if(String(x[1])===String(MS.me)){MS.c=null}msDrawSide();msDrawProf()}
   else{MS.tab=r==='msgc'?'contacts':'chats';MS.c=null;MS.peer=null;MS.prof=null;MS.pane='list';msDrawSide();msDrawMain()}
-  msTabs();msLoop()}
+  MS.lastR=r;msTabs();msLoop()}
 function msHide(){const m=$('#msgr');MS.on=false;document.body.classList.remove('ms-open');if(m){m.classList.remove('on');m.style.height='';m.style.transform=''}MS.c=null;MS.prof=null;msRecStop(true);msLoop()}
 
 /* ---------- списки: чаты и контакты ---------- */
@@ -3281,7 +3296,7 @@ async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;bo
 /* ---------- профиль прямо в мессенджере (тот же, что на сайте) ---------- */
 async function msDrawProf(){const box=$('#msMain');if(!box)return;const id=MS.prof,own=String(id)===String(MS.me);
   box.innerHTML=`<header class="ms-ch ms-pfh own${own?'':' pfx'}">${own?'<span style="width:40px"></span>':`<button class="ib lq ms-pfback" data-act="ms-back">${ico('left')}</button>`}<div class="ms-cht"><b></b></div>${own?`<button class="ib lq ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button>`:''}</header>
-    <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id],1):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div><div class="pfg-cta"><button class="pfg-btn" data-act="gift-shop" ${own?'':`data-to="${id}"`}>${ico('star')}<span>${own?'Отправить подарки':'Подарить'}</span></button></div></div>`;
+    <div class="ms-pfs${MS.profBack?' from-chat':''}" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id],1):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div><div class="pfg-cta"><button class="pfg-btn" data-act="gift-shop" ${own?'':`data-to="${id}"`}>${ico('star')}<span>${own?'Отправить подарки':'Подарить'}</span></button></div></div>`;
   msPchLoad(id,own);setTimeout(pfgCta,60);
   try{const j=await peopleApi('id='+id);PEOPLE.cache[id]=j.profile;if(MS.prof===id){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(j.profile,1);setTimeout(pfgCta,60)}}catch(e){const b=$('#msgr #pfBox');if(b)b.innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`}}
 function msOptsHTML(){return `<div class="h3">${ico('chat')}Мессенджер</div><div class="ms-grp lq">
@@ -4508,7 +4523,8 @@ const MS_ACT={
   'cl-mic'(){callMic()},'cl-cam'(){callCam()},'cl-flip'(){callFlip()},'cl-min'(){callMini()},'cl-more'(el){callMore(el)},'cl-add'(el){callAdd(el.dataset.u,el)},'cl-sh-x'(){$('#clSheet')?.classList.remove('on')},
   'cl-max'(){const el=$('#cl');if(el){el.classList.remove('mini')}$('#clMini')?.remove()},
   'ms-go'(el){location.hash=el.dataset.h},
-  'ms-back'(){if(history.length>1&&MS.backOk)history.back();else location.hash=MS.tab==='contacts'?'#msgc':'#msg'},
+  'ms-back'(){if(MS.pane==='prof'&&MS.profBack){const h=MS.profBack;MS.profBack=null;location.hash=h;return}if(history.length>1&&MS.backOk)history.back();else location.hash=MS.tab==='contacts'?'#msgc':'#msg'},
+  'un-copy'(el){const t='@'+el.dataset.u;try{navigator.clipboard.writeText(t);toast('Скопировано: '+t,'copy')}catch(e){}},
   'ms-write'(el){location.hash='#msg-'+el.dataset.id},
   'ms-newchat'(el){msNewMenu(el)},
   'ms-ng-back'(){const ch=NG.type==='channel';if(!NG.add&&NG.step==='info'&&!ch){NG.step='pick';return msNGDraw()}if(!NG.add&&NG.step==='pick'&&ch){NG.step='info';return msNGDraw()}msNGClose()},
@@ -5673,7 +5689,7 @@ const GIFT_ACT={
   async 'wal-open'(el){const id=el.dataset.id,p=PEOPLE.cache[id];if(!p||!(p.wallets||[]).length)return;walModal(el,id,p.wallets)},
   'wal-close'(){walClose()},
   'wal-copy'(el){copyText(el.dataset.a)},
-  async 'gl-save'(el){glGrab();const me=PEOPLE.cache[USR.id]||{},curName=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';
+  async 'gl-save'(el){const unEl=$('#pfUn');if(unEl){const v=unEl.value.trim().replace(/^@/,'');if(v!==(MS.un||'')){if(!v){toast('Юзернейм нельзя оставить пустым','x');return}try{const j=await peopleApi('a=unset',{u:v});MS.un=j.un;USR.un=j.un;if(j.profile)PEOPLE.cache[j.profile.id]=j.profile}catch(e){toast(e.message,'x');unEl.focus();return}}}glGrab();const me=PEOPLE.cache[USR.id]||{},curName=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';
     const nameCh=GL.name.trim()!==curName,meCh=nameCh||GL.bio!==(USR.bio||'')||pfEdit.av!==USR.avatar||GL.open!==(USR.open!==false);
     const layCh=JSON.stringify(GL.pos)!==JSON.stringify(me.pos||[])||(GL.nick||null)!==(me.nick||null)||GL.anim!==(me.anim||'none');
     if(!meCh&&!layCh){GL.on=false;glPaint();return}
@@ -6686,6 +6702,7 @@ function pfHTML(p,ms){
       <div class="an-seg">${[['none','Стоят','Как расставил'],['bubbles','Пузыри','Живые: летают по шапке, сталкиваются, их можно бросать'],['orbit','Орбита 3D','Кружат вокруг аватарки']].map(([v,n,d])=>`<button type="button" class="${GL.anim===v?'on':''}" data-act="gl-anim" data-v="${v}"><b>${n}</b><small>${d}</small></button>`).join('')}</div>
       <small style="font-weight:400">В редактировании подарки стоят на месте, чтобы их было удобно расставлять.</small></div>`}
     <label class="lq-f lq"><small>Никнейм · проверяет нейросеть</small><input id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать"></label>
+    ${ms&&p.self?`<label class="lq-f lq"><small>Юзернейм · по нему тебя найдут</small><span class="un-in">@<input id="pfUn" maxlength="32" autocapitalize="off" autocomplete="off" spellcheck="false" value="${esc(MS.un||p.un||'')}" placeholder="username" oninput="unLive(this,'#pfUnErr')"></span><em class="un-err" id="pfUnErr"></em></label>`:''}
     <label class="lq-f lq"><small>О себе</small><textarea id="pfBio" maxlength="160" rows="3" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea></label>
     ${ms&&p.self?`<button type="button" class="lq-f lq gl-pch" data-act="ms-pchpick"><small>Канал в профиле · виден всем под шапкой</small><span>${ico('mega','s')}<b id="msPchName">${MS.pch&&MS.pchFor===String(p.id)?esc(MS.pch.title):'не выбран'}</b>${ico('chev','s r')}</span></button>`:''}
     <div class="lq-f lq"><small>Криптокошельки · видны всем вместе с балансом, только просмотр</small>
@@ -6701,7 +6718,7 @@ function pfHTML(p,ms){
     <div class="row gl-btns" style="margin-top:4px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
     ${ms?(p.self?act('pf-edit',ico('edit'),'Изменить')+act('ms-settings',ico('gear'),'Настройки')
-      :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+(p.bot&&p.bot.mine?act('ms-botedit',ico('edit'),'Изменить',`data-id="${p.id}"`):act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`))+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')+(USR&&USR.admin?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''))
+      :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+(p.bot&&p.bot.mine?act('ms-botedit',ico('edit'),'Изменить',`data-id="${p.id}"`):act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`))+(USR&&USR.admin?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''))
     :`${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
       :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
     ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
@@ -6711,11 +6728,12 @@ function pfHTML(p,ms){
   ${ms?`<div class="ms-pchslot">${MS.pchFor===String(p.id)&&MS.pchHTML||''}</div>`:''}
   <div class="glass tgp-info">
     ${p.bio?`<div class="tgp-row"><small>о себе</small><p>${esc(p.bio)}</p></div>`:''}
-    ${p.tg?`<button class="tgp-row" data-act="tg-go" data-u="${esc(p.tg.username||'')}"><small>telegram</small><b class="tgp-link">${esc(tgLabel(p.tg))}</b></button>`:''}
-    ${p.bot?`<div class="tgp-row"><small>юзернейм</small><b>@${esc(p.bot.uname)}</b></div>`:p.self?`<button class="tgp-row" data-act="email-change"><small>почта · нажми, чтобы сменить</small><b>${ico('lock','s')}${esc(p.email)}${ico('edit','s')}</b></button>`:`<div class="tgp-row"><small>почта</small><b>${ico('lock','s')}${esc(p.email)}</b></div>`}
+    ${p.tg&&!ms?`<button class="tgp-row" data-act="tg-go" data-u="${esc(p.tg.username||'')}"><small>telegram</small><b class="tgp-link">${esc(tgLabel(p.tg))}</b></button>`:''}
+    ${p.un||(ms&&p.self&&MS.un)?`<button class="tgp-row" data-act="un-copy" data-u="${esc(p.un||MS.un)}"><small>юзернейм</small><b>@${esc(p.un||MS.un)}</b></button>`:''}
+    ${p.bot?'':p.self?`<button class="tgp-row" data-act="email-change"><small>почта · нажми, чтобы сменить</small><b>${ico('lock','s')}${esc(p.email)}${ico('edit','s')}</b></button>`:`<div class="tgp-row"><small>почта</small><b>${ico('lock','s')}${esc(p.email)}</b></div>`}
     ${joined?`<div class="tgp-row"><small>в Mundora</small><b>с ${joined}</b></div>`:''}
   </div>
-${ms?msPfTail(p,gs):`
+${ms?(p.bot?'':msPfTail(p,gs)):`
   <div class="glass tgp-gifts">
     <div class="tgp-gh"><b>Подарки</b><span class="k">${gs.length||''}</span>${p.self?`<button class="btn ghost sm" data-act="gift-shop">${ico('plus','s')}Купить</button>`:`<button class="btn ghost sm" data-act="gift-shop" data-to="${p.id}">${ico('star','s')}Подарить</button>`}</div>
     ${gs.length?`<div class="tgp-gg">${gs.map(g=>`<button class="tgp-gt r-${giftRar(g.k).c}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}"><img src="${giftImg(g.k)}" alt=""><b>${esc(GIFT_CAT[g.k].n)}</b><small>${g.from?'от '+esc(g.from.name):'куплен'}</small>${(p.pos||[]).some(x=>x.id===g.id)||p.nick===g.id?'<i class="tgp-pin">'+ico('pin','s')+'</i>':''}</button>`).join('')}</div>`
@@ -6767,7 +6785,20 @@ const msPins=()=>{try{return JSON.parse(localStorage.getItem('msPins:'+MS.me)||'
 function msPinToggleOld(c){let P=msPins();if(P.includes(c))P=P.filter(x=>x!==c);else{if(P.length>=5){toast('Закрепить можно до 5 чатов','x');return}P.unshift(c)}try{localStorage.setItem('msPins:'+MS.me,JSON.stringify(P))}catch(e){}msDrawSide();toast(P.includes(c)?'Чат закреплён':'Чат откреплён','check')}
 // команды бота: всплывают над полем ввода, когда начинаешь с «/»
 document.addEventListener('click',e=>{const b=document.getElementById('msBotCmd');if(b&&!e.target.closest('#msBotCmd,.ms-bmenu,#msIn'))b.remove()},true);
-const msUnames=h=>h.replace(/(^|[\s(>])@([A-Za-z][A-Za-z0-9_]{2,30}bot)\b/gi,'$1<a class="ms-un" data-act="ms-uname" data-u="$2">@$2</a>');
+const msUnames=h=>h.replace(/(^|[\s(>])@([A-Za-z][A-Za-z0-9_]{3,31})\b/g,'$1<a class="ms-un" data-act="ms-uname" data-u="$2">@$2</a>');
+// юзернейм: проверка на лету и окно при первом входе в мессенджер
+function unLive(inp,errSel){clearTimeout(inp._t);const v=inp.value.replace(/^@/,'').trim(),e=$(errSel),ok=$('#unOk');
+  const bad=!v?'':/[^A-Za-z0-9]/.test(v)?'Только латинские буквы и цифры':!/^[A-Za-z]/.test(v)?'Должен начинаться с буквы':v.length<5?'Минимум 5 символов':/bot$/i.test(v)?'На «bot» заканчиваются только боты':'';
+  if(e){e.textContent=bad;e.className='un-err'+(bad?' bad':'')}if(ok)ok.disabled=true;if(bad||!v||v===MS.un)return;
+  inp._t=setTimeout(async()=>{try{const j=await peopleApi('a=uncheck&u='+encodeURIComponent(v));if(inp.value.replace(/^@/,'').trim()!==v)return;if(e){e.textContent=j.ok?'Свободен ✓':j.err;e.className='un-err '+(j.ok?'good':'bad')}if(ok)ok.disabled=!j.ok}catch(_){}},350)}
+function msUnAsk(){if(MS.un||$('#unOv')||sessionStorage.getItem('unLater'))return;const d=document.createElement('div');d.id='unOv';d.className='un-ov';
+  d.innerHTML=`<div class="un-card lq"><div class="un-ic">@</div><b>Выбери юзернейм</b><p>По нему тебя найдут и смогут упомянуть в чатах. Латинские буквы и цифры, от 5 символов.</p>
+    <label class="un-in big">@<input id="unIn" maxlength="32" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="username" oninput="unLive(this,'#unErr')"></label><em class="un-err" id="unErr"></em>
+    <button class="btn" id="unOk" disabled>${ico('check','s')}Готово</button><button class="un-later" id="unLater">Позже</button></div>`;
+  document.body.append(d);setTimeout(()=>$('#unIn')?.focus(),350);
+  $('#unLater').onclick=()=>{sessionStorage.setItem('unLater','1');d.classList.add('out');setTimeout(()=>d.remove(),260)};
+  $('#unOk').onclick=async e=>{const b=e.currentTarget,v=$('#unIn').value.replace(/^@/,'').trim();b.disabled=true;try{const j=await peopleApi('a=unset',{u:v});MS.un=j.un;USR.un=j.un;if(j.profile)PEOPLE.cache[j.profile.id]=j.profile;toast('Теперь ты @'+j.un,'check');d.classList.add('out');setTimeout(()=>d.remove(),260)}catch(err){const er=$('#unErr');if(er){er.textContent=err.message;er.className='un-err bad'}b.disabled=false}};
+  $('#unIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('#unOk').disabled)$('#unOk').click()})}
 function msBotComp(p,empty){const f=$('#msComp');if(!f)return;f.classList.toggle('isbot',!!p);f.classList.toggle('bstart',!!empty);
   if(p&&!f.querySelector('.ms-startb'))f.insertAdjacentHTML('afterbegin',`<button type="button" class="ms-startb" data-act="ms-bcmd" data-c="/start">СТАРТ</button>`);
   const hasM=p&&(p.cmds||[]).length;let mb=f.querySelector('.ms-bmenu');if(hasM&&!mb)f.querySelector('.ms-inp').insertAdjacentHTML('afterbegin',`<button type="button" class="ms-bmenu" data-act="ms-bmenu" title="Команды бота"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button>`);else if(!hasM&&mb)mb.remove()}

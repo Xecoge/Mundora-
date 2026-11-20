@@ -166,10 +166,10 @@ async function card(email, viewer, full) {
   const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
     id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null,
-    verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self, ...(u.bot ? { bot: { uname: u.bot.uname, cmds: u.bot.cmds || [], about: u.bot.about || '', mine: botCan(u, viewer) } } : {}),
+    verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self, un: u.bot ? u.bot.uname : (u.un || ''), ...(u.bot ? { bot: { uname: u.bot.uname, cmds: u.bot.cmds || [], about: u.bot.about || '', mine: botCan(u, viewer) } } : {}),
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: !!onK, seen: lastSeen ? Math.floor(lastSeen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
-    gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), anim: ['orbit', 'bubbles'].includes(u.giftAnim) ? u.giftAnim : (u.giftOrbit ? 'orbit' : 'none'), wallets: walletsOut(u)
+    gifts: u.bot ? [] : giftsOut(u), pos: posOut(u), nick: nickOut(u), anim: ['orbit', 'bubbles'].includes(u.giftAnim) ? u.giftAnim : (u.giftOrbit ? 'orbit' : 'none'), wallets: walletsOut(u)
   };
   // визуальный админ видит свои «изменения» чужих обложек/аватарок только сам
   if (L && !self) { const k = String(u.id); if (L.cov && k in L.cov) base.cover = L.cov[k] ? `/api/people?img=cov&id=${u.id}&sh=1&v=${L.cov[k]}` : ''; if (L.ava && L.ava[k]) base.avatar = owner ? 'gem_orbit' : 'planet'; }
@@ -259,6 +259,7 @@ export default async function handler(req) {
       if (b.to != null && String(b.to) !== String(u.id)) { tEmail = /^\d{1,12}$/.test(String(b.to)) ? await kv('GET', 'id:' + b.to) : null; if (!tEmail) return json({ error: 'Получатель не найден' }, 404); }
       const t = tEmail === me.email ? u : await getUser(tEmail);
       if (!t) return json({ error: 'Получатель не найден' }, 404);
+      if (t.bot) return json({ error: 'Ботам нельзя дарить подарки' }, 400);
       t.gifts = Array.isArray(t.gifts) ? t.gifts : [];
       if (t.gifts.length >= 200) return json({ error: 'У получателя уже слишком много подарков' }, 400);
       const g = { id: rand(8), k: b.k, t: Date.now(), from: t === u ? null : { id: u.id, name: displayName(u), av: avatarOf(u) } };
@@ -345,6 +346,19 @@ export default async function handler(req) {
     }
     if (req.method === 'POST' && a === 'tg-unlink') { await unlinkTg(me.email); return json({ ok: true, profile: await card(me.email, me, true) }); }
     // настройки бота: имя, описание, фото — у владельца; BotFather — только у ID 0
+    // юзернейм: латиница и цифры, от 5 до 32, начинается с буквы, не на «bot» (это для ботов)
+    if (a === 'uncheck' || (req.method === 'POST' && a === 'unset')) {
+      const b = req.method === 'POST' ? await req.json().catch(() => ({})) : {}, un = String(b.u ?? url.searchParams.get('u') ?? '').replace(/^@/, '').trim(), lo = un.toLowerCase();
+      const err = !un ? 'Напиши юзернейм' : /[^A-Za-z0-9]/.test(un) ? 'Только латинские буквы и цифры' : !/^[A-Za-z]/.test(un) ? 'Должен начинаться с буквы' : un.length < 5 ? 'Минимум 5 символов' : un.length > 32 ? 'Максимум 32 символа' : /bot$/i.test(un) ? 'На «bot» заканчиваются только боты' : '';
+      const mine = me.un && me.un.toLowerCase() === lo;
+      const busy = !err && !mine && ((await kv('GET', 'un:' + lo)) || (await kv('GET', 'bu:' + lo)));
+      if (a === 'uncheck') return json({ ok: !err && !busy, err: err || (busy ? 'Этот юзернейм уже занят' : '') });
+      if (err) return json({ error: err }, 400);
+      if (busy) return json({ error: 'Этот юзернейм уже занят' }, 409);
+      const u = await getUser(me.email);
+      if (!mine) { const got = await kv('SET', 'un:' + lo, String(u.id), 'NX'); if (!got) return json({ error: 'Этот юзернейм уже занят' }, 409); if (u.un) await kv('DEL', 'un:' + u.un.toLowerCase()); }
+      u.un = un; await putUser(u); return json({ ok: true, un, profile: await card(me.email, u, true) });
+    }
     if (req.method === 'POST' && a === 'botedit') {
       const b = await req.json().catch(() => ({})), id = String(b.id || '');
       const em = /^\d{1,12}$/.test(id) ? await kv('GET', 'id:' + id) : null, t = em ? await getUser(em) : null;
@@ -398,7 +412,7 @@ export default async function handler(req) {
     const emails = await kv('SMEMBERS', 'users');
     const us = (await kvMulti(emails.map(e => ['GET', 'u:' + e]))).map(parse).filter(u => u && u.status !== 'banned' && u.status !== 'deleted');
     const qq = q.replace(/^@/, '');
-    const hit = u => (u.id != null && (String(u.id) === q || (/^\d{2,}$/.test(q) && String(u.id).startsWith(q)))) || displayName(u).toLowerCase().includes(qq) || (u.bot && u.bot.uname.toLowerCase().includes(qq)) || (me.admin && !u.bot && u.email.includes(q));
+    const hit = u => (me.admin && u.id != null && (String(u.id) === q || (/^\d{2,}$/.test(q) && String(u.id).startsWith(q)))) || displayName(u).toLowerCase().includes(qq) || (u.bot && u.bot.uname.toLowerCase().includes(qq)) || (u.un && u.un.toLowerCase().includes(qq)) || (me.admin && !u.bot && u.email.includes(q));
     const found = us.filter(hit).sort((x, y) => (String(y.id) === q) - (String(x.id) === q) || (displayName(y).toLowerCase() === q) - (displayName(x).toLowerCase() === q) || (y.seen || 0) - (x.seen || 0)).slice(0, 20);
     const people = await Promise.all(found.map(u => card(u.email, me, false)));
     return json({ people: people.filter(Boolean) });

@@ -178,7 +178,7 @@ export default async function handler(req, ctx) {
       if (me.id == null) return json({ error: 'Нет ID аккаунта' }, 400);
       const tk = me.id + '.' + (await sign('mp:' + me.id + ':' + me.email)).slice(0, 32);
       const [v, list] = await Promise.all([kv('GET', 'mv:' + me.id), chatList(me.id)]);
-      return json({ tk, me: me.id, v: v || '0', chats: list });
+      return json({ tk, me: me.id, un: me.un || '', v: v || '0', chats: list });
     }
     if (a === 'vapid') return json({ key: (await vapid()).pub });
     if (a === 'botapi') return botApi(req, url);
@@ -237,10 +237,10 @@ export default async function handler(req, ctx) {
       const ems = ids.length ? await kvMulti(ids.map(id => ['GET', 'id:' + id])) : [];
       const us = await Promise.all(ems.map(e => e ? getUser(e) : null));
       const pr = ids.length ? await kvMulti(ids.flatMap(id => [['GET', 'on:' + id], ['GET', 'ls:' + id]])) : [];
-      return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, ...(u.bot ? { bot: u.bot.uname, about: u.bot.about || '', cmds: u.bot.cmds || [] } : {}), seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
+      return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, un: u.bot ? u.bot.uname : (u.un || ''), ...(u.bot ? { bot: u.bot.uname, about: u.bot.about || '', cmds: u.bot.cmds || [] } : {}), seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
     }
     // настройки списка чатов (закреп, архив, без звука, удалённые) — одинаковые на сайте и в приложении
-    if (a === 'uname') { const b = await botByUname(url.searchParams.get('u') || ''); return b && b.status !== 'deleted' ? json({ id: b.id }) : json({ error: 'Не найден' }, 404); }
+    if (a === 'uname') { const n = String(url.searchParams.get('u') || '').replace(/^@/, '').toLowerCase(); const uid = /^[a-z][a-z0-9_]{2,31}$/.test(n) ? await kv('GET', 'un:' + n) : null; if (uid) return json({ id: +uid }); const b = await botByUname(n); return b && b.status !== 'deleted' ? json({ id: b.id }) : json({ error: 'Не найден' }, 404); }
     if (a === 'prefs') return json({ p: (await jget('mp:' + me)) || {} });
     if (a === 'pch') { const u = String(q('u') || ''); if (!/^\d{1,12}$/.test(u)) return json({ ch: null }); const c = await kv('GET', 'pch:' + u); const g = c ? await gget(c) : null;
       if (!g || g.type !== 'channel') return json({ ch: null });
