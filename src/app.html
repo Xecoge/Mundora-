@@ -2044,6 +2044,15 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{wi
 .pfg-btn:active{transform:scale(.93)}.pfg-btn svg{width:17px;height:17px}
 .gl-pch{display:block;text-align:left;cursor:pointer;color:inherit;font:inherit}.gl-pch span{display:flex;align-items:center;gap:8px;margin-top:6px}.gl-pch span b{flex:1}
 #msPfs:has(.gl-bar) .pfg-cta{display:none}
+.pfg-cta .pfg-btn{opacity:0;transform:translateY(26px) scale(.7);pointer-events:none;transition:opacity .22s,transform .38s cubic-bezier(.3,1.5,.5,1)}
+.pfg-cta.show .pfg-btn{opacity:1;transform:none;pointer-events:auto}
+.pfg-cta.show .pfg-btn:active{transform:scale(.93)}
+#msPfs:has(.gl-bar) .pfg{display:none}
+.ms-pchr{display:flex;align-items:baseline;gap:8px;min-width:0}.ms-pchr b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-pchr em{margin-left:auto;font-style:normal;font-size:13px;color:rgba(255,255,255,.55);white-space:nowrap;flex:none}
+.ms-pch>div{flex:1;min-width:0}
+.ms-pinI{margin-left:auto;display:grid;place-items:center;color:rgba(255,255,255,.45);flex:none}.ms-pinI svg{width:15px;height:15px;transform:rotate(45deg)}
+.ms-setg .ms-row.red{color:#ff7b8a}.ms-setg{margin-top:4px}
 </style>
 </head>
 <body>
@@ -2107,7 +2116,7 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{wi
 <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></symbol>
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.6 9.3a2.8 2.8 0 0 0-2.4-1.3h-.6a2.3 2.3 0 0 0 0 4.6h.8a2.3 2.3 0 0 1 0 4.6h-.7a2.8 2.8 0 0 1-2.4-1.3M12 6.2V8M12 16.2V18"/></symbol>
 <symbol id="i-notes" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></symbol>
-<symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3.5 3.5h-11L10 9zM12 12.5V20"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3.5 3.5h-11L10 9zM12 12.5V20"/></symbol>
 <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
 <symbol id="i-checks" viewBox="0 0 24 24"><rect x="3.5" y="4" width="6" height="6" rx="1.5"/><path d="m5 7 1.2 1.2L8.3 6M13 7h7.5"/><rect x="3.5" y="14" width="6" height="6" rx="1.5"/><path d="M13 17h7.5"/></symbol>
 <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
@@ -3197,31 +3206,35 @@ function msListHTML(){return (MS.q?'':pushCard())+msListHTML0()}
 function msListHTML0(){const q=MS.q.trim().toLowerCase();
   const L=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
   if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
+  const P=msPins();if(P.length)L.sort((a,b)=>{const x=P.indexOf(a.c),y=P.indexOf(b.c);return (x<0?1e9:x)-(y<0?1e9:y)});
   return L.map(c=>{if(c.g){const g=c.g;MS.G[c.c]=g;const mine=String(c.f)===String(MS.me),rd=mine&&c.n&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,who=mine?'Вы':(MS.peers[c.f]||{}).name;
-      return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.c}"><span class="ms-avw">${msGAva(g)}</span><div class="ms-itx"><div class="ms-r1"><b>${g.type==='channel'?`<i class="ms-gic">${ico('mega','s')}</i>`:`<i class="ms-gic">${ico('users','s')}</i>`}${esc(g.title)}${msGVf(g)}</b><span class="ms-tm">${mine&&g.type!=='channel'?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
-      <div class="ms-r2"><span>${g.type!=='channel'&&who&&c.n>1?`<em class="ms-pvw">${esc(who)}: </em>`:''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:''}</div></div></a>`}
+      const pin=msPins().includes(c.c)?`<i class="ms-pinI">${ico('pin','s')}</i>`:'';
+      return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.c}" data-c="${c.c}"><span class="ms-avw">${msGAva(g)}</span><div class="ms-itx"><div class="ms-r1"><b>${g.type==='channel'?`<i class="ms-gic">${ico('mega','s')}</i>`:`<i class="ms-gic">${ico('users','s')}</i>`}${esc(g.title)}${msGVf(g)}</b><span class="ms-tm">${mine&&g.type!=='channel'?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
+      <div class="ms-r2"><span>${g.type!=='channel'&&who&&c.n>1?`<em class="ms-pvw">${esc(who)}: </em>`:''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:pin}</div></div></a>`}
+    const pin=msPins().includes(c.c)?`<i class="ms-pinI">${ico('pin','s')}</i>`:'';
+    if(String(c.p)===String(MS.me))return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}" data-c="${c.c}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b><span class="ms-tm">${msWhen(c.t)}</span></div><div class="ms-r2"><span>${esc(msPvNice(c.pv))}</span>${pin}</div></div></a>`;
     const p=MS.peers[c.p],mine=String(c.f)===String(MS.me),rd=mine&&c.n&&String(c.p)!==String(MS.me)&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,on=MS.on2[c.p]&&MS.on2[c.p].on;
-    return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
-      <div class="ms-r2"><span>${mine?'<em>Вы: </em>':''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:''}</div></div></a>`}).join('')}
+    return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}" data-c="${c.c}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
+      <div class="ms-r2"><span>${mine?'<em>Вы: </em>':''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:pin}</div></div></a>`}).join('')}
 function msContactsHTML(){const ids=[...new Set(MS.chats.filter(c=>c.p!=null).map(c=>String(c.p)))].filter(id=>id!==String(MS.me));const L=ids.map(id=>MS.peers[id]).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
   return `<a class="ms-it" href="#msg-${MS.me}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b></div><div class="ms-r2"><span>заметки и файлы для себя</span></div></div></a>`
     +(L.length?`<div class="ms-sec">Мои контакты</div>`+L.map(p=>{const on=MS.on2[p.id]&&MS.on2[p.id].on;return `<a class="ms-it" href="#msgp-${p.id}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>${on?'<span class="ms-on">в сети</span>':p.seen?'был(а) '+msWhen(p.seen):'ID '+p.id}</span></div></div></a>`}).join(''):`<div class="ms-empty"><b>Контактов пока нет</b><span>Найди человека по нику или ID сверху</span></div>`)}
 async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;box.innerHTML=MS.tab==='contacts'?msContactsHTML():msListHTML();if(q.length<1)return;
   try{const j=await peopleApi('q='+encodeURIComponent(q));if(MS.q.trim()!==q)return;const known=new Set(MS.chats.map(c=>String(c.p)));
     const ppl=j.people.filter(p=>!known.has(String(p.id)));if(!ppl.length)return;MS.found=ppl.map(p=>String(p.id));ppl.forEach(p=>{if(p.online!=null)MS.on2[p.id]={on:!!p.online,t:p.seen||0}});setTimeout(()=>msPresenceList(true),50);
-    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen};
+    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{if(String(p.id)===String(MS.me))return `<a class="ms-it" href="#msg-${MS.me}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b></div><div class="ms-r2"><span>заметки и файлы для себя</span></div></div></a>`;MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen};
       return `<a class="ms-it" href="#msgp-${p.id}"><span class="ms-avw ms-ondot${MS.on2[p.id]&&MS.on2[p.id].on?' on':''}" data-onu="${p.id}">${msAva(p)}<i class="ms-dot"></i></span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>ID ${p.id}${p.bio?' · '+esc(p.bio):''}</span></div></div></a>`}).join(''))}catch(e){}}
 
 /* ---------- профиль прямо в мессенджере (тот же, что на сайте) ---------- */
 async function msDrawProf(){const box=$('#msMain');if(!box)return;const id=MS.prof,own=String(id)===String(MS.me);
   box.innerHTML=`<header class="ms-ch ms-pfh own${own?'':' pfx'}">${own?'<span style="width:40px"></span>':`<button class="ib lq ms-pfback" data-act="ms-back">${ico('left')}</button>`}<div class="ms-cht"><b></b></div>${own?`<button class="ib lq ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button>`:''}</header>
-    <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id],1):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div>${own?msOptsHTML():''}<div class="pfg-cta"><button class="pfg-btn" data-act="gift-shop" ${own?'':`data-to="${id}"`}>${ico('star')}<span>${own?'Отправить подарки':'Подарить'}</span></button></div></div>`;
-  msPchLoad(id,own);
-  try{const j=await peopleApi('id='+id);PEOPLE.cache[id]=j.profile;if(MS.prof===id){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(j.profile,1)}}catch(e){const b=$('#msgr #pfBox');if(b)b.innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`}}
+    <div class="ms-pfs" id="msPfs"><div id="pfBox">${PEOPLE.cache[id]?pfHTML(PEOPLE.cache[id],1):'<div class="glass pf-hero skel" style="height:210px"></div>'}</div><div class="pfg-cta"><button class="pfg-btn" data-act="gift-shop" ${own?'':`data-to="${id}"`}>${ico('star')}<span>${own?'Отправить подарки':'Подарить'}</span></button></div></div>`;
+  msPchLoad(id,own);setTimeout(pfgCta,60);
+  try{const j=await peopleApi('id='+id);PEOPLE.cache[id]=j.profile;if(MS.prof===id){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(j.profile,1);setTimeout(pfgCta,60)}}catch(e){const b=$('#msgr #pfBox');if(b)b.innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`}}
 function msOptsHTML(){return `<div class="h3">${ico('chat')}Мессенджер</div><div class="ms-grp lq">
     <label class="ms-row ms-pc">${ico('send')}<span>Отправка по Enter</span><input type="checkbox" data-ms-opt="enter" ${LS.get('msEnter',true)?'checked':''}></label>
     <button class="ms-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button></div>`}
-function pfPaint(p){if(!p)return;if(route()==='u-'+p.id){const b=$('#view #pfBox');if(b)b.innerHTML=pfHTML(p)}if(MS.on&&String(MS.prof)===String(p.id)){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(p,1)}}
+function pfPaint(p){if(!p)return;if(route()==='u-'+p.id){const b=$('#view #pfBox');if(b)b.innerHTML=pfHTML(p)}if(MS.on&&String(MS.prof)===String(p.id)){const b=$('#msgr #pfBox');if(b)b.innerHTML=pfHTML(p,1);setTimeout(pfgCta,60)}}
 
 /* ---------- чат ---------- */
 async function msOpenChat(){const c=MS.c,had=!!MS.msgs[c];MS.typing=false;msDrawMain();MS.prT=0;msPresence(true);
@@ -4140,7 +4153,7 @@ function avView(src){const ov=document.createElement('div');ov.className='av-vie
   const up=()=>{if(y0==null)return;y0=null;im.style.transition='';if(Math.abs(dy)>110)return close();if(Math.abs(dy)<6)return close();im.style.transform='';ov.style.background=''};ov.addEventListener('pointerup',up);ov.addEventListener('pointercancel',up)}
 // канал в профиле, как в Telegram: карточка с аватаркой, подписчиками и последним постом
 async function msPchLoad(id,own){try{const j=await msApi('pch',null,'&u='+id);if(MS.prof!==id)return;const ch=j.ch;MS.pch=ch;MS.pchFor=String(id);const n=$('#msPchName');if(n)n.textContent=ch?ch.title:'не выбран';
-  MS.pchHTML=ch?`<div class="h3">${ico('mega')}Канал</div><div class="ms-grp lq"><a class="ms-pch" href="#${ch.member?'msg-'+ch.id:'msgj-'+ch.id+'-'+ch.inv}">${msGAva(ch)}<div><b>${esc(ch.title)}${msGVf(ch)}</b><small>${msGN(ch)}${ch.t?' · '+msWhen(ch.t):''}</small>${ch.pv?`<p>${esc(msPvNice(ch.pv))}</p>`:''}</div>${ico('chev','s r')}</a></div>`:'';$$('#msgr .ms-pchslot').forEach(b=>b.innerHTML=MS.pchHTML)}catch(e){}}
+  MS.pchHTML=ch?`<div class="h3">${ico('mega')}Канал</div><div class="ms-grp lq"><a class="ms-pch" href="#${ch.member?'msg-'+ch.id:'msgj-'+ch.id+'-'+ch.inv}">${msGAva(ch)}<div><span class="ms-pchr"><b>${esc(ch.title)}${msGVf(ch)}</b><em>${msGN(ch)}</em></span>${ch.t?`<small>${msWhen(ch.t)}</small>`:''}${ch.pv?`<p>${esc(msPvNice(ch.pv))}</p>`:''}</div>${ico('chev','s r')}</a></div>`:'';$$('#msgr .ms-pchslot').forEach(b=>b.innerHTML=MS.pchHTML)}catch(e){}}
 const NG={};
 // выбор аватарки: квадрат 320×320 из центра, JPEG
 function gAvaPick(cb,cam){const i=document.createElement('input');i.type='file';i.accept='image/*';if(cam)i.setAttribute('capture','user');i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const bm=await createImageBitmap(f);const s=Math.min(bm.width,bm.height),c=document.createElement('canvas');c.width=c.height=320;c.getContext('2d').drawImage(bm,(bm.width-s)/2,(bm.height-s)/2,s,s,0,0,320,320);cb(c.toDataURL('image/jpeg',.84))}catch(e){toast('Не удалось открыть фото','x')}};i.click()}
@@ -4438,12 +4451,13 @@ const MS_ACT={
   'cl-max'(){const el=$('#cl');if(el){el.classList.remove('mini')}$('#clMini')?.remove()},
   'ms-go'(el){location.hash=el.dataset.h},
   'ms-back'(){if(history.length>1&&MS.backOk)history.back();else location.hash=MS.tab==='contacts'?'#msgc':'#msg'},
-  'ms-exit'(){location.hash='#home'},
   'ms-write'(el){location.hash='#msg-'+el.dataset.id},
   'ms-newchat'(el){msNewMenu(el)},
   'ms-ng-back'(){const ch=NG.type==='channel';if(!NG.add&&NG.step==='info'&&!ch){NG.step='pick';return msNGDraw()}if(!NG.add&&NG.step==='pick'&&ch){NG.step='info';return msNGDraw()}msNGClose()},
   'ms-ng-next'(el){msNGNext(el)},
   'ms-ge-close'(){msNGClose()},
+  'ms-settings'(){msSettings()},
+  'ms-exit'(){closeSheet();location.hash='#home'},
   'pf-gtab'(el){MS.pfTab=el.dataset.v;const w=el.closest('.pfg');if(!w)return;w.classList.toggle('only-pin',MS.pfTab==='pin');w.querySelectorAll('.pfg-tabs button').forEach(b=>b.classList.toggle('on',b===el))},
   'ms-pchpick'(el){const L=MS.chats.filter(c=>c.g&&c.g.type==='channel'&&c.g.own&&String(c.g.owner)===String(MS.me));const set=async c=>{try{await msApi('pchset',{c});toast(c?'Канал добавлен в профиль':'Канал убран из профиля','check');msPchLoad(String(MS.me),true)}catch(e){toast(e.message,'x')}};
     if(!L.length)return bubMenu(el,[{t:'Создать канал',ic:'mega',fn:()=>msNG('channel')}]);bubMenu(el,[...L.map(c=>({t:esc(c.g.title),ic:'mega',fn:()=>set(c.c)})),...(MS.pch?['-',{t:'Убрать из профиля',ic:'x',red:1,fn:()=>set('')}]:[])])},
@@ -5577,10 +5591,17 @@ const GIFT_ACT={
   async 'wal-open'(el){const id=el.dataset.id,p=PEOPLE.cache[id];if(!p||!(p.wallets||[]).length)return;walModal(el,id,p.wallets)},
   'wal-close'(){walClose()},
   'wal-copy'(el){copyText(el.dataset.a)},
-  async 'gl-save'(el){el.disabled=true;glGrab();toast('Сохраняю — нейросеть проверяет имя…','loader');
-    try{const j=await peopleApi('a=me',{name:GL.name,bio:GL.bio,avatar:pfEdit.av,open:GL.open});const p=j.profile;Object.assign(USR,{name:p.name,bio:p.bio,avatar:p.avatar,open:p.open,hasName:!/^Пользователь \d+$/.test(p.name)});meHead();
-      const k=await peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick,anim:GL.anim});PEOPLE.cache[k.profile.id]=k.profile;GL.on=false;glPaint();toast('Профиль сохранён','check')}
-    catch(e){toast(e.message,'x');el.disabled=false;if(/имя|name/i.test(e.message)){const n=$('#pfName');if(n){n.focus();n.scrollIntoView({block:'center'})}}}},
+  async 'gl-save'(el){glGrab();const me=PEOPLE.cache[USR.id]||{},curName=USR.name&&!/^Пользователь \d+$/.test(USR.name)?USR.name:'';
+    const nameCh=GL.name.trim()!==curName,meCh=nameCh||GL.bio!==(USR.bio||'')||pfEdit.av!==USR.avatar||GL.open!==(USR.open!==false);
+    const layCh=JSON.stringify(GL.pos)!==JSON.stringify(me.pos||[])||(GL.nick||null)!==(me.nick||null)||GL.anim!==(me.anim||'none');
+    if(!meCh&&!layCh){GL.on=false;glPaint();return}
+    if(nameCh){el.disabled=true;toast('Сохраняю — нейросеть проверяет имя…','loader')}
+    else{Object.assign(USR,{bio:GL.bio,avatar:pfEdit.av,open:GL.open});PEOPLE.cache[USR.id]={...me,bio:GL.bio,avatar:pfEdit.av,open:GL.open,pos:GL.pos.map(x=>({...x})),nick:GL.nick,anim:GL.anim};meHead();GL.on=false;glPaint();toast('Профиль сохранён','check')}
+    try{const [j,k]=await Promise.all([meCh?peopleApi('a=me',{name:GL.name,bio:GL.bio,avatar:pfEdit.av,open:GL.open}):null,layCh?peopleApi('a=gift-layout',{pos:GL.pos,nick:GL.nick,anim:GL.anim}):null]);
+      let prof=(k||j).profile;if(j){const q=j.profile;Object.assign(USR,{name:q.name,bio:q.bio,avatar:q.avatar,open:q.open,hasName:!/^Пользователь \d+$/.test(q.name)});if(k)prof={...k.profile,name:q.name,bio:q.bio,avatar:q.avatar,open:q.open};meHead()}
+      PEOPLE.cache[prof.id]=prof;if(nameCh){GL.on=false;toast('Профиль сохранён','check')}if(!GL.on)glPaint()}
+    catch(e){toast(e.message,'x');el.disabled=false;if(nameCh&&/имя|name/i.test(e.message)){const n=$('#pfName');if(n){n.focus();n.scrollIntoView({block:'center'})}}
+      else if(!nameCh){try{const r=await peopleApi('id='+USR.id);pfApply(r.profile)}catch(_){}}}},
   'gl-toggle'(el){const id=el.dataset.g,i=GL.pos.findIndex(x=>x.id===id);if(i>=0)GL.pos.splice(i,1);else{if(GL.pos.length>=10)return toast('Максимум 10 подарков у аватарки','x');const D=[[20,18],[80,16],[10,50],[90,48],[22,82],[78,84],[36,8],[64,8],[6,22],[94,76]];const d=D.find(([x,y])=>!GL.pos.some(p=>Math.abs(p.x-x)<6&&Math.abs(p.y-y)<6))||[50,90];GL.pos.push({id,x:d[0],y:d[1]})}glPaint()},
   'gl-nick'(el){GL.nick=el.dataset.g||null;glPaint()},
   async 'gift-nick'(el){const me=PEOPLE.cache[USR.id];if(!me)return;const nick=me.nick===el.dataset.g?null:el.dataset.g;try{const j=await peopleApi('a=gift-layout',{nick});PEOPLE.cache[j.profile.id]=j.profile;closeSheet();glPaint()}catch(e){toast(e.message,'x')}},
@@ -6578,10 +6599,10 @@ function pfHTML(p,ms){
     <div class="tgp-sub tgp-seen"><span>${seenTxt(p)}</span></div>
   </div>
   ${lay?`<div class="gl-bar">
-    <div class="gl-tip lq">${ico('spark','s')}<span>Нажми на <b>свободное место</b> в шапке — добавишь подарок, на <b>аватарку</b> — сменишь её, на <b>ник</b> — подарок у ника. Подарки тяни куда хочешь, зажми — уберётся.</span></div>
+    ${ms?'':`    <div class="gl-tip lq">${ico('spark','s')}<span>Нажми на <b>свободное место</b> в шапке — добавишь подарок, на <b>аватарку</b> — сменишь её, на <b>ник</b> — подарок у ника. Подарки тяни куда хочешь, зажми — уберётся.</span></div>
     <div class="lq-f lq"><small>Анимация подарков в шапке</small>
       <div class="an-seg">${[['none','Стоят','Как расставил'],['bubbles','Пузыри','Живые: летают по шапке, сталкиваются, их можно бросать'],['orbit','Орбита 3D','Кружат вокруг аватарки']].map(([v,n,d])=>`<button type="button" class="${GL.anim===v?'on':''}" data-act="gl-anim" data-v="${v}"><b>${n}</b><small>${d}</small></button>`).join('')}</div>
-      <small style="font-weight:400">В редактировании подарки стоят на месте, чтобы их было удобно расставлять.</small></div>
+      <small style="font-weight:400">В редактировании подарки стоят на месте, чтобы их было удобно расставлять.</small></div>`}
     <label class="lq-f lq"><small>Никнейм · проверяет нейросеть</small><input id="pfName" maxlength="24" value="${esc(GL.name)}" placeholder="Как тебя показывать"></label>
     <label class="lq-f lq"><small>О себе</small><textarea id="pfBio" maxlength="160" rows="3" placeholder="Пара слов — видят все">${esc(GL.bio)}</textarea></label>
     ${ms&&p.self?`<button type="button" class="lq-f lq gl-pch" data-act="ms-pchpick"><small>Канал в профиле · виден всем под шапкой</small><span>${ico('mega','s')}<b id="msPchName">${MS.pch&&MS.pchFor===String(p.id)?esc(MS.pch.title):'не выбран'}</b>${ico('chev','s r')}</span></button>`:''}
@@ -6597,12 +6618,15 @@ function pfHTML(p,ms){
     ${canCov?`<div class="lq-f lq"><small>Обложка</small><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-up" data-id="${p.id}">${ico('plus','s')}${p.cover?'Сменить':'Загрузить'}</button>${p.cover?`<button class="btn ghost sm" style="flex:1;justify-content:center" data-act="pf-cover-del" data-id="${p.id}">${ico('trash','s')}Убрать</button>`:''}</div></div>`:''}
     <div class="row gl-btns" style="margin-top:4px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
-    ${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
+    ${ms?(p.self?act('pf-edit',ico('edit'),'Изменить')+act('ms-settings',ico('gear'),'Настройки')
+      :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')+(USR&&USR.admin?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''))
+    :`${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
       :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
     ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
     ${p.self&&!IS_APP&&!/iPhone|iPad|iPod/.test(navigator.userAgent)?act('app-get',ico('down'),'Приложение'):''}
-    ${USR&&USR.admin&&!p.self?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''}
+    ${USR&&USR.admin&&!p.self?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''}`}
   </div>`}
+  ${ms?`<div class="ms-pchslot">${MS.pchFor===String(p.id)&&MS.pchHTML||''}</div>`:''}
   <div class="glass tgp-info">
     ${p.bio?`<div class="tgp-row"><small>о себе</small><p>${esc(p.bio)}</p></div>`:''}
     ${p.tg?`<button class="tgp-row" data-act="tg-go" data-u="${esc(p.tg.username||'')}"><small>telegram</small><b class="tgp-link">${esc(tgLabel(p.tg))}</b></button>`:''}
@@ -6650,14 +6674,32 @@ function msPfTail(p,gs){const pin=new Set([...(p.pos||[]).map(x=>x.id),p.nick].f
   const tile=g=>{const f=g.from,fa=f?(f.av||(MS.peers[f.id]||{}).avatar||((PEOPLE.cache[f.id]||{}).avatar)):(p.avatar);
     return `<button class="pfg-t lq r-${giftRar(g.k).c}${pin.has(g.id)?' pin':''}" data-act="gift-view" data-u="${p.id}" data-g="${g.id}" title="${esc(GIFT_CAT[g.k].n)}${f?' · от '+esc(f.name):''}"><img class="pfg-from" src="${avaSrc(fa)}" alt=""><img class="pfg-img" src="${giftImg(g.k)}" alt="" loading="lazy"></button>`};
   const own=!!p.self,np=gs.filter(g=>pin.has(g.id)).length;
-  return `<div class="ms-pchslot">${MS.pchFor===String(p.id)&&MS.pchHTML||''}</div>
-  <div class="pfg${tab==='pin'?' only-pin':''}">
+  return `<div class="pfg${tab==='pin'?' only-pin':''}">
     <div class="pfg-tabs lq"><button class="${tab==='all'?'on':''}" data-act="pf-gtab" data-v="all">Подарки${gs.length?` <i>${gs.length}</i>`:''}</button><button class="${tab==='pin'?'on':''}" data-act="pf-gtab" data-v="pin">В шапке${np?` <i>${np}</i>`:''}</button></div>
-    ${gs.length?`<div class="pfg-grid">${gs.map(tile).join('')}</div>${tab==='pin'&&!np?`<p class="pfg-hint">${own?'Закрепи подарки в шапке через «Изменить».':'Нет подарков в шапке.'}</p>`:`<p class="pfg-hint">${own?'Нажми на подарок, чтобы посмотреть его или закрепить в шапке.':'Нажми на подарок, чтобы посмотреть, от кого он.'}</p>`}`
+    ${gs.length?`<div class="pfg-grid">${gs.map(tile).join('')}</div>${tab==='pin'&&!np?`<p class="pfg-hint">${own?'Закрепи подарки в шапке через «Изменить».':'Нет подарков в шапке.'}</p>`:''}`
       :`<p class="pfg-hint">${own?'Пока нет подарков.':'Пока нет подарков — подари первым.'}</p>`}
   </div>
-  ${own&&USR.admin?`<div class="h3">${ico('user')}Аккаунт</div><div class="glass tgp-info tgp-menu"><button class="tgp-mi" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt=""><span>Админ-панель<small>коды и аккаунты</small></span>${ico('chev','s r')}</button><button class="tgp-mi red" data-act="acc-logout">${ico('back')}<span>Выйти из аккаунта</span></button></div>`
-    :own?`<div class="glass tgp-info tgp-menu" style="margin-top:14px"><button class="tgp-mi red" data-act="acc-logout">${ico('back')}<span>Выйти из аккаунта</span></button></div>`:''}`}
+`}
+// закреплённые чаты (на этом устройстве)
+const msPins=()=>{try{return JSON.parse(localStorage.getItem('msPins:'+MS.me)||'[]')}catch(e){return []}};
+function msPinToggle(c){let P=msPins();if(P.includes(c))P=P.filter(x=>x!==c);else{if(P.length>=5){toast('Закрепить можно до 5 чатов','x');return}P.unshift(c)}try{localStorage.setItem('msPins:'+MS.me,JSON.stringify(P))}catch(e){}msDrawSide();toast(P.includes(c)?'Чат закреплён':'Чат откреплён','check')}
+function msItMenu(it){const c=it.dataset.c;if(!c)return;try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}const on=msPins().includes(c);bubMenu(it,[{t:on?'Открепить':'Закрепить',ic:'pin',fn:()=>msPinToggle(c)}])}
+document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!it)return;e.preventDefault();msItMenu(it)});
+(()=>{let t=0,it=null,x0=0,y0=0;document.addEventListener('touchstart',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!el)return;it=el;x0=e.touches[0].clientX;y0=e.touches[0].clientY;t=setTimeout(()=>{t=0;it._lp=Date.now();msItMenu(it)},480)},{passive:true});
+  document.addEventListener('touchmove',e=>{if(t&&(Math.abs(e.touches[0].clientX-x0)>8||Math.abs(e.touches[0].clientY-y0)>8)){clearTimeout(t);t=0}},{passive:true});
+  document.addEventListener('touchend',()=>{if(t){clearTimeout(t);t=0}},{passive:true});
+  document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(el&&el._lp&&Date.now()-el._lp<900){e.preventDefault();e.stopPropagation();el._lp=0}},true)})();
+// кнопка «Подарить» появляется, когда видны подарки
+function pfgCta(){const s=$('#msPfs');if(!s)return;const c=s.querySelector('.pfg-cta'),g=s.querySelector('.pfg-grid')||s.querySelector('.pfg-hint')||s.querySelector('.pfg');if(!c)return;let v=false;if(g){const r=g.getBoundingClientRect();v=r.top<innerHeight-150&&r.bottom>90}c.classList.toggle('show',v)}
+document.addEventListener('scroll',e=>{if(e.target&&e.target.id==='msPfs')pfgCta()},true);
+function msSettings(){const pc=matchMedia('(min-width:761px)').matches;
+  openSheet(`<h3>${ico('gear')}Настройки<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+  <div class="ms-grp lq ms-setg">
+    ${USR.admin?`<button class="ms-row" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt="" style="width:26px;height:26px"><span>Админ-панель<small>коды и аккаунты</small></span>${ico('chev','s r')}</button>`:''}
+    ${pc?`<label class="ms-row">${ico('send')}<span>Отправка по Enter</span><input type="checkbox" data-ms-opt="enter" ${LS.get('msEnter',true)?'checked':''}></label>`:''}
+    <button class="ms-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button>
+    <button class="ms-row red" data-act="acc-logout">${ico('back')}<span>Выйти из аккаунта</span></button>
+  </div>`)}
 const TGI='<svg class="tgi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.4 11.8l10.9-4.2c.5-.2 1 .1.8.9l-1.9 8.8c-.1.6-.5.8-1 .5l-2.8-2.1-1.4 1.3c-.2.2-.3.3-.6.3l.2-2.9 5.3-4.8c.2-.2 0-.3-.3-.1L8 13.7l-2.8-.9c-.6-.2-.6-.6.2-1z"/></svg>';
 const tgLabel=t=>t.username?'@'+t.username:(t.name||'Telegram');
 function pfApply(p){PEOPLE.cache[p.id]=p;if(p.self){USR.avatar=p.avatar;meHead()}pfPaint(p)}
