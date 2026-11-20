@@ -15,7 +15,7 @@
 // GET  ?a=ginfo&c                        — описание, участники, ссылка-приглашение (для участников)
 import { kv, kvMulti, jget, jset, pairs } from './_store.mjs';
 import { guard, json, sign, sessionFromCookie, getUser, displayName, avatarOf, rand } from './_auth.mjs';
-import { isBotEmail, botById, botByToken, botFatherId, botFatherReply, botEnqueue, botUpdates } from './_bots.mjs';
+import { isBotEmail, botById, botByUname, botByToken, botFatherId, botFatherReply, botEnqueue, botUpdates } from './_bots.mjs';
 export const config = { runtime: 'edge' };
 
 const enc = new TextEncoder(), dec = new TextDecoder();
@@ -240,6 +240,7 @@ export default async function handler(req, ctx) {
       return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, ...(u.bot ? { bot: u.bot.uname, about: u.bot.about || '', cmds: u.bot.cmds || [] } : {}), seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
     }
     // настройки списка чатов (закреп, архив, без звука, удалённые) — одинаковые на сайте и в приложении
+    if (a === 'uname') { const b = await botByUname(url.searchParams.get('u') || ''); return b && b.status !== 'deleted' ? json({ id: b.id }) : json({ error: 'Не найден' }, 404); }
     if (a === 'prefs') return json({ p: (await jget('mp:' + me)) || {} });
     if (a === 'pch') { const u = String(q('u') || ''); if (!/^\d{1,12}$/.test(u)) return json({ ch: null }); const c = await kv('GET', 'pch:' + u); const g = c ? await gget(c) : null;
       if (!g || g.type !== 'channel') return json({ ch: null });

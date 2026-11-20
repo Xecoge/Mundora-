@@ -2083,9 +2083,8 @@ html.mu .ms-home,html.mu .ms-lhead [data-act="ms-exit"],html.mu header [data-act
 .ms-bcmds button:active,.ms-bcmds button:hover{background:rgba(255,255,255,.08)}
 .ms-bcmds img{width:30px;height:30px;border-radius:50%}.ms-bcmds b{font-size:15px}.ms-bcmds span{color:rgba(255,255,255,.55);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ms-comp .ms-startb,.ms-comp .ms-bmenu{display:none}
-.ms-comp.isbot .ms-bmenu{display:inline-flex;align-items:center;gap:6px;flex:none;height:44px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;font:700 14.5px/1 inherit;box-shadow:0 6px 18px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
-.ms-comp.isbot .ms-bmenu svg{width:18px;height:18px}.ms-comp.isbot .ms-bmenu:active{transform:scale(.92)}
-@media(max-width:380px){.ms-comp.isbot .ms-bmenu span{display:none}.ms-comp.isbot .ms-bmenu{padding:0 13px}}
+.ms-comp.isbot .ms-bmenu{display:grid;place-items:center;flex:none;width:32px;height:32px;margin:0 6px 0 -8px;align-self:center;padding:0;border:0;border-radius:50%;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;box-shadow:0 4px 12px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.ms-comp.isbot .ms-bmenu svg{width:17px;height:17px}.ms-comp.isbot .ms-bmenu:active{transform:scale(.88)}
 .ms-comp.bstart>*:not(.ms-startb){display:none!important}
 .ms-comp.bstart .ms-startb{display:block;flex:1;height:52px;border:0;border-radius:18px;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;font:800 16px/1 inherit;letter-spacing:.06em;box-shadow:0 10px 26px rgba(124,58,237,.38),inset 0 1px 0 rgba(255,255,255,.28);animation:selIn .4s cubic-bezier(.3,1.5,.5,1)}
 .ms-comp.bstart .ms-startb:active{transform:scale(.97)}
@@ -2098,7 +2097,7 @@ html.mu .ms-home,html.mu .ms-lhead [data-act="ms-exit"],html.mu header [data-act
 .be-ava img{width:96px;height:96px;border-radius:50%;object-fit:cover;box-shadow:0 10px 28px rgba(0,0,0,.4)}
 .be-ava i{position:absolute;right:0;bottom:0;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;box-shadow:0 0 0 3px #15111f}.be-ava i svg{width:16px;height:16px}
 .be-ava small{color:rgba(255,255,255,.5)}
-.ms-comp.isbot #msIn{white-space:nowrap;overflow-x:hidden}.ms-comp.isbot #msIn::placeholder{white-space:nowrap}
+.ms-un{color:#b79bff!important;font-weight:600;cursor:pointer;text-decoration:none!important}.mb.me .ms-un{color:#fff;text-decoration:underline}.ms-un:active{opacity:.6}
 </style>
 </head>
 <body>
@@ -3186,7 +3185,7 @@ const msCid=p=>/^g\d+$/.test(String(p))?String(p):[String(MS.me),String(p)].sort
 const msFile=(id,dl)=>`/api/msg?a=file&id=${encodeURIComponent(id)}&tk=${encodeURIComponent(MS.tk)}${dl?'&dl=1':''}`;
 async function msApi(a,body,qs=''){const r=await fetch('/api/msg?a='+a+qs+(body?'':'&tk='+encodeURIComponent(MS.tk)),body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,tk:MS.tk})}:{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'HTTP '+r.status);return j}
 async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers();mqResume()}
-async function msPeers(extra=[],force){const ids=[...new Set([...MS.chats.flatMap(c=>c.g?[c.f]:[c.p]),...extra].filter(x=>x!=null&&!/^g/.test(String(x))).map(String))].filter(id=>force||!MS.peers[id]);if(!ids.length)return;
+async function msPeers(extra=[],force){const ids=[...new Set([...MS.chats.flatMap(c=>c.g?[c.f]:[c.p]),...extra].filter(x=>x!=null&&!/^g/.test(String(x))).map(String))].filter(id=>force||!MS.peers[id]||MS.peers[id]._part);if(!ids.length)return;
   try{const j=await msApi('peers',null,'&ids='+ids.join(','));j.peers.forEach(p=>MS.peers[p.id]=p)}catch(e){}}
 const msUnread=()=>MS.chats.reduce((n,c)=>n+(LS.get('msMute_'+c.c,false)?0:(c.u||0)),0);
 function msBadge(){const n=msUnread();$$('.ms-badge').forEach(b=>{b.textContent=n>99?'99+':n;b.hidden=!n});const t=$('#tabAll');if(t)t.classList.toggle('dot',n>0)}
@@ -3276,7 +3275,7 @@ function msContactsHTML(){const ids=[...new Set(MS.chats.filter(c=>c.p!=null).ma
 async function msSearch(){const q=MS.q.trim(),box=$('#msList');if(!box)return;box.innerHTML=MS.tab==='contacts'?msContactsHTML():msListHTML();if(q.length<1)return;
   try{const j=await peopleApi('q='+encodeURIComponent(q));if(MS.q.trim()!==q)return;const known=new Set(MS.chats.map(c=>String(c.p)));
     const ppl=j.people.filter(p=>!known.has(String(p.id)));if(!ppl.length)return;MS.found=ppl.map(p=>String(p.id));ppl.forEach(p=>{if(p.online!=null)MS.on2[p.id]={on:!!p.online,t:p.seen||0}});setTimeout(()=>msPresenceList(true),50);
-    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{if(String(p.id)===String(MS.me))return `<a class="ms-it" href="#msg-${MS.me}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b></div><div class="ms-r2"><span>заметки и файлы для себя</span></div></div></a>`;MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen};
+    box.insertAdjacentHTML('beforeend',`<div class="ms-sec">Люди в Mundora</div>`+ppl.map(p=>{if(String(p.id)===String(MS.me))return `<a class="ms-it" href="#msg-${MS.me}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b></div><div class="ms-r2"><span>заметки и файлы для себя</span></div></div></a>`;MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen,_part:1,...(p.bot?{bot:p.bot.uname,about:p.bot.about||'',cmds:p.bot.cmds||[]}:{})};
       return `<a class="ms-it" href="#msgp-${p.id}"><span class="ms-avw ms-ondot${MS.on2[p.id]&&MS.on2[p.id].on?' on':''}" data-onu="${p.id}">${msAva(p)}<i class="ms-dot"></i></span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>ID ${p.id}${p.bio?' · '+esc(p.bio):''}</span></div></div></a>`}).join(''))}catch(e){}}
 
 /* ---------- профиль прямо в мессенджере (тот же, что на сайте) ---------- */
@@ -3345,7 +3344,7 @@ function msMsgHTML(m,next,prev){const mine=String(m.f)===String(MS.me),c=MS.c,rd
       else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
       else{const fi=msFileIcon(m,String(key));media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-ftap" data-k="${key}"`}>${fi?fi:`<span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:ico('down')}</span>`}<span><b>${esc(F.n)}</b><small>${MS.dl[String(key)]&&MS.dl[String(key)].tot?fsz(MS.dl[String(key)].got)+' / '+fsz(MS.dl[String(key)].tot):fsz(F.sz)}</small></span></button>`}}
     if(F&&MS.dl[String(m.i??m.tmp)]&&!(!F.vo&&!F.rd&&!/^(image|video)\//.test(F.ty)))media=media.replace(/<\/(button|div)>$/,msRing(MS.dl[String(m.i??m.tmp)].p,String(m.i??m.tmp),'ov')+'</$1>');
-    const X=ed?ed.x:m.x;card=msCardHTML(X);const txt=card||(X?`<div class="ms-tx">${(MS.peers[m.f]||{}).bot?linkify(esc(X)).replace(/(^|[\s(>])(\/[a-z][a-z0-9_]{0,31})(?=$|[\s.,!?)<])/gi,'$1<a class="ms-bc" data-act="ms-bcmd" data-c="$2">$2</a>'):linkify(esc(X))}</div>`:'');
+    const X=ed?ed.x:m.x;card=msCardHTML(X);const txt=card||(X?`<div class="ms-tx">${msUnames((MS.peers[m.f]||{}).bot?linkify(esc(X)).replace(/(^|[\s(>])(\/[a-z][a-z0-9_]{0,31})(?=$|[\s.,!?)<])/gi,'$1<a class="ms-bc" data-act="ms-bcmd" data-c="$2">$2</a>'):linkify(esc(X)))}</div>`:'');
     const fw=m.fw!=null?`<a class="ms-fw" href="#msgp-${m.fw}">${ico('send','s')}<span>Переслано · От <b>${esc(String(m.fw)===String(MS.me)?(USR.name||'вас'):((MS.peers[m.fw]||{}).name||'ID '+m.fw))}</b></span></a>`:'';
     body=fw+msRqHTML(c,m)+media+txt+msRxHTML(c,m)+meta}
   const bare=(kind==='img'||kind==='rnd')&&!m.x&&m.r==null&&!(c&&m.i!=null&&MS.rx[c]&&MS.rx[c][m.i]);
@@ -4241,7 +4240,7 @@ function msNGDraw(){const el=$('#msNG');if(!el)return;const ch=NG.type==='channe
   const q=$('#msNGq');let tm;q.addEventListener('input',()=>{NG.q=q.value;$('#msNGl').innerHTML=msNGList(msNGCands());clearTimeout(tm);tm=setTimeout(msNGSearch,260)});}
 function msNGList(L){if(!L.length)return `<div class="ms-empty"><b>${NG.q?'Никого не нашли':'Пока некого добавить'}</b><span>Введи ник или ID человека в Mundora</span></div>`;
   return `<div class="ms-sec">${NG.q?'Результаты':'Контакты'}</div>`+L.map(p=>{const on=NG.sel.has(String(p.id)),o=MS.on2[p.id];return `<button class="ms-it ms-ngi${on?' sel':''}" data-act="ms-ng-tog" data-id="${p.id}"><i class="ms-ngck">${ico('check','s')}</i>${msAva(p)}<div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>${o&&o.on?'<span class="ms-on">в сети</span>':'ID '+p.id}</span></div></div></button>`}).join('')}
-async function msNGSearch(){const q=NG.q.trim();if(!q){NG.found=[];return}try{const j=await peopleApi('q='+encodeURIComponent(q));if(NG.q.trim()!==q)return;NG.found=j.people.map(p=>(MS.peers[p.id]=MS.peers[p.id]||{id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen}));const l=$('#msNGl');if(l)l.innerHTML=msNGList(msNGCands())}catch(e){}}
+async function msNGSearch(){const q=NG.q.trim();if(!q){NG.found=[];return}try{const j=await peopleApi('q='+encodeURIComponent(q));if(NG.q.trim()!==q)return;NG.found=j.people.map(p=>(MS.peers[p.id]=MS.peers[p.id]||{_part:1,id:p.id,name:p.name,avatar:p.avatar,verified:p.verified,seen:p.seen}));const l=$('#msNGl');if(l)l.innerHTML=msNGList(msNGCands())}catch(e){}}
 async function msNGNext(btn){const ch=NG.type==='channel';
   if(NG.step==='pick'&&NG.add){if(!NG.sel.size)return;btn.classList.add('dis');try{const j=await msApi('gadd',{c:NG.add.c,ids:[...NG.sel.keys()]});MS.G[NG.add.c]=j.g;msNGClose();toast(ch?'Подписчики добавлены':'Участники добавлены','check');MS.v='';if(MS.pane==='ginfo')msGInfo(NG.add.c)}catch(e){toast(e.message,'x');btn.classList.remove('dis')}return}
   if(NG.step==='pick'&&!ch){NG.step='info';return msNGDraw()}
@@ -4594,6 +4593,7 @@ const MS_ACT={
     $('#beSave').onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const j=await peopleApi('a=botedit',{id,name:$('#beName').value,about:$('#beAbout').value,...(data?{data}:{})});const q=j.profile;PEOPLE.cache[id]=q;
       MS.peers[id]={...(MS.peers[id]||{}),name:q.name,avatar:q.avatar,about:q.bot&&q.bot.about||''};closeSheet();toast('Бот обновлён','check');if(String(MS.prof)===String(id)){const bx=$('#msgr #pfBox');if(bx)bx.innerHTML=pfHTML(q,1)}msListPaint()}
       catch(err){toast(err.message,'x');b.disabled=false}}},
+  async 'ms-uname'(el){const u=el.dataset.u;try{const j=await msApi('uname',null,'&u='+encodeURIComponent(u));location.hash='#msgp-'+j.id}catch(e){toast('@'+u+' не найден','x')}},
   'ms-bmenu'(el){const inp=$('#msIn');if(!inp)return;const now=Date.now();if(now-(MS.bmT||0)<350)return;MS.bmT=now;if($('#msBotCmd')){$('#msBotCmd').remove();return}msBotHint(inp,true)},
   'ms-bcmd'(el){const inp=$('#msIn');if(inp){inp.value='';msBotHint(inp)}msSendText(el.dataset.c)},
   'ms-react'(el){const i=+el.dataset.k,from=el.closest('.ms-ctxr')?el.getBoundingClientRect():null;msSelClose();msReact(i,el.dataset.e,from)},
@@ -6767,9 +6767,10 @@ const msPins=()=>{try{return JSON.parse(localStorage.getItem('msPins:'+MS.me)||'
 function msPinToggleOld(c){let P=msPins();if(P.includes(c))P=P.filter(x=>x!==c);else{if(P.length>=5){toast('Закрепить можно до 5 чатов','x');return}P.unshift(c)}try{localStorage.setItem('msPins:'+MS.me,JSON.stringify(P))}catch(e){}msDrawSide();toast(P.includes(c)?'Чат закреплён':'Чат откреплён','check')}
 // команды бота: всплывают над полем ввода, когда начинаешь с «/»
 document.addEventListener('click',e=>{const b=document.getElementById('msBotCmd');if(b&&!e.target.closest('#msBotCmd,.ms-bmenu,#msIn'))b.remove()},true);
+const msUnames=h=>h.replace(/(^|[\s(>])@([A-Za-z][A-Za-z0-9_]{2,30}bot)\b/gi,'$1<a class="ms-un" data-act="ms-uname" data-u="$2">@$2</a>');
 function msBotComp(p,empty){const f=$('#msComp');if(!f)return;f.classList.toggle('isbot',!!p);f.classList.toggle('bstart',!!empty);
   if(p&&!f.querySelector('.ms-startb'))f.insertAdjacentHTML('afterbegin',`<button type="button" class="ms-startb" data-act="ms-bcmd" data-c="/start">СТАРТ</button>`);
-  const hasM=p&&(p.cmds||[]).length;let mb=f.querySelector('.ms-bmenu');if(hasM&&!mb)f.querySelector('.ms-att').insertAdjacentHTML('beforebegin',`<button type="button" class="ms-bmenu" data-act="ms-bmenu" title="Команды бота"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg><span>Меню</span></button>`);else if(!hasM&&mb)mb.remove()}
+  const hasM=p&&(p.cmds||[]).length;let mb=f.querySelector('.ms-bmenu');if(hasM&&!mb)f.querySelector('.ms-inp').insertAdjacentHTML('afterbegin',`<button type="button" class="ms-bmenu" data-act="ms-bmenu" title="Команды бота"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button>`);else if(!hasM&&mb)mb.remove()}
 function msBotHint(inp,all){const p=MS.peers[MS.peer]||{},v=all?'/':inp.value;let box=$('#msBotCmd');
   const L=p.bot&&/^\/[a-z0-9_]*$/i.test(v)?(p.cmds||[]).filter(o=>('/'+o.c).startsWith(v.toLowerCase())).slice(0,12):[];
   if(!L.length){if(box)box.remove();return}
