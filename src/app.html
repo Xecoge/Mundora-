@@ -2053,6 +2053,22 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{wi
 .ms-pch>div{flex:1;min-width:0}
 .ms-pinI{margin-left:auto;display:grid;place-items:center;color:rgba(255,255,255,.45);flex:none}.ms-pinI svg{width:15px;height:15px;transform:rotate(45deg)}
 .ms-setg .ms-row.red{color:#ff7b8a}.ms-setg{margin-top:4px}
+/* выбор чатов, как в Telegram */
+.ms-lsel{gap:6px}.ms-lsel .ib{width:42px;height:42px;flex:none}.ms-selc{font-size:24px!important;padding-left:6px;animation:selIn .3s cubic-bezier(.3,1.6,.5,1)}
+@keyframes selIn{from{transform:scale(.6);opacity:0}}
+.ms-lsel .ib{animation:selIn .32s cubic-bezier(.3,1.6,.5,1) both}.ms-lsel .ib:nth-child(3){animation-delay:.03s}.ms-lsel .ib:nth-child(4){animation-delay:.06s}.ms-lsel .ib:nth-child(5){animation-delay:.09s}.ms-lsel .ib:nth-child(6){animation-delay:.12s}
+.ms-avw{position:relative}
+.ms-chk{position:absolute;right:-3px;bottom:-3px;width:24px;height:24px;border-radius:50%;background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 3px #0d0a18;transform:scale(0);transition:transform .3s cubic-bezier(.3,1.7,.5,1);z-index:2}
+.ms-chk svg{width:15px;height:15px}
+.ms-it.sel .ms-chk{transform:scale(1)}
+.ms-it.sel{background:rgba(139,92,246,.16)!important}
+.ms-it.sel .ms-ava,.ms-it.sel .ms-avw>img{transform:scale(.9)}
+.ms-it .ms-ava{transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.ms-it.press{transform:scale(.97);background:rgba(255,255,255,.05);transition:transform .4s,background .2s}
+.ms-muti{display:inline-grid;place-items:center;margin-left:5px;color:rgba(255,255,255,.4);vertical-align:-2px}.ms-muti svg{width:15px;height:15px}
+.ms-side .ms-ub.mut,.ms-ub.mut{background:rgba(255,255,255,.22)!important;color:#fff}
+.ms-archi{display:grid!important;place-items:center;background:linear-gradient(160deg,#4c3a80,#2a2148)!important;color:#d9ccff}.ms-archi svg{width:26px;height:26px}
+.ms-archr .ms-r2 span{color:rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
@@ -2116,7 +2132,7 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{wi
 <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></symbol>
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.6 9.3a2.8 2.8 0 0 0-2.4-1.3h-.6a2.3 2.3 0 0 0 0 4.6h.8a2.3 2.3 0 0 1 0 4.6h-.7a2.8 2.8 0 0 1-2.4-1.3M12 6.2V8M12 16.2V18"/></symbol>
 <symbol id="i-notes" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></symbol>
-<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3.5 3.5h-11L10 9zM12 12.5V20"/></symbol>
+<symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"></rect><path d="M5 9v9.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V9M12 12v5M9.5 14.5 12 17l2.5-2.5"></path></symbol><symbol id="i-unarch" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"></rect><path d="M5 9v9.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V9M12 17v-5M9.5 14.5 12 12l2.5 2.5"></path></symbol><symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"></path><path d="M16 9.5l5 5M21 9.5l-5 5"></path></symbol><symbol id="i-unpin" viewBox="0 0 24 24"><path d="M15 3.5 20.5 9l-2.2.8-3.1 3.1.4 4.3-1.6 1.6-3.6-3.6-4.9 4.9M8.3 9.3l-1.6 1.6 3.6 3.6"></path><path d="M3.5 3.5l17 17"></path></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 5 3.5 3.5h-11L10 9zM12 12.5V20"/></symbol>
 <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
 <symbol id="i-checks" viewBox="0 0 24 24"><rect x="3.5" y="4" width="6" height="6" rx="1.5"/><path d="m5 7 1.2 1.2L8.3 6M13 7h7.5"/><rect x="3.5" y="14" width="6" height="6" rx="1.5"/><path d="M13 17h7.5"/></symbol>
 <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
@@ -3139,7 +3155,7 @@ async function msApi(a,body,qs=''){const r=await fetch('/api/msg?a='+a+qs+(body?
 async function msInit(){if(MS.ok)return;const r=await fetch('/api/msg?a=init',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||'Ошибка');MS.tk=j.tk;MS.me=j.me;MS.v=j.v;MS.chats=j.chats;MS.ok=true;await msPeers();mqResume()}
 async function msPeers(extra=[],force){const ids=[...new Set([...MS.chats.flatMap(c=>c.g?[c.f]:[c.p]),...extra].filter(x=>x!=null&&!/^g/.test(String(x))).map(String))].filter(id=>force||!MS.peers[id]);if(!ids.length)return;
   try{const j=await msApi('peers',null,'&ids='+ids.join(','));j.peers.forEach(p=>MS.peers[p.id]=p)}catch(e){}}
-const msUnread=()=>MS.chats.reduce((n,c)=>n+(c.g&&LS.get('msMute_'+c.c,false)?0:(c.u||0)),0);
+const msUnread=()=>MS.chats.reduce((n,c)=>n+(LS.get('msMute_'+c.c,false)?0:(c.u||0)),0);
 function msBadge(){const n=msUnread();$$('.ms-badge').forEach(b=>{b.textContent=n>99?'99+':n;b.hidden=!n});const t=$('#tabAll');if(t)t.classList.toggle('dot',n>0)}
 const msTime=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
 function msWhen(t){const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return msTime(t);if(d.toDateString()===new Date(n-864e5).toDateString())return 'вчера';return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}).replace('.','')}
@@ -3197,7 +3213,8 @@ function msHide(){const m=$('#msgr');MS.on=false;document.body.classList.remove(
 
 /* ---------- списки: чаты и контакты ---------- */
 function msDrawSide(){const s=$('#msSide');if(!s)return;const ct=MS.tab==='contacts';
-  s.innerHTML=`<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>${ct?'Контакты':'Чаты'}</h1><button class="ib" data-act="ms-newchat" title="Новый чат">${ico('edit')}</button></div>
+  if(MS.sel&&MS.sel.size&&ct)MS.sel.clear();const sel=MS.sel&&MS.sel.size;
+  s.innerHTML=`${sel?msSelBar():MS.arch&&!ct?`<div class="ms-lhead"><button class="ib lq" data-act="ms-arch-x" title="Назад">${ico('left')}</button><h1>Архив</h1></div>`:`<div class="ms-lhead"><button class="ib ms-home" data-act="ms-exit" title="На сайт Mundora">${ico('home')}</button><h1>${ct?'Контакты':'Чаты'}</h1><button class="ib" data-act="ms-newchat" title="Новый чат">${ico('edit')}</button></div>`}
     <label class="ms-search">${ico('search','s')}<input id="msQ" placeholder="${ct?'Ник или ID человека':'Поиск людей и чатов'}" value="${esc(MS.q)}" autocomplete="off"></label>
     <div class="ms-list" id="msList">${ct?msContactsHTML():msListHTML()}</div>`;
   const q=$('#msQ');let t;q.addEventListener('input',()=>{MS.q=q.value;clearTimeout(t);t=setTimeout(msSearch,250)});if(MS.q)msSearch()}
@@ -3206,16 +3223,19 @@ function msListHTML(){return (MS.q?'':pushCard())+msListHTML0()}
 function msListHTML0(){const q=MS.q.trim().toLowerCase();
   const L=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
   if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
+  const H=msHid(),A=msArchL();for(let i=L.length-1;i>=0;i--){const c=L[i];if(H[c.c]&&H[c.c]>=(c.t||0))L.splice(i,1)}
+  const AL=L.filter(c=>A.includes(c.c));if(MS.arch){L.splice(0,L.length,...AL);if(!AL.length)return `<div class="ms-empty"><b>Архив пуст</b><span>Зажми чат и выбери «В архив»</span></div>`}else if(!q)for(let i=L.length-1;i>=0;i--)if(A.includes(L[i].c))L.splice(i,1);
+  const archRow=!MS.arch&&!q&&AL.length?`<a class="ms-it ms-archr" data-act="ms-arch-open" href="#msg"><span class="ms-avw"><span class="ms-ava ms-archi">${ico('archive')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Архив чатов</b></div><div class="ms-r2"><span>${esc(AL.map(c=>c.g?c.g.title:String(c.p)===String(MS.me)?'Избранное':(MS.peers[c.p]||{}).name||'').filter(Boolean).join(', '))}</span>${AL.reduce((n,c)=>n+(c.u||0),0)?`<b class="ms-ub mut">${AL.reduce((n,c)=>n+(c.u||0),0)}</b>`:''}</div></div></a>`:'';
   const P=msPins();if(P.length)L.sort((a,b)=>{const x=P.indexOf(a.c),y=P.indexOf(b.c);return (x<0?1e9:x)-(y<0?1e9:y)});
-  return L.map(c=>{if(c.g){const g=c.g;MS.G[c.c]=g;const mine=String(c.f)===String(MS.me),rd=mine&&c.n&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,who=mine?'Вы':(MS.peers[c.f]||{}).name;
+  return archRow+L.map(c=>{if(c.g){const g=c.g;MS.G[c.c]=g;const mine=String(c.f)===String(MS.me),rd=mine&&c.n&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,who=mine?'Вы':(MS.peers[c.f]||{}).name;
       const pin=msPins().includes(c.c)?`<i class="ms-pinI">${ico('pin','s')}</i>`:'';
-      return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.c}" data-c="${c.c}"><span class="ms-avw">${msGAva(g)}</span><div class="ms-itx"><div class="ms-r1"><b>${g.type==='channel'?`<i class="ms-gic">${ico('mega','s')}</i>`:`<i class="ms-gic">${ico('users','s')}</i>`}${esc(g.title)}${msGVf(g)}</b><span class="ms-tm">${mine&&g.type!=='channel'?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
-      <div class="ms-r2"><span>${g.type!=='channel'&&who&&c.n>1?`<em class="ms-pvw">${esc(who)}: </em>`:''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:pin}</div></div></a>`}
+      return `<a class="ms-it${c.c===MS.c?' on':''}${msSelOn(c.c)}" href="#msg-${c.c}" data-c="${c.c}"><span class="ms-avw">${msGAva(g)}${MSCHK}</span><div class="ms-itx"><div class="ms-r1"><b>${g.type==='channel'?`<i class="ms-gic">${ico('mega','s')}</i>`:`<i class="ms-gic">${ico('users','s')}</i>`}${esc(g.title)}${msGVf(g)}${msMutI(c.c)}</b><span class="ms-tm">${mine&&g.type!=='channel'?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
+      <div class="ms-r2"><span>${g.type!=='channel'&&who&&c.n>1?`<em class="ms-pvw">${esc(who)}: </em>`:''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub${LS.get('msMute_'+c.c,false)?' mut':''}">${c.u}</b>`:pin}</div></div></a>`}
     const pin=msPins().includes(c.c)?`<i class="ms-pinI">${ico('pin','s')}</i>`:'';
-    if(String(c.p)===String(MS.me))return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}" data-c="${c.c}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b><span class="ms-tm">${msWhen(c.t)}</span></div><div class="ms-r2"><span>${esc(msPvNice(c.pv))}</span>${pin}</div></div></a>`;
+    if(String(c.p)===String(MS.me))return `<a class="ms-it${c.c===MS.c?' on':''}${msSelOn(c.c)}" href="#msg-${c.p}" data-c="${c.c}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span>${MSCHK}</span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b><span class="ms-tm">${msWhen(c.t)}</span></div><div class="ms-r2"><span>${esc(msPvNice(c.pv))}</span>${pin}</div></div></a>`;
     const p=MS.peers[c.p],mine=String(c.f)===String(MS.me),rd=mine&&c.n&&String(c.p)!==String(MS.me)&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,on=MS.on2[c.p]&&MS.on2[c.p].on;
-    return `<a class="ms-it${c.c===MS.c?' on':''}" href="#msg-${c.p}" data-c="${c.c}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
-      <div class="ms-r2"><span>${mine?'<em>Вы: </em>':''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub">${c.u}</b>`:pin}</div></div></a>`}).join('')}
+    return `<a class="ms-it${c.c===MS.c?' on':''}${msSelOn(c.c)}" href="#msg-${c.p}" data-c="${c.c}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}${MSCHK}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}${msMutI(c.c)}</b><span class="ms-tm">${mine?`<i class="ms-tk${rd?' rd':''}">${rd?TK2:TK1}</i>`:''}${msWhen(c.t)}</span></div>
+      <div class="ms-r2"><span>${mine?'<em>Вы: </em>':''}${esc(msPvNice(c.pv))}</span>${c.u?`<b class="ms-ub${LS.get('msMute_'+c.c,false)?' mut':''}">${c.u}</b>`:pin}</div></div></a>`}).join('')}
 function msContactsHTML(){const ids=[...new Set(MS.chats.filter(c=>c.p!=null).map(c=>String(c.p)))].filter(id=>id!==String(MS.me));const L=ids.map(id=>MS.peers[id]).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
   return `<a class="ms-it" href="#msg-${MS.me}"><span class="ms-avw"><span class="ms-ava ms-fav">${ico('notes')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Избранное</b></div><div class="ms-r2"><span>заметки и файлы для себя</span></div></div></a>`
     +(L.length?`<div class="ms-sec">Мои контакты</div>`+L.map(p=>{const on=MS.on2[p.id]&&MS.on2[p.id].on;return `<a class="ms-it" href="#msgp-${p.id}"><span class="ms-avw">${msAva(p)}${on?'<i class="ms-dot"></i>':''}</span><div class="ms-itx"><div class="ms-r1"><b>${msName(p)}</b></div><div class="ms-r2"><span>${on?'<span class="ms-on">в сети</span>':p.seen?'был(а) '+msWhen(p.seen):'ID '+p.id}</span></div></div></a>`}).join(''):`<div class="ms-empty"><b>Контактов пока нет</b><span>Найди человека по нику или ID сверху</span></div>`)}
@@ -4457,6 +4477,15 @@ const MS_ACT={
   'ms-ng-next'(el){msNGNext(el)},
   'ms-ge-close'(){msNGClose()},
   'ms-settings'(){msSettings()},
+  'ms-sel-x'(){msSelDone()},
+  'ms-sel-pin'(){msChatsPin([...MS.sel])},
+  'ms-sel-mute'(){msChatsMute([...MS.sel])},
+  'ms-sel-del'(){msChatsDel([...MS.sel])},
+  'ms-sel-delok'(){const L=MS.sel&&MS.sel.size?[...MS.sel]:MS.delL||[];const H=msHid(),now=Date.now();L.forEach(id=>{const c=MS.chats.find(x=>x.c===id);H[id]=Math.max(now,(c&&c.t)||0)});msLSset('msHide',H);msLSset('msPins',msPins().filter(c=>!L.includes(c)));closeSheet();toast(L.length>1?'Чаты удалены':'Чат удалён','trash');msSelDone()},
+  'ms-sel-more'(el){const L=[...MS.sel],A=msArchL(),allA=L.every(c=>A.includes(c)),anyU=L.some(id=>(MS.chats.find(x=>x.c===id)||{}).u);
+    bubMenu(el,[{t:allA?'Из архива':'В архив',ic:allA?'unarch':'archive',fn:()=>msChatsArch(L)},...(anyU?[{t:'Пометить прочитанным',ic:'checks',fn:()=>msChatsRead(L)}]:[]),{t:'Выбрать все',ic:'check',fn:()=>{const ids=[...document.querySelectorAll('#msSide .ms-it[data-c]')].map(e=>e.dataset.c);MS.sel=new Set(ids);msDrawSide()}}])},
+  'ms-arch-open'(){MS.arch=true;msDrawSide()},
+  'ms-arch-x'(){MS.arch=false;msDrawSide()},
   'ms-exit'(){closeSheet();location.hash='#home'},
   'pf-gtab'(el){MS.pfTab=el.dataset.v;const w=el.closest('.pfg');if(!w)return;w.classList.toggle('only-pin',MS.pfTab==='pin');w.querySelectorAll('.pfg-tabs button').forEach(b=>b.classList.toggle('on',b===el))},
   'ms-pchpick'(el){const L=MS.chats.filter(c=>c.g&&c.g.type==='channel'&&c.g.own&&String(c.g.owner)===String(MS.me));const set=async c=>{try{await msApi('pchset',{c});toast(c?'Канал добавлен в профиль':'Канал убран из профиля','check');msPchLoad(String(MS.me),true)}catch(e){toast(e.message,'x')}};
@@ -5548,7 +5577,7 @@ const GIFT_ACT={
     openSheet(`<h3>${ico('star')}${to?'Подарок для '+esc(tp?tp.name:'ID '+to):'Магазин подарков'}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
       <div class="gs-bal"><img src="/img/money.webp" alt=""><div><small class="k">Доступно для подарков</small><b class="num">${av.toLocaleString('ru-RU')} XP</b></div></div>
       <div class="k" style="margin:-2px 0 12px">XP копятся за лайки, прослушивания, плейлисты, заметки и дни в Mundora. Покупка не понижает уровень.</div>
-      <div class="gs-grid">${Object.entries(GIFT_CAT).map(([k,g])=>{const r=giftRar(k);return `<button class="gs-it r-${r.c}${av<g.p?' no':''}" data-act="gift-pick" data-k="${k}"${to?` data-to="${to}"`:''}><img src="${giftImg(k)}" alt=""><b>${g.n}</b><small>${r.n}</small><span class="gs-pr">${g.p.toLocaleString('ru-RU')} XP</span></button>`}).join('')}</div>`)},
+      <div class="gs-grid">${Object.entries(GIFT_CAT).sort((x,y)=>x[1].p-y[1].p).map(([k,g])=>{const r=giftRar(k);return `<button class="gs-it r-${r.c}${av<g.p?' no':''}" data-act="gift-pick" data-k="${k}"${to?` data-to="${to}"`:''}><img src="${giftImg(k)}" alt=""><b>${g.n}</b><small>${r.n}</small><span class="gs-pr">${g.p.toLocaleString('ru-RU')} XP</span></button>`}).join('')}</div>`)},
   'gift-pick'(el){const k=el.dataset.k,g=GIFT_CAT[k],to=el.dataset.to,tp=to&&PEOPLE.cache[to],r=giftRar(k);
     openSheet(`<div class="gv r-${r.c}"><div class="gv-img"><img src="${giftImg(k)}" alt=""></div><h3 class="gv-n">${g.n}</h3><div class="gv-r">${r.n}</div>
       <div class="k" style="text-align:center;margin:8px 0 16px">${to?'Подарок появится в профиле '+esc(tp?tp.name:'ID '+to)+' с твоим именем.':'Подарок появится в твоём профиле и сразу встанет у аватарки, если есть свободное место.'}</div>
@@ -6560,9 +6589,9 @@ addEventListener('keydown',e=>{if(e.key==='Escape')walClose()});
 addEventListener('hashchange',()=>walClose(true));
 const WAL_APPS=['Tonkeeper','Telegram Wallet','MyTonWallet','MetaMask','Trust Wallet','Phantom','TronLink','Exodus','Ledger','Bybit','OKX','Binance'];
 const walIco=c=>`<span class="wi wi-${c}">${({btc:'₿',eth:'Ξ',ton:'◆',tron:'T',sol:'◎'})[c]||'•'}</span>`;
-const GIFT_CAT={usdt:{n:'Стопка USDT',p:250},btc:{n:'Золотой биткоин',p:300},doge:{n:'Doge-монета',p:350},eth:{n:'Эфир-кристалл',p:400},ton:{n:'Алмаз TON',p:450},ledger:{n:'Холодный кошелёк',p:600},rocket:{n:'Ракета to the Moon',p:800},bull:{n:'Бык',p:1200},bear:{n:'Медведь',p:1200},miner:{n:'Майнинг-риг',p:1500},whale:{n:'Кит',p:2500},diamond:{n:'Diamond Hands',p:5000}};
+const GIFT_CAT={usdt:{n:'Стопка USDT',p:250},btc:{n:'Золотой биткоин',p:300},doge:{n:'Doge-монета',p:350},eth:{n:'Эфир-кристалл',p:400},ton:{n:'Алмаз TON',p:450},ledger:{n:'Холодный кошелёк',p:600},rocket:{n:'Ракета to the Moon',p:800},bull:{n:'Бык',p:1200},bear:{n:'Медведь',p:1200},miner:{n:'Майнинг-риг',p:1500},whale:{n:'Кит',p:2500},diamond:{n:'Diamond Hands',p:5000},giftbox:{n:'Подарочная коробка',p:200},heart:{n:'Кристальное сердце',p:220},teddy:{n:'Мишка',p:300},star:{n:'Звезда',p:350},coins:{n:'Горсть монет',p:400},headphones:{n:'Наушники',p:500},phone:{n:'Телефон',p:650},gamepad:{n:'Геймпад',p:700},console:{n:'Карманная консоль',p:750},crown:{n:'Корона',p:900},moneybag:{n:'Мешок денег',p:1000},gem:{n:'Бриллиант',p:1400},chest:{n:'Сундук сокровищ',p:1800},cat:{n:'Крутой кот',p:2200},shuttle:{n:'Фиолетовая ракета',p:2600},car:{n:'Суперкар',p:6000}};
 const GIFT_TMP={usdt:'gift_stack',btc:'money',doge:'planet',eth:'crystal',ton:'gem_orbit',ledger:'box_open',rocket:'asteroid',bull:'bar_gold',bear:'bar_silver',miner:'orbit',whale:'planet2',diamond:'gift_planet'};
-const GIFT_READY=new Set(['usdt','btc','doge','eth','ton','ledger','rocket','bull','bear','miner','whale','diamond']); // ключи, для которых уже загружены настоящие картинки /img/gifts/<k>.webp
+const GIFT_READY=new Set(['usdt','btc','doge','eth','ton','ledger','rocket','bull','bear','miner','whale','diamond','giftbox','heart','teddy','star','coins','headphones','phone','gamepad','console','crown','moneybag','gem','chest','cat','shuttle','car']); // ключи, для которых уже загружены настоящие картинки /img/gifts/<k>.webp
 const giftImg=k=>GIFT_READY.has(k)?`/img/gifts/${k}.webp`:`/img/${GIFT_TMP[k]||'gift_planet'}.webp`;
 const giftRar=k=>{const p=(GIFT_CAT[k]||{}).p||0;return p>=3000?{c:'leg',n:'Легендарный'}:p>=1000?{c:'epic',n:'Эпический'}:p>=450?{c:'rare',n:'Редкий'}:{c:'com',n:'Обычный'}};
 const TGP_PAT=[[4,8,-12],[16,30,8],[6,58,14],[18,84,-6],[30,6,4],[30,62,-10],[70,8,10],[84,28,-8],[94,56,6],[80,84,12],[68,62,-4],[44,90,8],[56,4,-6],[92,6,-14],[2,86,4],[96,86,-10]];
@@ -6682,13 +6711,35 @@ function msPfTail(p,gs){const pin=new Set([...(p.pos||[]).map(x=>x.id),p.nick].f
 `}
 // закреплённые чаты (на этом устройстве)
 const msPins=()=>{try{return JSON.parse(localStorage.getItem('msPins:'+MS.me)||'[]')}catch(e){return []}};
-function msPinToggle(c){let P=msPins();if(P.includes(c))P=P.filter(x=>x!==c);else{if(P.length>=5){toast('Закрепить можно до 5 чатов','x');return}P.unshift(c)}try{localStorage.setItem('msPins:'+MS.me,JSON.stringify(P))}catch(e){}msDrawSide();toast(P.includes(c)?'Чат закреплён':'Чат откреплён','check')}
-function msItMenu(it){const c=it.dataset.c;if(!c)return;try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}const on=msPins().includes(c);bubMenu(it,[{t:on?'Открепить':'Закрепить',ic:'pin',fn:()=>msPinToggle(c)}])}
-document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!it)return;e.preventDefault();msItMenu(it)});
-(()=>{let t=0,it=null,x0=0,y0=0;document.addEventListener('touchstart',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!el)return;it=el;x0=e.touches[0].clientX;y0=e.touches[0].clientY;t=setTimeout(()=>{t=0;it._lp=Date.now();msItMenu(it)},480)},{passive:true});
-  document.addEventListener('touchmove',e=>{if(t&&(Math.abs(e.touches[0].clientX-x0)>8||Math.abs(e.touches[0].clientY-y0)>8)){clearTimeout(t);t=0}},{passive:true});
-  document.addEventListener('touchend',()=>{if(t){clearTimeout(t);t=0}},{passive:true});
-  document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(el&&el._lp&&Date.now()-el._lp<900){e.preventDefault();e.stopPropagation();el._lp=0}},true)})();
+function msPinToggleOld(c){let P=msPins();if(P.includes(c))P=P.filter(x=>x!==c);else{if(P.length>=5){toast('Закрепить можно до 5 чатов','x');return}P.unshift(c)}try{localStorage.setItem('msPins:'+MS.me,JSON.stringify(P))}catch(e){}msDrawSide();toast(P.includes(c)?'Чат закреплён':'Чат откреплён','check')}
+const MSCHK='<i class="ms-chk"><svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-8.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
+const msSelOn=c=>MS.sel&&MS.sel.has(c)?' sel':'';
+const msMutI=c=>LS.get('msMute_'+c,false)?`<i class="ms-muti">${ico('mute','s')}</i>`:'';
+const msHid=()=>{try{return JSON.parse(localStorage.getItem('msHide:'+MS.me)||'{}')}catch(e){return {}}};
+const msArchL=()=>{try{return JSON.parse(localStorage.getItem('msArch:'+MS.me)||'[]')}catch(e){return []}};
+const msLSset=(k,v)=>{try{localStorage.setItem(k+':'+MS.me,JSON.stringify(v))}catch(e){}};
+function msSelBar(){const L=[...MS.sel],P=msPins(),allPin=L.every(c=>P.includes(c)),allMut=L.every(c=>LS.get('msMute_'+c,false));
+  return `<div class="ms-lhead ms-lsel"><button class="ib lq" data-act="ms-sel-x" title="Отмена">${ico('x')}</button><h1 class="ms-selc">${L.length}</h1>
+    <button class="ib lq" data-act="ms-sel-pin" title="${allPin?'Открепить':'Закрепить'}">${ico(allPin?'unpin':'pin')}</button>
+    <button class="ib lq" data-act="ms-sel-mute" title="${allMut?'Включить звук':'Без звука'}">${ico(allMut?'vol':'mute')}</button>
+    <button class="ib lq" data-act="ms-sel-del" title="Удалить">${ico('trash')}</button>
+    <button class="ib lq" data-act="ms-sel-more" title="Ещё">${ico('more')}</button></div>`}
+function msSelToggle(c){MS.sel=MS.sel||new Set();if(MS.sel.has(c))MS.sel.delete(c);else MS.sel.add(c);try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}const y=$('#msList')?.scrollTop;msDrawSide();const l=$('#msList');if(l&&y!=null)l.scrollTop=y}
+function msSelDone(){if(MS.sel)MS.sel.clear();const y=$('#msList')?.scrollTop;msDrawSide();const l=$('#msList');if(l&&y!=null)l.scrollTop=y}
+function msChatsPin(L){let P=msPins();const all=L.every(c=>P.includes(c));if(all)P=P.filter(c=>!L.includes(c));else{const add=L.filter(c=>!P.includes(c));if(P.length+add.length>5){toast('Закрепить можно до 5 чатов','x');return}P=[...add,...P]}msLSset('msPins',P);toast(all?'Откреплено':'Закреплено','check');msSelDone()}
+function msChatsMute(L){const all=L.every(c=>LS.get('msMute_'+c,false));L.forEach(c=>LS.set('msMute_'+c,!all));msBadge();toast(all?'Звук включён':'Без звука',all?'vol':'check');msSelDone()}
+function msChatsArch(L){let A=msArchL();const all=L.every(c=>A.includes(c));A=all?A.filter(c=>!L.includes(c)):[...new Set([...L,...A])];msLSset('msArch',A);if(!all)msLSset('msPins',msPins().filter(c=>!L.includes(c)));toast(all?'Возвращено из архива':'Перенесено в архив','check');msSelDone()}
+function msChatsRead(L){L.forEach(id=>{const c=MS.chats.find(x=>x.c===id);if(!c||!c.u)return;const s=Math.max(0,(c.n||1)-1);c.u=0;MS.read[id]=Math.max(MS.read[id]??-1,s);msApi('read',{c:id,s}).catch(()=>{})});msBadge();toast('Отмечено прочитанным','check');msSelDone()}
+function msChatsDel(L){MS.delL=L;openSheet(`<h3>${ico('trash')}Удалить ${L.length>1?L.length+' '+plural(L.length,'чат','чата','чатов'):'чат'}?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin:0 2px 14px">Чат пропадёт из списка, пока не придёт новое сообщение. Переписка у собеседника останется.</p><button class="btn" style="width:100%;justify-content:center;background:#e5484d;color:#fff" data-act="ms-sel-delok">${ico('trash','s')}Удалить</button>`)}
+function msItMenu(it){const c=it.dataset.c;if(!c)return;const P=msPins().includes(c),M=LS.get('msMute_'+c,false),A=msArchL().includes(c),ch=MS.chats.find(x=>x.c===c);
+  bubMenu(it,[{t:P?'Открепить':'Закрепить',ic:P?'unpin':'pin',fn:()=>msChatsPin([c])},{t:M?'Включить звук':'Без звука',ic:M?'vol':'mute',fn:()=>msChatsMute([c])},{t:A?'Из архива':'В архив',ic:A?'unarch':'archive',fn:()=>msChatsArch([c])},...(ch&&ch.u?[{t:'Прочитано',ic:'checks',fn:()=>msChatsRead([c])}]:[]),{t:'Выбрать',ic:'check',fn:()=>msSelToggle(c)},'-',{t:'Удалить',ic:'trash',red:true,fn:()=>msChatsDel([c])}])}
+document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!it)return;e.preventDefault();if(MS.sel&&MS.sel.size)msSelToggle(it.dataset.c);else msItMenu(it)});
+(()=>{let t=0,it=null,x0=0,y0=0;document.addEventListener('touchstart',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!el)return;it=el;x0=e.touches[0].clientX;y0=e.touches[0].clientY;el.classList.add('press');t=setTimeout(()=>{t=0;it._lp=Date.now();it.classList.remove('press');msSelToggle(it.dataset.c)},420)},{passive:true});
+  const stop=()=>{if(t){clearTimeout(t);t=0}if(it)it.classList.remove('press')};
+  document.addEventListener('touchmove',e=>{if(t&&(Math.abs(e.touches[0].clientX-x0)>8||Math.abs(e.touches[0].clientY-y0)>8))stop()},{passive:true});
+  document.addEventListener('touchend',stop,{passive:true});document.addEventListener('touchcancel',stop,{passive:true});
+  document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!el)return;if(el._lp&&Date.now()-el._lp<900){e.preventDefault();e.stopPropagation();el._lp=0;return}
+    if(MS.sel&&MS.sel.size){e.preventDefault();e.stopPropagation();msSelToggle(el.dataset.c)}},true)})();
 // кнопка «Подарить» появляется, когда видны подарки
 function pfgCta(){const s=$('#msPfs');if(!s)return;const c=s.querySelector('.pfg-cta'),g=s.querySelector('.pfg-grid')||s.querySelector('.pfg-hint')||s.querySelector('.pfg');if(!c)return;let v=false;if(g){const r=g.getBoundingClientRect();v=r.top<innerHeight-150&&r.bottom>90}c.classList.toggle('show',v)}
 document.addEventListener('scroll',e=>{if(e.target&&e.target.id==='msPfs')pfgCta()},true);
