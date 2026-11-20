@@ -4,9 +4,12 @@ import os, re, sys
 from PIL import Image, ImageDraw
 plat = sys.argv[1]
 root = plat
-A = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
+BRAND = os.environ.get('BRAND', 'mundora')  # mundora — весь сайт; mundere — только мессенджер
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.environ.get('REPO', os.path.dirname(HERE))
+A = os.path.join(HERE, 'assets') if BRAND == 'mundora' else os.path.join(REPO, 'mundere', 'assets')
 icon = Image.open(os.path.join(A, 'icon.png')).convert('RGBA')
-fg = Image.open(os.path.join(A, 'foreground.png')).convert('RGBA')
+fg = Image.open(os.path.join(A, 'foreground.png' if BRAND == 'mundora' else 'adaptive.png')).convert('RGBA')
 spl = Image.open(os.path.join(A, 'splash.png')).convert('RGB')
 BG = '#0E0A18'
 
@@ -76,9 +79,26 @@ if plat == 'android':
     run = os.environ.get('GITHUB_RUN_NUMBER', '1')
     edit(os.path.join(root, 'app', 'build.gradle'), lambda s: re.sub(r'versionName "[^"]*"', f'versionName "1.0.{run}"', re.sub(r'versionCode \d+', f'versionCode {run}', s)))
     # музыка в фоне: не ставим WebView на паузу, когда приложение свёрнуто
-    ma = os.path.join(root, 'app', 'src', 'main', 'java', 'app', 'mundora', 'MainActivity.java')
-    if os.path.exists(ma):
-        open(ma, 'w', encoding='utf-8').write('''package app.mundora;
+    ma = None
+    for dp, _, fs in os.walk(os.path.join(root, 'app', 'src', 'main', 'java')):
+        if 'MainActivity.java' in fs: ma = os.path.join(dp, 'MainActivity.java')
+    PKG = re.search(r'package ([\w.]+);', open(ma, encoding='utf-8').read()).group(1) if ma else 'app.mundora'
+    # код сайта (скрипт, стили, картинки) — внутри APK: открывается мгновенно, с сервера идут только данные
+    import json, shutil
+    mc = os.path.join(root, 'app', 'src', 'main', 'assets', 'mcache')
+    os.makedirs(mc, exist_ok=True)
+    try:
+        src = open(os.path.join(REPO, 'api', '_asset.mjs'), encoding='utf-8').read()
+        J = json.loads(src[src.index('export default ') + 15:].rstrip().rstrip(';'))
+        open(os.path.join(mc, 'asset.css'), 'w', encoding='utf-8').write(J['css'])
+        open(os.path.join(mc, 'asset.js'), 'w', encoding='utf-8').write(J['js'])
+        open(os.path.join(mc, 'hash.txt'), 'w').write(J['hash'])
+        if os.path.exists(os.path.join(mc, 'img')): shutil.rmtree(os.path.join(mc, 'img'))
+        shutil.copytree(os.path.join(REPO, 'img'), os.path.join(mc, 'img'))
+        print('код сайта внутри APK, версия', J['hash'])
+    except Exception as e: print('без встроенного кода сайта:', e)
+    if ma:
+        open(ma, 'w', encoding='utf-8').write('''package ''' + PKG + ''';
 
 import android.app.DownloadManager;
 import android.content.Context;
@@ -115,11 +135,62 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebViewClient;
+import android.view.View;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import java.util.HashMap;
 
 public class MainActivity extends BridgeActivity {
+    private String HASH = "";
+    private WebResourceResponse local(String mime, String path) {
+        try {
+            InputStream in = getAssets().open(path);
+            HashMap<String, String> h = new HashMap<>();
+            h.put("cache-control", "public, max-age=31536000, immutable");
+            h.put("access-control-allow-origin", "*");
+            return new WebResourceResponse(mime, mime.startsWith("text") || mime.contains("javascript") ? "utf-8" : null, 200, "OK", h, in);
+        } catch (Exception e) { return null; }
+    }
+    private static String mimeOf(String p) {
+        String l = p.toLowerCase();
+        return l.endsWith(".webp") ? "image/webp" : l.endsWith(".png") ? "image/png" : l.endsWith(".svg") ? "image/svg+xml" : l.endsWith(".jpg") || l.endsWith(".jpeg") ? "image/jpeg" : l.endsWith(".gif") ? "image/gif" : l.endsWith(".mp3") ? "audio/mpeg" : "application/octet-stream";
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try { InputStream hi = getAssets().open("mcache/hash.txt"); byte[] b = new byte[64]; int n = hi.read(b); hi.close(); HASH = new String(b, 0, Math.max(0, n)).trim(); } catch (Exception e) { }
+        if (bridge != null && bridge.getWebView() != null) {
+            WebView w = bridge.getWebView();
+            // плавность: аппаратная отрисовка, без «резинки», без масштаба шрифта системы, рендер в приоритете
+            w.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            w.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            WebSettings ws = w.getSettings();
+            ws.setTextZoom(100);
+            if (Build.VERSION.SDK_INT >= 23) ws.setOffscreenPreRaster(true);
+            if (Build.VERSION.SDK_INT >= 26) w.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
+            ws.setMediaPlaybackRequiresUserGesture(false);
+            // скрипт, стили и картинки сайта — из APK, остальное (данные, файлы) — с сервера
+            w.setWebViewClient(new BridgeWebViewClient(bridge) {
+                @Override
+                public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
+                    try {
+                        Uri u = req.getUrl();
+                        if ("mundorai.vercel.app".equals(u.getHost()) && "GET".equals(req.getMethod()) && u.getPath() != null) {
+                            String p = u.getPath();
+                            if (p.startsWith("/img/") && !p.contains("..")) { WebResourceResponse r = local(mimeOf(p), "mcache" + p); if (r != null) return r; }
+                            if (p.equals("/api/asset") && !HASH.isEmpty() && HASH.equals(u.getQueryParameter("v"))) {
+                                boolean css = "css".equals(u.getQueryParameter("f"));
+                                WebResourceResponse r = local(css ? "text/css" : "application/javascript", css ? "mcache/asset.css" : "mcache/asset.js"); if (r != null) return r;
+                            }
+                        }
+                    } catch (Exception e) { }
+                    return super.shouldInterceptRequest(view, req);
+                }
+            });
+        }
         // скачивание файлов из чатов в «Загрузки» телефона
         if (bridge != null && bridge.getWebView() != null) {
             bridge.getWebView().setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
