@@ -9,6 +9,7 @@ import { kv, kvMulti, pairs, jget, jset } from './_store.mjs';
 import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser, avatarOf, coverOf, unlinkTg, rand } from './_auth.mjs';
 import { checkName, claimName } from './_names.mjs';
 import { botFatherId } from './_bots.mjs';
+const botCan = (u, v) => !!(u && u.bot && v && v.id != null && (String(u.bot.owner) === String(v.id) || (u.bot.owner === 'system' && String(v.id) === '0')));
 export const config = { runtime: 'edge' };
 
 const parse = v => { try { return v == null ? null : JSON.parse(v); } catch (e) { return null; } };
@@ -165,7 +166,7 @@ async function card(email, viewer, full) {
   const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
     id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null,
-    verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self, ...(u.bot ? { bot: { uname: u.bot.uname, cmds: u.bot.cmds || [], mine: String(u.bot.owner) === String(viewer.id) } } : {}),
+    verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self, ...(u.bot ? { bot: { uname: u.bot.uname, cmds: u.bot.cmds || [], about: u.bot.about || '', mine: botCan(u, viewer) } } : {}),
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: !!onK, seen: lastSeen ? Math.floor(lastSeen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
     gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), anim: ['orbit', 'bubbles'].includes(u.giftAnim) ? u.giftAnim : (u.giftOrbit ? 'orbit' : 'none'), wallets: walletsOut(u)
@@ -343,6 +344,17 @@ export default async function handler(req) {
       return json({ url: `https://t.me/${me2.username}?start=acc_${t}` });
     }
     if (req.method === 'POST' && a === 'tg-unlink') { await unlinkTg(me.email); return json({ ok: true, profile: await card(me.email, me, true) }); }
+    // настройки бота: имя, описание, фото — у владельца; BotFather — только у ID 0
+    if (req.method === 'POST' && a === 'botedit') {
+      const b = await req.json().catch(() => ({})), id = String(b.id || '');
+      const em = /^\d{1,12}$/.test(id) ? await kv('GET', 'id:' + id) : null, t = em ? await getUser(em) : null;
+      if (!t || !t.bot || t.status === 'deleted') return json({ error: 'Бот не найден' }, 404);
+      if (!botCan(t, me)) return json({ error: 'Менять бота может только его создатель' }, 403);
+      if (b.data) { const bad = checkImg(b.data, 'ava'); if (bad) return json({ error: bad }, 400); await kv('SET', 'img:ava:' + em, b.data); t.avatar = 'up:' + Date.now().toString(36); }
+      if (typeof b.name === 'string') { const n = b.name.replace(/[\u0000-\u001f]/g, '').trim().slice(0, 64); if (!n) return json({ error: 'Имя не может быть пустым' }, 400); t.name = n; }
+      if (typeof b.about === 'string') { t.bot.about = b.about.slice(0, 300); t.bio = t.bot.about; }
+      await putUser(t); return json({ ok: true, profile: await card(em, me, true) });
+    }
     if (req.method === 'POST' && a === 'avatar') {
       if (me.status === 'frozen') return json({ error: 'Аккаунт заморожен — профиль не меняется' }, 423);
       const b = await req.json().catch(() => ({})), bad = checkImg(b.data, 'ava'); if (bad) return json({ error: bad }, 400);

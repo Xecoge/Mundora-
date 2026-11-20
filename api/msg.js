@@ -86,7 +86,7 @@ async function push(c, me, G, m, pvText) {
   const O = others(c, me, G);
   await kvMulti([['HSET', 'ci:' + me, c, meta], ['HSET', 'cu:' + me, c, '0'], ['HSET', 'cr:' + c, me, String(len - 1)], ['INCR', 'mv:' + me], ...(isG(c) ? [['DEL', 'tyg:' + c]] : [['DEL', 'ty:' + c + ':' + me]]),
     ...O.flatMap(u => [['HSET', 'ci:' + u, c, meta], ['HINCRBY', 'cu:' + u, c, '1'], ['INCR', 'mv:' + u]])]);
-  if (O.length && O.length <= 30 && !m.cl) { const on = await kvMulti(O.map(u => ['GET', 'on:' + u])); await Promise.allSettled(O.filter((u, i) => !on[i]).map(u => pushTo(u, false))); }
+  if (O.length && O.length <= 30 && !m.cl) bg(kvMulti(O.map(u => ['GET', 'on:' + u])).then(on => Promise.allSettled(O.filter((u, i) => !on[i]).map(u => pushTo(u, false)))));
   return len;
 }
 const okAva = a => typeof a === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(a) && a.length < 160000;
@@ -126,8 +126,8 @@ async function chatList(me) {
 // ---- боты ----
 async function botGot(b, me, email, c, i, m) {
   if (b.bot.uname === 'BotFather' && b.verified) {
-    const reply = await botFatherReply(me, m.x || '');
-    const t = Date.now(); await push(c, String(b.id), { dm: 1 }, { f: +b.id, t, x: reply }, reply.slice(0, 80)); return;
+    const r = await botFatherReply(me, m.x || ''), L = Array.isArray(r) ? r : [r];
+    for (const x of L) { const t = Date.now(); await push(c, String(b.id), { dm: 1 }, { f: +b.id, t, x }, x.slice(0, 80)); } return;
   }
   const u = await getUser(email);
   await botEnqueue(b.id, { message: { message_id: i, from: { id: +me, is_bot: false, first_name: u ? displayName(u) : 'ID ' + me }, chat: { id: +me, type: 'private' }, date: Math.floor(m.t / 1000), ...(m.x ? { text: m.x } : {}), ...(m.fl ? { file: { name: m.fl.n, type: m.fl.ty } } : {}), ...(m.r != null ? { reply_to_message_id: m.r } : {}) } });
@@ -166,7 +166,11 @@ async function botApi(req, url) {
   return R([404, 'Not Found: метод ' + mt], false);
 }
 
-export default async function handler(req) {
+// фоновая работа после ответа (уведомления, ответ BotFather) — отправка не ждёт её
+let BG = null;
+const bg = p => { const q = Promise.resolve(p).catch(() => {}); if (BG) BG(q); return q; };
+export default async function handler(req, ctx) {
+  BG = ctx && typeof ctx.waitUntil === 'function' ? q => ctx.waitUntil(q) : null;
   const url = new URL(req.url), a = url.searchParams.get('a'), q = k => url.searchParams.get(k);
   try {
     if (a === 'init') {
@@ -325,9 +329,9 @@ export default async function handler(req) {
       const fl = body.fl && typeof body.fl === 'object' ? { id: String(body.fl.id || '').slice(0, 20), n: String(body.fl.n || 'файл').slice(0, 120), ty: String(body.fl.ty || '').slice(0, 80), sz: +body.fl.sz || 0, w: +body.fl.w || 0, h: +body.fl.h || 0, d: +body.fl.d || 0, th: String(body.fl.th || '').slice(0, 6000), wf: String(body.fl.wf || '').replace(/[^0-9a-z]/g, '').slice(0, 80), vo: body.fl.vo ? 1 : 0, rd: body.fl.rd ? 1 : 0, ...(body.fl.once ? { once: 1 } : {}), ...(body.fl.doc ? { doc: 1 } : {}), ...(+body.fl.a > 0 ? { a: Math.round(+body.fl.a * 100) / 100 } : {}), ...(+body.fl.b > 0 ? { b: Math.round(+body.fl.b * 100) / 100 } : {}) } : null;
       if (fl) { const m = await jget('mf:' + fl.id); if (!m || m.c !== c || m.o !== me) return json({ error: 'Файл не загружен' }, 400); }
       if (!x.trim() && !fl) return json({ error: 'Пустое сообщение' }, 400);
-      const t = Date.now(), m = { f: +me, t, x, ...(fl ? { fl } : {}), ...(body.r != null ? { r: +body.r } : {}) };
+      const t = Date.now(), m = { f: +me, t, x, ...(fl ? { fl } : {}), ...(body.r != null ? { r: +body.r } : {}), ...(body.tmp ? { k: String(body.tmp).slice(0, 24) } : {}) };
       const len = await push(c, me, D.G, m, x.trim() ? x.slice(0, 80) : (fl.vo ? '🎤 Голосовое' : fl.rd ? '📹 Видеосообщение' : fl.ty.startsWith('image/') ? '🖼 Фото' : fl.ty.startsWith('video/') ? '🎬 Видео' : '📎 ' + fl.n));
-      if (D.bot) await botGot(D.bot, me, W.email, c, len - 1, m);
+      if (D.bot) bg(botGot(D.bot, me, W.email, c, len - 1, m));
       return json({ ok: 1, c, m: { ...m, i: len - 1 }, tmp: body.tmp });
     }
     if (a === 'fwd') { // переслать сообщение (и файл) в другой чат: файл перешифровывается ключом нового чата

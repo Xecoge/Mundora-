@@ -26,15 +26,18 @@ async function makeBot({ name, uname, owner, verified, avatar }) {
 }
 
 // Конструктор ботов — системный бот с галочкой; создаётся сам при первом обращении
+const BF_CMDS = [['newbot', 'Создать бота'], ['mybots', 'Мои боты'], ['setname', 'Сменить имя'], ['setdescription', 'Изменить описание'], ['setuserpic', 'Сменить фото'], ['setcommands', 'Задать команды'], ['token', 'Показать токен'], ['revoke', 'Новый токен'], ['deletebot', 'Удалить бота'], ['help', 'Помощь'], ['cancel', 'Отменить']].map(([c, d]) => ({ c, d }));
+let bfChecked = false;
 export async function botFatherId() {
   let id = await kv('GET', 'bu:' + BF_UNAME.toLowerCase());
-  if (id && (await botById(id))) return String(id);
+  const ex = id ? await botById(id) : null;
+  if (ex) { if (!bfChecked) { bfChecked = true; if (JSON.stringify(ex.bot.cmds) !== JSON.stringify(BF_CMDS)) { ex.bot.cmds = BF_CMDS; await putUser(ex); } } return String(id); }
   const u = await makeBot({ name: 'BotFather', uname: BF_UNAME, owner: 'system', verified: true, avatar: 'code' });
-  u.bot.about = 'Создаёт ботов Mundora и выдаёт токены. Напиши /newbot'; u.bot.cmds = [['newbot', 'Создать бота'], ['mybots', 'Мои боты'], ['setname', 'Сменить имя'], ['setdescription', 'Изменить описание'], ['setcommands', 'Задать команды'], ['token', 'Показать токен'], ['revoke', 'Новый токен'], ['deletebot', 'Удалить бота'], ['help', 'Помощь'], ['cancel', 'Отменить']].map(([c, d]) => ({ c, d })); u.bio = 'Официальный конструктор ботов Mundora'; await putUser(u);
+  u.bot.about = 'Создаёт ботов Mundora и выдаёт токены. Напиши /newbot'; u.bot.cmds = BF_CMDS; u.bio = 'Официальный конструктор ботов Mundora'; await putUser(u);
   return String(u.id);
 }
 
-const myBots = async me => { const ids = (await kv('SMEMBERS', 'bots:' + me)) || []; const L = (await Promise.all(ids.map(botById))).filter(b => b && String(b.bot.owner) === String(me)); return L.sort((a, b) => a.created - b.created); };
+const myBots = async me => { const ids = (await kv('SMEMBERS', 'bots:' + me)) || []; if (String(me) === '0') { const bf = await kv('GET', 'bu:' + BF_UNAME.toLowerCase()); if (bf) ids.push(bf); } const L = (await Promise.all(ids.map(botById))).filter(b => b && (String(b.bot.owner) === String(me) || (b.bot.owner === 'system' && String(me) === '0'))); return L.sort((a, b) => a.created - b.created); };
 const HELP = `Я помогу создать ботов Mundora и управлять ими.
 
 Боты
@@ -44,6 +47,7 @@ const HELP = `Я помогу создать ботов Mundora и управл�
 Настройки
 /setname — имя
 /setdescription — описание (видно в профиле бота)
+/setuserpic — фото бота
 /setcommands — список команд
 /token — показать токен
 /revoke — выпустить новый токен
@@ -75,8 +79,8 @@ export async function botFatherReply(me, text) {
     if ((await myBots(me)).length >= MAXBOTS) return done(`Можно создать не больше ${MAXBOTS} ботов.`);
     return ask({ cmd: 'newbot', step: 'name' }, 'Хорошо, новый бот. Как его назовём? Пришли имя — его будут видеть в чатах.');
   }
-  if (['/setname', '/setdescription', '/setabouttext', '/setcommands', '/token', '/revoke', '/deletebot'].includes(cmd)) {
-    const L = await myBots(me), verb = { '/setname': 'сменить имя', '/setdescription': 'изменить описание', '/setabouttext': 'изменить описание', '/setcommands': 'задать команды', '/token': 'показать токен', '/revoke': 'выпустить новый токен', '/deletebot': 'удалить его' }[cmd];
+  if (['/setname', '/setdescription', '/setabouttext', '/setuserpic', '/setcommands', '/token', '/revoke', '/deletebot'].includes(cmd)) {
+    const L = await myBots(me), verb = { '/setname': 'сменить имя', '/setdescription': 'изменить описание', '/setabouttext': 'изменить описание', '/setuserpic': 'сменить фото', '/setcommands': 'задать команды', '/token': 'показать токен', '/revoke': 'выпустить новый токен', '/deletebot': 'удалить его' }[cmd];
     if (!L.length) return done('У тебя пока нет ботов. Создай: /newbot');
     return ask({ cmd: cmd.slice(1).replace('setabouttext', 'setdescription'), step: 'bot' }, pick(L, verb));
   }
@@ -97,15 +101,17 @@ export async function botFatherReply(me, text) {
     return `Готово! Бот ${st.name} создан: @${un}\n\nНапиши ему — он появится в чатах.\n\n` + apiDoc(b.bot.tok) + '\n\nОписание и команды: /setdescription, /setcommands';
   }
   if (st.step === 'bot') {
-    const b = await botByUname(x); if (!b || String(b.bot.owner) !== String(me)) return 'Не нашёл такого бота среди твоих. Пришли юзернейм из списка или /cancel.';
+    const b = await botByUname(x); if (!b || !(String(b.bot.owner) === String(me) || (b.bot.owner === 'system' && String(me) === '0'))) return 'Не нашёл такого бота среди твоих. Пришли юзернейм из списка или /cancel.';
     if (st.cmd === 'token') return done(`Токен @${b.bot.uname}:\n${b.bot.tok}`);
+    if (st.cmd === 'setuserpic') { await kv('DEL', K); return [`Открой профиль @${b.bot.uname} и нажми «Изменить» — там фото, имя и описание.`, `👤 ${b.name}\n${SITE}/#msgp-${b.id}`]; }
     if (st.cmd === 'revoke') { const old = b.bot.tok; b.bot.tok = newToken(b.id); await putUser(b); await kvMulti([['DEL', 'bt:' + old], ['SET', 'bt:' + b.bot.tok, String(b.id)]]); return done(`Старый токен больше не работает. Новый токен @${b.bot.uname}:\n${b.bot.tok}`); }
+    if (st.cmd === 'deletebot' && b.bot.owner === 'system') return done('BotFather удалить нельзя.');
     if (st.cmd === 'deletebot') return ask({ cmd: 'deletebot', step: 'confirm', id: b.id }, `Точно удалить @${b.bot.uname}? Это нельзя отменить. Напиши «Да, удалить».`);
     const q = { setname: 'Пришли новое имя бота.', setdescription: 'Пришли описание — его увидят в профиле бота (до 300 символов).', setcommands: 'Пришли список команд, каждая с новой строки:\n\nstart - Начать\nhelp - Помощь' }[st.cmd];
     return ask({ cmd: st.cmd, step: 'val', id: b.id }, q);
   }
   if (st.step === 'val' || st.step === 'confirm') {
-    const b = await botById(st.id); if (!b || String(b.bot.owner) !== String(me)) return done('Бот не найден.');
+    const b = await botById(st.id); if (!b || !(String(b.bot.owner) === String(me) || (b.bot.owner === 'system' && String(me) === '0'))) return done('Бот не найден.');
     if (st.cmd === 'setname') { const n = x.slice(0, 64).trim(); if (!n) return 'Пришли имя текстом.'; b.name = n; await putUser(b); return done(`Готово, теперь бот называется «${n}».`); }
     if (st.cmd === 'setdescription') { b.bot.about = x.slice(0, 300); b.bio = b.bot.about; await putUser(b); return done('Описание обновлено.'); }
     if (st.cmd === 'setcommands') {

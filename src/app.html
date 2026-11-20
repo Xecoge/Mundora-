@@ -2077,11 +2077,28 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{wi
 .cl-list{-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}
 #msSide .ms-it{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html.mu .ms-home,html.mu .ms-lhead [data-act="ms-exit"],html.mu header [data-act="ms-exit"]{display:none!important}
-.ms-bc{color:#8fbaff;font-weight:600;cursor:pointer}.mb.th .ms-bc{color:#fff;text-decoration:underline}
+.ms-bc{color:#b79bff;font-weight:600;cursor:pointer;text-decoration:none!important}.mb.th .ms-bc{color:#b79bff}.mb.me .ms-bc{color:#fff;text-decoration:underline!important}.ms-bc:active{opacity:.6}
 .ms-bcmds{position:absolute;left:8px;right:8px;bottom:calc(100% + 8px);max-height:300px;overflow:auto;border-radius:20px;padding:6px;z-index:30;animation:selIn .25s cubic-bezier(.3,1.4,.5,1)}
 .ms-bcmds button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:#fff;font:inherit;text-align:left;padding:8px 10px;border-radius:14px;cursor:pointer}
 .ms-bcmds button:active,.ms-bcmds button:hover{background:rgba(255,255,255,.08)}
 .ms-bcmds img{width:30px;height:30px;border-radius:50%}.ms-bcmds b{font-size:15px}.ms-bcmds span{color:rgba(255,255,255,.55);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-comp .ms-startb,.ms-comp .ms-bmenu{display:none}
+.ms-comp.isbot .ms-bmenu{display:inline-flex;align-items:center;gap:6px;flex:none;height:44px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;font:700 14.5px/1 inherit;box-shadow:0 6px 18px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.ms-comp.isbot .ms-bmenu svg{width:18px;height:18px}.ms-comp.isbot .ms-bmenu:active{transform:scale(.92)}
+@media(max-width:380px){.ms-comp.isbot .ms-bmenu span{display:none}.ms-comp.isbot .ms-bmenu{padding:0 13px}}
+.ms-comp.bstart>*:not(.ms-startb){display:none!important}
+.ms-comp.bstart .ms-startb{display:block;flex:1;height:52px;border:0;border-radius:18px;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;font:800 16px/1 inherit;letter-spacing:.06em;box-shadow:0 10px 26px rgba(124,58,237,.38),inset 0 1px 0 rgba(255,255,255,.28);animation:selIn .4s cubic-bezier(.3,1.5,.5,1)}
+.ms-comp.bstart .ms-startb:active{transform:scale(.97)}
+.ms-bhello{margin:auto;max-width:300px;border-radius:24px;padding:22px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ms-bhello img{width:84px;height:84px;border-radius:50%;margin-bottom:8px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.ms-bhello b{font-size:18px;display:inline-flex;align-items:center;gap:5px}.ms-bhello b svg{width:18px;height:18px;color:#4a9dff}
+.ms-bhello small{color:rgba(255,255,255,.5)}.ms-bhello p{margin:10px 0 0;color:rgba(255,255,255,.8);font-size:14.5px;line-height:1.45;white-space:pre-wrap}
+#msMsgs:has(.ms-bhello){display:flex;flex-direction:column}
+.be-ava{display:flex;flex-direction:column;align-items:center;gap:8px;margin:4px 0 14px}.be-ava button{position:relative;border:0;padding:0;background:none;border-radius:50%;cursor:pointer}
+.be-ava img{width:96px;height:96px;border-radius:50%;object-fit:cover;box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.be-ava i{position:absolute;right:0;bottom:0;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;box-shadow:0 0 0 3px #15111f}.be-ava i svg{width:16px;height:16px}
+.be-ava small{color:rgba(255,255,255,.5)}
+.ms-comp.isbot #msIn{white-space:nowrap;overflow-x:hidden}.ms-comp.isbot #msIn::placeholder{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -3279,7 +3296,7 @@ async function msOpenChat(){const c=MS.c,had=!!MS.msgs[c];MS.typing=false;msDraw
   if(MS.c!==c)return;MS.reply=null;MS.edit=null;mqShow(c);msPaintMsgs(true);msPinBar();msMarkRead();msFwPeers(c);if(had)msCatchUp(c)}
 // чат уже был открыт раньше: догружаем всё, что пришло, пока он был закрыт
 async function msCatchUp(c){try{const j=await msApi('hist',null,'&c='+c);if(MS.c!==c||!MS.msgs[c])return;const L=MS.msgs[c];const last=Math.max(-1,...L.filter(m=>m.i!=null).map(m=>m.i));const add=(j.msgs||[]).filter(m=>m.i>last);
-  MS.read[c]=j.read;msDel(c,j.del);msExtras(c,j);if(add.length){MS.msgs[c]=L.filter(m=>!(m.pend&&add.some(a=>a.tmp&&a.tmp===m.tmp))).concat(add);msPaintMsgs(true);msMarkRead();msFwPeers(c)}else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}msPinBar();MS.v=''}catch(e){}}
+  MS.read[c]=j.read;msDel(c,j.del);msExtras(c,j);if(add.length){msSwapPend(c,add);msPaintMsgs(true);msMarkRead();msFwPeers(c)}else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}msPinBar();MS.v=''}catch(e){}}
 async function msFwPeers(c){const ids=[...new Set((MS.msgs[c]||[]).flatMap(m=>[m.fw,...(msIsG(c)?[m.f,...(m.u||[])]:[]),(/#msgp-(\d+)$/.exec(m.x||'')||[])[1]]).filter(x=>x!=null&&!MS.peers[x]).map(String))];if(!ids.length)return;await msPeers(ids);if(MS.c===c)msPaintMsgs()}
 function msDrawMain(){const box=$('#msMain');if(!box)return;
   if(!MS.c){box.innerHTML=`<div class="ms-blank"><div class="ce-orb"><img src="/img/logo-mark.webp" alt=""></div><b>Выбери чат</b><span>или найди человека в поиске слева</span></div>`;return}
@@ -3328,7 +3345,7 @@ function msMsgHTML(m,next,prev){const mine=String(m.f)===String(MS.me),c=MS.c,rd
       else if(F.ty.startsWith('audio/')){kind='aud';media=`<div class="ms-voice ms-aud" data-k="${key}"><button type="button" class="ms-vplay" data-act="ms-vplay" data-k="${key}" data-src="${esc(src)}">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:PLAYI}</button><div class="ms-vw"><b>${esc(F.n.replace(/\.[a-z0-9]+$/i,''))}</b><div class="ms-abar"><i></i></div><small>${fsz(F.sz)}</small></div></div>`}
       else{const fi=msFileIcon(m,String(key));media=`<button type="button" class="ms-fl" ${m.pend?'':`data-act="ms-ftap" data-k="${key}"`}>${fi?fi:`<span class="ms-fli">${m.pend?`<span class="ms-prog sm"><i style="--p:${m.prog||0}%"></i><span class="ms-cxl" role="button" data-act="ms-upcancel" data-k="${key}" title="Отменить отправку">${ico('x','s')}</span></span>`:ico('down')}</span>`}<span><b>${esc(F.n)}</b><small>${MS.dl[String(key)]&&MS.dl[String(key)].tot?fsz(MS.dl[String(key)].got)+' / '+fsz(MS.dl[String(key)].tot):fsz(F.sz)}</small></span></button>`}}
     if(F&&MS.dl[String(m.i??m.tmp)]&&!(!F.vo&&!F.rd&&!/^(image|video)\//.test(F.ty)))media=media.replace(/<\/(button|div)>$/,msRing(MS.dl[String(m.i??m.tmp)].p,String(m.i??m.tmp),'ov')+'</$1>');
-    const X=ed?ed.x:m.x;card=msCardHTML(X);const txt=card||(X?`<div class="ms-tx">${(MS.peers[m.f]||{}).bot?linkify(esc(X)).replace(/(^|[\s(])(\/[a-z][a-z0-9_]{0,31})(?=$|[\s.,!?)])/gi,'$1<a class="ms-bc" data-act="ms-bcmd" data-c="$2">$2</a>'):linkify(esc(X))}</div>`:'');
+    const X=ed?ed.x:m.x;card=msCardHTML(X);const txt=card||(X?`<div class="ms-tx">${(MS.peers[m.f]||{}).bot?linkify(esc(X)).replace(/(^|[\s(>])(\/[a-z][a-z0-9_]{0,31})(?=$|[\s.,!?)<])/gi,'$1<a class="ms-bc" data-act="ms-bcmd" data-c="$2">$2</a>'):linkify(esc(X))}</div>`:'');
     const fw=m.fw!=null?`<a class="ms-fw" href="#msgp-${m.fw}">${ico('send','s')}<span>Переслано · От <b>${esc(String(m.fw)===String(MS.me)?(USR.name||'вас'):((MS.peers[m.fw]||{}).name||'ID '+m.fw))}</b></span></a>`:'';
     body=fw+msRqHTML(c,m)+media+txt+msRxHTML(c,m)+meta}
   const bare=(kind==='img'||kind==='rnd')&&!m.x&&m.r==null&&!(c&&m.i!=null&&MS.rx[c]&&MS.rx[c][m.i]);
@@ -3340,7 +3357,8 @@ function msPaintMsgs(...A){if(!MS.flipNext)return msPaintMsgs0(...A);MS.flipNext
   msPaintMsgs0(...A);ml.scrollTop=y;ml.querySelectorAll('.mb[data-i]').forEach(e=>{const b=B[e.dataset.i];if(b==null)return;const d=b-e.getBoundingClientRect().top;if(Math.abs(d)>1)e.animate([{transform:`translateY(${d}px)`},{transform:'none'}],{duration:340,easing:'cubic-bezier(.25,.9,.3,1)'})})}
 function msPaintMsgs0(toBottom){const ml=$('#msMsgs'),c=MS.c;if(!ml||!c)return;const L=MS.msgs[c]||[];
   const stick=toBottom||ml.scrollHeight-ml.scrollTop-ml.clientHeight<120;
-  const BP=MS.peers[MS.peer]||{};if(!L.some(m=>!m.d)&&!msIsG(c)&&BP.bot){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc(BP.avatar)}" alt=""></div><b>${esc(BP.name||'')}${BP.verified?' '+ico('check','s'):''}</b><span>${esc(BP.about||'Бот Mundora')}</span><button class="btn" style="margin-top:12px;justify-content:center;min-width:160px" data-act="ms-bcmd" data-c="/start">Начать</button></div>`;return}
+  const BP=MS.peers[MS.peer]||{},bEmpty=!msIsG(c)&&BP.bot&&!L.some(m=>!m.d);msBotComp(!msIsG(c)&&BP.bot?BP:null,bEmpty);
+  if(bEmpty){ml.innerHTML=`<div class="ms-bhello lq"><img src="${avaSrc(BP.avatar)}" alt=""><b>${esc(BP.name||'')}${BP.verified?' '+ico('check','s'):''}</b><small>бот</small><p>${esc(BP.about||'Бот Mundora')}</p></div>`;return}
   if(!L.some(m=>!m.d)&&!msIsG(c)){ml.innerHTML=`<div class="ms-hello"><div class="ce-orb"><img src="${avaSrc((MS.peers[MS.peer]||{}).avatar)}" alt=""></div><b>Напиши первым</b><span>Сообщения и файлы хранятся зашифрованными</span></div>`;return}
   let h='',day='';const LV=L.filter(m=>!m.d);LV.forEach((m,k)=>{const L=LV;const d=new Date(m.t).toDateString();if(d!==day){day=d;h+=`<div class="ms-day"><span>${msDay(m.t)}</span></div>`}h+=m.sys?msSysHTML(m):msMsgHTML(m,L[k+1]&&L[k+1].sys?null:L[k+1],L[k-1])});
   ml.innerHTML=h;if(stick)ml.scrollTop=ml.scrollHeight;msVoiceSync();msVidObserve();msDownBtn()}
@@ -3357,6 +3375,7 @@ async function msSend(){const inp=$('#msIn');const x=(inp?inp.value:'').trim();i
   inp.value='';inp.style.height='';$('#msComp').classList.remove('has');if(MS.draft)delete MS.draft[MS.c];
   const m={tmp:'t'+Date.now()+Math.random().toString(36).slice(2,6),f:+MS.me,t:Date.now(),x,pend:1,...(rr!=null?{r:rr}:{})};(MS.msgs[MS.c]=MS.msgs[MS.c]||[]).push(m);msAppend([m]);
   await msPost(m,{to:MS.peer,x,...(rr!=null?{r:rr}:{})})}
+function msSwapPend(c,add){const L=(MS.msgs[c]||[]).slice(),fresh=[];add.forEach(a=>{const k=a.k?L.findIndex(m=>m.pend&&m.tmp===a.k):-1;if(k>=0){const o=L[k];L[k]=o.fl&&o.fl.local?{...a,fl:{...a.fl,local:o.fl.local}}:a}else if(!L.some(m=>m.i!=null&&m.i===a.i)){L.push(a);fresh.push(a)}});MS.msgs[c]=L;return fresh}
 async function msPost(m,body,c0,p0){const c=c0||MS.c,peer=p0||MS.peer;try{const j=await msApi('send',{...body,tmp:m.tmp});const L=MS.msgs[c]||[];const k=L.indexOf(m);
     const real={...j.m};if(m.fl&&m.fl.local)real.fl={...real.fl,local:m.fl.local};
     if(L.some(x=>x.i===real.i)){if(k>=0)L.splice(k,1)}else if(k>=0)L[k]=real;
@@ -3775,7 +3794,7 @@ async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
     if(!j.same){const before=msUnread();MS.v=j.v;MS.chats=j.chats;await msPeers();
       if(c&&j.msgs&&MS.c===c){const have=new Set((MS.msgs[c]||[]).map(m=>m.i));const add=j.msgs.filter(m=>!have.has(m.i));MS.read[c]=j.read;msDelFx(c,[...(j.del||[]),...(j.hid||[])]);msDel(c,j.del);msExtras(c,j);if(j.g){MS.G[c]=j.g;const cw=!!$('#msComp')&&!$('#msComp').hidden;if(cw!==msCanW())msDrawMain(),msPaintMsgs(true)}const tw=MS.typing;MS.typing=j.typing;
         clearTimeout(MS.tyT);if(MS.typing)MS.tyT=setTimeout(()=>{MS.typing=false;const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])},5500);
-        if(add.length){const ml0=$('#msMsgs');if(ml0&&ml0.scrollHeight-ml0.scrollTop-ml0.clientHeight>300)MS.newBelow=(MS.newBelow||0)+add.filter(m=>String(m.f)!==String(MS.me)).length;MS.msgs[c]=(MS.msgs[c]||[]).filter(m=>!(m.pend&&add.some(a=>a.tmp===m.tmp))).concat(add);msAppend(add);if(add.some(m=>m.fw!=null)||msIsG(c))msFwPeers(c);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
+        if(add.length){const ml0=$('#msMsgs');if(ml0&&ml0.scrollHeight-ml0.scrollTop-ml0.clientHeight>300)MS.newBelow=(MS.newBelow||0)+add.filter(m=>String(m.f)!==String(MS.me)).length;const fresh=msSwapPend(c,add);if(fresh.length)msAppend(fresh);else msPaintMsgs();if(add.some(m=>m.fw!=null)||msIsG(c))msFwPeers(c);if(add.some(m=>String(m.f)!==String(MS.me))){msMarkRead();if(MS.on2[MS.peer])MS.on2[MS.peer].on=true}}
         else{const ml=$('#msMsgs');const y=ml?ml.scrollTop:0;msPaintMsgs();if(ml)ml.scrollTop=y}
         msPinBar();const st=$('#msStat');if(st)st.innerHTML=msStatus(MS.peers[MS.peer])}
       if(msUnread()>before&&!(MS.on&&c&&!document.hidden))msBeep();
@@ -4563,6 +4582,19 @@ const MS_ACT={
   'ms-fwd'(el){const m=msFind(el.dataset.k);msSelClose();if(m)msForward(m)},
   async 'ms-fwto'(el){el.disabled=true;try{const to=el.dataset.to;await msApi('fwd',{c:MS.c,i:+el.dataset.i,to});closeSheet();toast('Переслано','check');const c2=msCid(to);delete MS.msgs[c2];location.hash='#msg-'+to}catch(e){toast(e.message,'x');el.disabled=false}},
   'ms-del'(el){closeSheet();msSelClose();const k=el.dataset.k??el.dataset.i,m=msFind(k);if(!m||m.i==null)return;setTimeout(()=>msDelAsk(m),180)},
+  'ms-botedit'(el){const id=el.dataset.id,p=PEOPLE.cache[id]||{};let data=null;
+    openSheet(`<h3>${ico('edit')}Бот @${esc(p.bot?p.bot.uname:'')}<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
+      <div class="be-ava"><button type="button" id="beAva" title="Сменить фото"><img src="${avaSrc(p.avatar)}" alt=""><i>${ico('edit')}</i></button><small>Нажми, чтобы сменить фото</small></div>
+      <label class="lq-f lq"><small>Имя</small><input id="beName" maxlength="64" value="${esc(p.name||'')}"></label>
+      <label class="lq-f lq" style="margin-top:10px"><small>Описание — видно в профиле и в пустом чате</small><textarea id="beAbout" rows="3" maxlength="300">${esc(p.bot&&p.bot.about||p.bio||'')}</textarea></label>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:14px" id="beSave">${ico('check','s')}Сохранить</button>`);
+    const fi=document.createElement('input');fi.type='file';fi.accept='image/*';
+    $('#beAva').onclick=()=>fi.click();
+    fi.onchange=async()=>{const f=fi.files[0];if(!f)return;try{data=await imgPrep(f,360,360,250e3);$('#beAva img').src=data}catch(e){toast(e.message,'x')}};
+    $('#beSave').onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const j=await peopleApi('a=botedit',{id,name:$('#beName').value,about:$('#beAbout').value,...(data?{data}:{})});const q=j.profile;PEOPLE.cache[id]=q;
+      MS.peers[id]={...(MS.peers[id]||{}),name:q.name,avatar:q.avatar,about:q.bot&&q.bot.about||''};closeSheet();toast('Бот обновлён','check');if(String(MS.prof)===String(id)){const bx=$('#msgr #pfBox');if(bx)bx.innerHTML=pfHTML(q,1)}msListPaint()}
+      catch(err){toast(err.message,'x');b.disabled=false}}},
+  'ms-bmenu'(el){const inp=$('#msIn');if(!inp)return;const now=Date.now();if(now-(MS.bmT||0)<350)return;MS.bmT=now;if($('#msBotCmd')){$('#msBotCmd').remove();return}msBotHint(inp,true)},
   'ms-bcmd'(el){const inp=$('#msIn');if(inp){inp.value='';msBotHint(inp)}msSendText(el.dataset.c)},
   'ms-react'(el){const i=+el.dataset.k,from=el.closest('.ms-ctxr')?el.getBoundingClientRect():null;msSelClose();msReact(i,el.dataset.e,from)},
   'ms-rxmore'(el){msRxMore(+el.dataset.k)},
@@ -6669,7 +6701,7 @@ function pfHTML(p,ms){
     <div class="row gl-btns" style="margin-top:4px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1;justify-content:center" data-act="gl-cancel">Отмена</button><button class="btn" style="flex:1;justify-content:center" data-act="gl-save">${ico('check','s')}Сохранить</button></div>
   </div>`:`<div class="tgp-acts">
     ${ms?(p.self?act('pf-edit',ico('edit'),'Изменить')+act('ms-settings',ico('gear'),'Настройки')
-      :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')+(USR&&USR.admin?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''))
+      :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+(p.bot&&p.bot.mine?act('ms-botedit',ico('edit'),'Изменить',`data-id="${p.id}"`):act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`))+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')+(USR&&USR.admin?act('pf-manage',ico('gem'),'Управлять',`data-id="${p.id}"`):''))
     :`${p.self?act('pf-edit',ico('edit'),'Изменить')+act('gift-shop',ico('star'),'Подарки')
       :act('ms-write',ico('chat'),'Написать',`data-id="${p.id}"`)+act('gift-shop',ico('star'),'Подарить',`data-to="${p.id}"`)+(p.tg?act('tg-go',TGI,'Telegram',`data-u="${esc(p.tg.username||'')}"`):'')}
     ${act('pf-share',ico('copy'),'ID '+p.id,`data-id="${p.id}"`)}
@@ -6734,7 +6766,11 @@ function msPfTail(p,gs){const pin=new Set([...(p.pos||[]).map(x=>x.id),p.nick].f
 const msPins=()=>{try{return JSON.parse(localStorage.getItem('msPins:'+MS.me)||'[]')}catch(e){return []}};
 function msPinToggleOld(c){let P=msPins();if(P.includes(c))P=P.filter(x=>x!==c);else{if(P.length>=5){toast('Закрепить можно до 5 чатов','x');return}P.unshift(c)}try{localStorage.setItem('msPins:'+MS.me,JSON.stringify(P))}catch(e){}msDrawSide();toast(P.includes(c)?'Чат закреплён':'Чат откреплён','check')}
 // команды бота: всплывают над полем ввода, когда начинаешь с «/»
-function msBotHint(inp){const p=MS.peers[MS.peer]||{},v=inp.value;let box=$('#msBotCmd');
+document.addEventListener('click',e=>{const b=document.getElementById('msBotCmd');if(b&&!e.target.closest('#msBotCmd,.ms-bmenu,#msIn'))b.remove()},true);
+function msBotComp(p,empty){const f=$('#msComp');if(!f)return;f.classList.toggle('isbot',!!p);f.classList.toggle('bstart',!!empty);
+  if(p&&!f.querySelector('.ms-startb'))f.insertAdjacentHTML('afterbegin',`<button type="button" class="ms-startb" data-act="ms-bcmd" data-c="/start">СТАРТ</button>`);
+  const hasM=p&&(p.cmds||[]).length;let mb=f.querySelector('.ms-bmenu');if(hasM&&!mb)f.querySelector('.ms-att').insertAdjacentHTML('beforebegin',`<button type="button" class="ms-bmenu" data-act="ms-bmenu" title="Команды бота"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg><span>Меню</span></button>`);else if(!hasM&&mb)mb.remove()}
+function msBotHint(inp,all){const p=MS.peers[MS.peer]||{},v=all?'/':inp.value;let box=$('#msBotCmd');
   const L=p.bot&&/^\/[a-z0-9_]*$/i.test(v)?(p.cmds||[]).filter(o=>('/'+o.c).startsWith(v.toLowerCase())).slice(0,12):[];
   if(!L.length){if(box)box.remove();return}
   if(!box){box=document.createElement('div');box.id='msBotCmd';box.className='ms-bcmds lq';const host=inp.closest('.ms-comp')||inp.closest('.ms-inp').parentNode;host.style.position=host.style.position||'relative';host.append(box)}
