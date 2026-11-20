@@ -2069,6 +2069,13 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{wi
 .ms-side .ms-ub.mut,.ms-ub.mut{background:rgba(255,255,255,.22)!important;color:#fff}
 .ms-archi{display:grid!important;place-items:center;background:linear-gradient(160deg,#4c3a80,#2a2148)!important;color:#d9ccff}.ms-archi svg{width:26px;height:26px}
 .ms-archr .ms-r2 span{color:rgba(255,255,255,.6)}
+/* звонок: легче для телефона */
+.cl-bg{inset:auto!important;left:-12%;top:-12%;width:41%;height:41%;transform:scale(3) translateZ(0);transform-origin:0 0;filter:blur(20px) saturate(1.3)!important}
+#cl.vid .cl-bg i,#cl:has(.cl-rv.show) .cl-bg i{animation:none}
+.cl-rb{inset:auto!important;left:0;top:0;width:25%!important;height:25%!important;transform:scale(4.3) translateZ(0)!important;transform-origin:0 0;filter:blur(9px) brightness(.55) saturate(1.2)!important}
+.cl-ic,.cl-sec,.cl-b span{-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
+.cl-list{-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}
+#msSide .ms-it{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body>
@@ -4271,14 +4278,14 @@ const CAMQ=()=>({facingMode:CALL.face,width:{ideal:1280},height:{ideal:960},aspe
 async function callUnzoom(st){try{for(const t of st.getVideoTracks()){const c=t.getCapabilities&&t.getCapabilities();if(c&&c.zoom&&c.zoom.min!=null)await t.applyConstraints({advanced:[{zoom:c.zoom.min}]})}}catch(e){}return st}
 async function callMedia(video){return callUnzoom(await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:video?CAMQ():false}))}
 // качество видео: до 2,5 Мбит/с (в групповом — 1 Мбит/с на каждого), 30 к/с
-async function callQuality(P){try{const sd=P.vt&&P.vt.sender;if(!sd)return;const p=sd.getParameters();if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=callGroup()?1000000:2500000;p.encodings[0].maxFramerate=30;p.degradationPreference='balanced';await sd.setParameters(p)}catch(e){}}
+async function callQuality(P){try{const sd=P.vt&&P.vt.sender;if(!sd)return;const p=sd.getParameters();if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=callGroup()?700000:1500000;p.encodings[0].maxFramerate=30;p.encodings[0].scaleResolutionDownBy=callGroup()?2:1.333;p.degradationPreference='maintain-framerate';await sd.setParameters(p)}catch(e){}}
 // в приложении Mundora для Android: звук в разговорный динамик (у уха), «Динамик» — громкая связь, датчик приближения гасит экран
 function callNative(on){try{if(!window.MundoraCall)return;if(on){CALL.spk=CALL.kind==='video'||CALL.video||callGroup();MundoraCall.start(!!CALL.spk)}else MundoraCall.stop()}catch(e){}}
 
 // ---- соединение с одним участником ----
 function callPeer(uid){uid=String(uid);if(CALL.peers[uid])return CALL.peers[uid];
-  const pc=new RTCPeerConnection({iceServers:CALL.ice||[]}),P={uid,pc,stream:new MediaStream(),vt:null,ok:false};CALL.peers[uid]=P;
-  pc.ontrack=e=>{P.stream.addTrack(e.track);callMediaAttach();if(e.track.kind==='audio')callLevel(uid,P.stream);e.track.onunmute=e.track.onmute=()=>callMediaAttach()};
+  const pc=new RTCPeerConnection({iceServers:CALL.ice||[],bundlePolicy:'max-bundle',rtcpMuxPolicy:'require'}),P={uid,pc,stream:new MediaStream(),vt:null,ok:false};CALL.peers[uid]=P;
+  pc.ontrack=e=>{try{const r=e.receiver;if('jitterBufferTarget' in r)r.jitterBufferTarget=e.track.kind==='audio'?0:40;else if('playoutDelayHint' in r)r.playoutDelayHint=0}catch(_){}P.stream.addTrack(e.track);callMediaAttach();if(e.track.kind==='audio')callLevel(uid,P.stream);e.track.onunmute=e.track.onmute=()=>callMediaAttach()};
   pc.onconnectionstatechange=()=>{const s=pc.connectionState;
     if(s==='connected'){P.ok=true;clearTimeout(CALL.wd[uid]);if(CALL.st!=='on'||!CALL.t0){CALL.t0=CALL.t0||Date.now()}if(!CALL.live){CALL.live=1;callNative(true);callToneStop();callBeep(660,.12);callTick()}callQuality(P);callPaint()}
     if(s==='failed'){callDrop(uid,'net')}
@@ -4290,11 +4297,12 @@ function callTracks(P){const pc=P.pc,st=CALL.loc;const a=st&&st.getAudioTracks()
   let vt=pc.getTransceivers().find(t=>t.receiver.track&&t.receiver.track.kind==='video');
   if(!vt)vt=pc.addTransceiver('video',{direction:'sendrecv'});else vt.direction='sendrecv';
   P.vt=vt;const v=st&&st.getVideoTracks()[0];vt.sender.replaceTrack(v||null)}
-async function callOffer(uid){const P=callPeer(uid);callTracks(P);await P.pc.setLocalDescription(await P.pc.createOffer());await callWaitIce(P.pc);
+const callSdp=sdp=>sdp.replace(/a=fmtp:(\d+) (.*useinbandfec=1.*)/g,(m,pt,f)=>`a=fmtp:${pt} ${f.replace(/;?usedtx=\d/,'').replace(/;?stereo=\d/,'')};usedtx=0;stereo=0;maxaveragebitrate=40000`);
+async function callOffer(uid){const P=callPeer(uid);callTracks(P);{const o=await P.pc.createOffer();o.sdp=callSdp(o.sdp);await P.pc.setLocalDescription(o)}await callWaitIce(P.pc);
   if(CALL.peers[uid]===P)msApi('csig',{id:CALL.id,to:uid,d:{t:'offer',sdp:P.pc.localDescription.sdp}}).catch(()=>{})}
 async function callSignal(m){const uid=String(m.from),d=m.d||{};
   try{if(d.t==='offer'){let P=CALL.peers[uid];if(P&&P.pc.signalingState!=='stable'){callClosePeer(uid);P=null}P=callPeer(uid);
-      await P.pc.setRemoteDescription({type:'offer',sdp:d.sdp});callTracks(P);await P.pc.setLocalDescription(await P.pc.createAnswer());await callWaitIce(P.pc);
+      await P.pc.setRemoteDescription({type:'offer',sdp:d.sdp});callTracks(P);{const o=await P.pc.createAnswer();o.sdp=callSdp(o.sdp);await P.pc.setLocalDescription(o)}await callWaitIce(P.pc);
       if(CALL.peers[uid]===P)await msApi('csig',{id:CALL.id,to:uid,d:{t:'answer',sdp:P.pc.localDescription.sdp}})}
     else if(d.t==='answer'){const P=CALL.peers[uid];if(P&&P.pc.signalingState==='have-local-offer')await P.pc.setRemoteDescription({type:'answer',sdp:d.sdp})}}catch(e){}}
 function callClosePeer(uid){const P=CALL.peers[uid];if(!P)return;try{P.pc.close()}catch(e){}delete CALL.peers[uid];clearTimeout(CALL.wd[uid]);delete CALL.wd[uid];const L=CALL.lv[uid];if(L){try{L.src.disconnect()}catch(e){}delete CALL.lv[uid]}$('#clA'+uid)?.remove()}
@@ -4353,8 +4361,9 @@ const callGN=()=>{const n=CALL.members.length;return n+' '+plural(n,'участ�
 function callLevel(uid,stream){try{if(!stream.getAudioTracks().length)return;if(!CALL.ac)CALL.ac=new(window.AudioContext||window.webkitAudioContext)();const ac=CALL.ac;ac.resume&&ac.resume();
   if(CALL.lv[uid])return;const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=512;src.connect(an);CALL.lv[uid]={src,an,buf:new Uint8Array(an.fftSize),v:0};
   if(!CALL.lvT)CALL.lvT=setInterval(()=>{for(const [u,L] of Object.entries(CALL.lv)){L.an.getByteTimeDomainData(L.buf);let s=0;for(const x of L.buf){const d=(x-128)/128;s+=d*d}const r=Math.sqrt(s/L.buf.length);L.v=L.v*.6+r*.4;
-      const on=L.v>.035&&(u!==String(MS.me)||CALL.mic);document.querySelectorAll(`[data-spk="${u}"]`).forEach(e=>{e.classList.toggle('spk',on);e.style.setProperty('--lv',Math.min(1,L.v*9).toFixed(2))});
-      const st=document.querySelector(`[data-sst="${u}"]`);if(st&&CALL.members.includes(u))st.textContent=on?'говорит':(CALL.micOf[u]===false||(u===String(MS.me)&&!CALL.mic)?'без звука':'слушает')}},150)}catch(e){}}
+      const on=L.v>.035&&(u!==String(MS.me)||CALL.mic),lv=(Math.round(Math.min(1,L.v*9)*5)/5).toFixed(1);if(on===L.on&&lv===L.lvS)continue;L.on=on;L.lvS=lv;
+      document.querySelectorAll(`[data-spk="${u}"]`).forEach(e=>{e.classList.toggle('spk',on);e.style.setProperty('--lv',lv)});
+      const st=document.querySelector(`[data-sst="${u}"]`);if(st&&CALL.members.includes(u)){const t=on?'говорит':(CALL.micOf[u]===false||(u===String(MS.me)&&!CALL.mic)?'без звука':'слушает');if(st.textContent!==t)st.textContent=t}}},200)}catch(e){}}
 
 async function callCam(){if(!CALL.loc)return;
   if(CALL.video){const t=CALL.loc.getVideoTracks()[0];if(t){t.stop();CALL.loc.removeTrack(t)}Object.values(CALL.peers).forEach(P=>P.vt&&P.vt.sender.replaceTrack(null));CALL.video=false}
@@ -6733,7 +6742,8 @@ function msChatsRead(L){L.forEach(id=>{const c=MS.chats.find(x=>x.c===id);if(!c|
 function msChatsDel(L){MS.delL=L;openSheet(`<h3>${ico('trash')}Удалить ${L.length>1?L.length+' '+plural(L.length,'чат','чата','чатов'):'чат'}?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin:0 2px 14px">Чат пропадёт из списка, пока не придёт новое сообщение. Переписка у собеседника останется.</p><button class="btn" style="width:100%;justify-content:center;background:#e5484d;color:#fff" data-act="ms-sel-delok">${ico('trash','s')}Удалить</button>`)}
 function msItMenu(it){const c=it.dataset.c;if(!c)return;const P=msPins().includes(c),M=LS.get('msMute_'+c,false),A=msArchL().includes(c),ch=MS.chats.find(x=>x.c===c);
   bubMenu(it,[{t:P?'Открепить':'Закрепить',ic:P?'unpin':'pin',fn:()=>msChatsPin([c])},{t:M?'Включить звук':'Без звука',ic:M?'vol':'mute',fn:()=>msChatsMute([c])},{t:A?'Из архива':'В архив',ic:A?'unarch':'archive',fn:()=>msChatsArch([c])},...(ch&&ch.u?[{t:'Прочитано',ic:'checks',fn:()=>msChatsRead([c])}]:[]),{t:'Выбрать',ic:'check',fn:()=>msSelToggle(c)},'-',{t:'Удалить',ic:'trash',red:true,fn:()=>msChatsDel([c])}])}
-document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!it)return;e.preventDefault();if(MS.sel&&MS.sel.size)msSelToggle(it.dataset.c);else msItMenu(it)});
+let msTouchT=0;document.addEventListener('touchstart',()=>{msTouchT=Date.now()},{passive:true,capture:true});
+document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!it)return;e.preventDefault();if(Date.now()-msTouchT<1500||matchMedia('(pointer:coarse)').matches)return;if(MS.sel&&MS.sel.size)msSelToggle(it.dataset.c);else msItMenu(it)});
 (()=>{let t=0,it=null,x0=0,y0=0;document.addEventListener('touchstart',e=>{const el=e.target.closest&&e.target.closest('#msSide .ms-it[data-c]');if(!el)return;it=el;x0=e.touches[0].clientX;y0=e.touches[0].clientY;el.classList.add('press');t=setTimeout(()=>{t=0;it._lp=Date.now();it.classList.remove('press');msSelToggle(it.dataset.c)},420)},{passive:true});
   const stop=()=>{if(t){clearTimeout(t);t=0}if(it)it.classList.remove('press')};
   document.addEventListener('touchmove',e=>{if(t&&(Math.abs(e.touches[0].clientX-x0)>8||Math.abs(e.touches[0].clientY-y0)>8))stop()},{passive:true});
