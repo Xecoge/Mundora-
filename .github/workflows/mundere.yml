@@ -2,7 +2,7 @@ name: Mundere (Android)
 on:
   push:
     branches: [main]
-    paths: ['mundere/**', 'mobile/**', '.github/workflows/mundere.yml']
+    paths: ['mundere/**', 'mobile/**', 'src/app.html', 'img/**', '.github/workflows/mundere.yml']
   workflow_dispatch:
 permissions:
   contents: write

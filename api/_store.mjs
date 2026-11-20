@@ -99,6 +99,7 @@ export function memoryStore(load, persist) {
       case 'SMEMBERS': r = live(a[0]) && D.get(a[0]).s ? [...D.get(a[0]).s] : []; break;
       case 'SISMEMBER': r = live(a[0]) && D.get(a[0]).s && D.get(a[0]).s.includes(a[1]) ? 1 : 0; break;
       case 'SCARD': r = live(a[0]) && D.get(a[0]).s ? D.get(a[0]).s.length : 0; break;
+      case 'LTRIM': { if (live(a[0]) && D.get(a[0]).l) { const L = D.get(a[0]).l; let s0 = +a[1], e0 = +a[2]; if (s0 < 0) s0 = Math.max(0, L.length + s0); if (e0 < 0) e0 = L.length + e0; D.get(a[0]).l = L.slice(s0, e0 + 1); } r = 'OK'; break; }
       default: throw new Error('unsupported ' + c);
     }
     if (!/^(GET|EXISTS|TTL|HGET|HMGET|HGETALL|HLEN|SMEMBERS|SCARD|SISMEMBER|LLEN|LRANGE)$/.test(c)) save();

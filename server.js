@@ -60,6 +60,7 @@ function route(u) {
   if (p === '/api/asset') return ['asset', u];
   if (p === '/api/tg') return ['tg', u];
   if (p === '/tempo-ping') return ['ping', u];
+  { const b = p.match(/^\/bot([^/]+)\/(\w+)$/); if (b) { const n = new URL('http://local/api/msg'); n.searchParams.set('a', 'botapi'); n.searchParams.set('token', b[1]); n.searchParams.set('method', b[2]); u.searchParams.forEach((v, k) => n.searchParams.append(k, v)); return ['msg', n]; } }
   let m;
   if ((m = p.match(/^\/ai-proxy\/(.*)$/))) { const n = new URL('http://local/api/proxy'); n.searchParams.set('path', m[1]); u.searchParams.forEach((v, k) => n.searchParams.append(k, v)); return ['proxy', n]; }
   if ((m = p.match(/^\/music\/([^/]+)\/(.*)$/))) { const n = new URL('http://local/api/music'); n.searchParams.set('src', m[1]); n.searchParams.set('path', m[2]); u.searchParams.forEach((v, k) => n.searchParams.append(k, v)); return ['music', n]; }

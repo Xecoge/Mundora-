@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/bot:token/:method",
+      "destination": "/api/msg?a=botapi&token=:token&method=:method"
+    },
+    {
       "source": "/sw.js",
       "destination": "/api/sw"
     },

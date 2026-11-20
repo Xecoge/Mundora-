@@ -8,6 +8,7 @@
 import { kv, kvMulti, pairs, jget, jset } from './_store.mjs';
 import { guard, json, ensureId, maskEmail, displayName, AVATARS, ADMIN, putUser, getUser, avatarOf, coverOf, unlinkTg, rand } from './_auth.mjs';
 import { checkName, claimName } from './_names.mjs';
+import { botFatherId } from './_bots.mjs';
 export const config = { runtime: 'edge' };
 
 const parse = v => { try { return v == null ? null : JSON.parse(v); } catch (e) { return null; } };
@@ -164,7 +165,7 @@ async function card(email, viewer, full) {
   const adm = adm0 || (self && sh); // визуальный админ видит галочку только у себя
   const base = {
     id: u.id, name: displayName(u), bio: u.bio || '', avatar: avatarOf(u), cover: coverOf(u), tg: u.tg ? { username: u.tg.username || '', name: u.tg.name || '' } : null,
-    verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self,
+    verified: !!(u.verified || owner || adm), admin: owner || !!adm, owner, self, ...(u.bot ? { bot: { uname: u.bot.uname, cmds: u.bot.cmds || [], mine: String(u.bot.owner) === String(viewer.id) } } : {}),
     email: viewer.admin || self ? email : maskEmail(email), status: viewer.admin ? (u.status || 'active') : undefined,
     online: !!onK, seen: lastSeen ? Math.floor(lastSeen / 6e4) * 6e4 : 0, joined: u.created || 0, open: u.open !== false,
     gifts: giftsOut(u), pos: posOut(u), nick: nickOut(u), anim: ['orbit', 'bubbles'].includes(u.giftAnim) ? u.giftAnim : (u.giftOrbit ? 'orbit' : 'none'), wallets: walletsOut(u)
@@ -381,9 +382,11 @@ export default async function handler(req) {
     }
     const q = String(url.searchParams.get('q') || '').trim().toLowerCase().replace(/^(id|#)\s*/i, '');
     if (!q) return json({ people: [] });
+    if (/bot/.test(q)) await botFatherId().catch(() => {});
     const emails = await kv('SMEMBERS', 'users');
-    const us = (await kvMulti(emails.map(e => ['GET', 'u:' + e]))).map(parse).filter(u => u && u.status !== 'banned');
-    const hit = u => (u.id != null && (String(u.id) === q || (/^\d{2,}$/.test(q) && String(u.id).startsWith(q)))) || displayName(u).toLowerCase().includes(q) || (me.admin && u.email.includes(q));
+    const us = (await kvMulti(emails.map(e => ['GET', 'u:' + e]))).map(parse).filter(u => u && u.status !== 'banned' && u.status !== 'deleted');
+    const qq = q.replace(/^@/, '');
+    const hit = u => (u.id != null && (String(u.id) === q || (/^\d{2,}$/.test(q) && String(u.id).startsWith(q)))) || displayName(u).toLowerCase().includes(qq) || (u.bot && u.bot.uname.toLowerCase().includes(qq)) || (me.admin && !u.bot && u.email.includes(q));
     const found = us.filter(hit).sort((x, y) => (String(y.id) === q) - (String(x.id) === q) || (displayName(y).toLowerCase() === q) - (displayName(x).toLowerCase() === q) || (y.seen || 0) - (x.seen || 0)).slice(0, 20);
     const people = await Promise.all(found.map(u => card(u.email, me, false)));
     return json({ people: people.filter(Boolean) });

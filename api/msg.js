@@ -15,6 +15,7 @@
 // GET  ?a=ginfo&c                        — описание, участники, ссылка-приглашение (для участников)
 import { kv, kvMulti, jget, jset, pairs } from './_store.mjs';
 import { guard, json, sign, sessionFromCookie, getUser, displayName, avatarOf, rand } from './_auth.mjs';
+import { isBotEmail, botById, botByToken, botFatherId, botFatherReply, botEnqueue, botUpdates } from './_bots.mjs';
 export const config = { runtime: 'edge' };
 
 const enc = new TextEncoder(), dec = new TextDecoder();
@@ -45,7 +46,9 @@ const bumpAll = (me, c, G) => [['INCR', 'mv:' + me], ...others(c, me, G).map(u =
 // куда пишем: личный чат с человеком или группа/канал
 async function dest(to, me) { to = String(to ?? '');
   if (isG(to)) { const g = await access(to, me); if (!g) return { err: 'Нет доступа' }; if (g.type === 'channel' && !isAdm(g, me)) return { err: 'В канале пишут только администраторы' }; return { c: to, G: g }; }
-  if (!/^\d{1,12}$/.test(to)) return { err: 'Кому?' }; if (to !== me && !(await kv('GET', 'id:' + to))) return { err: 'Аккаунт не найден' }; return { c: chatId(me, to), G: { dm: 1 }, to }; }
+  if (!/^\d{1,12}$/.test(to)) return { err: 'Кому?' }; const em = to !== me ? await kv('GET', 'id:' + to) : null; if (to !== me && !em) return { err: 'Аккаунт не найден' };
+  if (isBotEmail(em)) { const b = await getUser(em); if (!b || b.status === 'deleted' || !b.bot) return { err: 'Бот удалён' }; return { c: chatId(me, to), G: { dm: 1 }, to, bot: b }; }
+  return { c: chatId(me, to), G: { dm: 1 }, to }; }
 // ---- Web Push: уведомления, даже когда сайт закрыт. Ключи VAPID создаются один раз и хранятся в базе (в коде их нет). ----
 const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 let VAP = null;
@@ -120,6 +123,49 @@ async function chatList(me) {
   return out.filter(Boolean).sort((a, b) => b.t - a.t);
 }
 
+// ---- боты ----
+async function botGot(b, me, email, c, i, m) {
+  if (b.bot.uname === 'BotFather' && b.verified) {
+    const reply = await botFatherReply(me, m.x || '');
+    const t = Date.now(); await push(c, String(b.id), { dm: 1 }, { f: +b.id, t, x: reply }, reply.slice(0, 80)); return;
+  }
+  const u = await getUser(email);
+  await botEnqueue(b.id, { message: { message_id: i, from: { id: +me, is_bot: false, first_name: u ? displayName(u) : 'ID ' + me }, chat: { id: +me, type: 'private' }, date: Math.floor(m.t / 1000), ...(m.x ? { text: m.x } : {}), ...(m.fl ? { file: { name: m.fl.n, type: m.fl.ty } } : {}), ...(m.r != null ? { reply_to_message_id: m.r } : {}) } });
+}
+async function botApi(req, url) {
+  const R = (result, ok = true) => new Response(JSON.stringify(ok ? { ok: true, result } : { ok: false, error_code: result[0], description: result[1] }), { status: ok ? 200 : result[0], headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*', 'cache-control': 'no-store' } });
+  const b = await botByToken(url.searchParams.get('token'));
+  if (!b || b.status === 'deleted') return R([401, 'Unauthorized: неверный токен'], false);
+  let P = Object.fromEntries(url.searchParams);
+  if (req.method === 'POST') { const ct = req.headers.get('content-type') || ''; try { P = { ...P, ...(ct.includes('json') ? await req.json() : Object.fromEntries(new URLSearchParams(await req.text()))) }; } catch (e) {} }
+  const me = String(b.id), mt = String(P.method || '');
+  if (mt === 'getMe') return R({ id: +me, is_bot: true, first_name: displayName(b), username: b.bot.uname, can_join_groups: false });
+  if (mt === 'getUpdates') {
+    const off = +P.offset || 0, lim = Math.min(100, Math.max(1, +P.limit || 100)), tmo = Math.min(20, Math.max(0, +P.timeout || 0)), t0 = Date.now();
+    let L = await botUpdates(me, off, lim);
+    while (!L.length && Date.now() - t0 < tmo * 1000) { await new Promise(r => setTimeout(r, 1000)); L = await botUpdates(me, off, lim); }
+    return R(L);
+  }
+  if (mt === 'sendMessage') {
+    const to = String(P.chat_id ?? ''), x = String(P.text ?? '').slice(0, 4000);
+    if (!/^\d{1,12}$/.test(to)) return R([400, 'Bad Request: chat_id'], false);
+    if (!x.trim()) return R([400, 'Bad Request: text is empty'], false);
+    const c = chatId(me, to);
+    if (!(await kv('HGET', 'ci:' + me, c))) return R([403, 'Forbidden: пользователь ещё не писал боту'], false);
+    const t = Date.now(), m = { f: +me, t, x, ...(P.reply_to_message_id != null && P.reply_to_message_id !== '' ? { r: +P.reply_to_message_id } : {}) };
+    const len = await push(c, me, { dm: 1 }, m, x.slice(0, 80));
+    return R({ message_id: len - 1, from: { id: +me, is_bot: true, first_name: displayName(b), username: b.bot.uname }, chat: { id: +to, type: 'private' }, date: Math.floor(t / 1000), text: x });
+  }
+  if (mt === 'setMyCommands') {
+    let cm = P.commands; try { if (typeof cm === 'string') cm = JSON.parse(cm); } catch (e) { cm = null; }
+    if (!Array.isArray(cm)) return R([400, 'Bad Request: commands'], false);
+    b.bot.cmds = cm.slice(0, 50).map(o => ({ c: String(o.command || '').replace(/^\//, '').toLowerCase().slice(0, 32), d: String(o.description || '').slice(0, 256) })).filter(o => /^[a-z0-9_]+$/.test(o.c));
+    await kv('SET', 'u:' + b.email, JSON.stringify(b)); return R(true);
+  }
+  if (mt === 'getMyCommands') return R((b.bot.cmds || []).map(o => ({ command: o.c, description: o.d })));
+  return R([404, 'Not Found: метод ' + mt], false);
+}
+
 export default async function handler(req) {
   const url = new URL(req.url), a = url.searchParams.get('a'), q = k => url.searchParams.get(k);
   try {
@@ -131,6 +177,7 @@ export default async function handler(req) {
       return json({ tk, me: me.id, v: v || '0', chats: list });
     }
     if (a === 'vapid') return json({ key: (await vapid()).pub });
+    if (a === 'botapi') return botApi(req, url);
     if (a === 'pend') { // для service worker: что случилось — звонок, пропущенный или сообщение
       const g = await guard(req, true); if (g.res) return g.res; const me = String(g.user.id);
       const card = async id => { const e = await kv('GET', 'id:' + id); const u = e ? await getUser(e) : null; const av = u ? avatarOf(u) : 'planet'; return { name: u ? displayName(u) : 'ID ' + id, ava: typeof av === 'string' && av.startsWith('/') ? av : '/img/' + (av || 'planet') + '.webp' }; };
@@ -186,7 +233,7 @@ export default async function handler(req) {
       const ems = ids.length ? await kvMulti(ids.map(id => ['GET', 'id:' + id])) : [];
       const us = await Promise.all(ems.map(e => e ? getUser(e) : null));
       const pr = ids.length ? await kvMulti(ids.flatMap(id => [['GET', 'on:' + id], ['GET', 'ls:' + id]])) : [];
-      return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
+      return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, ...(u.bot ? { bot: u.bot.uname, about: u.bot.about || '', cmds: u.bot.cmds || [] } : {}), seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
     }
     // настройки списка чатов (закреп, архив, без звука, удалённые) — одинаковые на сайте и в приложении
     if (a === 'prefs') return json({ p: (await jget('mp:' + me)) || {} });
@@ -280,6 +327,7 @@ export default async function handler(req) {
       if (!x.trim() && !fl) return json({ error: 'Пустое сообщение' }, 400);
       const t = Date.now(), m = { f: +me, t, x, ...(fl ? { fl } : {}), ...(body.r != null ? { r: +body.r } : {}) };
       const len = await push(c, me, D.G, m, x.trim() ? x.slice(0, 80) : (fl.vo ? '🎤 Голосовое' : fl.rd ? '📹 Видеосообщение' : fl.ty.startsWith('image/') ? '🖼 Фото' : fl.ty.startsWith('video/') ? '🎬 Видео' : '📎 ' + fl.n));
+      if (D.bot) await botGot(D.bot, me, W.email, c, len - 1, m);
       return json({ ok: 1, c, m: { ...m, i: len - 1 }, tmp: body.tmp });
     }
     if (a === 'fwd') { // переслать сообщение (и файл) в другой чат: файл перешифровывается ключом нового чата
