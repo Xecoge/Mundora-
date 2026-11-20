@@ -36,7 +36,8 @@ export async function hashPass(pw, salt) {
 }
 
 // ---------- cookies ----------
-export function cookies(req) { const o = {}; (req.headers.get('cookie') || '').split(/;\s*/).forEach(p => { const i = p.indexOf('='); if (i > 0) o[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); }); return o; }
+// приложение Mundere шлёт куки в заголовке x-cookie (у нативного клиента нет браузерных кук)
+export function cookies(req) { const o = {}; [req.headers.get('cookie') || '', req.headers.get('x-cookie') || ''].join('; ').split(/;\s*/).forEach(p => { const i = p.indexOf('='); if (i > 0) o[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); }); return o; }
 const isHttps = req => (req.headers.get('x-forwarded-proto') || new URL(req.url).protocol.replace(':', '')) === 'https';
 export const setCookie = (req, name, val, days) => `${name}=${encodeURIComponent(val)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.round(days * 86400)}${isHttps(req) ? '; Secure' : ''}`;
 export const clearCookie = (req, name) => `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${isHttps(req) ? '; Secure' : ''}`;
@@ -136,7 +137,7 @@ export async function gatePassed(req) { return (await gateInfo(req)).ok; }
 export async function gateInfo(req) { const p = await unsign(cookies(req).tempo_g); if (!p || !p.startsWith('g:')) return { ok: false, days: 0 }; return { ok: true, rid: p.split(':')[1] || '', days: +(p.split(':')[2] || 0) || 0 }; }
 
 export const json = (obj, status = 200, headers = {}) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
-export const jsonC = (obj, cookiesArr, status = 200) => { const h = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); cookiesArr.forEach(c => h.append('set-cookie', c)); return new Response(JSON.stringify(obj), { status, headers: h }); };
+export const jsonC = (obj, cookiesArr, status = 200, req = null) => { if (req && req.headers.get('x-app')) obj = { ...obj, _ck: Object.fromEntries(cookiesArr.map(c => { const p = c.split(';')[0], i = p.indexOf('='); return [p.slice(0, i), decodeURIComponent(p.slice(i + 1))]; })) }; const h = new Headers({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); cookiesArr.forEach(c => h.append('set-cookie', c)); return new Response(JSON.stringify(obj), { status, headers: h }); };
 
 // Защита API (музыка, крипта, ИИ): пускаем только вошедших
 export async function guard(req, full = false) {
