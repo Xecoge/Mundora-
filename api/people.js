@@ -258,7 +258,7 @@ export default async function handler(req) {
       if (!t) return json({ error: 'Получатель не найден' }, 404);
       t.gifts = Array.isArray(t.gifts) ? t.gifts : [];
       if (t.gifts.length >= 200) return json({ error: 'У получателя уже слишком много подарков' }, 400);
-      const g = { id: rand(8), k: b.k, t: Date.now(), from: t === u ? null : { id: u.id, name: displayName(u) } };
+      const g = { id: rand(8), k: b.k, t: Date.now(), from: t === u ? null : { id: u.id, name: displayName(u), av: avatarOf(u) } };
       t.gifts.unshift(g);
       if (t === u && b.place !== false) { const ps = posOut(u); if (ps.length < MAXPOS) { const d = DEFPOS.find(([x, y]) => !ps.some(p => Math.abs(p.x - x) < 6 && Math.abs(p.y - y) < 6)) || DEFPOS[ps.length]; ps.push({ id: g.id, x: d[0], y: d[1] }); u.giftPos = ps; delete u.giftSlots; } }
       u.xpSpent = (u.xpSpent || 0) + G.p;
