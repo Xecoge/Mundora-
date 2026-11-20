@@ -188,6 +188,8 @@ export default async function handler(req) {
       const pr = ids.length ? await kvMulti(ids.flatMap(id => [['GET', 'on:' + id], ['GET', 'ls:' + id]])) : [];
       return json({ peers: ids.map((id, i) => { const u = us[i]; return u ? { id: +id, name: displayName(u), avatar: avatarOf(u), verified: !!u.verified, seen: Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) ? Math.floor(Math.max(u.seen || 0, +pr[i * 2 + 1] || 0) / 6e4) * 6e4 : 0, online: !!pr[i * 2] } : { id: +id, name: 'Удалённый аккаунт', avatar: 'planet', gone: 1 }; }) });
     }
+    // настройки списка чатов (закреп, архив, без звука, удалённые) — одинаковые на сайте и в приложении
+    if (a === 'prefs') return json({ p: (await jget('mp:' + me)) || {} });
     if (a === 'pch') { const u = String(q('u') || ''); if (!/^\d{1,12}$/.test(u)) return json({ ch: null }); const c = await kv('GET', 'pch:' + u); const g = c ? await gget(c) : null;
       if (!g || g.type !== 'channel') return json({ ch: null });
       const meta = await kv('HGET', 'ci:' + g.owner, c); let o = {}; try { o = JSON.parse(meta || '{}'); } catch (e) {}
@@ -410,6 +412,14 @@ export default async function handler(req) {
         if (g.members.length && g.type !== 'channel') await push(c, me, g, { f: +me, t: Date.now(), x: '', sys: 'left' }, 'Участник вышел'); else if (g.members.length) await kvMulti(g.members.map(u => ['INCR', 'mv:' + u]));
         return json({ ok: 1 });
       }
+    }
+    if (a === 'prefset') {
+      const cur = (await jget('mp:' + me)) || {}, b = body.p || {}, ok = x => /^[\w-]{1,40}$/.test(String(x));
+      if (Array.isArray(b.pins)) cur.pins = b.pins.filter(ok).slice(0, 5);
+      if (Array.isArray(b.arch)) cur.arch = b.arch.filter(ok).slice(0, 500);
+      if (Array.isArray(b.mute)) cur.mute = b.mute.filter(ok).slice(0, 500);
+      if (b.hide && typeof b.hide === 'object') cur.hide = Object.fromEntries(Object.entries(b.hide).filter(([k, v]) => ok(k) && +v > 0).slice(-500).map(([k, v]) => [k, +v]));
+      await jset('mp:' + me, cur); return json({ ok: 1, p: cur });
     }
     if (a === 'pchset') { const c = String(body.c || ''); if (!c) { await kv('DEL', 'pch:' + me); return json({ ok: 1 }); }
       const g = await gget(c); if (!g || g.type !== 'channel' || !isOwn(g, me)) return json({ error: 'Можно добавить только свой канал' }, 403); await kv('SET', 'pch:' + me, c); return json({ ok: 1 }); }

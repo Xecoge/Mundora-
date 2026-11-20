@@ -3208,6 +3208,7 @@ function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&
 async function msShow(r){const m=msShell();const first=!MS.on;MS.on=true;document.body.classList.add('ms-open');m.classList.add('on');if(first){m.classList.add('enter');setTimeout(()=>m.classList.remove('enter'),350);const pb=$('#view #pfBox');if(pb)pb.remove()}
   msVV();
   try{await msInit()}catch(e){$('#msSide').innerHTML=`<div class="ms-empty">${esc(e.message)}</div>`;return}
+  if(!MS.pfL){MS.pfL=1;msPfLoad()}
   let x;
   if((x=r.match(/^msg-(g\d+)$/))){const c=x[1];MS.peer=c;MS.c=c;MS.prof=null;MS.pane='chat';if(!msGr(c)){try{const j=await msApi('ginfo',null,'&c='+c);MS.G[c]=j.g}catch(e){toast(e.message,'x');location.hash='#msg';return}}msDrawSide();msOpenChat()}
   else if((x=r.match(/^msgi-(g\d+)$/))){MS.c=x[1];MS.peer=x[1];MS.prof=null;MS.pane='ginfo';msDrawSide();msGInfo(x[1])}
@@ -4509,7 +4510,7 @@ const MS_ACT={
   'ms-gi-back'(){const c=MS.gi&&MS.gi.c||MS.c;if(history.length>1&&MS.backOk)history.back();else location.hash='#msg-'+c},
   'ms-gedit'(el){msGEdit(el.dataset.c)},
   async 'ms-gsave'(el){const c=el.dataset.c;el.disabled=true;try{const j=await msApi('gedit',{c,title:$('#msGEt').value,about:$('#msGEa').value,...(MS.gava!=null?{ava:MS.gava}:{})});MS.G[c]=j.g;msNGClose();MS.v='';msGInfo(c)}catch(e){toast(e.message,'x');el.disabled=false}},
-  'ms-gmute'(el){const c=el.dataset.c||MS.c,k='msMute_'+c,on=!LS.get(k,false);LS.set(k,on);toast(on?'Уведомления выключены':'Уведомления включены',on?'vol':'check');if(MS.pane==='ginfo')msGInfo(c);else{const b=$('.ms-chbar button');if(b)b.innerHTML=`${ico(on?'vol':'bell')}<span>${on?'Включить звук':'Выключить звук'}</span>`}msBadge()},
+  'ms-gmute'(el){const c=el.dataset.c||MS.c,k='msMute_'+c,on=!LS.get(k,false);LS.set(k,on);msPfSave();toast(on?'Уведомления выключены':'Уведомления включены',on?'vol':'check');if(MS.pane==='ginfo')msGInfo(c);else{const b=$('.ms-chbar button');if(b)b.innerHTML=`${ico(on?'vol':'bell')}<span>${on?'Включить звук':'Выключить звук'}</span>`}msBadge()},
   'ms-ginv'(el){const l=el.dataset.l,g=msGr(MS.c)||{};bubMenu(el,[{t:'Скопировать ссылку',ic:'copy',fn:async()=>{try{await navigator.clipboard.writeText(l);toast('Ссылка скопирована','check')}catch(e){prompt('Ссылка',l)}}},...(navigator.share?[{t:'Поделиться',ic:'share2',fn:()=>navigator.share({title:g.title||'Mundora',text:(g.type==='channel'?'Подписывайся на канал «':'Вступай в группу «')+(g.title||'')+'» в Mundora',url:l}).catch(()=>{})}]:[])])},
   'ms-gleave'(el){const c=el.dataset.c,g=msGr(c)||{},ch=g.type==='channel';bubMenu(el,[{t:ch?'Отписаться от канала':'Покинуть группу',ic:'out',red:1,fn:async()=>{try{await msApi('gleave',{c});MS.chats=MS.chats.filter(x=>x.c!==c);delete MS.msgs[c];MS.v='';toast(ch?'Ты отписался от канала':'Ты покинул группу','check');location.hash='#msg'}catch(e){toast(e.message,'x')}}}],{left:1})},
   'ms-gadd'(el){const c=el.dataset.c,g=msGr(c)||{};msNG(g.type,{c,members:(MS.gi&&MS.gi.c===c?MS.gi.mem:[])})},
@@ -6726,7 +6727,15 @@ const msSelOn=c=>MS.sel&&MS.sel.has(c)?' sel':'';
 const msMutI=c=>LS.get('msMute_'+c,false)?`<i class="ms-muti">${ico('mute','s')}</i>`:'';
 const msHid=()=>{try{return JSON.parse(localStorage.getItem('msHide:'+MS.me)||'{}')}catch(e){return {}}};
 const msArchL=()=>{try{return JSON.parse(localStorage.getItem('msArch:'+MS.me)||'[]')}catch(e){return []}};
-const msLSset=(k,v)=>{try{localStorage.setItem(k+':'+MS.me,JSON.stringify(v))}catch(e){}};
+const msLSset=(k,v)=>{try{localStorage.setItem(k+':'+MS.me,JSON.stringify(v))}catch(e){}msPfSave()};
+// синхронизация с сервером: то же самое видно в приложении Mundere и на других устройствах
+function msPfCollect(){const mute=MS.chats.map(c=>c.c).filter(c=>LS.get('msMute_'+c,false));return {pins:msPins(),arch:msArchL(),hide:msHid(),mute}}
+function msPfSave(){clearTimeout(MS.pfT);MS.pfT=setTimeout(()=>msApi('prefset',{p:msPfCollect()}).catch(()=>{}),400)}
+async function msPfLoad(){try{const j=await msApi('prefs');const p=j.p||{};const empty=!p.pins&&!p.arch&&!p.mute&&!p.hide;
+  if(empty){const loc=msPfCollect();if(loc.pins.length||loc.arch.length||loc.mute.length||Object.keys(loc.hide).length)msPfSave();return}
+  const put=(k,v)=>{try{localStorage.setItem(k+':'+MS.me,JSON.stringify(v))}catch(e){}};put('msPins',p.pins||[]);put('msArch',p.arch||[]);put('msHide',p.hide||{});
+  const M=new Set(p.mute||[]);MS.chats.forEach(c=>LS.set('msMute_'+c.c,M.has(c.c)));(p.mute||[]).forEach(c=>LS.set('msMute_'+c,true));
+  if(MS.on&&MS.pane!=='chat'||MS.on)msDrawSide();msBadge()}catch(e){}}
 function msSelBar(){const L=[...MS.sel],P=msPins(),allPin=L.every(c=>P.includes(c)),allMut=L.every(c=>LS.get('msMute_'+c,false));
   return `<div class="ms-lhead ms-lsel"><button class="ib lq" data-act="ms-sel-x" title="Отмена">${ico('x')}</button><h1 class="ms-selc">${L.length}</h1>
     <button class="ib lq" data-act="ms-sel-pin" title="${allPin?'Открепить':'Закрепить'}">${ico(allPin?'unpin':'pin')}</button>
@@ -6736,7 +6745,7 @@ function msSelBar(){const L=[...MS.sel],P=msPins(),allPin=L.every(c=>P.includes(
 function msSelToggle(c){MS.sel=MS.sel||new Set();if(MS.sel.has(c))MS.sel.delete(c);else MS.sel.add(c);try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}const y=$('#msList')?.scrollTop;msDrawSide();const l=$('#msList');if(l&&y!=null)l.scrollTop=y}
 function msSelDone(){if(MS.sel)MS.sel.clear();const y=$('#msList')?.scrollTop;msDrawSide();const l=$('#msList');if(l&&y!=null)l.scrollTop=y}
 function msChatsPin(L){let P=msPins();const all=L.every(c=>P.includes(c));if(all)P=P.filter(c=>!L.includes(c));else{const add=L.filter(c=>!P.includes(c));if(P.length+add.length>5){toast('Закрепить можно до 5 чатов','x');return}P=[...add,...P]}msLSset('msPins',P);toast(all?'Откреплено':'Закреплено','check');msSelDone()}
-function msChatsMute(L){const all=L.every(c=>LS.get('msMute_'+c,false));L.forEach(c=>LS.set('msMute_'+c,!all));msBadge();toast(all?'Звук включён':'Без звука',all?'vol':'check');msSelDone()}
+function msChatsMute(L){const all=L.every(c=>LS.get('msMute_'+c,false));L.forEach(c=>LS.set('msMute_'+c,!all));msBadge();msPfSave();toast(all?'Звук включён':'Без звука',all?'vol':'check');msSelDone()}
 function msChatsArch(L){let A=msArchL();const all=L.every(c=>A.includes(c));A=all?A.filter(c=>!L.includes(c)):[...new Set([...L,...A])];msLSset('msArch',A);if(!all)msLSset('msPins',msPins().filter(c=>!L.includes(c)));toast(all?'Возвращено из архива':'Перенесено в архив','check');msSelDone()}
 function msChatsRead(L){L.forEach(id=>{const c=MS.chats.find(x=>x.c===id);if(!c||!c.u)return;const s=Math.max(0,(c.n||1)-1);c.u=0;MS.read[id]=Math.max(MS.read[id]??-1,s);msApi('read',{c:id,s}).catch(()=>{})});msBadge();toast('Отмечено прочитанным','check');msSelDone()}
 function msChatsDel(L){MS.delL=L;openSheet(`<h3>${ico('trash')}Удалить ${L.length>1?L.length+' '+plural(L.length,'чат','чата','чатов'):'чат'}?<button class="ib" data-act="close-sheet">${ico('x')}</button></h3><p class="k" style="margin:0 2px 14px">Чат пропадёт из списка, пока не придёт новое сообщение. Переписка у собеседника останется.</p><button class="btn" style="width:100%;justify-content:center;background:#e5484d;color:#fff" data-act="ms-sel-delok">${ico('trash','s')}Удалить</button>`)}
