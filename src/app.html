@@ -2098,21 +2098,102 @@ html.mu .ms-home,html.mu .ms-lhead [data-act="ms-exit"],html.mu header [data-act
 .be-ava i{position:absolute;right:0;bottom:0;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#8b5cf6,#6d3fe0);color:#fff;box-shadow:0 0 0 3px #15111f}.be-ava i svg{width:16px;height:16px}
 .be-ava small{color:rgba(255,255,255,.5)}
 .ms-un{color:#b79bff;font-weight:600;cursor:pointer;text-decoration:none!important}.mb.me .ms-un,.mb.me .ms-bc{color:#fff!important;text-decoration:underline!important;text-underline-offset:2px}.mb.th .ms-un{color:#b79bff!important}.ms-un:active{opacity:.6}
-.un-in{display:flex;align-items:center;gap:2px;color:rgba(255,255,255,.55);font-weight:600}.un-in input{flex:1;min-width:0}
-.un-err{display:block;font-style:normal;font-size:12.5px;min-height:16px;margin-top:4px;color:rgba(255,255,255,.45)}.un-err.bad{color:#ff8a95}.un-err.good{color:#6be3a0}
-.un-ov{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:20px;background:rgba(6,4,14,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:unFade .3s ease both}
-.un-ov.out{animation:unFade .25s ease reverse both}.un-ov.out .un-card{animation:unPop .25s ease reverse both}
-@keyframes unFade{from{opacity:0}}@keyframes unPop{from{transform:scale(.6) translateY(30px);opacity:0}}
-.un-card{width:min(360px,100%);border-radius:30px;padding:26px 22px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;animation:unPop .5s cubic-bezier(.3,1.5,.5,1) both}
-.un-ic{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font:800 34px/1 inherit;color:#fff;background:radial-gradient(circle at 35% 30%,#b79bff,#7c3aed 60%,#4c1d95);box-shadow:0 12px 30px rgba(124,58,237,.45),inset 0 2px 0 rgba(255,255,255,.35);margin-bottom:14px;animation:unPop .6s .08s cubic-bezier(.3,1.7,.5,1) both}
-.un-card b{font-size:21px}.un-card p{margin:8px 0 16px;color:rgba(255,255,255,.65);font-size:14.5px;line-height:1.45}
-.un-in.big{width:100%;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:18px}
-.un-in.big input{background:none;border:0;outline:0;color:#fff;font:600 18px/1 inherit}
-.un-card .un-err{width:100%;text-align:left;padding-left:6px}
+	.un-in{display:flex;align-items:center;gap:8px;color:#c8b8ff;font-weight:750}.un-in input{flex:1;min-width:0}
+	.un-err{display:block;font-style:normal;font-size:12.5px;min-height:16px;margin-top:4px;color:rgba(255,255,255,.45)}.un-err.bad{color:#ff8a95}.un-err.good{color:#79e8b0}
+	.lq-f:has(> .un-in){gap:8px}.lq-f:has(> .un-in) .un-in{min-height:48px;padding:0 14px;border-radius:16px;background:linear-gradient(135deg,rgba(145,112,255,.13),rgba(255,255,255,.055));border:1px solid rgba(177,150,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);transition:border-color .2s,box-shadow .2s,background .2s}.lq-f:has(> .un-in):focus-within .un-in{border-color:rgba(177,150,255,.65);background:rgba(145,112,255,.12);box-shadow:0 0 0 3px rgba(145,112,255,.11),inset 0 1px 0 rgba(255,255,255,.1)}
+	.lq-f:has(> .un-in) .un-in input{background:transparent!important;border:0!important;box-shadow:none!important;padding:10px 0!important;font-weight:650;letter-spacing:.01em}
+	.un-ov{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:20px;background:rgba(5,7,16,.68);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);animation:unFade .3s ease both}
+	.un-ov.out{animation:unFade .25s ease reverse both}.un-ov.out .un-card{animation:unPop .25s ease reverse both}
+	@keyframes unFade{from{opacity:0}}@keyframes unPop{from{transform:scale(.92) translateY(20px);opacity:0}}
+	.un-card{width:min(380px,100%);border-radius:30px;padding:28px 22px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;background:linear-gradient(155deg,rgba(37,33,60,.97),rgba(17,20,32,.98));border:1px solid rgba(190,173,255,.2);box-shadow:0 32px 90px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.12);animation:unPop .38s cubic-bezier(.2,.9,.25,1) both}
+	.un-ic{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;font:800 32px/1 inherit;color:#fff;background:linear-gradient(145deg,#a78bfa,#7054dc 68%,#4c3c9b);box-shadow:0 12px 30px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.35);margin-bottom:16px}
+	.un-card b{font-size:21px;letter-spacing:-.02em}.un-card p{margin:8px 0 16px;color:rgba(255,255,255,.66);font-size:14px;line-height:1.5;max-width:300px}
+	.un-in.big{width:100%;min-height:54px;padding:0 16px;border-radius:17px;background:rgba(255,255,255,.055);border:1px solid rgba(177,150,255,.24);font-size:18px;transition:border-color .2s,box-shadow .2s,background .2s}.un-in.big:focus-within{border-color:rgba(177,150,255,.68);background:rgba(145,112,255,.1);box-shadow:0 0 0 4px rgba(145,112,255,.12)}
+	.un-in.big input{background:none;border:0;outline:0;color:#fff;font:600 18px/1.2 inherit}
+	.un-card .un-err{width:100%;text-align:left;padding-left:6px}
+
 .un-card .btn{width:100%;justify-content:center;margin-top:12px}.un-card .btn:disabled{opacity:.45}
 .un-later{margin-top:10px;border:0;background:none;color:rgba(255,255,255,.5);font:inherit;font-size:14px;cursor:pointer}
 .ms-pfs.from-chat{animation:pfDown .42s cubic-bezier(.2,.9,.3,1) both}
 @keyframes pfDown{from{transform:translateY(-36px);opacity:0;clip-path:inset(0 0 100% 0 round 0 0 28px 28px)}to{clip-path:inset(0 0 0 0)}}
+
+/* Mundora messenger: consistent premium glass, tuned for mobile GPUs */
+.msgr{--ms-accent:#8b7cff;--ms-glass:rgba(24,27,42,.82);--ms-line:rgba(255,255,255,.09)}
+.ms-side,.ms-main{background-color:#111521}
+.ms-side{background-image:radial-gradient(80% 38% at 0 0,rgba(91,82,202,.16),transparent 72%),linear-gradient(180deg,#141827,#10141f)!important}
+.msgr .ms-lhead{min-height:68px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+.msgr .ms-lhead h1{font-size:22px;letter-spacing:-.035em;font-weight:750}
+.msgr .ms-search{border:1px solid var(--ms-line);background:rgba(255,255,255,.055);border-radius:17px;transition:border-color .18s,background .18s}
+.msgr .ms-search:focus-within{border-color:rgba(154,145,255,.45);background:rgba(255,255,255,.08)}
+.msgr .ms-list{padding:8px 10px 24px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+.msgr .ms-it{margin:2px 0;border:1px solid transparent;border-radius:18px;transition:background-color .18s,border-color .18s,transform .2s}
+.msgr .ms-it:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.045)}
+.msgr .ms-it.on{background:linear-gradient(115deg,rgba(112,104,230,.21),rgba(112,104,230,.09));border-color:rgba(158,150,255,.18)}
+.msgr .ms-it b,.msgr .ms-r2{letter-spacing:-.01em}
+.msgr .ms-tabs{border:1px solid rgba(255,255,255,.09);background:rgba(22,26,40,.8);box-shadow:0 14px 38px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+.msgr .ms-tabs button.on{color:#aaa2ff!important}
+.msgr .ms-drop{background:rgba(128,119,255,.16);box-shadow:inset 0 1px rgba(255,255,255,.1)}
+.msgr .ms-pfh{background:rgba(17,21,33,.74)!important;border-color:var(--ms-line)!important;border-radius:20px!important;box-shadow:0 12px 34px rgba(0,0,0,.22)!important}
+.msgr .ms-pfs{padding-left:clamp(14px,3vw,30px);padding-right:clamp(14px,3vw,30px);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.13) transparent}
+.msgr .ms-pfs #pfBox{max-width:680px;margin:0 auto}
+.msgr .ms-pfs .tgp{padding:18px 18px 16px;border-radius:26px;border-color:rgba(255,255,255,.1);background:linear-gradient(145deg,rgba(46,51,77,.82),rgba(22,26,41,.9));box-shadow:0 18px 46px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.1)}
+.msgr .ms-pfs .tgp.has-cov{background:linear-gradient(180deg,rgba(14,17,28,.22),rgba(14,17,28,.88) 78%),var(--cov) center/cover no-repeat!important}
+.msgr .ms-pfs .tgp-ava[src*="img=ava"]{box-shadow:0 0 0 4px rgba(255,255,255,.14),0 12px 30px rgba(8,10,24,.4)}
+.msgr .ms-pfs .tgp-name{font-size:clamp(23px,4vw,29px);letter-spacing:-.04em}
+.msgr .ms-pfs .tgp-sub{color:#aab1c3}
+.msgr .ms-pfs .tgp-acts{gap:8px;margin-top:16px}
+.msgr .ms-pfs .tgp-a{min-height:72px;justify-content:center;border-color:rgba(255,255,255,.075);background:rgba(255,255,255,.055);border-radius:18px}
+.msgr .ms-pfs .tgp-a:hover{background:rgba(255,255,255,.1);border-color:rgba(173,165,255,.25)}
+.msgr .ms-pfs .tgp-a:first-child .i{color:#a9a1ff}
+.msgr .ms-pfs .tgp-info,.msgr .ms-pfs .tgp-gifts{border-radius:20px;background:rgba(26,31,47,.78);border-color:rgba(255,255,255,.075);box-shadow:inset 0 1px rgba(255,255,255,.07)}
+.msgr .ms-pfs .tgp-info{padding:5px 18px}
+.msgr .ms-pfs .tgp-row{padding:14px 0}
+.msgr .ms-pfs .tgp-row small{color:#9ca6bb;letter-spacing:.035em}
+.msgr .ms-pfs .tgp-row b{color:#f3f4fa}
+.msgr .ms-pfs .pfg-grid,.msgr .ms-pfs .pfg-hint,.msgr .ms-pfs .pfg{max-width:680px;margin-left:auto;margin-right:auto}
+.msgr .ms-setg{background:rgba(25,30,45,.84)!important;border:1px solid var(--ms-line)!important;border-radius:22px!important;padding:6px!important;box-shadow:0 20px 55px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.1)!important}
+.msgr .ms-setg .ms-row{min-height:58px;padding:13px 14px;border-radius:15px;transition:background-color .18s,color .18s}
+.msgr .ms-setg .ms-row:hover{background:rgba(255,255,255,.055)}
+.msgr .ms-setg .ms-row+.ms-row{border-top-color:rgba(255,255,255,.055)}
+.msgr .ms-setg .ms-row>.i:first-child{color:#a9a1ff}
+  .msgr .ms-setg .ms-row.red>.i:first-child{color:inherit}
+  .ms-preferences{max-width:560px!important}.ms-preferences .sheet{max-width:560px!important}.ms-pref-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.ms-pref-head .ib{flex:none}.ms-pref-head h3{margin:0;flex:1}.ms-pref-lead{margin:-6px 2px 16px;color:var(--muted,#a1a1aa);font-size:13px;line-height:1.5}.ms-pref-group{margin:12px 0;padding:7px;border:1px solid rgba(255,255,255,.09);border-radius:19px;background:rgba(255,255,255,.035)}.ms-pref-label{margin:18px 8px 8px;color:#a9a1ff;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.ms-pref-row{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:12px;border:0;border-radius:13px;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}.ms-pref-row:hover{background:rgba(255,255,255,.055)}.ms-pref-row+.ms-pref-row{border-top:1px solid rgba(255,255,255,.055)}.ms-pref-row .i{width:20px;height:20px;color:#a9a1ff;flex:none}.ms-pref-row span{flex:1;min-width:0}.ms-pref-row small{display:block;margin-top:3px;color:#9b9aa7;font-size:12px;line-height:1.4}.ms-pref-row em{font-style:normal;color:#a9a1ff;font-size:13px}.ms-pref-row input[type=checkbox]{width:18px;height:18px;accent-color:#9b8cff}.ms-pref-colors{display:flex;gap:10px;padding:8px 12px 12px}  .ms-pref-colors button{width:30px;height:30px;border:2px solid transparent;border-radius:50%;background:var(--swatch);cursor:pointer}.ms-pref-colors button.on{outline:2px solid white;outline-offset:3px}.ms-pref-range{padding:8px 12px 14px}.ms-pref-range input{width:100%;accent-color:#9b8cff}.ms-pref-range div{display:flex;justify-content:space-between;color:#a1a1aa;font-size:12px}.ms-preferences .sheet{max-width:560px}.ms-preferences .sheet h3{margin:0}.ms-pref-row:disabled{opacity:.65;cursor:default}
+  .msgr .mb.me{background:var(--ms-accent,linear-gradient(145deg,rgba(120,108,237,.9),rgba(81,74,177,.88)))}.msgr .mb{border-radius:var(--ms-radius,20px)}
+  .msgr.ms-compact .ms-it{min-height:58px;padding-top:8px;padding-bottom:8px}.msgr.ms-reduced *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+
+
+.msgr .lq{-webkit-backdrop-filter:blur(14px) saturate(1.35)!important;backdrop-filter:blur(14px) saturate(1.35)!important}
+.msgr .ms-pfs.from-chat{animation:pfEnter .3s cubic-bezier(.2,.75,.3,1) both}
+@keyframes pfEnter{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(max-width:760px){
+  .msgr .ms-lhead{min-height:62px;padding-inline:14px}
+  .msgr .ms-lhead h1{font-size:20px}
+  .msgr .ms-list{padding-inline:8px}
+  .msgr .ms-pfs{padding-top:calc(70px + env(safe-area-inset-top));padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+  .msgr .ms-pfs .tgp{padding:14px 12px 14px;border-radius:23px}
+  .msgr .ms-pfs .tgp-acts{gap:6px}
+  .msgr .ms-pfs .tgp-a{min-height:66px;border-radius:16px}
+  .msgr .ms-pfs .tgp-info{padding-inline:14px}
+}
+@media(prefers-reduced-motion:reduce){.msgr .ms-pfs.from-chat{animation:none!important}.msgr .ms-it,.msgr .ms-tabs button,.msgr .ms-pfs .tgp-a{transition:none!important}}
+.msgr .ms-main{background:radial-gradient(80% 60% at 5% 0%,rgba(105,91,219,.12),transparent 68%),radial-gradient(65% 55% at 100% 100%,rgba(47,112,146,.1),transparent 70%),#111521!important}
+.msgr .ms-main::before{opacity:.32;background-size:64px 64px,88px 88px}
+.msgr .ms-main::after{opacity:.38}
+.msgr .mb{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:9px 12px 8px;box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.1);transition:transform .18s ease,background-color .18s ease}
+.msgr .mb.me{border-color:rgba(190,182,255,.2);background:linear-gradient(145deg,rgba(120,108,237,.9),rgba(81,74,177,.88));border-bottom-right-radius:7px;box-shadow:0 8px 22px rgba(67,57,160,.22),inset 0 1px rgba(255,255,255,.22)}
+.msgr .mb.th{background:linear-gradient(145deg,rgba(48,54,73,.92),rgba(34,39,55,.9));border-color:rgba(255,255,255,.09);border-bottom-left-radius:7px}
+.msgr .mb.me .ms-mt{color:rgba(255,255,255,.72)}
+.msgr .ms-comp{background:linear-gradient(180deg,transparent,rgba(14,17,27,.82) 30%);padding-top:18px}
+.msgr .ms-comp .ms-inp{border:1px solid rgba(255,255,255,.1);background:rgba(29,34,50,.9);border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.08)}
+.msgr .ms-comp .ms-send,.msgr .ms-comp .ms-mic{box-shadow:0 5px 16px rgba(109,92,226,.24),inset 0 1px rgba(255,255,255,.22)}
+.msgr .ms-comp .ms-att,.msgr .ms-main .ib,.msgr .ms-side .ib{transition:transform .18s ease,background-color .18s ease,border-color .18s ease}
+.msgr .ms-comp .ms-att:active,.msgr .ms-main .ib:active,.msgr .ms-side .ib:active{transform:scale(.94)}
+@media(max-width:760px){
+  .msgr .mb{max-width:86%;padding:8px 11px 7px}
+  .msgr .ms-main::after{opacity:.24}
+  .msgr .ms-comp .ms-inp{-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+@media(prefers-reduced-motion:reduce){.msgr .mb,.msgr .ms-comp .ms-att,.msgr .ms-main .ib,.msgr .ms-side .ib{transition:none!important}}
 </style>
 </head>
 <body>
@@ -2976,7 +3057,8 @@ function toast(msg,icon='check',img=''){
   el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2600);
 }
 function openSheet(html){$('#sheetIn').innerHTML=html;$('#sheet').classList.add('open');const f=$('#sheetIn input,#sheetIn textarea');if(f&&matchMedia('(min-width:761px)').matches)setTimeout(()=>f.focus(),50)}
-function closeSheet(){$('#sheet').classList.remove('open')}
+  function closeSheet(){$('#sheet').classList.remove('open','ms-preferences')}
+
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeSheet()});
 const LISTS={};
 function reg(key,list){LISTS[key]=list;return key}
@@ -3819,7 +3901,9 @@ async function msPoll(){if(MS.busy)return msLoop();MS.busy=true;
 let msBeepAC=null;function msBeep(){try{msBeepAC=msBeepAC||new AudioContext();const o=msBeepAC.createOscillator(),g=msBeepAC.createGain();o.type='sine';o.frequency.setValueAtTime(880,msBeepAC.currentTime);o.frequency.exponentialRampToValueAtTime(1320,msBeepAC.currentTime+.08);g.gain.setValueAtTime(.0001,msBeepAC.currentTime);g.gain.exponentialRampToValueAtTime(.12,msBeepAC.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,msBeepAC.currentTime+.25);o.connect(g).connect(msBeepAC.destination);o.start();o.stop(msBeepAC.currentTime+.26)}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){MS.n=0;msLoop();if(MS.on)msMarkRead()}});
 addEventListener('pagehide',()=>{try{if(MS.tk)navigator.sendBeacon('/api/msg?a=off&tk='+encodeURIComponent(MS.tk))}catch(e){}});
-document.addEventListener('change',async e=>{const gv=e.target.dataset&&e.target.dataset.msGvf;if(gv){const on=e.target.checked;try{const j=await msApi('gverify',{c:gv,on:on?1:0});MS.G[gv]=j.g;MS.v='';toast(on?'Галочка выдана':'Галочка снята','check');msGInfo(gv)}catch(x){toast(x.message,'x');e.target.checked=!on}return}const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked)});
+  document.addEventListener('change',async e=>{const gv=e.target.dataset&&e.target.dataset.msGvf;if(gv){const on=e.target.checked;try{const j=await msApi('gverify',{c:gv,on:on?1:0});MS.G[gv]=j.g;MS.v='';toast(on?'Галочка выдана':'Галочка снята','check');msGInfo(gv)}catch(x){toast(x.message,'x');e.target.checked=!on}return}const o=e.target.dataset&&e.target.dataset.msOpt;if(o==='snd')LS.set('msSnd',e.target.checked);if(o==='enter')LS.set('msEnter',e.target.checked);const k=e.target.dataset&&e.target.dataset.msPref;if(k){msPrefStore(k,e.target.checked);if(k==='enter')LS.set('msEnter',e.target.checked);if(k==='snd')LS.set('msSnd',e.target.checked)}});
+  document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.msPrefRange;if(!k)return;msPrefStore(k,+e.target.value);const out=e.target.parentElement.querySelector('output');if(out)out.value=e.target.value+'px'});
+
 
 /* ---------- как в Telegram для iOS 26: реакции, ответы свайпом, правка, закреп, одноразовые, обрезка голосовых, «пыль» при удалении ---------- */
 const RX_SET=['❤️','👍','🔥','😂','😮','😢','👎','🎉','🙏','💯','🤝','😍'];
@@ -4531,6 +4615,9 @@ const MS_ACT={
   'ms-ng-next'(el){msNGNext(el)},
   'ms-ge-close'(){msNGClose()},
   'ms-settings'(){msSettings()},
+  'ms-pref-page'(el){if(el.dataset.page==='edit'){closeSheet();pfEdit();return}msPrefPage(el.dataset.page)},
+  'ms-pref-color'(el){const c=el.dataset.color;msPrefStore('accent',c);document.querySelectorAll('.ms-pref-colors button').forEach(b=>b.classList.toggle('on',b===el))},
+  async 'ms-pref-push'(){if(!PUSH.ok)return toast('Push-уведомления не поддерживаются','x');if(await pushSub(true)){toast('Уведомления включены','check');msPrefPage('notify')}},
   'ms-sel-x'(){msSelDone()},
   'ms-sel-pin'(){msChatsPin([...MS.sel])},
   'ms-sel-mute'(){msChatsMute([...MS.sel])},
@@ -6847,14 +6934,21 @@ document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.
 // кнопка «Подарить» появляется, когда видны подарки
 function pfgCta(){const s=$('#msPfs');if(!s)return;const c=s.querySelector('.pfg-cta'),g=s.querySelector('.pfg-grid')||s.querySelector('.pfg-hint')||s.querySelector('.pfg');if(!c)return;let v=false;if(g){const r=g.getBoundingClientRect();v=r.top<innerHeight-150&&r.bottom>90}c.classList.toggle('show',v)}
 document.addEventListener('scroll',e=>{if(e.target&&e.target.id==='msPfs')pfgCta()},true);
-function msSettings(){const pc=matchMedia('(min-width:761px)').matches;
-  openSheet(`<h3>${ico('gear')}Настройки<button class="ib" data-act="close-sheet">${ico('x')}</button></h3>
-  <div class="ms-grp lq ms-setg">
-    ${USR.admin?`<button class="ms-row" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt="" style="width:26px;height:26px"><span>Админ-панель<small>коды и аккаунты</small></span>${ico('chev','s r')}</button>`:''}
-    ${pc?`<label class="ms-row">${ico('send')}<span>Отправка по Enter</span><input type="checkbox" data-ms-opt="enter" ${LS.get('msEnter',true)?'checked':''}></label>`:''}
-    ${IS_MU?'':`<button class="ms-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button>`}
-    <button class="ms-row red" data-act="acc-logout">${ico('back')}<span>Выйти из аккаунта</span></button>
-  </div>`)}
+function msPrefStore(k,v){LS.set('msPref_'+k,v);const app=$('#msgr');if(!app)return;if(k==='compact')app.classList.toggle('ms-compact',!!v);if(k==='motion')app.classList.toggle('ms-reduced',!!v);if(k==='accent')app.style.setProperty('--ms-accent',v);if(k==='radius')app.style.setProperty('--ms-radius',v+'px')}
+function msPrefPage(page='home'){
+  const row=(icon,title,sub,target,value='')=>`<button class="ms-pref-row" data-act="ms-pref-page" data-page="${target}">${ico(icon)}<span>${title}${sub?`<small>${sub}</small>`:''}</span>${value?`<em>${value}</em>`:ico('chev','s r')}</button>`;
+  const toggle=(icon,title,sub,key,def=false)=>`<label class="ms-pref-row">${ico(icon)}<span>${title}${sub?`<small>${sub}</small>`:''}</span><input type="checkbox" data-ms-pref="${key}" ${LS.get('msPref_'+key,def)?'checked':''}></label>`;
+  const title={home:'Настройки',account:'Аккаунт',chats:'Чаты и оформление',privacy:'Конфиденциальность',notify:'Уведомления'}[page]||'Настройки';
+  let body='';
+  if(page==='home')body=`<p class="ms-pref-lead">Настрой Mundora под себя. Изменения сохраняются на этом устройстве.</p><div class="ms-pref-label">Профиль</div><div class="ms-pref-group">${row('user','Аккаунт и профиль','Имя, фото, описание и открытость профиля','account')}${row('shield','Конфиденциальность','Управление видимостью профиля','privacy')}</div><div class="ms-pref-label">Приложение</div><div class="ms-pref-group">${row('chat','Чаты и оформление','Тема, список чатов и отправка','chats')}${row('bell','Уведомления','Push-уведомления и звук','notify')}</div>${USR.admin?`<div class="ms-pref-group"><button class="ms-pref-row" data-act="acc-admin"><img class="oi" src="/img/code.webp" alt="" style="width:22px;height:22px"><span>Админ-панель<small>Коды и аккаунты</small></span>${ico('chev','s r')}</button></div>`:''}${IS_MU?'':`<div class="ms-pref-group"><button class="ms-pref-row" data-act="ms-exit">${ico('home')}<span>Вернуться в Mundora</span>${ico('chev','s r')}</button></div>`}<div class="ms-pref-group"><button class="ms-pref-row" style="color:#ff8292" data-act="acc-logout">${ico('back')}<span>Выйти из аккаунта</span></button></div>`;
+  if(page==='account')body=`<p class="ms-pref-lead">Управляй именем, фотографией и описанием своего профиля.</p><div class="ms-pref-group">${row('user','Изменить профиль','Фото, имя и информация о себе','edit')}${row('at','Публичный профиль','Настройки видимости','privacy')}</div>`;
+  if(page==='chats'){const colors=['#9285ff','#38bdf8','#fb7185','#34d399'];const accent=LS.get('msPref_accent',colors[0]);const radius=LS.get('msPref_radius',18);body=`<p class="ms-pref-lead">Персонализируй переписки и внешний вид списка чатов.</p><div class="ms-pref-label">Поведение</div><div class="ms-pref-group">${toggle('send','Отправка по Enter','На компьютере Enter отправляет сообщение','enter',LS.get('msEnter',true))}${toggle('list','Компактный список','Показывать больше чатов на экране','compact')}${toggle('sparkles','Уменьшить анимацию','Плавные эффекты будут отключены','motion')}</div><div class="ms-pref-label">Оформление</div><div class="ms-pref-group"><div class="ms-pref-row">${ico('palette')}<span>Акцентный цвет<small>Применяется к элементам мессенджера</small></span></div><div class="ms-pref-colors">${colors.map(c=>`<button type="button" aria-label="Цвет ${c}" data-act="ms-pref-color" data-color="${c}" class="${accent===c?'on':''}" style="--swatch:${c}"></button>`).join('')}</div><div class="ms-pref-row">${ico('chat')}<span>Скругление сообщений<small>Подстрой форму пузырей чата</small></span></div><div class="ms-pref-range"><input aria-label="Скругление сообщений" type="range" min="10" max="24" value="${radius}" data-ms-pref-range="radius"><div><span>Мягче</span><output>${radius}px</output><span>Круглее</span></div></div></div>`}
+  if(page==='privacy')body=`<p class="ms-pref-lead">Настройки приватности применяются к данным, которые Mundora уже поддерживает.</p><div class="ms-pref-group">${row('user','Публичность профиля','Управление открытостью профиля и видимостью данных','edit')}</div><p class="ms-pref-lead">Номер телефона и список активных устройств в Mundora не запрашиваются и не публикуются.</p>`;
+  if(page==='notify'){const permission=PUSH.ok?Notification.permission:'unsupported',permitted=permission==='granted';body=`<p class="ms-pref-lead">Получай уведомления о новых сообщениях, даже когда Mundora закрыта.</p><div class="ms-pref-group"><button class="ms-pref-row" data-act="ms-pref-push" ${!PUSH.ok||permitted?'disabled':''}>${ico('bell')}<span>${permitted?'Push-уведомления включены':permission==='denied'?'Разреши уведомления в браузере':'Включить push-уведомления'}<small>${permitted?'Браузер разрешил уведомления':!PUSH.ok?'Этот браузер не поддерживает push':'Нужно разрешение браузера'}</small></span>${permitted?ico('check','s'):ico('chev','s r')}</button>${toggle('vol','Звуки в мессенджере','Звук новых сообщений','snd',LS.get('msSnd',true))}</div>`}
+  openSheet(`<div class="ms-pref-head">${page==='home'?ico('gear'):''}<h3>${title}</h3>${page!=='home'?`<button class="ib" data-act="ms-pref-page" data-page="home" aria-label="Назад">${ico('left')}</button>`:''}<button class="ib" data-act="close-sheet" aria-label="Закрыть">${ico('x')}</button></div>${body}`);$('#sheet').classList.add('ms-preferences')
+}
+function msSettings(){const app=$('#msgr');if(app){msPrefStore('compact',LS.get('msPref_compact',false));msPrefStore('motion',LS.get('msPref_motion',false));msPrefStore('accent',LS.get('msPref_accent','#9285ff'));msPrefStore('radius',LS.get('msPref_radius',18))}msPrefPage('home')}
+
 const TGI='<svg class="tgi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.4 11.8l10.9-4.2c.5-.2 1 .1.8.9l-1.9 8.8c-.1.6-.5.8-1 .5l-2.8-2.1-1.4 1.3c-.2.2-.3.3-.6.3l.2-2.9 5.3-4.8c.2-.2 0-.3-.3-.1L8 13.7l-2.8-.9c-.6-.2-.6-.6.2-1z"/></svg>';
 const tgLabel=t=>t.username?'@'+t.username:(t.name||'Telegram');
 function pfApply(p){PEOPLE.cache[p.id]=p;if(p.self){USR.avatar=p.avatar;meHead()}pfPaint(p)}
