@@ -2194,6 +2194,22 @@ html.mu .ms-home,html.mu .ms-lhead [data-act="ms-exit"],html.mu header [data-act
   .msgr .ms-comp .ms-inp{-webkit-backdrop-filter:none;backdrop-filter:none}
 }
 @media(prefers-reduced-motion:reduce){.msgr .mb,.msgr .ms-comp .ms-att,.msgr .ms-main .ib,.msgr .ms-side .ib{transition:none!important}}
+/* Username setup uses the same violet glass language as the refreshed messenger. */
+.un-ov{padding:clamp(14px,4vw,24px);background:rgba(7,9,18,.78);-webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15)}
+.un-card{width:min(410px,100%);padding:clamp(22px,6vw,30px) clamp(18px,5vw,26px) 20px;border-radius:28px;background:linear-gradient(155deg,rgba(35,31,58,.98),rgba(17,20,32,.99));border-color:rgba(177,150,255,.25);box-shadow:0 26px 70px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.12)}
+.un-card p{color:rgba(236,237,248,.68)}
+.un-in.big{min-height:56px;border-color:rgba(177,150,255,.3);background:rgba(255,255,255,.06)}
+.un-in.big input{min-width:0;font-size:16px}
+.un-card .btn{min-height:48px;border-radius:16px;transition:transform .18s ease,filter .18s ease,opacity .18s ease}
+.un-card .btn:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px)}
+.un-card .btn:not(:disabled):active{transform:scale(.98)}
+.un-later{min-height:42px;padding:8px 18px;border-radius:12px;transition:background .18s,color .18s}
+.un-later:hover{background:rgba(255,255,255,.06);color:#fff}
+.un-in.big:focus-within{outline:none}
+.un-err{min-height:18px}
+@media(max-width:480px){.un-ov{align-items:end;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}.un-card{border-radius:26px;max-height:min(88dvh,560px);overflow-y:auto}.un-ic{width:60px;height:60px;border-radius:20px}}
+@media(prefers-reduced-motion:reduce){.un-ov,.un-card,.un-later,.un-card .btn{animation:none!important;transition:none!important}}
+body.lowfx .un-ov{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(7,9,18,.94)}
 </style>
 </head>
 <body>
@@ -5805,6 +5821,7 @@ function orbitRun(){if(ORB.raf)return;const red=matchMedia('(prefers-reduced-mot
 // «пузыри» как в Telegram: прозрачные мыльные пузыри с подарком внутри плавают по всей шапке профиля,
 // сталкиваются друг с другом, отскакивают от краёв (не вылетают), их можно схватить, подвигать и бросить
 const BUB={raf:0,st:null,b:[],drag:null};
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(ORB.raf);ORB.raf=0;cancelAnimationFrame(BUB.raf);BUB.raf=0}else{if(document.querySelector('#tgpStage.orbit'))orbitRun();if(document.querySelector('#tgpStage.bubbles'))bubRun()}});
 const hsh=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
 function bubBounds(st){const hero=st.closest('.tgp'),sr=st.getBoundingClientRect(),hr=hero?hero.getBoundingClientRect():sr;return {l:hr.left-sr.left+6,t:hr.top-sr.top+6,r:hr.right-sr.left-6,b:hr.bottom-sr.top-6}}
 function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)return;
@@ -6879,13 +6896,14 @@ function unLive(inp,errSel){clearTimeout(inp._t);const v=inp.value.replace(/^@/,
   if(e){e.textContent=bad;e.className='un-err'+(bad?' bad':'')}if(ok)ok.disabled=true;if(bad||!v||v===MS.un)return;
   inp._t=setTimeout(async()=>{try{const j=await peopleApi('a=uncheck&u='+encodeURIComponent(v));if(inp.value.replace(/^@/,'').trim()!==v)return;if(e){e.textContent=j.ok?'Свободен ✓':j.err;e.className='un-err '+(j.ok?'good':'bad')}if(ok)ok.disabled=!j.ok}catch(_){}},350)}
 function msUnAsk(){if(MS.un||$('#unOv')||sessionStorage.getItem('unLater'))return;const d=document.createElement('div');d.id='unOv';d.className='un-ov';
-  d.innerHTML=`<div class="un-card lq"><div class="un-ic">@</div><b>Выбери юзернейм</b><p>По нему тебя найдут и смогут упомянуть в чатах. Латинские буквы и цифры, от 5 символов.</p>
-    <label class="un-in big">@<input id="unIn" maxlength="32" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="username" oninput="unLive(this,'#unErr')"></label><em class="un-err" id="unErr"></em>
-    <button class="btn" id="unOk" disabled>${ico('check','s')}Готово</button><button class="un-later" id="unLater">Позже</button></div>`;
+  d.innerHTML=`<section class="un-card lq" role="dialog" aria-modal="true" aria-labelledby="unTitle" aria-describedby="unDescription"><div class="un-ic" aria-hidden="true">@</div><b id="unTitle">Выбери юзернейм</b><p id="unDescription">По нему тебя найдут и смогут упомянуть в чатах. Латинские буквы и цифры, от 5 символов.</p>
+    <label class="un-in big"><span aria-hidden="true">@</span><input id="unIn" maxlength="32" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Юзернейм" aria-describedby="unErr" placeholder="username" oninput="unLive(this,'#unErr')"></label><em class="un-err" id="unErr" role="status" aria-live="polite"></em>
+    <button class="btn" id="unOk" disabled>${ico('check','s')}Готово</button><button class="un-later" id="unLater">Позже</button></section>`;
   document.body.append(d);setTimeout(()=>$('#unIn')?.focus(),350);
   $('#unLater').onclick=()=>{sessionStorage.setItem('unLater','1');d.classList.add('out');setTimeout(()=>d.remove(),260)};
+  d.addEventListener('keydown',e=>{if(e.key==='Escape')$('#unLater').click();if(e.key==='Tab'){const items=[...d.querySelectorAll('button:not(:disabled),input')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0].focus()}}});
   $('#unOk').onclick=async e=>{const b=e.currentTarget,v=$('#unIn').value.replace(/^@/,'').trim();b.disabled=true;try{const j=await peopleApi('a=unset',{u:v});MS.un=j.un;USR.un=j.un;if(j.profile)PEOPLE.cache[j.profile.id]=j.profile;toast('Теперь ты @'+j.un,'check');d.classList.add('out');setTimeout(()=>d.remove(),260)}catch(err){const er=$('#unErr');if(er){er.textContent=err.message;er.className='un-err bad'}b.disabled=false}};
-  $('#unIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('#unOk').disabled)$('#unOk').click()})}
+  $('#unIn').addEventListener('keydown',e=>{if((e.nativeEvent?.isComposing||e.keyCode===229)||e.key!=='Enter'||$('#unOk').disabled)return;e.preventDefault();$('#unOk').click()})}
 function msBotComp(p,empty){const f=$('#msComp');if(!f)return;f.classList.toggle('isbot',!!p);f.classList.toggle('bstart',!!empty);
   if(p&&!f.querySelector('.ms-startb'))f.insertAdjacentHTML('afterbegin',`<button type="button" class="ms-startb" data-act="ms-bcmd" data-c="/start">СТАРТ</button>`);
   const hasM=p&&(p.cmds||[]).length;let mb=f.querySelector('.ms-bmenu');if(hasM&&!mb)f.querySelector('.ms-inp').insertAdjacentHTML('afterbegin',`<button type="button" class="ms-bmenu" data-act="ms-bmenu" title="Команды бота"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button>`);else if(!hasM&&mb)mb.remove()}
