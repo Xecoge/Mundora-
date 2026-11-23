@@ -1207,16 +1207,24 @@ body:not(.mroute) .ytfloat{right:16px!important;bottom:96px!important}
 .tgp-stage.orbit .tgp-g:hover{transform:none}
 .tgp-name,.tgp-sub{z-index:3}
 
-/* пузыри — прозрачные, как мыльные */
-.tgp-stage.bubbles .tgp-g{width:var(--bs,52px)!important;height:var(--bs,52px)!important;margin:0!important;border-radius:50%;transition:opacity .5s!important;will-change:transform;display:grid;place-items:center;touch-action:none;cursor:grab;
- background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.7) 0 3.5%,rgba(255,255,255,.12) 9%,transparent 16%),
-  radial-gradient(circle at 72% 80%,rgba(255,255,255,.16),transparent 30%),
-  radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(220,210,255,.10) 70%,rgba(190,220,255,.26) 86%,rgba(255,255,255,.5) 98%,rgba(255,255,255,0) 100%),
-  conic-gradient(from 210deg,rgba(255,120,220,.10),rgba(120,200,255,.12),rgba(160,255,200,.08),rgba(255,220,120,.10),rgba(255,120,220,.10));
- box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 18px rgba(255,255,255,.06),0 8px 20px -10px rgba(0,0,0,.6);background-color:rgba(255,255,255,.04);backdrop-filter:blur(1.5px) brightness(1.05);-webkit-backdrop-filter:blur(1.5px) brightness(1.05)}
+/* пузыри — стекло как в Telegram 23 ноября: живая неправильная форма, блик, подарок внутри.
+   орбита, пружина и глубина те же — их считает bubRun, здесь только вид. */
+.tgp-stage.bubbles .tgp-g{width:var(--bs,52px)!important;height:var(--bs,52px)!important;margin:0!important;border-radius:46% 54% 50% 50% / 48% 46% 54% 52%;transition:opacity .5s!important;will-change:transform,border-radius;display:grid;place-items:center;touch-action:none;cursor:grab;overflow:hidden;isolation:isolate;
+ background:
+  radial-gradient(115% 78% at 28% 16%,rgba(255,255,255,.92) 0 7%,rgba(255,255,255,.22) 16%,transparent 40%),
+  radial-gradient(80% 60% at 82% 86%,rgba(255,255,255,.28),transparent 48%),
+  linear-gradient(168deg,rgba(255,255,255,.34),rgba(255,255,255,.05) 46%,rgba(255,255,255,.2));
+ background-color:var(--glass,rgba(180,220,255,.42));
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.8),inset 0 -12px 18px rgba(255,255,255,.14),inset 0 0 0 1.5px rgba(255,255,255,.5),0 12px 22px -12px rgba(0,0,0,.7),0 0 16px var(--glow,rgba(160,210,255,.35));
+ backdrop-filter:blur(7px) saturate(1.45);-webkit-backdrop-filter:blur(7px) saturate(1.45)}
+.tgp-stage.bubbles .tgp-g.r-com{--glass:rgba(244,236,220,.5);--glow:rgba(244,228,190,.4)}
+.tgp-stage.bubbles .tgp-g.r-rare{--glass:rgba(110,196,255,.48);--glow:rgba(90,180,255,.42)}
+.tgp-stage.bubbles .tgp-g.r-epic{--glass:rgba(196,170,255,.5);--glow:rgba(180,140,255,.4)}
+.tgp-stage.bubbles .tgp-g.r-leg{--glass:rgba(190,236,255,.52);--glow:rgba(140,220,255,.45)}
 .tgp-stage.bubbles .tgp-g.grab{cursor:grabbing}
-.tgp-stage.bubbles .tgp-g img{width:46%!important;height:46%!important;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
-.tgp-stage.bubbles .tgp-g::before,.tgp-stage.bubbles .tgp-g::after{display:none!important}
+.tgp-stage.bubbles .tgp-g img{width:52%!important;height:52%!important;position:relative;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.tgp-stage.bubbles .tgp-g::before{display:block!important;content:'';position:absolute;left:16%;right:28%;top:9%;height:26%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,0));z-index:2;pointer-events:none;animation:none!important;inset:auto!important}
+.tgp-stage.bubbles .tgp-g::after{display:none!important}
 .tgp-stage.bubbles .tgp-ava{z-index:2}
 .tgp-stage.bubbles~.tgp-name,.tgp-stage.bubbles~.tgp-sub{z-index:1}
 .an-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
@@ -5803,16 +5811,17 @@ function orbitRun(){if(ORB.raf)return;const red=matchMedia('(prefers-reduced-mot
       el.style.zIndex=sn>0?'4':'0';el.style.opacity=(.45+dep*.55).toFixed(2);el.style.filter=sn<-.2?`blur(${((-sn-.2)*1.6).toFixed(2)}px) saturate(.8)`:''});
     ORB.raf=requestAnimationFrame(tick)};
   ORB.raf=requestAnimationFrame(tick)}
-// «пузыри» как в Telegram: прозрачные мыльные пузыри с подарком внутри плавают по всей шапке профиля,
-// сталкиваются друг с другом, отскакивают от краёв (не вылетают), их можно схватить, подвигать и бросить
+// «пузыри»: стекло неправильной формы как в Telegram 23 ноября. Орбита та же, что была.
 const BUB={raf:0,st:null,b:[],drag:null};
+function bubGlass(egg,t,seed){const wob=n=>Math.sin(t*.42+seed+n)*3.2,top=44+egg*16+wob(0),bot=56-egg*8+wob(1),a=48+wob(2),b=52+wob(3),c=46+egg*6+wob(4),d=54-wob(5);
+  return top.toFixed(1)+'% '+(100-top).toFixed(1)+'% '+bot.toFixed(1)+'% '+(100-bot).toFixed(1)+'% / '+a.toFixed(1)+'% '+b.toFixed(1)+'% '+c.toFixed(1)+'% '+d.toFixed(1)+'%'}
 const hsh=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
 function bubBounds(st){const hero=st.closest('.tgp'),sr=st.getBoundingClientRect(),hr=hero?hero.getBoundingClientRect():sr;return {l:hr.left-sr.left+6,t:hr.top-sr.top+6,r:hr.right-sr.left-6,b:hr.bottom-sr.top-6}}
 function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)return;
   if(BUB.st!==st){BUB.st=st;const W=st.clientWidth,H=st.clientHeight,base=innerWidth<=760?50:58;
     BUB.b=[...st.querySelectorAll('.tgp-g')].map((el,i)=>{const h=hsh(el.dataset.g||i),dep=.78+(h%60)/100,sz=Math.round(base*dep);el.style.setProperty('--bs',sz+'px');el.style.zIndex=String(3+Math.round(dep*10));el.dataset.zi=el.style.zIndex;
       const x=(parseFloat(el.style.left)||50)/100*W,y=(parseFloat(el.style.top)||50)/100*H,a=(h%628)/100;el.style.left='0';el.style.top='0';
-      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,r:sz/2,m:dep*dep,zi:String(3+Math.round(dep*10)),th:i*Math.PI*2/Math.max(1,st.querySelectorAll('.tgp-g').length)+(h%100)/300,w:Math.PI*2/(13+(h%5)),rr:(h%5)*7,sw:(h%2?1:-1)*(8+h%7)}})}
+      return {el,x,y,vx:Math.cos(a)*24,vy:Math.sin(a)*24,ph:(h%600)/100,egg:(h%100)/100,r:sz/2,m:dep*dep,zi:String(3+Math.round(dep*10)),th:i*Math.PI*2/Math.max(1,st.querySelectorAll('.tgp-g').length)+(h%100)/300,w:Math.PI*2/(13+(h%5)),rr:(h%5)*7,sw:(h%2?1:-1)*(8+h%7)}})}
   if(BUB.raf)return;let last=performance.now();const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tick=now=>{const st=BUB.st;if(!st||!st.isConnected){BUB.raf=0;BUB.st=null;BUB.drag=null;return}
     const dt=Math.min(.04,(now-last)/1000);last=now;const L=bubBounds(st),B=BUB.b,cruise=24;
@@ -5832,7 +5841,7 @@ function bubRun(){const st=document.querySelector('#tgpStage.bubbles');if(!st)re
         a.x-=nx*o*ta;a.y-=ny*o*ta;b.x+=nx*o*tb;b.y+=ny*o*tb;const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
         if(rv<0){const jn=-(1.85)*rv/(1/ma+1/mb);a.vx-=jn/ma*nx;a.vy-=jn/ma*ny;b.vx+=jn/mb*nx;b.vy+=jn/mb*ny;a.sq=b.sq=Math.min(1,Math.abs(rv)/80+.3)}}}
     const t=now/1000;
-    for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*2.2);const wob=red?0:Math.sin(t*2.4+p.ph)*.03+p.sq*Math.sin(t*22)*.09;
+    for(const p of B){p.sq=Math.max(0,(p.sq||0)-dt*2.2);const wob=red?0:Math.sin(t*2.4+p.ph)*.03+p.sq*Math.sin(t*22)*.09;p.el.style.borderRadius=red?'46% 54% 50% 50% / 48% 46% 54% 52%':bubGlass(p.egg||.3,t,p.ph);
       // глубина: пузырь то уплывает за аватарку (меньше, тусклее, прячется), то выплывает вперёд
       const dragging=BUB.drag&&BUB.drag.p===p;p.z=dragging?1:red?.5:Math.sin(p.th);
       const back=p.z<-.15,ds=.68+(p.z+1)*.24;
