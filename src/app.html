@@ -3365,7 +3365,11 @@ function msDrawSide(){const s=$('#msSide');if(!s)return;const ct=MS.tab==='conta
 const msPvNice=pv=>{pv=String(pv||'');if(/^📍 /.test(pv))return '📍 Геопозиция';const r=/^👤 ([^\n]+)/.exec(pv);if(r)return '👤 Контакт: '+r[1].replace(/<[^>]*>/g,'').replace(/\s+https?:.*$/,'');return pv};
 function msListHTML(){const F=LS.get('msFolders',[]),sel=LS.get('msFolderSel','');const tabs=(F.length&&MS.tab==='chats'&&!MS.q)?`<div class="ms-ftabs">${F.map((f,i)=>{const n=f.n||f;return `<button class="ms-ftab${String(sel)===String(i)?' on':''}" data-act="ms-folder" data-i="${i}">${esc(n)}</button>`}).join('')}</div>`:'';
   return (MS.q?'':pushCard())+tabs+msListHTML0()}
-function msListFiltered(L){const F=LS.get('msFolders',[]),sel=LS.get('msFolderSel','');if(sel===''||!F.length)return L;const f=F[+sel],n=(f&&f.n)||f;const map={'Новые':c=>!msHid()[c.c],'Личные':c=>!c.g,'Группы':c=>c.g&&c.g.type!=='channel','Каналы':c=>c.g&&c.g.type==='channel'};return L.filter(map[n]||(()=>true))}
+function msListFiltered(L){const F=LS.get('msFolders',[]),sel=LS.get('msFolderSel','');let R=L;if(sel!==''&&F.length){const f=F[+sel],n=(f&&f.n)||f;const map={'Новые':c=>!msHid()[c.c],'Личные':c=>!c.g,'Группы':c=>c.g&&c.g.type!=='channel','Каналы':c=>c.g&&c.g.type==='channel'};R=R.filter(map[n]||(()=>true))}
+  if(!LS.get('msPref_c_dm',true))R=R.filter(c=>c.g);
+  if(!LS.get('msPref_c_grp',true))R=R.filter(c=>!c.g||(c.g.type!=='group'&&c.g.type!==''));
+  if(!LS.get('msPref_c_ch',true))R=R.filter(c=>!c.g||c.g.type!=='channel');
+  return R}
 function msListHTML0(){const q=MS.q.trim().toLowerCase();const filter=msListFiltered;
   const L0=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
   const L=MS.q?q:L0;
@@ -7143,6 +7147,7 @@ const SET_CSS=`.msgr .ms-set{position:absolute;inset:0;z-index:40;display:none;c
 if(!document.getElementById('msSetCss')){const s=document.createElement('style');s.id='msSetCss';s.textContent=SET_CSS;document.head.appendChild(s)}
 
 const tg=(ic,t,sub,key,def=false)=>`<label class="st-row"><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span><span class="st-tg"><input type="checkbox" data-st-tg="${key}" ${LS.get('msPref_'+key,def)?'checked':''}><i></i></span></label>`;
+const cyc=(ic,t,sub,key,opts)=>`<button class="st-row" data-st-cycle="${key}" data-opts="${opts.join('|')}"><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span><em>${esc(String(LS.get('msPref_c_'+key,opts[0])))}</em></button>`;
 const row=(ic,t,sub,page,val,act)=>`<button class="st-row${page?'':' st-dead'}" ${page?`data-st-page="${page}"`:act?`data-st-act="${act}"`:''}><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span>${val?`<em>${val}</em>`:page?ico('chev','s chev'):''}</button>`;
 const card=inner=>`<div class="st-card">${inner}</div>`;
 const label=t=>`<div class="st-label">${t}</div>`;
@@ -7169,27 +7174,27 @@ P['root-acct']={t:'Аккаунт',h:()=>{const nm=(USR&&USR.name)||'Польз�
     <small>${esc((USR&&USR.bio)||'Добавь описание профиля')}</small>
     <span class="pill">${ico('check','s')} ID ${esc(String((USR&&USR.id)||''))}${isPrem?' · Premium':''}</span></div>
   ${card(row('edit','Изменить профиль','Фото, имя и информация о себе',null,'Изменить','edit-profile'))}
-  ${label('Связи')}${card(row('link','Почта',null,null,USR&&USR.email?esc(USR.email):'не привязана'))}
+  ${label('Связи')}${card(row('link','Почта',null,null,USR&&USR.email?esc(USR.email):'не привязана','edit-profile'))}
   ${card(row('send','Telegram',null,null,'привязать','tg-link'))}
   ${label('Приватность')}${card(tg('lock','Открытый профиль','Показывать подарки и плейлисты всем','open',USR&&USR.open!==false))}
-  ${card(row('spark','Реферальная программа','Приглашай друзей и получай бонусы','root-prof'))}`}};
+  ${card(row('spark','Реферальная программа','Скопировать ссылку приглашения',null,null,'ref'))}`}};
 P['root-prof']={t:'Профиль',h:()=>`<p class="st-lead">То, что видят другие люди в твоём профиле.</p>
   ${card(row('edit','О себе','Пара слов на карточке профиля',null,'Изменить','edit-profile'))}
-  ${label('Связи')}${card(row('user','Имя пользователя',null,null,'@'+esc(String((USR&&USR.id)||''))))}
-  ${card(row('link','Почта','Видна только тебе',null,USR&&USR.email?esc(USR.email):'скрыта'))}
-  ${card(row('send','Telegram',null,null,'не привязан'))}`};
+  ${label('Связи')}${card(row('user','Имя пользователя',null,null,'@'+esc(String((USR&&USR.id)||'')),'edit-profile'))}
+  ${card(row('link','Почта','Видна только тебе',null,USR&&USR.email?esc(USR.email):'скрыта','edit-profile'))}
+  ${card(row('send','Telegram',null,null,'не привязан','tg-link'))}`};
 P['root-priv']={t:'Конфиденциальность',h:()=>`<p class="st-lead">Решай, что видно другим, а что — только тебе.</p>
   ${label('Безопасность')}${card(
-    row('lock','Пароль аккаунта','Вход по паролю',null,'Вкл.')+
-    row('key','Код-пароль','Быстрый вход в мессенджер',null,'Выкл.')+
-    row('link','Почта для восстановления',null,null,USR&&USR.email?esc(USR.email):'не привязана')+
-    row('dislike','Чёрный список','Заблокированные люди',null,'0')+
+    row('lock','Пароль аккаунта','Сменить пароль',null,null,'edit-profile')+
+    tg('key','Код-пароль','Быстрый вход в мессенджер','codepass')+
+    row('link','Почта для восстановления',null,null,USR&&USR.email?esc(USR.email):'не привязана','edit-profile')+
+    row('dislike','Чёрный список','Заблокированные люди',null,null,'bl-list')+
     row('headph','Устройства','Активные сеансы входа','root-devices'))}
   ${label('Кто это видит')}${card(
-    row('link','Почта',null,null,'Никто')+
-    row('hist','Время захода',null,null,'Все')+
-    row('cam2','Фото профиля',null,null,'Все')+
-    row('checks','Прочитано',null,null,'Все'))}`};
+    cyc('link','Почта',null,'mail',['Никто','Контакты','Все'])+
+    cyc('hist','Время захода',null,'seen',['Все','Контакты','Никто'])+
+    cyc('cam2','Фото профиля',null,'photo',['Все','Контакты','Никто'])+
+    cyc('checks','Прочитано',null,'read',['Все','Контакты','Никто']))}`};
 P['root-notify']={t:'Уведомления и звуки',h:()=>`<p class="st-lead">Уведомления о новых сообщениях, даже когда Mundora закрыта.</p>
   ${card(tg('eye','Предпросмотр сообщений','Текст сообщения в уведомлении','n_prev',true))}
   ${label('Чаты')}${card(
@@ -7198,8 +7203,8 @@ P['root-notify']={t:'Уведомления и звуки',h:()=>`<p class="st-l
     tg('mega','Каналы','Новые посты каналов','n_ch')+
     tg('heart','Реакции','Реакции на твои сообщения','n_re'))}
   ${label('Звонки')}${card(
-    row('vol','Вибрация','При входящем звонке',null,'По умолчанию')+
-    row('wave','Рингтон',null,null,'По умолчанию'))}`};
+    cyc('vol','Вибрация',null,'vib_call',['По умолчанию','Сильная','Без вибрации'])+
+    cyc('wave','Рингтон',null,'ring_call',['По умолчанию','Волна','Импульс','Без звука']))}`};
 P['root-chats']={t:'Чаты',h:()=>`<p class="st-lead">Как ведут себя переписки и что показывать в списке.</p>
   ${label('Показывать в списке')}${card(
     tg('user','Личные чаты',null,'c_dm',true)+
@@ -7207,8 +7212,8 @@ P['root-chats']={t:'Чаты',h:()=>`<p class="st-lead">Как ведут себ
     tg('mega','Каналы',null,'c_ch',true)+
     tg('heart','Реакции',null,'c_re',true))}
   ${label('Сообщения')}${card(
-    row('bolt','Вибрация','При новом сообщении',null,'По умолчанию')+
-    row('wave','Звук',null,null,'По умолчанию'))}`};
+    cyc('bolt','Вибрация',null,'vib_msg',['По умолчанию','Сильная','Без вибрации'])+
+    cyc('wave','Звук',null,'snd_msg',['По умолчанию','Волна','Импульс','Без звука']))}`};
 P['root-data']={t:'Данные и память',h:()=>{const kb=MS.traffic||0;const val=kb>1024?(kb/1024).toFixed(1).replace('.',',')+' МБ':kb+' КБ';return `<p class="st-lead">Сколько места и трафика использует Mundora.</p>
   ${card(row('table','Кэш и медиа','Занимают память устройства',null,'~'+val))}
   ${card(row('flow','Трафик за этот месяц','Загрузка и отправка',null,'~1,3 МБ'))}
@@ -7273,6 +7278,10 @@ function stEl(){let e=$('#msSet');if(e)return e;const m=$('#msgr');e=document.cr
   e.addEventListener('click',ev=>{
     const b=ev.target.closest('[data-st-back]');if(b){stBack();return}
     const p=ev.target.closest('[data-st-page]');if(p){stGo(p.dataset.stPage);return}
+    const cy=ev.target.closest('[data-st-cycle]');if(cy){const k=cy.dataset.stCycle,opts=cy.dataset.opts.split('|');const cur=String(LS.get('msPref_c_'+k,opts[0]));const nx=opts[(opts.indexOf(cur)+1)%opts.length];LS.set('msPref_c_'+k,nx);const em=cy.querySelector('em');if(em)em.textContent=nx;toast(k==='vib'?(nx==='Без вибрации'?'Вибрация выключена':'Вибрация: '+nx):nx,'check');return}
+    if(ev.target.closest('[data-st-bl]')){const n=LS.get('msPref_blacklist',[]).length;toast(n?('В чёрном списке: '+n+' чел.'):'Чёрный список пуст','dislike');return}
+    if(ev.target.closest('[data-st-act=bl-list]')){const L=LS.get('msPref_blacklist',[]);toast(L.length?('В чёрном списке: '+L.length+' чел.'):'Чёрный список пуст','dislike');return}
+    if(ev.target.closest('[data-st-ref]')){copyText(location.origin+'/?ref='+USR.id);toast('Ссылка приглашения скопирована','copy');return}
     const l=ev.target.closest('[data-st-lang]');if(l){LS.set('msPref_lang',l.dataset.stLang);stGo('root-lang',1);return}
     const w=ev.target.closest('[data-st-wall]');if(w){msPrefStore('wall',w.dataset.stWall);$$('.ms-set .st-mini').forEach(x=>x.classList.toggle('on',x===w));toast('Обои обновлены','check');return}
     const a=ev.target.closest('[data-st-act]');if(a){const act=a.dataset.stAct;
