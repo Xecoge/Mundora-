@@ -7143,135 +7143,128 @@ const SET_CSS=`.msgr .ms-set{position:absolute;inset:0;z-index:40;display:none;c
 if(!document.getElementById('msSetCss')){const s=document.createElement('style');s.id='msSetCss';s.textContent=SET_CSS;document.head.appendChild(s)}
 
 const tg=(ic,t,sub,key,def=false)=>`<label class="st-row"><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span><span class="st-tg"><input type="checkbox" data-st-tg="${key}" ${LS.get('msPref_'+key,def)?'checked':''}><i></i></span></label>`;
-const row=(ic,t,sub,page,val)=>`<button class="st-row${page?'':' st-dead'}" ${page?`data-st-page="${page}"`:''}><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span>${val?`<em>${val}</em>`:page?ico('chev','s chev'):''}</button>`;
+const row=(ic,t,sub,page,val,act)=>`<button class="st-row${page?'':' st-dead'}" ${page?`data-st-page="${page}"`:act?`data-st-act="${act}"`:''}><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span>${val?`<em>${val}</em>`:page?ico('chev','s chev'):''}</button>`;
 const card=inner=>`<div class="st-card">${inner}</div>`;
 const label=t=>`<div class="st-label">${t}</div>`;
 const P={};
 
-P.root={t:'Настройки',h:()=>`<p class="st-lead">Аккаунт, оформление и всё остальное — изменения сохраняются на этом устройстве.</p>
+P.root={t:'Настройки',h:()=>`<p class="st-lead">Аккаунт, оформление и всё остальное. Изменения сохраняются сразу.</p>
   <div class="st-folders">${card(row({n:'user'},'Аккаунт','Профиль, почта и вход','root-acct'))}
-  ${card(row({n:'shield',c:'bl'},'Конфиденциальность','Код-пароль, чёрный список, данные','root-priv'))}
-  ${card(row({n:'bell',c:'rd'},'Уведомления и звуки','Предпросмотр, чаты и звонки','root-notify'))}
-  ${card(row({n:'chat',c:'gr'},'Чаты','Редактирование чатов и звонки','root-chats'))}
-  ${card(row({n:'table',c:'bl'},'Данные и память','Трафик, автозагрузка, хранилище','root-data'))}
-  ${card(row({n:'lib',c:'or'},'Папки с чатами','Папки для listа чатов и текст','root-folders'))}
-  ${card(row({n:'headph',c:'gr'},'Устройства','Активные сеансы и сессии','root-devices'))}
-  ${card(row({n:'bolt',c:'or'},'Энергосбережение','Режим и экономия анимации','root-power'))}
+  ${card(row({n:'shield',c:'bl'},'Конфиденциальность','Код-пароль, чёрный список, кто что видит','root-priv'))}
+  ${card(row({n:'bell',c:'rd'},'Уведомления и звуки','Предпросмотр сообщений, звуки чатов и звонков','root-notify'))}
+  ${card(row({n:'chat',c:'gr'},'Чаты','Показ в списке, реакции, звуки сообщений','root-chats'))}
+  ${card(row({n:'table',c:'bl'},'Данные и память','Трафик, автозагрузка медиа, кэш','root-data'))}
+  ${card(row({n:'lib',c:'or'},'Папки с чатами','Группируй чаты по темам','root-folders'))}
+  ${card(row({n:'headph',c:'gr'},'Устройства','Активные сеансы входа','root-devices'))}
+  ${card(row({n:'bolt',c:'or'},'Энергосбережение','Экономия заряда и анимации','root-power'))}
   ${card(row('moon','Хранилища','Файлы и медиа Mundora','root-store'))}
   ${card(row('disc','Язык',null,'root-lang',String(LS.get('msPref_lang','Русский'))))}
-  ${card(row({n:'gem',c:'or'},'Mundora Premium','Возможности Premium','root-prem'))}
-  ${card(row('grid','Обои для чата','Обои и цвета чатов','root-walls'))}
-  ${USR&&USR.admin?card(`<button class="st-row" data-act="acc-admin"><span class="st-ic">${ico('gear')}</span><span class="st-tx">Админ-панель<small>Коды и аккаунты</small></span><em>${ico('chev','s r')}</em></button>`):''}
+  ${card(row({n:'gem',c:'or'},'Mundora Premium',USR&&USR.premium?'Активен':'Возможности Premium','root-prem'))}
+  ${card(row('grid','Обои для чата','Фон списка и чатов','root-walls'))}
+  ${USR&&USR.admin?card(`<button class="st-row" data-act="acc-admin"><span class="st-ic">${ico('gear')}</span><span class="st-tx">Админ-панель<small>Коды доступа и аккаунты</small></span><em>${ico('chev','s r')}</em></button>`):''}
   ${card(`<button class="st-row" style="color:#fb7185" data-act="acc-logout"><span class="st-ic rd">${ico('out')}</span><span class="st-tx">Выйти из аккаунта</span></button>`)}`};
 
-P['root-acct']={t:'Аккаунт',h:()=>{const nm=(USR&&USR.name)||'Пользователь';return `<div class="st-me">
+P['root-acct']={t:'Аккаунт',h:()=>{const nm=(USR&&USR.name)||'Пользователь';const isPrem=!!(USR&&(USR.premium||String(USR.id)==='0'||String(USR.id)==='1'||LS.get('msPref_premium',0)));return `<div class="st-me">
     <span class="av"><img src="${avaSrc(USR.avatar)}" alt=""></span><b>${esc(nm)}</b>
-    <small>${esc((USR&&USR.bio)||'Bio профиля — здесь виден твой статус')}</small>
-    <span class="pill">${ico('check','s')} ID ${esc(String((USR&&USR.id)||''))}</span></div>
-  ${card(row('edit','Изменить профиль','Фото, имя и информация о себе',null,'Открыть'))}
-  ${label('Профиль')}${card(row('user','Личное username','Ник, видимый другим','root-prof'))}
-  ${card(row('link','Почта',USR&&USR.email?esc(USR.email):'не привязана','#root-prof'))}
-  ${card(row('send','Telegram','Привязать аккаунт Telegram','root-prof'))}
-  ${label('Ещё')}${card(tg('lock','Открытый профиль','Показывать лайки, плейлисты и вкус','open',USR&&USR.open!==false))}
+    <small>${esc((USR&&USR.bio)||'Добавь описание профиля')}</small>
+    <span class="pill">${ico('check','s')} ID ${esc(String((USR&&USR.id)||''))}${isPrem?' · Premium':''}</span></div>
+  ${card(row('edit','Изменить профиль','Фото, имя и информация о себе',null,'Изменить','edit-profile'))}
+  ${label('Связи')}${card(row('link','Почта',null,null,USR&&USR.email?esc(USR.email):'не привязана'))}
+  ${card(row('send','Telegram',null,null,'привязать','tg-link'))}
+  ${label('Приватность')}${card(tg('lock','Открытый профиль','Показывать подарки и плейлисты всем','open',USR&&USR.open!==false))}
   ${card(row('spark','Реферальная программа','Приглашай друзей и получай бонусы','root-prof'))}`}};
-P['root-prof']={t:'Профиль',h:()=>`<p class="st-lead">Здесь собрано то, что видят другие в твоём профиле.</p>
-  ${card(row('edit','Изменить описание','Пара слов о себе',null,'Изменить'))}
-  ${label('Личное')}${card(row('user','Личное username','Показывать ник всем',null,'@'+esc(String((USR&&USR.id)||''))))}
+P['root-prof']={t:'Профиль',h:()=>`<p class="st-lead">То, что видят другие люди в твоём профиле.</p>
+  ${card(row('edit','О себе','Пара слов на карточке профиля',null,'Изменить','edit-profile'))}
+  ${label('Связи')}${card(row('user','Имя пользователя',null,null,'@'+esc(String((USR&&USR.id)||''))))}
   ${card(row('link','Почта','Видна только тебе',null,USR&&USR.email?esc(USR.email):'скрыта'))}
-  ${card(row('send','Telegram','Переход в мессенджер',null,'профиль'))}`};
+  ${card(row('send','Telegram',null,null,'не привязан'))}`};
 P['root-priv']={t:'Конфиденциальность',h:()=>`<p class="st-lead">Решай, что видно другим, а что — только тебе.</p>
   ${label('Безопасность')}${card(
     row('lock','Пароль аккаунта','Вход по паролю',null,'Вкл.')+
-    tg('user','Автоудаление сообщений','Чистить переписки по таймеру','autodel')+
-    row('key','Код-пароль','Код на вход в мессенджер',null,'Вкл.')+
-    row('link','Почта для входа','Почта восстановления',null,'Привязана')+
-    row('dislike','Чёрный список','Заблокированные',null,'0 чел.')+
-    row('headph','Устройства','Активные сеансы','root-devices'))}
-  ${label('Конфиденциальность')}${card(
-    row('link','Почта','Кто видит почту',null,'Никто')+
-    row('hist','Время захода','Кто видит вход',null,'Все')+
-    row('cam2','Фотографии профиля','Кто видит фото',null,'Все')+
-    row('checks','Прочитанные сообщения','Отметки «прочитано»',null,'Все'))}`};
-P['root-notify']={t:'Уведомления и звуки',h:()=>`<p class="st-lead">Получай уведомления о новых сообщениях, даже когда Mundora закрыта.</p>
-  ${card(tg('eye','Предпросмотр сообщений','Текст сообщения в уведомлении','prev',true))}
-  ${label('Уведомления о чатах')}${card(
+    row('key','Код-пароль','Быстрый вход в мессенджер',null,'Выкл.')+
+    row('link','Почта для восстановления',null,null,USR&&USR.email?esc(USR.email):'не привязана')+
+    row('dislike','Чёрный список','Заблокированные люди',null,'0')+
+    row('headph','Устройства','Активные сеансы входа','root-devices'))}
+  ${label('Кто это видит')}${card(
+    row('link','Почта',null,null,'Никто')+
+    row('hist','Время захода',null,null,'Все')+
+    row('cam2','Фото профиля',null,null,'Все')+
+    row('checks','Прочитано',null,null,'Все'))}`};
+P['root-notify']={t:'Уведомления и звуки',h:()=>`<p class="st-lead">Уведомления о новых сообщениях, даже когда Mundora закрыта.</p>
+  ${card(tg('eye','Предпросмотр сообщений','Текст сообщения в уведомлении','n_prev',true))}
+  ${label('Чаты')}${card(
     tg('chat','Личные чаты','Сообщения один на один','n_dm',true)+
     tg('users','Группы','Сообщения в группах','n_grp',true)+
     tg('mega','Каналы','Новые посты каналов','n_ch')+
-    tg('heart','Реакции','Реакции на сообщения','n_re'))}
+    tg('heart','Реакции','Реакции на твои сообщения','n_re'))}
   ${label('Звонки')}${card(
     row('vol','Вибрация','При входящем звонке',null,'По умолчанию')+
-    row('wave','Рингтон','Звук звонка',null,'По умолчанию'))}
-  ${label('Своё')}${card(tg('spark','Свой смс-пользователь','Свой звук для сообщений','n_custom'))}`};
-P['root-chats']={t:'Чаты',h:()=>`<p class="st-lead">Настрой поведение переписок под себя.</p>
-  ${label('Редактирование чатов')}${card(
-    tg('user','Личные чаты','Показывать в списке','c_dm',true)+
-    tg('users','Группы','Показывать в списке','c_grp',true)+
-    tg('mega','Каналы','Показывать в списке','c_ch',true)+
-    tg('heart','Реакции','Реакции на сообщения','c_re',true))}
-  ${label('Звонки')}${card(
-    row('bolt','Вибрация','При сообщении',null,'По умолчанию')+
-    row('wave','Рингтон','Звук уведомления',null,'По умолчанию'))}
-  ${label('Своё')}${card(tg('spark','Свой смс-пользователь','Свой звук сообщений','c_custom'))}`};
-P['root-data']={t:'Данные и память',h:()=>`<p class="st-lead">Сколько места и трафика использует Mundora.</p>
-  ${card(row('table','Использование памяти','Занимают кэш и медиа',null,'1 КБ'))}
-  ${card(row('flow','Трафик за этот месяц','Загрузка и отправка',null,'1,3 МБ'))}
+    row('wave','Рингтон',null,null,'По умолчанию'))}`};
+P['root-chats']={t:'Чаты',h:()=>`<p class="st-lead">Как ведут себя переписки и что показывать в списке.</p>
+  ${label('Показывать в списке')}${card(
+    tg('user','Личные чаты',null,'c_dm',true)+
+    tg('users','Группы',null,'c_grp',true)+
+    tg('mega','Каналы',null,'c_ch',true)+
+    tg('heart','Реакции',null,'c_re',true))}
+  ${label('Сообщения')}${card(
+    row('bolt','Вибрация','При новом сообщении',null,'По умолчанию')+
+    row('wave','Звук',null,null,'По умолчанию'))}`};
+P['root-data']={t:'Данные и память',h:()=>{const kb=MS.traffic||0;const val=kb>1024?(kb/1024).toFixed(1).replace('.',',')+' МБ':kb+' КБ';return `<p class="st-lead">Сколько места и трафика использует Mundora.</p>
+  ${card(row('table','Кэш и медиа','Занимают память устройства',null,'~'+val))}
+  ${card(row('flow','Трафик за этот месяц','Загрузка и отправка',null,'~1,3 МБ'))}
   ${label('Автозагрузка медиа')}${card(
     tg('phone','Через мобильную сеть','Фото и видео в чатах','dl_mob')+
-    tg('wifi','Через Wi-Fi','Загружать всё подряд','dl_wifi',true)+
-    tg('disc','В роуминге','Осторожно: тариф оператора','dl_rom'))}
-  ${card(`<button class="st-row" data-st-act="reset-traffic"><span class="st-ic rd">${ico('refresh')}</span><span class="st-tx" style="color:#fb7185">Сбросить счётчики</span></button>`)}
+    tg('wifi','Через Wi-Fi','Загружать всё автоматически','dl_wifi',true)+
+    tg('disc','В роуминге','Тариф оператора может списать деньги','dl_rom'))}
+  ${card(`<button class="st-row" data-st-act="reset-traffic"><span class="st-ic rd">${ico('refresh')}</span><span class="st-tx" style="color:#fb7185">Сбросить счётчики трафика</span></button>`)}
   ${label('Сохранять в галерею')}${card(
-    tg('cam2','Личные чаты','Фото из личных чатов','g_dm')+
-    tg('users','Группы','Фото из групп','g_grp'))}
-  <p class="st-note">Нажми на счётчик, чтобы посмотреть детали по папкам.</p>`};
+    tg('cam2','Фото из личных чатов',null,'g_dm')+
+    tg('users','Фото из групп',null,'g_grp'))}`}};
 P['root-folders']={t:'Папки с чатами',h:()=>{const F=LS.get('msFolders',[{n:'Новые',c:'#38bdf8'},{n:'Личные',c:'#34d399'},{n:'Группы',c:'#a78bfa'},{n:'Каналы',c:'#fbbf24'}]);
-  return `<p class="st-lead">Создай папки с разными чатами и переключайся между ними в один тап.</p>
+  return `<p class="st-lead">Группируй чаты по темам и переключайся между ними над списком — одним тапом.</p>
   <div class="st-folders">${F.map((f,i)=>{const n=f.n||f,c=f.c||'#8b5cf6';return `<div class="st-folder"><span class="f-ic" style="--fc:${c}">${ico('lib')}</span>${esc(n)}<button class="add" data-st-act="del-folder" data-i="${i}">Убрать</button></div>`}).join('')}</div>
-  ${label('Папки с чатами')}${card(row('checks','Все чаты','Основная папка без фильтров',null,'вкл.'))}
-  ${card(`<button class="st-row st-add" data-st-act="add-folder"><span class="st-ic">${ico('plus')}</span><span class="st-tx">Создать новую папку</span></button>`)}
-  ${label('Текст для чата')}${card(row('edit','Начальный текст сообщения','Шаблон для новых чатов',null,'Изменить'))}`}};
-P['root-devices']={t:'Устройства',h:()=>`<p class="st-lead">Войди в Mundora на другом устройстве с помощью кода — или покинь этот сеанс.</p>
-  <div class="st-empty"><span class="big">${ico('headph')}</span><b>Не запущось затустить</b><span>Новых сеансов пока нет</span></div>
-  ${card(row('refresh','Завершить остальные сеансы','Выйти на всех устройствах',null,'Выйти'))}`};
-P['root-power']={t:'Энергосбережение',h:()=>{const lvl=LS.get('msPref_power',0);return `<p class="st-lead">Режим экономит заряд, отключая анимации и фоновую активность.</p>
-  ${card(`<label class="st-row"><span class="st-ic or">${ico('bolt')}</span><span class="st-tx">Режим энергосбережения<small>Вкл — <span id="stPow">${lvl}%</span></small></span><span class="st-tg"><input type="checkbox" data-st-tg="power" ${lvl?'checked':''}><i></i></span></label>
+  ${card(`<button class="st-row st-add" data-st-act="add-folder"><span class="st-ic">${ico('plus')}</span><span class="st-tx">Создать папку</span></button>`)}
+  <p class="st-note">Вкладки папок появятся над списком чатов.</p>`}};
+P['root-devices']={t:'Устройства',h:()=>`<p class="st-lead">Список устройств, с которых выполнен вход в твой аккаунт.</p>
+  <div class="st-empty"><span class="big">${ico('headph')}</span><b>Это устройство</b><span>Других сеансов входа пока нет</span></div>
+  ${card(row('refresh','Завершить остальные сеансы','Выйти на всех других устройствах',null,'Выйти','st-confirm-sessions'))}`};
+P['root-power']={t:'Энергосбережение',h:()=>{const lvl=LS.get('msPref_power',0);return `<p class="st-lead">Режим экономит заряд: отключает анимации и фоновую активность.</p>
+  ${card(`<label class="st-row"><span class="st-ic or">${ico('bolt')}</span><span class="st-tx">Режим энергосбережения<small>Отключить анимации и автоигру видео</small></span><span class="st-tg"><input type="checkbox" data-st-tg="power" ${lvl?'checked':''}><i></i></span></label>
   <div class="st-meter"><i style="width:${lvl}%"></i></div>
-  <div class="st-bat"><svg class="i s" viewBox="0 0 24 24"><rect x="2" y="8" width="17" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 10.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>При полной зарядке не влияет</div>`)}
-  ${label('Подробная энергосбережения')}${card(
+  <div class="st-bat"><svg class="i s" viewBox="0 0 24 24"><rect x="2" y="8" width="17" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 10.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>При полной зарядке можно выключить</div>`)}
+  ${label('Анимации и эффекты')}${card(
     tg('spark','Анимации интерфейса','Плавные переходы и жесты','p_anim',true)+
-    tg('eye','Анимации реакций и подтекстов','Эффекты сообщений','p_react',true)+
-    tg('chat','Анимация чатов','Появление пузырей','p_chat',true)+
-    tg('phone','Анимация звонков','Экран звонка','p_call',true)+
-    tg('vol','Автозапуск видео','Видео играет само','p_vid')+
-    tg('wave','Автоответчик WF','Фоновый аудио-движок','p_wf')+
-    tg('eye','Стоп-кадр анимации','Останавливать фоновые сцены','p_bg'))}`}};
-P['root-store']={t:'Хранилища',h:()=>`<p class="st-lead">Фотографии и видео из Mundora занимают место — чисти то, что больше не нужно.</p>
-  <div class="st-empty"><span class="big">${ico('grid')}</span><b>Загруженное пространство</b><span>Файлы из мессенджера хранятся здесь</span></div>
+    tg('eye','Эффекты сообщений','Реакции и всплывающие подсказки','p_react',true)+
+    tg('chat','Анимация чатов','Появление пузырей сообщений','p_chat',true)+
+    tg('phone','Анимация звонков','Экран входящего звонка','p_call',true)+
+    tg('vol','Автозапуск видео','Видео играет само при прокрутке','p_vid'))}`}};
+P['root-store']={t:'Хранилища',h:()=>`<p class="st-lead">Фото и видео из чатов занимают место — чисти то, что больше не нужно.</p>
+  <div class="st-empty"><span class="big">${ico('grid')}</span><b>Место в Mundora</b><span>Файлы мессенджера хранятся здесь</span></div>
   ${card(tg('cam2','Автосохранение фото и видео','Скачивать медиа на устройство','st_auto',true))}
-  ${label('Эти устройства')}${card(row('headph','Этот браузер','Кэш страниц и медиа',null,'0 Б'))}
-  ${label('Есть смс и файлы')}${card(row('table','Очистить кэш','Удалить временные файлы',null,'Очистить'))}`};
+  ${label('Это устройство')}${card(row('headph','Кэш браузера','Временные файлы страниц',null,'0 Б'))}
+  ${label('Кэш')}${card(`<button class="st-row" data-st-act="clear-cache"><span class="st-ic rd">${ico('trash')}</span><span class="st-tx" style="color:#fb7185">Очистить кэш</span><em>Удалить временные файлы</em></button>`)}`};
 P['root-lang']={t:'Язык',h:()=>{const langs=['Русский','English','Українська','Қазақ тілі','Deutsch','Español','Беларуская'];const cur=LS.get('msPref_lang','Русский');
-  return `<p class="st-lead">Язык интерфейса мессенджера. Название чатов и людей не переводятся.</p>
+  return `<p class="st-lead">Язык интерфейса мессенджера. Имена людей и названия чатов остаются как есть.</p>
   ${card(langs.map(l=>`<button class="st-row${l===cur?' sel':''}" data-st-lang="${l}"><span class="st-tx">${l}</span><span class="st-radio"></span></button>`).join(''))}
-  <p class="st-note">Другие языки появятся в следующем обновлении.</p>`}};
-P['root-prem']={t:'Mundora Premium',h:()=>`<div class="st-hero"><span class="st-crown">${ico('gem')}</span>
+  <p class="st-note">Ещё языки добавим в следующем обновлении.</p>`}};
+P['root-prem']={t:'Mundora Premium',h:()=>{const has=!!(USR&&(USR.premium||String(USR.id)==='0'||String(USR.id)==='1'||USR.id===0||USR.id===1))||LS.get('msPref_premium',0);
+  return `<div class="st-hero"><span class="st-crown">${ico('gem')}</span>
     <span class="st-prem-name">Mundora Premium</span>
-    <span class="st-prem-sub">Ежемесячно. Отменяй в любое время — подписка работает на всех устройствах.</span></div>
+    <span class="st-prem-sub">${has?'Premium активен — спасибо, что поддерживаешь Mundora!':'Ежемесячная подписка. Отменяй в любое время — работает на всех устройствах.'}</span></div>
   ${label('Возможности Premium')}${card(
-    row({n:'spark',c:'or'},'Больше анимаций в приложении','Плавные эффекты и переходы')+
+    row({n:'spark',c:'or'},'Больше анимаций','Плавные эффекты и переходы')+
     row({n:'user',c:'bl'},'Пауза чата','Замороженный статус «в сети»')+
-    row({n:'grid',c:'gr'},'Насолько преміальных обоев','Эксклюзивные обои чатов')+
-    row({n:'gem',c:'or'},'Личное имя в профиле','Уникальный значок рядом с ником')+
+    row({n:'grid',c:'gr'},'Премиальные обои','Эксклюзивные фоны чатов')+
+    row({n:'gem',c:'or'},'Значок в профиле','Уникальный значок рядом с именем')+
     row({n:'chat',c:'bl'},'Анимированные аватары','Живые аватары в чатах')+
     row({n:'lock',c:'gr'},'Конфиденциальные чаты','Чаты с автозащитой'))}
-  <button class="st-btn" data-st-act="premium">${ico('gem','s')}Подключить за 0 ₽ · мес</button>
-  <p class="st-note">Дорого нажимаешь в мессенджере — просто нажми на кнопку и следуй шагам.</p>`};
-P['root-walls']={t:'Обои для чата',h:()=>{const W=[['#151024','Бесплатные'],['#1a1030','Абрикос','#7c3aed'],['#101a2e','Аура','#38bdf8'],['#1f1424','Туманность','#ec4899'],['#12211d','Хвоя','#34d399']];
-  const cur=LS.get('msPref_wall','#151024');
-  return `<p class="st-lead">Создай папку с разными чатами и переключайся между ними — а фон задаёт настроение.</p>
+  ${has?`<button class="st-btn ghost" data-st-act="premium-on">${ico('check','s')}Активен</button>`:`<button class="st-btn" data-st-act="premium">${ico('gem','s')}Подключить</button>`}
+  <p class="st-note">Для ID 0 и 1 Premium бесплатный.</p>`}};
+P['root-walls']={t:'Обои для чата',h:()=>{const W=[['#0b1015','Стандарт'],['#1a1030','Абрикос','#7c3aed'],['#101a2e','Аура','#38bdf8'],['#1f1424','Туманность','#ec4899'],['#12211d','Хвоя','#34d399']];
+  const cur=LS.get('msPref_wall','#0b1015');
+  return `<p class="st-lead">Фон списка чатов и разговоров — выбери то, что приятно глазу.</p>
   <div class="st-switch-wrap">${W.map(([c,n])=>`<button class="st-mini${c===cur?' on':''}" data-st-wall="${c}"><span class="w"><span class="bub">Привет!</span><span class="bub me">Привет!</span></span><span class="nm">${n}</span></button>`).join('')}</div>
-  <p class="st-note">Больше обоев — в Mundora Premium.</p>`}};
+  <p class="st-note">Ещё обои — в Mundora Premium.</p>`}};
 
 const ST={stack:['root']};
 function stEl(){let e=$('#msSet');if(e)return e;const m=$('#msgr');e=document.createElement('div');e.id='msSet';e.className='ms-set';
@@ -7284,9 +7277,14 @@ function stEl(){let e=$('#msSet');if(e)return e;const m=$('#msgr');e=document.cr
     const w=ev.target.closest('[data-st-wall]');if(w){msPrefStore('wall',w.dataset.stWall);$$('.ms-set .st-mini').forEach(x=>x.classList.toggle('on',x===w));toast('Обои обновлены','check');return}
     const a=ev.target.closest('[data-st-act]');if(a){const act=a.dataset.stAct;
       if(act==='reset-traffic'){MS.dl={};toast('Счётчики трафика сброшены','check')}
+      if(act==='clear-cache'){try{caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)))}catch(e){}toast('Кэш очищен','check')}
       if(act==='add-folder'){const nm=prompt('Название папки');if(nm&&nm.trim()){const F=LS.get('msFolders',[]);F.push({n:nm.trim().slice(0,24),c:'#8b5cf6'});LS.set('msFolders',F);stGo('root-folders',1)}}
       if(act==='del-folder'){const i=+a.dataset.i;const F=LS.get('msFolders',[]);F.splice(i,1);LS.set('msFolders',F);stGo('root-folders',1)}
-      if(act==='premium'){if(USR.premium){toast('Premium уже активен','gem');return}LS.set('msPref_prem_ask',1);toast('Заявка на Premium отправлена — подключим после оплаты','gem')}return}});
+      if(act==='edit-profile'){stClose();closeSheet();pfEdit();return}
+      if(act==='tg-link'){stClose();ACT['tg-link']();return}
+      if(act==='st-confirm-sessions'){toast('Другие сеансы завершены','check');return}
+      if(act==='premium'){LS.set('msPref_premium',1);toast('Premium подключён','gem');stGo('root-prem',1)}
+      if(act==='premium-on')toast('Premium уже активен','gem');return}});
   e.addEventListener('change',ev=>{const t=ev.target.closest('[data-st-tg]');if(!t)return;
     const k=t.dataset.stTg;LS.set('msPref_'+k,t.checked);
     if(k==='motion'||k==='power'){msPrefStore('motion',t.checked);msPrefStore('power',t.checked?60:0);const m=$('.ms-set .st-meter i'),v=$('#stPow');if(v)v.textContent=(t.checked?60:0)+'%';if(m)m.style.width=(t.checked?60:0)+'%'}
