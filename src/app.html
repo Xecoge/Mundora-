@@ -3331,7 +3331,8 @@ function msShell(){let m=$('#msgr');if(m)return m;m=document.createElement('div'
 function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&String(MS.prof)===String(MS.me);
   t.innerHTML=`<button class="${MS.tab==='contacts'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msgc"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".9"/><circle cx="12" cy="9.5" r="3.3" fill="#000"/><path d="M5.8 18.2c1.4-2.5 3.6-3.7 6.2-3.7s4.8 1.2 6.2 3.7" fill="#000"/></svg><span>Контакты</span></button>
   <button class="${MS.tab==='chats'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msg"><svg class="i" viewBox="0 0 24 24"><path d="M4 11.5C4 7.4 7.6 4.5 12 4.5s8 2.9 8 7-3.6 7-8 7c-.9 0-1.8-.1-2.6-.4L5 19.5l1.2-3.4C4.8 14.9 4 13.3 4 11.5z" fill="currentColor"/></svg><span>Чаты</span><b class="ms-badge" hidden></b></button>
-  <button class="${own?'on':''}" data-act="ms-go" data-h="#msgp-${MS.me}"><img src="${avaSrc(USR.avatar)}" alt=""><span>Профиль</span></button>`;
+  <button class="${own?'on':''}" data-act="ms-go" data-h="#msgp-${MS.me}"><img src="${avaSrc(USR.avatar)}" alt=""><span>Профиль</span></button>
+  <button data-act="ms-settings"><svg class="i" viewBox="0 0 24 24"><path d="M12 8.6a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zm8.6 3.4c0 .5 0 1-.1 1.4l2 1.6-1.9 3.3-2.4-.9c-.7.6-1.5 1-2.4 1.3l-.4 2.5h-3.8l-.4-2.5c-.9-.3-1.7-.7-2.4-1.3l-2.4.9L4.5 15l2-1.6a8.6 8.6 0 010-2.8l-2-1.6 1.9-3.3 2.4.9c.7-.6 1.5-1 2.4-1.3l.4-2.5h3.8l.4 2.5c.9.3 1.7.7 2.4 1.3l2.4-.9 1.9 3.3-2 1.6c.1.4.1.9.1 1.4z" fill="currentColor"/></svg><span>Настройки</span></button>`;
   t.insertAdjacentHTML('afterbegin','<i class="ms-drop"></i>');const on=t.querySelector('button.on'),d=t.querySelector('.ms-drop');
   if(on&&d){const to=[on.offsetLeft,on.offsetWidth];if(MS.drop){d.style.transition='none';d.style.transform=`translateX(${MS.drop[0]}px)`;d.style.width=MS.drop[1]+'px';void d.offsetWidth;d.style.transition=''}
     requestAnimationFrame(()=>{d.style.transform=`translateX(${to[0]}px)`;d.style.width=to[1]+'px';if(MS.drop&&MS.drop[0]!==to[0]){d.classList.remove('jelly');void d.offsetWidth;d.classList.add('jelly')}MS.drop=to})}else if(d)d.hidden=true;
@@ -7036,6 +7037,271 @@ Object.assign(ACT,{
   async 'pf-manage'(el){if(!ADM.data)await admLoad();const u=ADM.data&&ADM.data.users.find(x=>String(x.id)===el.dataset.id);if(u)admUserSheet(u.id);else toast('Аккаунт не найден в админке','x')}
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.vb'))$$('.vb.show').forEach(b=>b.classList.remove('show'))},true);
+
+/* ===== полноэкранные настройки мессенджера (стиль тёмно-фиолетовый, как в макете) ===== */
+(function(){
+const SET_CSS=`.msgr .ms-set{position:absolute;inset:0;z-index:40;display:none;color:#fff;
+  background:radial-gradient(90% 45% at 0% 0%,rgba(124,58,237,.30),transparent 70%),radial-gradient(80% 40% at 100% 100%,rgba(168,85,247,.20),transparent 70%),#0d0819}
+.msgr .ms-set.on{display:flex}
+.ms-set .st-nav{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 12px) 14px 10px;
+  background:linear-gradient(rgba(13,8,25,.92),rgba(13,8,25,.65) 70%,transparent);pointer-events:none}
+.ms-set .st-nav>*{pointer-events:auto}
+.ms-set .st-title{font-size:17px;font-weight:750;letter-spacing:-.01em}
+.ms-set .st-back{width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px)}
+.ms-set .st-back:active{transform:scale(.92)}
+.ms-set .st-pages{position:relative;flex:1;overflow:hidden}
+.ms-set .st-page{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:calc(env(safe-area-inset-top) + 58px) 14px calc(env(safe-area-inset-bottom) + 92px);
+  opacity:0;pointer-events:none;transform:translateX(24px);transition:transform .34s cubic-bezier(.3,1.1,.4,1),opacity .26s}
+.ms-set .st-page.on{opacity:1;pointer-events:auto;transform:none}
+.ms-set .st-page.st-page-from{transform:translateX(-18px);opacity:0;pointer-events:none}
+.ms-set .st-page.st-page-fromback{transform:translateX(24px);opacity:0;pointer-events:none}
+.msgr.ms-reduced .st-page{transition:none}
+.ms-set .st-lead{margin:2px 4px 14px;color:rgba(255,255,255,.55);font-size:13.5px;line-height:1.45}
+.ms-set .st-label{margin:16px 6px 8px;color:rgba(255,255,255,.45);font-size:12.5px;font-weight:650}
+.ms-set .st-card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);border-radius:19px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.06)}
+.ms-set .st-row{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:0;background:none;color:#fff;font:inherit;font-size:14.5px;font-weight:600;text-align:left;cursor:pointer;position:relative}
+.ms-set .st-row+.st-row::before{content:'';position:absolute;left:58px;right:0;top:0;height:1px;background:rgba(255,255,255,.07)}
+.ms-set .st-row:active{background:rgba(255,255,255,.05)}
+.ms-set .st-ic{flex:none;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#c4b5fd;background:rgba(139,92,246,.18)}
+.ms-set .st-ic svg{width:19px;height:19px}
+.ms-set .st-ic.gr{color:#34d399;background:rgba(52,211,153,.14)}
+.ms-set .st-ic.bl{color:#60a5fa;background:rgba(96,165,250,.14)}
+.ms-set .st-ic.rd{color:#fb7185;background:rgba(251,113,133,.14)}
+.ms-set .st-ic.or{color:#fbbf24;background:rgba(251,191,36,.14)}
+.ms-set .st-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ms-set .st-tx small{color:rgba(255,255,255,.5);font-size:12px;font-weight:450;line-height:1.35}
+.ms-set .st-row em{color:rgba(255,255,255,.55);font-style:normal;font-size:13.5px;font-weight:550;display:flex;align-items:center;gap:5px}
+.ms-set .st-row em .i{color:rgba(255,255,255,.4)}
+.ms-set .st-row em .i path{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ms-set .st-row .chev{transform:rotate(-90deg);opacity:.5;margin-left:auto}
+.ms-set .st-row em .chev{position:absolute;right:14px;width:18px;height:18px}
+.ms-set .st-tg{position:relative;flex:none;width:46px;height:28px}
+.ms-set .st-tg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.ms-set .st-tg i{position:absolute;inset:0;border-radius:16px;background:rgba(255,255,255,.14);transition:background .25s}
+.ms-set .st-tg i::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .28s cubic-bezier(.3,1.3,.4,1);box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.ms-set .st-tg input:checked+i{background:#8b5cf6}
+.ms-set .st-tg input:checked+i::after{transform:translateX(18px)}
+.ms-set .st-radio{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;transition:border-color .2s}
+.ms-set .st-radio::after{content:'';width:11px;height:11px;border-radius:50%;background:#a78bfa;transform:scale(0);transition:transform .22s cubic-bezier(.3,1.4,.4,1)}
+.ms-set .st-row.sel .st-radio{border-color:#a78bfa}
+.ms-set .st-row.sel .st-radio::after{transform:scale(1)}
+.ms-set .st-switch-wrap{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.ms-set .st-switch-wrap::-webkit-scrollbar{display:none}
+.ms-set .st-mini{position:relative;flex:none;width:132px;height:190px;border-radius:18px;overflow:hidden;border:2px solid transparent;padding:0;background:#151024;cursor:pointer;font:inherit;color:#fff;text-align:center;transition:border-color .25s,transform .2s}
+.ms-set .st-mini:active{transform:scale(.97)}
+.ms-set .st-mini.on{border-color:#a78bfa}
+.ms-set .st-mini .w{height:118px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:10px}
+.ms-set .st-mini .bub{align-self:flex-start;max-width:85%;padding:5px 9px;border-radius:12px 12px 12px 4px;font-size:10.5px;background:rgba(255,255,255,.14)}
+.ms-set .st-mini .bub.me{align-self:flex-end;border-radius:12px 12px 4px 12px;background:#8b5cf6}
+.ms-set .st-mini .nm{display:block;padding:8px 4px 10px;font-size:12.5px;font-weight:650}
+.ms-set .st-wall{position:absolute;inset:0;opacity:0;transition:opacity .3s}
+.ms-set .st-mini.on .st-wall,.ms-set .st-mini:hover .st-wall{opacity:1}
+.ms-set .st-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 8px 10px;gap:4px}
+.ms-set .st-crown{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;
+  background:conic-gradient(from 210deg,#a78bfa,#7c3aed,#ec4899,#8b5cf6,#a78bfa);box-shadow:0 14px 40px rgba(139,92,246,.45);animation:stSpin 7s linear infinite}
+.ms-set .st-crown svg{width:42px;height:42px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+@keyframes stSpin{to{filter:hue-rotate(360deg)}}
+.msgr.ms-reduced .st-crown{animation:none}
+.ms-set .st-prem-name{font-size:24px;font-weight:800;background:linear-gradient(90deg,#c4b5fd,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:8px}
+.ms-set .st-prem-sub{color:rgba(255,255,255,.6);font-size:13px;max-width:270px;line-height:1.45}
+.ms-set .st-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:0;border-radius:16px;margin-top:12px;
+  background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 10px 26px rgba(109,40,217,.4);transition:transform .15s}
+.ms-set .st-btn:active{transform:scale(.97)}
+.ms-set .st-btn.ghost{background:rgba(255,255,255,.08);box-shadow:none}
+.ms-set .st-btn.danger{background:rgba(251,113,133,.12);color:#fb7185;box-shadow:none}
+.ms-set .st-note{margin:10px 6px;color:rgba(255,255,255,.4);font-size:12px;line-height:1.4}
+.ms-set .st-me{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 0 6px;text-align:center}
+.ms-set .st-me .av{width:84px;height:84px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px rgba(167,139,250,.5),0 12px 30px rgba(0,0,0,.4)}
+.ms-set .st-me .av img{width:100%;height:100%;object-fit:cover}
+.ms-set .st-me b{font-size:18px}
+.ms-set .st-me small{color:rgba(255,255,255,.55);font-size:13px}
+.ms-set .st-me .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:12px;background:rgba(139,92,246,.2);color:#c4b5fd;font-size:12px;font-weight:650}
+.ms-set .st-meter{height:8px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin:10px 4px 4px}
+.ms-set .st-meter i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#8b5cf6,#c4b5fd);transition:width .6s cubic-bezier(.3,1,.4,1)}
+.ms-set .st-add{border:1.5px dashed rgba(167,139,250,.4);background:none}
+.ms-set .st-add .st-tx{color:#c4b5fd}
+.ms-set .st-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:34px 20px;text-align:center;color:rgba(255,255,255,.6);font-size:13.5px}
+.ms-set .st-empty .big{width:76px;height:76px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);color:#c4b5fd}
+.ms-set .st-empty .big svg{width:36px;height:36px}
+.ms-set .st-folders{display:flex;flex-direction:column;gap:8px}
+.ms-set .st-folder{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:15px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font-size:14px;font-weight:600}
+.ms-set .st-folder .f-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--fc,#8b5cf6)}
+.ms-set .st-folder .f-ic svg{width:16px;height:16px}
+.ms-set .st-folder .add{margin-left:auto;color:#a78bfa;background:rgba(139,92,246,.18);border:0;border-radius:11px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.ms-set .st-bat{display:flex;align-items:center;gap:10px;margin:4px 6px 10px;color:rgba(255,255,255,.5);font-size:12.5px}
+.ms-set input.st-in{width:100%;padding:13px 15px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:14px;outline:none;transition:border-color .2s}
+.ms-set input.st-in:focus{border-color:#8b5cf6}`;
+if(!document.getElementById('msSetCss')){const s=document.createElement('style');s.id='msSetCss';s.textContent=SET_CSS;document.head.appendChild(s)}
+
+const tg=(ic,t,sub,key,def=false)=>`<label class="st-row"><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span><span class="st-tg"><input type="checkbox" data-st-tg="${key}" ${LS.get('msPref_'+key,def)?'checked':''}><i></i></span></label>`;
+const row=(ic,t,sub,page,val)=>`<button class="st-row${page?'':' st-dead'}" ${page?`data-st-page="${page}"`:''}><span class="st-ic ${ic.c||''}">${ico(ic.n||ic)}</span><span class="st-tx">${t}${sub?`<small>${sub}</small>`:''}</span>${val?`<em>${val}</em>`:page?ico('chev','s chev'):''}</button>`;
+const card=inner=>`<div class="st-card">${inner}</div>`;
+const label=t=>`<div class="st-label">${t}</div>`;
+const P={};
+
+P.root={t:'Настройки',h:()=>`<p class="st-lead">Аккаунт, оформление и всё остальное — изменения сохраняются на этом устройстве.</p>
+  <div class="st-folders">${card(row({n:'user'},'Аккаунт','Профиль, почта и вход','root-acct'))}
+  ${card(row({n:'shield',c:'bl'},'Конфиденциальность','Код-пароль, чёрный список, данные','root-priv'))}
+  ${card(row({n:'bell',c:'rd'},'Уведомления и звуки','Предпросмотр, чаты и звонки','root-notify'))}
+  ${card(row({n:'chat',c:'gr'},'Чаты','Редактирование чатов и звонки','root-chats'))}
+  ${card(row({n:'table',c:'bl'},'Данные и память','Трафик, автозагрузка, хранилище','root-data'))}
+  ${card(row({n:'lib',c:'or'},'Папки с чатами','Папки для listа чатов и текст','root-folders'))}
+  ${card(row({n:'headph',c:'gr'},'Устройства','Активные сеансы и сессии','root-devices'))}
+  ${card(row({n:'bolt',c:'or'},'Энергосбережение','Режим и экономия анимации','root-power'))}
+  ${card(row('moon','Хранилища','Файлы и медиа Mundora','root-store'))}
+  ${card(row('disc','Язык',null,'root-lang',String(LS.get('msPref_lang','Русский'))))}
+  ${card(row({n:'gem',c:'or'},'Mundora Premium','Возможности Premium','root-prem'))}
+  ${card(row('grid','Обои для чата','Обои и цвета чатов','root-walls'))}
+  ${USR&&USR.admin?card(`<button class="st-row" data-act="acc-admin"><span class="st-ic">${ico('gear')}</span><span class="st-tx">Админ-панель<small>Коды и аккаунты</small></span><em>${ico('chev','s r')}</em></button>`):''}
+  ${card(`<button class="st-row" style="color:#fb7185" data-act="acc-logout"><span class="st-ic rd">${ico('out')}</span><span class="st-tx">Выйти из аккаунта</span></button>`)}`};
+
+P['root-acct']={t:'Аккаунт',h:()=>{const nm=(USR&&USR.name)||'Пользователь';return `<div class="st-me">
+    <span class="av"><img src="${avaSrc(USR.avatar)}" alt=""></span><b>${esc(nm)}</b>
+    <small>${esc((USR&&USR.bio)||'Bio профиля — здесь виден твой статус')}</small>
+    <span class="pill">${ico('check','s')} ID ${esc(String((USR&&USR.id)||''))}</span></div>
+  ${card(row('edit','Изменить профиль','Фото, имя и информация о себе',null,'Открыть'))}
+  ${label('Профиль')}${card(row('user','Личное username','Ник, видимый другим','root-prof'))}
+  ${card(row('link','Почта',USR&&USR.email?esc(USR.email):'не привязана','#root-prof'))}
+  ${card(row('send','Telegram','Привязать аккаунт Telegram','root-prof'))}
+  ${label('Ещё')}${card(tg('lock','Открытый профиль','Показывать лайки, плейлисты и вкус','open',USR&&USR.open!==false))}
+  ${card(row('spark','Реферальная программа','Приглашай друзей и получай бонусы','root-prof'))}`}};
+P['root-prof']={t:'Профиль',h:()=>`<p class="st-lead">Здесь собрано то, что видят другие в твоём профиле.</p>
+  ${card(row('edit','Изменить описание','Пара слов о себе',null,'Изменить'))}
+  ${label('Личное')}${card(row('user','Личное username','Показывать ник всем',null,'@'+esc(String((USR&&USR.id)||''))))}
+  ${card(row('link','Почта','Видна только тебе',null,USR&&USR.email?esc(USR.email):'скрыта'))}
+  ${card(row('send','Telegram','Переход в мессенджер',null,'профиль'))}`};
+P['root-priv']={t:'Конфиденциальность',h:()=>`<p class="st-lead">Решай, что видно другим, а что — только тебе.</p>
+  ${label('Безопасность')}${card(
+    row('lock','Пароль аккаунта','Вход по паролю',null,'Вкл.')+
+    tg('user','Автоудаление сообщений','Чистить переписки по таймеру','autodel')+
+    row('key','Код-пароль','Код на вход в мессенджер',null,'Вкл.')+
+    row('link','Почта для входа','Почта восстановления',null,'Привязана')+
+    row('dislike','Чёрный список','Заблокированные',null,'0 чел.')+
+    row('headph','Устройства','Активные сеансы','root-devices'))}
+  ${label('Конфиденциальность')}${card(
+    row('link','Почта','Кто видит почту',null,'Никто')+
+    row('hist','Время захода','Кто видит вход',null,'Все')+
+    row('cam2','Фотографии профиля','Кто видит фото',null,'Все')+
+    row('checks','Прочитанные сообщения','Отметки «прочитано»',null,'Все'))}`};
+P['root-notify']={t:'Уведомления и звуки',h:()=>`<p class="st-lead">Получай уведомления о новых сообщениях, даже когда Mundora закрыта.</p>
+  ${card(tg('eye','Предпросмотр сообщений','Текст сообщения в уведомлении','prev',true))}
+  ${label('Уведомления о чатах')}${card(
+    tg('chat','Личные чаты','Сообщения один на один','n_dm',true)+
+    tg('users','Группы','Сообщения в группах','n_grp',true)+
+    tg('mega','Каналы','Новые посты каналов','n_ch')+
+    tg('heart','Реакции','Реакции на сообщения','n_re'))}
+  ${label('Звонки')}${card(
+    row('vol','Вибрация','При входящем звонке',null,'По умолчанию')+
+    row('wave','Рингтон','Звук звонка',null,'По умолчанию'))}
+  ${label('Своё')}${card(tg('spark','Свой смс-пользователь','Свой звук для сообщений','n_custom'))}`};
+P['root-chats']={t:'Чаты',h:()=>`<p class="st-lead">Настрой поведение переписок под себя.</p>
+  ${label('Редактирование чатов')}${card(
+    tg('user','Личные чаты','Показывать в списке','c_dm',true)+
+    tg('users','Группы','Показывать в списке','c_grp',true)+
+    tg('mega','Каналы','Показывать в списке','c_ch',true)+
+    tg('heart','Реакции','Реакции на сообщения','c_re',true))}
+  ${label('Звонки')}${card(
+    row('bolt','Вибрация','При сообщении',null,'По умолчанию')+
+    row('wave','Рингтон','Звук уведомления',null,'По умолчанию'))}
+  ${label('Своё')}${card(tg('spark','Свой смс-пользователь','Свой звук сообщений','c_custom'))}`};
+P['root-data']={t:'Данные и память',h:()=>`<p class="st-lead">Сколько места и трафика использует Mundora.</p>
+  ${card(row('table','Использование памяти','Занимают кэш и медиа',null,'1 КБ'))}
+  ${card(row('flow','Трафик за этот месяц','Загрузка и отправка',null,'1,3 МБ'))}
+  ${label('Автозагрузка медиа')}${card(
+    tg('phone','Через мобильную сеть','Фото и видео в чатах','dl_mob')+
+    tg('wifi','Через Wi-Fi','Загружать всё подряд','dl_wifi',true)+
+    tg('disc','В роуминге','Осторожно: тариф оператора','dl_rom'))}
+  ${card(`<button class="st-row" data-st-act="reset-traffic"><span class="st-ic rd">${ico('refresh')}</span><span class="st-tx" style="color:#fb7185">Сбросить счётчики</span></button>`)}
+  ${label('Сохранять в галерею')}${card(
+    tg('cam2','Личные чаты','Фото из личных чатов','g_dm')+
+    tg('users','Группы','Фото из групп','g_grp'))}
+  <p class="st-note">Нажми на счётчик, чтобы посмотреть детали по папкам.</p>`};
+P['root-folders']={t:'Папки с чатами',h:()=>{const F=[['Новые','#38bdf8'],['Личные','#34d399'],['Группы','#a78bfa'],['Каналы','#fbbf24']];
+  return `<p class="st-lead">Создай папки с разными чатами и переключайся между ними в один тап.</p>
+  <div class="st-folders">${F.map(([n,c])=>`<div class="st-folder"><span class="f-ic" style="--fc:${c}">${ico('lib')}</span>${n}<button class="add" data-st-act="add-folder">Добавить</button></div>`).join('')}</div>
+  ${label('Папки с чатами')}${card(row('checks','Все чаты','Основная папка без фильтров',null,'вкл.'))}
+  ${card(`<button class="st-row st-add"><span class="st-ic">${ico('plus')}</span><span class="st-tx">Создать новую папку</span></button>`)}
+  ${label('Текст для чата')}${card(row('edit','Начальный текст сообщения','Шаблон для новых чатов',null,'Изменить'))}`}};
+P['root-devices']={t:'Устройства',h:()=>`<p class="st-lead">Войди в Mundora на другом устройстве с помощью кода — или покинь этот сеанс.</p>
+  <div class="st-empty"><span class="big">${ico('headph')}</span><b>Не запущось затустить</b><span>Новых сеансов пока нет</span></div>
+  ${card(row('refresh','Завершить остальные сеансы','Выйти на всех устройствах',null,'Выйти'))}`};
+P['root-power']={t:'Энергосбережение',h:()=>{const lvl=LS.get('msPref_power',0);return `<p class="st-lead">Режим экономит заряд, отключая анимации и фоновую активность.</p>
+  ${card(`<label class="st-row"><span class="st-ic or">${ico('bolt')}</span><span class="st-tx">Режим энергосбережения<small>Вкл — <span id="stPow">${lvl}%</span></small></span><span class="st-tg"><input type="checkbox" data-st-tg="power" ${lvl?'checked':''}><i></i></span></label>
+  <div class="st-meter"><i style="width:${lvl}%"></i></div>
+  <div class="st-bat"><svg class="i s" viewBox="0 0 24 24"><rect x="2" y="8" width="17" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 10.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>При полной зарядке не влияет</div>`)}
+  ${label('Подробная энергосбережения')}${card(
+    tg('spark','Анимации интерфейса','Плавные переходы и жесты','p_anim',true)+
+    tg('eye','Анимации реакций и подтекстов','Эффекты сообщений','p_react',true)+
+    tg('chat','Анимация чатов','Появление пузырей','p_chat',true)+
+    tg('phone','Анимация звонков','Экран звонка','p_call',true)+
+    tg('vol','Автозапуск видео','Видео играет само','p_vid')+
+    tg('wave','Автоответчик WF','Фоновый аудио-движок','p_wf')+
+    tg('eye','Стоп-кадр анимации','Останавливать фоновые сцены','p_bg'))}`}};
+P['root-store']={t:'Хранилища',h:()=>`<p class="st-lead">Фотографии и видео из Mundora занимают место — чисти то, что больше не нужно.</p>
+  <div class="st-empty"><span class="big">${ico('grid')}</span><b>Загруженное пространство</b><span>Файлы из мессенджера хранятся здесь</span></div>
+  ${card(tg('cam2','Автосохранение фото и видео','Скачивать медиа на устройство','st_auto',true))}
+  ${label('Эти устройства')}${card(row('headph','Этот браузер','Кэш страниц и медиа',null,'0 Б'))}
+  ${label('Есть смс и файлы')}${card(row('table','Очистить кэш','Удалить временные файлы',null,'Очистить'))}`};
+P['root-lang']={t:'Язык',h:()=>{const langs=['Русский','English','Українська','Қазақ тілі','Deutsch','Español','Беларуская'];const cur=LS.get('msPref_lang','Русский');
+  return `<p class="st-lead">Язык интерфейса мессенджера. Название чатов и людей не переводятся.</p>
+  ${card(langs.map(l=>`<button class="st-row${l===cur?' sel':''}" data-st-lang="${l}"><span class="st-tx">${l}</span><span class="st-radio"></span></button>`).join(''))}
+  <p class="st-note">Другие языки появятся в следующем обновлении.</p>`}};
+P['root-prem']={t:'Mundora Premium',h:()=>`<div class="st-hero"><span class="st-crown">${ico('gem')}</span>
+    <span class="st-prem-name">Mundora Premium</span>
+    <span class="st-prem-sub">Ежемесячно. Отменяй в любое время — подписка работает на всех устройствах.</span></div>
+  ${label('Возможности Premium')}${card(
+    row({n:'spark',c:'or'},'Больше анимаций в приложении','Плавные эффекты и переходы')+
+    row({n:'user',c:'bl'},'Пауза чата','Замороженный статус «в сети»')+
+    row({n:'grid',c:'gr'},'Насолько преміальных обоев','Эксклюзивные обои чатов')+
+    row({n:'gem',c:'or'},'Личное имя в профиле','Уникальный значок рядом с ником')+
+    row({n:'chat',c:'bl'},'Анимированные аватары','Живые аватары в чатах')+
+    row({n:'lock',c:'gr'},'Конфиденциальные чаты','Чаты с автозащитой'))}
+  <button class="st-btn" data-st-act="premium">${ico('gem','s')}Подключить за 0 ₽ · мес</button>
+  <p class="st-note">Дорого нажимаешь в мессенджере — просто нажми на кнопку и следуй шагам.</p>`};
+P['root-walls']={t:'Обои для чата',h:()=>{const W=[['#151024','Бесплатные'],['#1a1030','Абрикос','#7c3aed'],['#101a2e','Аура','#38bdf8'],['#1f1424','Туманность','#ec4899'],['#12211d','Хвоя','#34d399']];
+  const cur=LS.get('msPref_wall','#151024');
+  return `<p class="st-lead">Создай папку с разными чатами и переключайся между ними — а фон задаёт настроение.</p>
+  <div class="st-switch-wrap">${W.map(([c,n])=>`<button class="st-mini${c===cur?' on':''}" data-st-wall="${c}"><span class="w"><span class="bub">Привет!</span><span class="bub me">Привет!</span></span><span class="nm">${n}</span></button>`).join('')}</div>
+  <p class="st-note">Больше обоев — в Mundora Premium.</p>`}};
+
+const ST={stack:['root']};
+function stEl(){let e=$('#msSet');if(e)return e;const m=$('#msgr');e=document.createElement('div');e.id='msSet';e.className='ms-set';
+  e.innerHTML=`<div class="st-nav"><button class="st-back" data-st-back>${ico('left')}</button><span class="st-title"></span></div><div class="st-pages"></div>`;
+  m.appendChild(e);
+  e.addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-st-back]');if(b){stBack();return}
+    const p=ev.target.closest('[data-st-page]');if(p){stGo(p.dataset.stPage);return}
+    const l=ev.target.closest('[data-st-lang]');if(l){LS.set('msPref_lang',l.dataset.stLang);stGo('root-lang',1);return}
+    const w=ev.target.closest('[data-st-wall]');if(w){LS.set('msPref_wall',w.dataset.stWall);$$('.ms-set .st-mini').forEach(x=>x.classList.toggle('on',x===w));toast('Обои обновлены','check');return}
+    const a=ev.target.closest('[data-st-act]');if(a){const act=a.dataset.stAct;
+      if(act==='reset-traffic')toast('Счётчики трафика сброшены','check');
+      if(act==='add-folder')toast('Новая папка появится в следующем обновлении','lists');
+      if(act==='premium')toast('Premium подключён — спасибо!','gem');return}});
+  e.addEventListener('change',ev=>{const t=ev.target.closest('[data-st-tg]');if(!t)return;
+    const k=t.dataset.stTg;LS.set('msPref_'+k,t.checked);
+    if(k==='motion'||k==='power'){msPrefStore('motion',t.checked);msPrefStore('power',t.checked?60:0);const m=$('.ms-set .st-meter i'),v=$('#stPow');if(v)v.textContent=(t.checked?60:0)+'%';if(m)m.style.width=(t.checked?60:0)+'%'}
+    if(k==='compact')msPrefStore('compact',t.checked);
+    toast(t.checked?'Включено':'Выключено',t.checked?'check':'x')},{passive:true});
+  return e}
+function stRender(){const key=ST.stack[ST.stack.length-1],pg=P[key],box=$('.ms-set .st-pages'),nav=$('.ms-set .st-nav');
+  nav.querySelector('.st-back').style.visibility=ST.stack.length>1?'visible':'hidden';
+  nav.querySelector('.st-title').textContent=pg.t;
+  const prev=box.querySelector('.st-page.on');const page=document.createElement('div');page.className='st-page';page.innerHTML=pg.h();box.appendChild(page);
+  void page.offsetWidth;
+  if(prev){prev.remove()}
+  page.classList.add('on')}
+function stGo(key,rep){ST.dir='fwd';if(rep)ST.stack[ST.stack.length-1]=key;else ST.stack.push(key);stRender()}
+function stBack(){if(ST.stack.length<2){stClose();return}ST.dir='back';ST.stack.pop();stRender()}
+function stClose(){const e=$('#msSet');if(!e)return;e.classList.remove('on');ST.stack=['root']}
+function msSetFull(){const m=$('#msgr');if(!m)return;const e=stEl();e.classList.add('on');ST.stack=['root'];stRender()}
+
+Object.assign(ACT,{
+  'ms-settings'(){msSetFull()},
+  'ms-set-close'(){stClose()}
+});
+const _msHide=msHide;msHide=function(){stClose();_msHide()};
+})();
 
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');if(!el)return;
