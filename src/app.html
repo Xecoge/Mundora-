@@ -1294,6 +1294,10 @@ body.ms-open .tabs,body.ms-open .tab-all{display:none!important}
 .ms-sec{padding:12px 10px 4px;font-size:12px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:.04em}
 .ms-empty,.ms-blank,.ms-hello{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:40px 24px;color:#a49dc0;font-size:14px}
 .ms-empty img{width:110px}.ms-empty b,.ms-blank b,.ms-hello b{color:#fff;font-size:17px}.ms-blank{flex:1}.ms-hello{margin:auto}.ms-hello .ce-orb{width:96px;height:96px}.ms-hello .ce-orb img{width:96px;height:96px;border-radius:50%;object-fit:cover}
+.msgr .ms-ftabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 2px;scrollbar-width:none}
+.msgr .ms-ftabs::-webkit-scrollbar{display:none}
+.msgr .ms-ftab{flex:none;padding:6px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);font:inherit;font-size:13px;font-weight:650;cursor:pointer;transition:background .2s,color .2s}
+.msgr .ms-ftab.on{background:#8b5cf6;color:#fff;border-color:transparent}
 .ms-tabs{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:calc(min(380px,100%) - 24px);height:60px;border-radius:30px;display:flex;padding:5px;gap:4px;z-index:3}
 .ms-tabs button{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;color:rgba(255,255,255,.6);font:inherit;font-size:11px;font-weight:650;border-radius:24px;cursor:pointer}
 .ms-tabs button.on{color:#fff;background:rgba(255,255,255,.14)}.ms-tabs .i{width:22px;height:22px}
@@ -1798,7 +1802,7 @@ body.ms-open{position:fixed;left:0;right:0;top:0;width:100%}
 .msgr[data-pane=prof] .ms-main{background:radial-gradient(90% 45% at 0% 0%,rgba(124,58,237,.28),transparent 70%),radial-gradient(80% 40% at 100% 100%,rgba(168,85,247,.18),transparent 70%),#0d0819}
 .msgr[data-pane=prof] .ms-main::before,.msgr[data-pane=prof] .ms-main::after{display:none}
 .ms-side .ms-it.on{background:rgba(139,92,246,.2)}.ms-side .ms-ub{background:#8b5cf6!important}.ms-tabs button.on{color:#a78bfa!important}
-.ms-main{background:#0b1015}
+.ms-main{background:var(--ms-wall,#0b1015)}
 .ms-main::before{opacity:1;background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 30l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z'/%3E%3Ccircle cx='160' cy='40' r='13'/%3E%3Cpath d='M147 40c-6-6 32-6 26 0'/%3E%3Cpath d='M90 90c0-8 12-8 12 0 0-8 12-8 12 0 0 9-12 15-12 15s-12-6-12-15z'/%3E%3Cpath d='M30 150v-26l22-5v26'/%3E%3Ccircle cx='25' cy='151' r='5'/%3E%3Ccircle cx='47' cy='146' r='5'/%3E%3Crect x='140' y='120' width='34' height='24' rx='5'/%3E%3Cpath d='M140 126l17 10 17-10'/%3E%3Cpath d='M95 175l18-14 5 22-8-6z'/%3E%3Ccircle cx='190' cy='190' r='4'/%3E%3Ccircle cx='70' cy='205' r='3'/%3E%3Cpath d='M185 85a10 10 0 1 1-10-10 8 8 0 0 0 10 10z'/%3E%3C/svg%3E") 0 0/220px 220px;
   -webkit-mask-image:linear-gradient(#000,#000);opacity:.055}
@@ -3331,8 +3335,8 @@ function msShell(){let m=$('#msgr');if(m)return m;m=document.createElement('div'
 function msTabs(){const t=$('#msTabs');if(!t)return;const own=MS.pane==='prof'&&String(MS.prof)===String(MS.me);
   t.innerHTML=`<button class="${MS.tab==='contacts'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msgc"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".9"/><circle cx="12" cy="9.5" r="3.3" fill="#000"/><path d="M5.8 18.2c1.4-2.5 3.6-3.7 6.2-3.7s4.8 1.2 6.2 3.7" fill="#000"/></svg><span>Контакты</span></button>
   <button class="${MS.tab==='chats'&&MS.pane==='list'?'on':''}" data-act="ms-go" data-h="#msg"><svg class="i" viewBox="0 0 24 24"><path d="M4 11.5C4 7.4 7.6 4.5 12 4.5s8 2.9 8 7-3.6 7-8 7c-.9 0-1.8-.1-2.6-.4L5 19.5l1.2-3.4C4.8 14.9 4 13.3 4 11.5z" fill="currentColor"/></svg><span>Чаты</span><b class="ms-badge" hidden></b></button>
-  <button class="${own?'on':''}" data-act="ms-go" data-h="#msgp-${MS.me}"><img src="${avaSrc(USR.avatar)}" alt=""><span>Профиль</span></button>
-  <button data-act="ms-settings"><svg class="i" viewBox="0 0 24 24"><path d="M12 8.6a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zm8.6 3.4c0 .5 0 1-.1 1.4l2 1.6-1.9 3.3-2.4-.9c-.7.6-1.5 1-2.4 1.3l-.4 2.5h-3.8l-.4-2.5c-.9-.3-1.7-.7-2.4-1.3l-2.4.9L4.5 15l2-1.6a8.6 8.6 0 010-2.8l-2-1.6 1.9-3.3 2.4.9c.7-.6 1.5-1 2.4-1.3l.4-2.5h3.8l.4 2.5c.9.3 1.7.7 2.4 1.3l2.4-.9 1.9 3.3-2 1.6c.1.4.1.9.1 1.4z" fill="currentColor"/></svg><span>Настройки</span></button>`;
+  <button data-act="ms-settings"><svg class="i" viewBox="0 0 24 24"><path d="M12 8.6a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zm8.6 3.4c0 .5 0 1-.1 1.4l2 1.6-1.9 3.3-2.4-.9c-.7.6-1.5 1-2.4 1.3l-.4 2.5h-3.8l-.4-2.5c-.9-.3-1.7-.7-2.4-1.3l-2.4.9L4.5 15l2-1.6a8.6 8.6 0 010-2.8l-2-1.6 1.9-3.3 2.4.9c.7-.6 1.5-1 2.4-1.3l.4-2.5h3.8l.4 2.5c.9.3 1.7.7 2.4 1.3l2.4-.9 1.9 3.3-2 1.6c.1.4.1.9.1 1.4z" fill="currentColor"/></svg><span>Настройки</span></button>
+  <button class="${own?'on':''}" data-act="ms-go" data-h="#msgp-${MS.me}"><img src="${avaSrc(USR.avatar)}" alt=""><span>Профиль</span></button>`;
   t.insertAdjacentHTML('afterbegin','<i class="ms-drop"></i>');const on=t.querySelector('button.on'),d=t.querySelector('.ms-drop');
   if(on&&d){const to=[on.offsetLeft,on.offsetWidth];if(MS.drop){d.style.transition='none';d.style.transform=`translateX(${MS.drop[0]}px)`;d.style.width=MS.drop[1]+'px';void d.offsetWidth;d.style.transition=''}
     requestAnimationFrame(()=>{d.style.transform=`translateX(${to[0]}px)`;d.style.width=to[1]+'px';if(MS.drop&&MS.drop[0]!==to[0]){d.classList.remove('jelly');void d.offsetWidth;d.classList.add('jelly')}MS.drop=to})}else if(d)d.hidden=true;
@@ -3359,12 +3363,15 @@ function msDrawSide(){const s=$('#msSide');if(!s)return;const ct=MS.tab==='conta
     <div class="ms-list" id="msList">${ct?msContactsHTML():msListHTML()}</div>`;
   const q=$('#msQ');let t;q.addEventListener('input',()=>{MS.q=q.value;clearTimeout(t);t=setTimeout(msSearch,250)});if(MS.q)msSearch()}
 const msPvNice=pv=>{pv=String(pv||'');if(/^📍 /.test(pv))return '📍 Геопозиция';const r=/^👤 ([^\n]+)/.exec(pv);if(r)return '👤 Контакт: '+r[1].replace(/<[^>]*>/g,'').replace(/\s+https?:.*$/,'');return pv};
-function msListHTML(){return (MS.q?'':pushCard())+msListHTML0()}
-function msListHTML0(){const q=MS.q.trim().toLowerCase();
-  const L=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
+function msListHTML(){const F=LS.get('msFolders',[]),sel=LS.get('msFolderSel','');const tabs=(F.length&&MS.tab==='chats'&&!MS.q)?`<div class="ms-ftabs">${F.map((f,i)=>{const n=f.n||f;return `<button class="ms-ftab${String(sel)===String(i)?' on':''}" data-act="ms-folder" data-i="${i}">${esc(n)}</button>`}).join('')}</div>`:'';
+  return (MS.q?'':pushCard())+tabs+msListHTML0()}
+function msListFiltered(L){const F=LS.get('msFolders',[]),sel=LS.get('msFolderSel','');if(sel===''||!F.length)return L;const f=F[+sel],n=(f&&f.n)||f;const map={'Новые':c=>!msHid()[c.c],'Личные':c=>!c.g,'Группы':c=>c.g&&c.g.type!=='channel','Каналы':c=>c.g&&c.g.type==='channel'};return L.filter(map[n]||(()=>true))}
+function msListHTML0(){const q=MS.q.trim().toLowerCase();const filter=msListFiltered;
+  const L0=MS.chats.filter(c=>!q||(c.g&&c.g.title.toLowerCase().includes(q))||(MS.peers[c.p]&&MS.peers[c.p].name.toLowerCase().includes(q))||(c.pv||'').toLowerCase().includes(q));
+  const L=MS.q?q:L0;
   if(!L.length&&!q)return `<div class="ms-empty"><img src="/img/chat.webp" alt=""><b>Пока нет переписок</b><span>Найди человека по нику или ID в поиске сверху — и напиши первым.</span></div>`;
   const H=msHid(),A=msArchL();for(let i=L.length-1;i>=0;i--){const c=L[i];if(H[c.c]&&H[c.c]>=(c.t||0))L.splice(i,1)}
-  const AL=L.filter(c=>A.includes(c.c));if(MS.arch){L.splice(0,L.length,...AL);if(!AL.length)return `<div class="ms-empty"><b>Архив пуст</b><span>Зажми чат и выбери «В архив»</span></div>`}else if(!q)for(let i=L.length-1;i>=0;i--)if(A.includes(L[i].c))L.splice(i,1);
+  const AL=L.filter(c=>A.includes(c.c));if(MS.arch){L.splice(0,L.length,...AL);if(!AL.length)return `<div class="ms-empty"><b>Архив пуст</b><span>Зажми чат и выбери «В архив»</span></div>`}else if(!q)L.splice(0,L.length,...msListFiltered(L));for(let i=L.length-1;i>=0;i--)if(A.includes(L[i].c))L.splice(i,1);
   const archRow=!MS.arch&&!q&&AL.length?`<a class="ms-it ms-archr" data-act="ms-arch-open" href="#msg"><span class="ms-avw"><span class="ms-ava ms-archi">${ico('archive')}</span></span><div class="ms-itx"><div class="ms-r1"><b>Архив чатов</b></div><div class="ms-r2"><span>${esc(AL.map(c=>c.g?c.g.title:String(c.p)===String(MS.me)?'Избранное':(MS.peers[c.p]||{}).name||'').filter(Boolean).join(', '))}</span>${AL.reduce((n,c)=>n+(c.u||0),0)?`<b class="ms-ub mut">${AL.reduce((n,c)=>n+(c.u||0),0)}</b>`:''}</div></div></a>`:'';
   const P=msPins();if(P.length)L.sort((a,b)=>{const x=P.indexOf(a.c),y=P.indexOf(b.c);return (x<0?1e9:x)-(y<0?1e9:y)});
   return archRow+L.map(c=>{if(c.g){const g=c.g;MS.G[c.c]=g;const mine=String(c.f)===String(MS.me),rd=mine&&c.n&&Math.max(MS.read[c.c]??-1,c.r??-1)>=c.n-1,who=mine?'Вы':(MS.peers[c.f]||{}).name;
@@ -4633,6 +4640,7 @@ const MS_ACT={
   'ms-sel-mute'(){msChatsMute([...MS.sel])},
   'ms-sel-del'(){msChatsDel([...MS.sel])},
   'ms-sel-delok'(){const L=MS.sel&&MS.sel.size?[...MS.sel]:MS.delL||[];const H=msHid(),now=Date.now();L.forEach(id=>{const c=MS.chats.find(x=>x.c===id);H[id]=Math.max(now,(c&&c.t)||0)});msLSset('msHide',H);msLSset('msPins',msPins().filter(c=>!L.includes(c)));closeSheet();toast(L.length>1?'Чаты удалены':'Чат удалён','trash');msSelDone()},
+  'ms-folder'(el){const i=el.dataset.i,cur=LS.get('msFolderSel','');LS.set('msFolderSel',String(cur)===String(i)?'':i);msListPaint()},
   'ms-sel-more'(el){const L=[...MS.sel],A=msArchL(),allA=L.every(c=>A.includes(c)),anyU=L.some(id=>(MS.chats.find(x=>x.c===id)||{}).u);
     bubMenu(el,[{t:allA?'Из архива':'В архив',ic:allA?'unarch':'archive',fn:()=>msChatsArch(L)},...(anyU?[{t:'Пометить прочитанным',ic:'checks',fn:()=>msChatsRead(L)}]:[]),{t:'Выбрать все',ic:'check',fn:()=>{const ids=[...document.querySelectorAll('#msSide .ms-it[data-c]')].map(e=>e.dataset.c);MS.sel=new Set(ids);msDrawSide()}}])},
   'ms-arch-open'(){MS.arch=true;msDrawSide()},
@@ -6945,7 +6953,7 @@ document.addEventListener('contextmenu',e=>{const it=e.target.closest&&e.target.
 // кнопка «Подарить» появляется, когда видны подарки
 function pfgCta(){const s=$('#msPfs');if(!s)return;const c=s.querySelector('.pfg-cta'),g=s.querySelector('.pfg-grid')||s.querySelector('.pfg-hint')||s.querySelector('.pfg');if(!c)return;let v=false;if(g){const r=g.getBoundingClientRect();v=r.top<innerHeight-150&&r.bottom>90}c.classList.toggle('show',v)}
 document.addEventListener('scroll',e=>{if(e.target&&e.target.id==='msPfs')pfgCta()},true);
-function msPrefStore(k,v){LS.set('msPref_'+k,v);const app=$('#msgr');if(!app)return;if(k==='compact')app.classList.toggle('ms-compact',!!v);if(k==='motion')app.classList.toggle('ms-reduced',!!v);if(k==='accent')app.style.setProperty('--ms-accent',v);if(k==='radius')app.style.setProperty('--ms-radius',v+'px')}
+function msPrefStore(k,v){LS.set('msPref_'+k,v);const app=$('#msgr');if(!app)return;if(k==='compact')app.classList.toggle('ms-compact',!!v);if(k==='motion')app.classList.toggle('ms-reduced',!!v);if(k==='accent')app.style.setProperty('--ms-accent',v);if(k==='radius')app.style.setProperty('--ms-radius',v+'px');if(k==='wall')app.style.setProperty('--ms-wall',v)}
 function msPrefPage(page='home'){
   const row=(icon,title,sub,target,value='')=>`<button class="ms-pref-row" data-act="ms-pref-page" data-page="${target}">${ico(icon)}<span>${title}${sub?`<small>${sub}</small>`:''}</span>${value?`<em>${value}</em>`:ico('chev','s r')}</button>`;
   const toggle=(icon,title,sub,key,def=false)=>`<label class="ms-pref-row">${ico(icon)}<span>${title}${sub?`<small>${sub}</small>`:''}</span><input type="checkbox" data-ms-pref="${key}" ${LS.get('msPref_'+key,def)?'checked':''}></label>`;
@@ -7217,11 +7225,11 @@ P['root-data']={t:'Данные и память',h:()=>`<p class="st-lead">Ск�
     tg('cam2','Личные чаты','Фото из личных чатов','g_dm')+
     tg('users','Группы','Фото из групп','g_grp'))}
   <p class="st-note">Нажми на счётчик, чтобы посмотреть детали по папкам.</p>`};
-P['root-folders']={t:'Папки с чатами',h:()=>{const F=[['Новые','#38bdf8'],['Личные','#34d399'],['Группы','#a78bfa'],['Каналы','#fbbf24']];
+P['root-folders']={t:'Папки с чатами',h:()=>{const F=LS.get('msFolders',[{n:'Новые',c:'#38bdf8'},{n:'Личные',c:'#34d399'},{n:'Группы',c:'#a78bfa'},{n:'Каналы',c:'#fbbf24'}]);
   return `<p class="st-lead">Создай папки с разными чатами и переключайся между ними в один тап.</p>
-  <div class="st-folders">${F.map(([n,c])=>`<div class="st-folder"><span class="f-ic" style="--fc:${c}">${ico('lib')}</span>${n}<button class="add" data-st-act="add-folder">Добавить</button></div>`).join('')}</div>
+  <div class="st-folders">${F.map((f,i)=>{const n=f.n||f,c=f.c||'#8b5cf6';return `<div class="st-folder"><span class="f-ic" style="--fc:${c}">${ico('lib')}</span>${esc(n)}<button class="add" data-st-act="del-folder" data-i="${i}">Убрать</button></div>`}).join('')}</div>
   ${label('Папки с чатами')}${card(row('checks','Все чаты','Основная папка без фильтров',null,'вкл.'))}
-  ${card(`<button class="st-row st-add"><span class="st-ic">${ico('plus')}</span><span class="st-tx">Создать новую папку</span></button>`)}
+  ${card(`<button class="st-row st-add" data-st-act="add-folder"><span class="st-ic">${ico('plus')}</span><span class="st-tx">Создать новую папку</span></button>`)}
   ${label('Текст для чата')}${card(row('edit','Начальный текст сообщения','Шаблон для новых чатов',null,'Изменить'))}`}};
 P['root-devices']={t:'Устройства',h:()=>`<p class="st-lead">Войди в Mundora на другом устройстве с помощью кода — или покинь этот сеанс.</p>
   <div class="st-empty"><span class="big">${ico('headph')}</span><b>Не запущось затустить</b><span>Новых сеансов пока нет</span></div>
@@ -7273,11 +7281,12 @@ function stEl(){let e=$('#msSet');if(e)return e;const m=$('#msgr');e=document.cr
     const b=ev.target.closest('[data-st-back]');if(b){stBack();return}
     const p=ev.target.closest('[data-st-page]');if(p){stGo(p.dataset.stPage);return}
     const l=ev.target.closest('[data-st-lang]');if(l){LS.set('msPref_lang',l.dataset.stLang);stGo('root-lang',1);return}
-    const w=ev.target.closest('[data-st-wall]');if(w){LS.set('msPref_wall',w.dataset.stWall);$$('.ms-set .st-mini').forEach(x=>x.classList.toggle('on',x===w));toast('Обои обновлены','check');return}
+    const w=ev.target.closest('[data-st-wall]');if(w){msPrefStore('wall',w.dataset.stWall);$$('.ms-set .st-mini').forEach(x=>x.classList.toggle('on',x===w));toast('Обои обновлены','check');return}
     const a=ev.target.closest('[data-st-act]');if(a){const act=a.dataset.stAct;
-      if(act==='reset-traffic')toast('Счётчики трафика сброшены','check');
-      if(act==='add-folder')toast('Новая папка появится в следующем обновлении','lists');
-      if(act==='premium')toast('Premium подключён — спасибо!','gem');return}});
+      if(act==='reset-traffic'){MS.dl={};toast('Счётчики трафика сброшены','check')}
+      if(act==='add-folder'){const nm=prompt('Название папки');if(nm&&nm.trim()){const F=LS.get('msFolders',[]);F.push({n:nm.trim().slice(0,24),c:'#8b5cf6'});LS.set('msFolders',F);stGo('root-folders',1)}}
+      if(act==='del-folder'){const i=+a.dataset.i;const F=LS.get('msFolders',[]);F.splice(i,1);LS.set('msFolders',F);stGo('root-folders',1)}
+      if(act==='premium'){if(USR.premium){toast('Premium уже активен','gem');return}LS.set('msPref_prem_ask',1);toast('Заявка на Premium отправлена — подключим после оплаты','gem')}return}});
   e.addEventListener('change',ev=>{const t=ev.target.closest('[data-st-tg]');if(!t)return;
     const k=t.dataset.stTg;LS.set('msPref_'+k,t.checked);
     if(k==='motion'||k==='power'){msPrefStore('motion',t.checked);msPrefStore('power',t.checked?60:0);const m=$('.ms-set .st-meter i'),v=$('#stPow');if(v)v.textContent=(t.checked?60:0)+'%';if(m)m.style.width=(t.checked?60:0)+'%'}
